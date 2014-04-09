@@ -81,7 +81,7 @@ preferences {
     	input("trace", "text", title: "trace", description: "Set it to true to enable tracing")
 	}
     metadata {
-	    definition (name: "My Ecobee Device", author: "Yves Racine") {
+	definition (name: "My Ecobee Device", author: "Yves Racine") {
         capability "Polling"
         capability "Thermostat"
         capability "Relative Humidity Measurement"
@@ -123,13 +123,13 @@ preferences {
     tiles {
          valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
              state("temperature", label: '${currentValue}°', unit:"C", backgroundColors: [
-	                [value: 0, color: "#153591"],
+	            [value: 0, color: "#153591"],
     	            [value: 8, color: "#1e9cbb"],
-        	        [value: 14, color: "#90d2a7"],
+        	    [value: 14, color: "#90d2a7"],
             	    [value: 20, color: "#44b621"],
-                 	[value: 24, color: "#f1d801"],
-                	[value: 25, color: "#d04e00"],
-                	[value: 27, color: "#bc2323"]
+                    [value: 24, color: "#f1d801"],
+                    [value: 25, color: "#d04e00"],
+                    [value: 27, color: "#bc2323"]
                 ]
             )
         }
