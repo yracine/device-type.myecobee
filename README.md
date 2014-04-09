@@ -37,9 +37,9 @@ INSTALLATION
 
  
 preferences {
-    section("Initialize this ecobee thermostat") {
+section("Initialize this ecobee thermostat") {
   	input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
-    }
+   }
 }
  
 def installed() {
@@ -52,3 +52,4 @@ def installed() {
 7) Go to the ecobee web portal within the next 9 minutes and enter your pin number under settings/my apps
  
 8) Your device should now be ready to process your commands
+
