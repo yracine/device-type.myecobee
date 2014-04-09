@@ -14,7 +14,7 @@ Ecobee-Smartthings integration
  * INSTALLATION
  * =========================================
  *
- * 1) Connect to the ecobee portal (www.ecobee.com) and create an application key with an application name (such as ecobeeTstat)
+ * 1) Connect to the ecobee portal (www.ecobee.com) and create an application key with an application name (such as    ecobeeTstat)
  *    and indicate the PIN method authentication (at the bottom of the window).
  *
  * 2) Create a new device type (https://graph.api.smartthings.com/ide/devices)
@@ -32,9 +32,9 @@ Ecobee-Smartthings integration
  *     Click on the new device 
  *     Click the edit button next to Preferences
  *     Fill in your device 
- *        (a) <appKey> provided at the ecobee web portal in step 1
- *        (b) <serial number> of your ecobee thermostat
- *        (c) <trace> when needed, set to true to get more tracing
+ *        (a) "appKey" provided at the ecobee web portal in step 1
+ *        (b) "serial number" of your ecobee thermostat
+ *        (c) "trace" when needed, set to true to get more tracing
  *
  * 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
  *
@@ -48,7 +48,7 @@ def installed() {
     log.debug "installed> calling getEcobeePinAuth... "
     ecobee.getEcobeePinAndAuth()
 }
- 
+
  * 6) Click on your ecobee device again to get the PIN number (alphanumerical on 4 positions) from the list ((https://graph.api.smartthings.com/device/list). 
  *    It should appear under the verboseTrace attribute.
  *
