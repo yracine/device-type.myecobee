@@ -47,7 +47,7 @@
  *   ecobee.getEcobeePinAndAuth()
  * }
  *
- * 6) Click on your ecobee device again to get the PIN number (alphanumerical on 4 positions) from the list ((https://graph.api.smartthings.com/device/list). 
+ * 6) Click on your ecobee device again to get the 4-alpanumeric PIN number from the list ((https://graph.api.smartthings.com/device/list). 
  *    It should appear under the verboseTrace attribute.
  *
  * 7) Go to the ecobee web portal within the next 9 minutes and enter your pin number under settings/my apps
