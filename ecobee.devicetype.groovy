@@ -1,0 +1,1178 @@
+/***
+ *  My Ecobee Device
+ *
+ *  Author: Yves Racine
+ *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *  Date: 2014-03-31
+ *  Code: https://github.com/
+ *
+ * INSTALLATION
+ * =========================================
+ *
+ * 1) Connect to the ecobee portal (www.ecobee.com) and create an application key with an application name (such as ecobeeTstat)
+ *    and indicate the PIN method authentication (at the bottom of the window).
+ *
+ * 2) Create a new device type (https://graph.api.smartthings.com/ide/devices)
+ *     Name: MyEcobee Device
+ *     Author: Yves Racine
+ *    
+ * 3) Create a new device (https://graph.api.smartthings.com/device/list)
+ *     Name: Your Choice
+ *     Device Network Id: Your Choice
+ *     Type: My Ecobee Device (should be the last option)
+ *     Location: Choose the correct location
+ *     Hub/Group: (optional) leave blank or set it up to your liking
+ *
+ * 4) Update device preferences
+ *     Click on the new device 
+ *     Click the edit button next to Preferences
+ *     Fill in your device 
+ *        (a) <appKey> provided at the ecobee web portal in step 1
+ *        (b) <serial number> of your ecobee thermostat
+ *        (c) <trace> when needed, set to true to get more tracing
+ *
+ * 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
+ *
+ *  preferences {
+ *   
+ *	   section("Initialize this ecobee thermostat") {
+ *		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+ *	   }
+ *
+ *   }
+ *
+ * def installed() {
+ *   
+ *   log.debug "installed> calling getEcobeePinAuth... "
+ *   ecobee.getEcobeePinAndAuth()
+ * }
+ *
+ * 6) Click on your ecobee device again to get the PIN number (alphanumerical on 4 positions) from the list ((https://graph.api.smartthings.com/device/list). 
+ *    It should appear under the verboseTrace attribute.
+ *
+ * 7) Go to the ecobee web portal within the next 9 minutes and enter your pin number under settings/my apps
+ *
+ * 8) Your device should now be ready to process your commands
+ *
+ * Copyright (C) 2014 Yves Racine <yracine66@gmail.com>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+ * software and associated documentation files (the "Software"), to deal in the Software 
+ * without restriction, including without limitation the rights to use, copy, modify, 
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+ * permit persons to whom the Software is furnished to do so, subject to the following 
+ * conditions: The above copyright notice and this permission notice shall be included 
+ * in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+ 
+// for the UI
+import groovy.json.JsonBuilder
+import java.text.SimpleDateFormat
+import java.net.URLEncoder
+preferences {
+    	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat")
+    	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee")
+    	input("trace", "text", title: "trace", description: "Set it to true to enable tracing")
+	}
+    metadata {
+	    definition (name: "My Ecobee Device", author: "Yves Racine") {
+        capability "Polling"
+        capability "Thermostat"
+        capability "Relative Humidity Measurement"
+
+        attribute "verboseTrace", "string"
+        attribute "humidifierMode", "string"
+        attribute "dehumidifierMode", "string"
+        attribute "humidifierLevel", "string" 
+        attribute "dehumidifierLevel", "string" 
+        attribute "condensationAvoid", "string" 
+    
+        command "createVacation"
+        command "deleteVacation"
+        command "getEcobeePinAndAuth"
+        command "getThermostatInfo"
+        command "getThermostatSummary"
+        command "iterateCreateVacation"
+        command "iterateDeleteVacation"
+        command "iterateResumeProgram"
+        command "iterateSetHold"
+        command "resumeProgram"
+        command "setAuthTokens"
+        command "setHold"
+        command "humidifierOn"
+        command "humidifierManual"
+        command "humidifierAuto"
+        command "setHumidifierLevel"
+        command "dehumidifierOn"
+        command "dehumidifierManual"
+        command "dehumidifierAuto"
+        command "setDehumidifierLevel"
+        command "setFanMinOnTime"	
+    }
+
+    simulator {
+        // TODO: define status and reply messages here
+    }
+ 
+    tiles {
+         valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
+             state("temperature", label: '${currentValue}°', unit:"C", backgroundColors: [
+	                [value: 0, color: "#153591"],
+    	            [value: 8, color: "#1e9cbb"],
+        	        [value: 14, color: "#90d2a7"],
+            	    [value: 20, color: "#44b621"],
+                 	[value: 24, color: "#f1d801"],
+                	[value: 25, color: "#d04e00"],
+                	[value: 27, color: "#bc2323"]
+                ]
+            )
+        }
+        standardTile("mode", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+            state "heat", label:'${name}', action:"thermostat.off", icon: "st.Weather.weather14", backgroundColor: '#E14902'
+            state "off", label:'${name}', action:"thermostat.cool", icon: "st.Outdoor.outdoor19"
+            state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7", backgroundColor: '#003CEC'
+        }
+        standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
+            state "off", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11"
+            state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
+   	        state "auto", label:'${name}', action:"thermostat.fanOff"
+        }
+        controlTile("heatSliderControl", "device.heatingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
+ 	        state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
+  	    }
+ 	
+	    valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
+	        state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
+ 	    }
+        controlTile("coolSliderControl", "device.coolingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
+            state "setCoolingSetpoint", label:'Set temperature to', action:"thermostat.setCoolingSetpoint" 
+        }
+        valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'${currentValue}°', unit:"C", backgroundColor:"#ffffff", icon:"st.appliances.appliances8"
+        }
+        valueTile("humidity", "device.humidity", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'${currentValue}%', unit:"Humidity"
+        }
+        standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+            state "default", action:"polling.poll", icon:"st.secondary.refresh"
+        }
+        main "temperature"
+ 	details(["temperature", "mode", "fanMode", "heatSliderControl", "heatingSetpoint", "coolSliderControl", "coolingSetpoint", "refresh"])
+    }
+}
+
+
+// parse events into attributes
+def parse(String description) {
+    
+}
+ 
+// handle commands
+def setHeatingSetpoint(temp) {
+//    poll() // to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId, device.coolingSetpoint, temp, null)
+    sendEvent(name: 'heatingSetpoint', value: temp)
+}
+ 
+def setCoolingSetpoint(temp) {
+//    poll() // to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId,  temp, device.heatingSetpoint, null) 
+    sendEvent(name: 'coolingSetpoint', value: temp)
+}
+ 
+ 
+def off() {
+    setThermostatMode('off')
+}
+ 
+def heat() {
+    setThermostatMode('heat')
+}
+ 
+def emergencyHeat() {
+    setThermostatMode('heat')
+}
+ 
+                      
+def cool() {
+    setThermostatMode('cool')
+}
+ 
+def setThermostatMode(mode) {
+//    poll() // to get the latest temperatures values at the thermostat
+    mode = mode == 'emergency heat'? 'heat' : mode
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['hvacMode':mode]) 
+    sendEvent(name: 'thermostatMode', value: mode)
+}
+ 
+def fanOn() {
+    setThermostatFanMode('on')
+}
+ 
+def fanCirculate() {
+    setThermostatFanMode('auto')
+}
+ 
+def fanOff() {
+    setThermostatFanMode('off')
+}
+
+
+def setFanMinOnTime(minutes) {
+    poll() // to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['ventilatorMinOnTime':minutes])
+    sendEvent(name: 'fanMinOnTime', value: minutes)
+}
+
+def setThermostatFanMode(mode) {    
+    poll() // to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['vent':mode]) 
+    sendEvent(name: 'thermostatFanMode', value: mode)
+}
+
+def setCondensationAvoid(flag) {  // set the flag to true or false
+    poll() // to get the latest temperatures values at the thermostat
+    flag = flag == 'true'? 'true' : 'false'
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['condensationAvoid':flag]) 
+    sendEvent(name: 'condensationAvoid', value: flag)
+}
+
+
+def auto() {
+    setThermostatMode('auto')
+}
+
+
+
+def dehumidifierOn() {
+    setDehumidifierMode('on')
+}
+
+def dehumidifierManual() {
+    setDehumidifierMode('manual')
+}
+
+def dehumidifierAuto() {
+    setDehumidifierMode('auto')
+}
+
+ 
+def setDehumidifierMode(mode) {  
+//    poll()// to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['dehumidifierMode':mode]) 
+    sendEvent(name: 'dehumidifierMode', value: mode)
+}
+
+def setDehumidifierLevel(level) {
+//    poll() // to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, ['dehumidifierLevel':level])
+    sendEvent(name: 'dehumidifierLevel', value: level)
+}
+
+def humidifierOn() {
+    setHumidifierMode('on')
+}
+ 
+def humidifierManual() {
+    setHumidifierMode('manual')
+}
+
+def humidifierAuto() {
+    setHumidifierMode('auto')
+}
+
+ 
+def setHumidifierMode(mode) {    
+    poll() // to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['humidifierMode':mode]) 
+    sendEvent(name: 'humidifierMode', value: mode)
+}
+ 
+ 
+
+def setHumidifierLevel(level) {
+    poll()  // to get the latest temperatures values at the thermostat
+    
+    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, ['humidity':level])
+    sendEvent(name: 'humidifierLevel', value: level)
+}
+
+
+def poll() {
+    
+    if (settings.trace) {
+         
+        log.debug "poll> about to execute with settings ${settings}.."
+        sendEvent name: "verboseTrace", value: "poll>about to execute with settings ${settings}"
+    }
+    getThermostatInfo(settings.thermostatId)
+    
+    sendEvent(name: 'thermostatFanMode', value: data.thermostatList.settings.vent)
+    sendEvent(name: 'humidity', value: data.thermostatList.runtime.actualHumidity)
+    sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
+    if (data.thermostatList.settings.hasHumidifier) {
+        sendEvent(name: 'humidifierMode', value: data.thermostatList.settings.humidifierMode)
+        sendEvent(name: 'humidifierLevel', value: data.thermostatList.settings.humidity)
+        
+    }
+    if (data.thermostatList.settings.hasDehumidifier) {
+        sendEvent(name: 'dehumidifierMode', value: data.thermostatList.settings.dehumidifierMode)
+        sendEvent(name: 'dehumidifierLevel', value: data.thermostatList.settings.dehumidifierLevel)
+    }
+    sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
+    def scale = getTemperatureScale()
+    if (scale == 'C') {
+        Integer actualTemp= (int)fToC(data.thermostatList.runtime.actualTemperature/10)
+        Integer actualCoolTemp = (int)fToC(data.thermostatList.runtime.desiredCool/10)
+        Integer actualHeatTemp = (int)fToC(data.thermostatList.runtime.desiredHeat/10)
+        sendEvent(name: 'temperature', value: String.format('%d',actualTemp), unit:"C", state: data.thermostatList.settings.hvacMode)
+        sendEvent(name: 'coolingSetpoint', value: String.format('%d',actualCoolTemp))
+        sendEvent(name: 'heatingSetpoint', value: String.format('%d',actualHeatTemp))
+    }
+    else {
+    
+        sendEvent(name: 'temperature', value: (data.thermostatList.runtime.actualTemperature/10), 
+            unit:"F", state: data.thermostatList.settings.hvacMode)
+        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList.runtime.desiredCool/10))
+        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList.runtime.desiredHeat/10))
+    
+    }
+}
+
+
+
+def refresh() {
+     poll()
+}
+
+def api(method,  args, success = {}) {
+    String URI_ROOT= "https://api.ecobee.com/1"
+    
+    if(!isLoggedIn()) {
+        if (settings.trace) {
+           log.debug "Need to login"
+        }   
+        login()
+    }
+    
+    if (settings.trace) {
+       log.debug "api> logged in"
+    }   
+    if (isTokenExpired()) {
+        if (settings.trace) {
+            log.debug "api> need to refresh tokens"
+        }    
+        if (!refresh_tokens()) {
+           if (settings.trace) {
+               log.debug "api> refresh_tokens failed, try login again..."
+           }    
+           login()
+        }
+        
+    }
+    
+    def args_encoded = URLEncoder.encode(args.toString(),"UTF-8")
+
+    def methods = [
+        'thermostatSummary': [uri: "${URI_ROOT}/thermostatSummary?format=json&body=${args_encoded}", type: 'get'],        
+        'thermostatInfo':    [uri: "${URI_ROOT}/thermostat?format=json&body=${args_encoded}", type: 'get'],
+        'setHold':           [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+        'resumeProgram':     [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+        'createVacation':    [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+        'deleteVacation':    [uri: "${URI_ROOT}/thermostat?format=json", type: 'post']
+    ]
+
+    def request = methods.getAt(method)
+
+    doRequest(request.uri, args, request.type, success)
+
+}
+ 
+
+
+// Need to be logged in before this is called. So don't call this. Call api.
+
+def doRequest(uri, args, type, success) {
+    
+    def args_encoded = URLEncoder.encode(args.toString(),"UTF-8")
+    
+    def params = [
+            uri: uri,
+            headers: [
+            	'Authorization':"${data.auth.token_type} ${data.auth.access_token}",
+                'Content-Type':"application/json",
+                'charset': "UTF-8",
+                'Accept':"application/json"
+  	        ],
+            body: args_encoded
+    ]
+    
+    try {
+
+        if (settings.trace) {
+           
+  	        sendEvent name: "verboseTrace", value: "doRequest>about to ${type} with uri ${params.uri}, (unencoded)args= ${args}"
+            log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args_encoded}"
+        }
+        if(type == 'post') {
+            httpPostJson(params, success)
+            
+        } else if (type == 'get') {    
+            params.body=null  // already in the URL request
+            httpGet(params, success)
+
+		}
+    } catch ( java.net.UnknownHostException e) {
+    	log.error "doRequest> Unknown host - check the URL " + params.uri
+    	sendEvent name: "verboseTrace", value: "doRequest> Unknown host"
+   	} catch (java.net.NoRouteToHostException e) {
+    	log.error "doRequest> No route to host - check the URL " + params.uri
+    	sendEvent name: "verboseTrace", value: "doRequest> No route to host"
+    } catch (java.io.IOException e) {
+      	log.error "doRequest> general or malformed request error " + params.body
+        sendEvent name: "verboseTrace", value: "doRequest> general or malformed request body error " + params.body
+    }
+
+}
+
+private def build_body_request(method, thermostatId,  tstatParams, tstatSettings) {
+
+    def selectionJson=null
+    def selection=null
+    
+    if (settings.trace) {
+        log.debug "build_body_request> about to build selection for method= ${method} & thermostatId= ${thermostatId}"
+    }
+    if (method == 'thermostatSummary') {
+    
+        selection = [selection: [selectionType: 'registered', 
+                    selectionMatch: '']
+                    ]                                    
+                       
+    }
+    else if (method == 'thermostatInfo') {
+    
+        selection = [selection: [selectionType:'thermostats',
+                                    selectionMatch:thermostatId, 
+                                    includeSettings:true,
+                                    includeRuntime:true]
+                    ]
+ 
+                     
+    }
+    else {
+        selection = [selectionType:'thermostats',selectionMatch:thermostatId]
+        
+    
+    }
+    selectionJson = new JsonBuilder(selection)
+    if (settings.trace) {
+        log.debug "build_body_request> about to build request for method = ${method} & thermostatId= ${thermostatId} with selection = ${selectionJson}"
+    }
+    if (tstatSettings != null) {
+        
+        def function_clause = [type:method,params:tstatParams]
+        def bodyWithSettings= [functions:[function_clause],selection:selection,thermostat:[settings:tstatSettings]]
+        def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
+        if (settings.trace) {
+            log.debug "build_tstat_request done>  for method = ${method}, body with settings= ${bodyWithSettingsJson}"
+        }    
+        return bodyWithSettingsJson
+    }
+    else if (tstatParams != null) {
+        def function_clause = [type:method,params:tstatParams]
+        def simpleBody= [functions:[function_clause],selection:selection]
+        
+        def simpleBodyJson = new JsonBuilder(simpleBody)
+        if (settings.trace) {
+            log.debug "build_tstat_request done>  for method = ${method}, body w/o settings= ${simpleBody}"
+        }    
+        return simpleBodyJson
+    }
+    else if (method == 'resumeProgram') {
+
+        def function_clause = [type:method]
+        def simpleBody= [functions:[function_clause],selection:selection]
+        
+        def simpleBodyJson = new JsonBuilder(simpleBody)
+        if (settings.trace) {
+            log.debug "build_tstat_request done>  for method = ${method}, body w/o params= ${simpleBody}"
+        }  
+        return simpleBodyJson
+
+    }
+    else {
+    
+        if (settings.trace) {
+            log.debug "build_tstat_request done> for method = ${method}, body for selection ${selectionJson}"
+        }    
+        return selectionJson
+    
+    }
+    
+}
+
+def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings) {    // fan_mode or thermostat_mode
+
+    if (data.thermostatCount==null)
+    {
+    
+         getThermostatSummary()
+    }
+    if (settings.trace) {
+        log.debug "iterateSetHold> about to loop ${data.thermostatCount} thermostat(s)"
+   	    sendEvent name: "verboseTrace", value: "iterateSetHold> about to loop ${data.thermostatCount} thermostat(s)"
+    }    
+    for (i in 0..data.thermostatCount-1) {
+    
+         def thermostatDetails = data.revisionList[i].split(':')
+         def thermostatId = thermostatDetails[0]
+         def thermostatName = thermostatDetails[1]
+         def connected = thermostatDetails[2]
+         def thermostatRevision = thermostatDetails[3]
+         def alertRevision = thermostatDetails[4]
+         def runtimeRevision = thermostatDetails[5]
+         
+         if (connected) {
+         
+             if (settings.trace) {
+             
+       	         sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${thermostatId}"
+                 log.debug "iterateSethold> about to call setHold for ${thermostatId}"
+             }
+             setHold (thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings)         
+             
+         }    
+    
+    }
+   
+}
+
+
+def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // settings are for fan_mode or thermostat_mode
+    Integer targetCoolTemp=null
+    Integer targetHeatTemp=null
+    
+    if (settings.trace) {
+        log.debug "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${tstatSettings} for ${thermostatId}"
+    }    
+    def scale= getTemperatureScale()
+    if (scale == 'C') {
+        targetCoolTemp =  (cToF(coolingSetPoint)*10)  // need to send temperature in F multiply by 10
+        targetHeatTemp =  (cToF(heatingSetPoint)*10) 
+    }
+    else {
+    
+        targetCoolTemp =  coolingSetPoint*10     // need to send temperature in F multiply by 10
+        targetHeatTemp =  heatingSetPoint*10
+        
+    
+    }
+    if (settings.trace) {
+	   sendEvent name: "verboseTrace", value: "setHold>about to build_body_req with ${tstatSettings}"
+    }
+    def tstatParams = [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp]
+       
+    def bodyReq = build_body_request('setHold', thermostatId, tstatParams, tstatSettings)
+    
+    
+    if (settings.trace) {
+        log.debug "sethold> about to call api with body = ${bodyReq} for ${thermostatId}"
+  	    sendEvent name: "verboseTrace", value: "setHold>about to call api with settings ${tstatSettings}, body=${bodyReq}"
+    }    
+    for (i in 0..1) { // try 2 times if needed
+    
+        api('setHold', bodyReq) {resp->
+    
+            def statusCode = resp.data.status.code
+            def message = resp.data.status.message
+            if (!statusCode) {
+            
+                if (settings.trace) {
+                    log.debug "setHold> fan mode= ${data.thermostatList.settings.vent}, mode=${data.thermostatList.settings.hvacMode}" 
+                    log.debug "setHold> current Temp= ${data.thermostatList.runtime.actualTemperature}, desiredHeat=${data.thermostatList.runtime.desiredHeat}"
+    	            sendEvent name: "verboseTrace", value: "setHold>done for ${thermostatId}"
+                }
+                return
+            
+            }
+            else {
+                log.error "setHold> error= ${statusCode}, message = ${message}"
+    	        sendEvent name: "verboseTrace", value: "setHold> ${statusCode} for ${thermostatId}"
+            }
+        }        
+        
+    }
+}
+
+def iterateCreateVacation(vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
+
+    if (data.thermostatCount==null)
+    {
+    
+         getThermostatSummary()
+    }
+    if (settings.trace) {
+        log.debug "iterateCreateVacation> about to loop ${data.thermostatCount}"
+   	    sendEvent name: "verboseTrace", value: "iterateCreateVacation> about to loop ${data.thermostatCount} thermostat(s)"
+    }    
+    for (i in 0..data.thermostatCount-1) {
+    
+         def thermostatDetails = data.revisionList[i].split(':')
+         def thermostatId = thermostatDetails[0]
+         def thermostatName = thermostatDetails[1]
+         def connected = thermostatDetails[2]
+         def thermostatRevision = thermostatDetails[3]
+         def alertRevision = thermostatDetails[4]
+         def runtimeRevision = thermostatDetails[5]
+         
+         if (connected) {
+         
+             if (settings.trace) {
+             
+      	         sendEvent name: "verboseTrace", value: "iterateCreateVacation> about to call createVacation for ${thermostatId}"
+                 log.debug "iterateCreateVacation> about to call createVacation for ${thermostatId}"
+             }
+             createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
+         }    
+    
+    }
+   
+}
+
+def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
+     
+     
+    def vacationStartDate = String.format('%tY-%<tm-%<td',targetStartDateTime) 
+    def vacationStartTime = String.format('%tH:%<tM:%<tS', targetStartDateTime) 
+    def vacationEndDate = String.format('%tY-%<tm-%<td', targetEndDateTime) 
+    def vacationEndTime = String.format('%tH:%<tM:%<tS', targetEndDateTime) 
+    
+    Integer targetCool=null
+    Integer targetHeat=null
+    
+    def scale= getTemperatureScale()
+    if (scale == 'C') {
+        targetCool =  (cToF(targetCoolTemp)*10) as Integer // need to send temperature in F multiply by 10
+        targetHeat =  (cToF(targetHeatTemp)*10) as Integer
+    }
+    else {
+    
+        targetCool =  targetCoolTemp*10 as Integer     // need to send temperature in F multiply by 10
+        targetHeat =  targetHeatTemp*10 as Integer
+    
+    }
+
+    def vacationParams = [ 
+        name:vacationName,
+        coolHoldTemp:targetCool.toString(),
+        heatHoldTemp:targetHeat.toString(),
+        startDate:vacationStartDate, 
+        startTime:vacationStartTime,
+        endDate:vacationEndDate,  
+        endTime:vacationEndTime 
+    ]
+    def bodyReq = build_body_request('createVacation',thermostatId, vacationParams, null)
+    
+    if (settings.trace) {
+        log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
+    }
+    api('createVacation', bodyReq) {resp->
+        def statusCode = resp.data.status.code
+        def message = resp.data.status.message
+        if (!statusCode) {
+            
+            log.debug "${vacationName} created for ${thermostatId}"
+            if (settings.trace) {
+             
+                sendEvent name: "verboseTrace", value: "createVacation>done for ${thermostatId}"
+            }
+        }
+        else {
+            log.error "createVacation> error= ${statusCode}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "createVacation>${statusCode} for ${thermostatId}"
+        }
+    } 
+}
+
+def iterateDeleteVacation(vacationName) {
+
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary()
+    }
+    if (settings.trace) {
+        log.debug "iterateDeleteVacation> about to loop ${data.thermostatCount}"
+   	    sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
+    }    
+    for (i in 0..data.thermostatCount-1) {
+    
+         def thermostatDetails = data.revisionList[i].split(':')
+         def thermostatId = thermostatDetails[0]
+         def thermostatName = thermostatDetails[1]
+         def connected = thermostatDetails[2]
+         def thermostatRevision = thermostatDetails[3]
+         def alertRevision = thermostatDetails[4]
+         def runtimeRevision = thermostatDetails[5]
+         
+         if (connected) {
+         
+             if (settings.trace) {
+             
+      	         sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${thermostatId}"
+                 log.debug "iterateDeleteVacation> about to call deleteVacation for ${thermostatId}"
+             }
+             deleteVacation(thermostatId, vacationName) 
+             
+         }    
+    
+    }
+   
+}
+
+
+def deleteVacation(thermostatId, vacationName) {
+     
+    def vacationParams = [name:vacationName]
+    
+    def bodyReq = build_body_request('deleteVacation', thermostatId, vacationParams, null)
+    
+    if (settings.trace) {
+        log.debug "deleteVacation> about to call api with body = ${bodyReq} for ${thermostatId}"
+    }    
+
+    api('deleteVacation', bodyReq) {resp->
+        def statusCode = resp.data.status.code
+        def message = resp.data.status.message
+        if (!statusCode) {
+            
+            if (settings.trace) {
+            
+                log.debug "deleteVacation>${vacationName} deleted done for ${thermostatId}"
+    	        sendEvent name: "verboseTrace", value: "deleteVacation>done for ${thermostatId}"
+            }
+            
+        }
+        else {
+            log.error "deleteVacation> error= ${statusCode}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "deleteVacation>${statusCode} for ${thermostatId}"
+        }
+    }    
+}
+
+
+def iterateResumeProgram() {
+
+    if (data.thermostatCount==null){
+    
+         getThermostatSummary()
+    }
+    if (settings.trace) {
+        log.debug "iterateResumeProgram> about to loop ${data.thermostatCount}"
+   	    sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to loop ${data.thermostatCount} thermostat(s)"
+    }    
+    for (i in 0..data.thermostatCount-1) {
+    
+         def thermostatDetails = data.revisionList[i].split(':')
+         def thermostatId = thermostatDetails[0]
+         def thermostatName = thermostatDetails[1]
+         def connected = thermostatDetails[2]
+         def thermostatRevision = thermostatDetails[3]
+         def alertRevision = thermostatDetails[4]
+         def runtimeRevision = thermostatDetails[5]
+         
+         if (connected) {
+         
+             if (settings.trace) {
+      	         sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${thermostatId}"
+                 log.debug "iterateResumeProgram> about to call resumeProgram for ${thermostatId}"
+             }    
+             resumeProgram(thermostatId)
+             
+         }    
+    
+    }
+   
+}
+
+def resumeProgram(thermostatId) {
+     
+    
+    def bodyReq = build_body_request('resumeProgram', thermostatId, null, null)
+
+    if (settings.trace) {
+        log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
+    }    
+    
+
+    // do the resumeProgram 3 times to make sure it is resumed.
+    
+    api('resumeProgram', bodyReq) {
+        sendEvent name: "verboseTrace", value: "resumeProgram> 1st done for ${thermostatId}"            
+    }
+    api('resumeProgram', bodyReq) {
+        sendEvent name: "verboseTrace", value: "resumeProgram> 2nd done for ${thermostatId}"            
+    }
+    api('resumeProgram', bodyReq) {resp->
+        def statusCode = resp.data.status.code
+        def message = resp.data.status.message
+        if (!statusCode) {
+            
+            if (settings.trace) {
+            
+                log.debug  "resumeProgram> final resume done for ${thermostatId}"            
+                sendEvent name: "verboseTrace", value: "resumeProgram> final resume done for ${thermostatId}"            
+            }
+            
+        }
+        else {
+            log.error "resumeProgram> error= ${statusCode}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "resumeProgram>${statusCode} for ${thermostatId}"
+        }
+    
+    }
+}
+
+def getThermostatInfo(thermostatId){
+    
+    if (settings.trace) {
+        log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
+    }
+    def bodyReq = build_body_request('thermostatInfo', thermostatId, null, null)
+    if (settings.trace) {
+        log.debug "getThermostatInfo> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
+    }
+    api('thermostatInfo', bodyReq) {resp->
+        def statusCode = resp.data.status.code
+        def message = resp.data.status.message
+        if (!statusCode) {
+            
+            data.thermostatList = resp.data.thermostatList
+            def thermostatName = data.thermostatList.name
+            if (settings.trace) {
+     	        log.debug "getTstatInfo> got info for ${thermostatId} name=${thermostatName}, features=${resp.data}"
+            }    
+            def runtimeSettings = data.thermostatList.runtime
+            def thermostatSettings = data.thermostatList.settings
+            
+            if (settings.trace) {
+            
+    	        sendEvent name: "verboseTrace", value: "getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," + 
+                    "vent = ${thermostatSettings.vent}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
+                    "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
+
+                log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
+                    "vent = ${thermostatSettings.vent}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
+                    "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
+            }            
+        }
+        else {
+            log.error "getThermostatInfo> error= ${statusCode}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "getTstatInfo>error=${statusCode} for ${thermostatId}"
+        }
+    
+                               
+    }
+    
+}
+
+def getThermostatSummary() {
+    
+   
+    def bodyReq = build_body_request('thermostatSummary', null, null, null)
+    if (settings.trace) {
+        log.debug "getThermostatSummary> about to call api with body = ${bodyReq}"
+    }
+    api('thermostatSummary', bodyReq) {resp->
+
+        def statusCode = resp.data.status.code
+        def message = resp.data.status.message
+        if (!statusCode) {
+    	    data.revisionList = resp.data.revisionList
+            data.thermostatCount= data.revisionList.size()
+            data.revisionList.each() { 
+                def thermostatDetails = it.split(':')
+                def thermostatId = thermostatDetails[0]
+                def thermostatName = thermostatDetails[1]
+                def connected = thermostatDetails[2]
+                def thermostatRevision = thermostatDetails[3]
+                def alertRevision = thermostatDetails[4]
+                def runtimeRevision = thermostatDetails[5]
+                if (settings.trace) {
+            
+                    log.debug "getThermostatSummary> thermostatId = ${thermostatId}, name = ${thermostatName}, connected =${connected}"
+        	        sendEvent name: "verboseTrace", value: "getTstatSummary> found ${thermostatId},name=${thermostatName},connected=${connected}"
+                }
+
+           }     
+        }
+        else {
+            log.error "getThermostatSummary> error= ${statusCode}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "getTstatSummary> error={statusCode}"
+        }
+    
+    }
+	
+}
+
+
+def refresh_tokens() {
+ 
+    String URI_ROOT= "https://api.ecobee.com/"
+    String appKey= settings.appKey
+    
+    def method =[
+        headers: [
+            'Content-Type': "application/json",
+            'charset': "UTF-8"
+        ],
+        uri: "${URI_ROOT}/token?" +
+            "grant_type=refresh_token&" + 
+            "code=${data.auth.refresh_token}&" +
+            "client_id=${appKey}" 
+    ]        
+    if (settings.trace) {
+        log.debug "refresh_tokens> uri = ${method.uri}"
+    }    
+
+    def successRefreshTokens= {resp->
+        if (settings.trace) {
+            log.debug "refresh_tokens> response = ${resp.data}"
+        }    
+        data.auth.access_token = resp.data.access_token
+        data.auth.refresh_token = resp.data.refresh_token
+        data.auth.expires_in = resp.data.expires_in
+        data.auth.token_type = resp.data.token_type
+        data.auth.scope = resp.data.scope
+     }
+
+    try {
+        httpPostJson(method, successRefreshTokens) 
+
+    } catch ( java.net.UnknownHostException e) {
+    	    log.error "refresh_tokens> Unknown host - check the URL " + method.uri
+    	    sendEvent name: "verboseTrace", value: "refresh_tokens> Unknown host"
+            return false
+   	} catch (java.net.NoRouteToHostException t) {
+    	    log.error "refresh_tokens> No route to host - check the URL " + method.uri
+    	    sendEvent name: "verboseTrace", value: "refresh_tokens> No route to host"
+            return false
+    } catch (java.io.IOException e) {
+    	    log.error "refresh_tokens> Authentication error, ecobee site cannot be reached"
+            sendEvent name: "verboseTrace", value: "refresh_tokens> Auth error"
+            return false
+    } catch (any) {
+    	    log.error "refresh_tokens> general error " + method.uri
+    	    sendEvent name: "verboseTrace", value: "refresh_tokens> general error at ${method.uri}"
+            return false
+    }   
+    // determine token's expire time
+    def now = new Date().getTime();
+    def authexptime=  new Date( (now + (data.auth.expires_in *60 *1000)) ).getTime()
+    data.auth.authexptime = authexptime
+    if (settings.trace) {
+            
+        log.debug "refresh_tokens> expires in ${data.auth.expires_in} minutes"
+	    log.debug "refresh_tokens> data_auth.expires_in in time = ${authexptime}"
+        sendEvent name: "verboseTrace", value: "refresh_tokens>expire in ${data.auth.expires_in} minutes"
+    }
+
+    return true
+
+}
+
+def login() {
+
+    if (settings.trace) {
+        log.debug "login> about to call setAuthTokens"
+    }    
+    setAuthTokens()
+ 
+    if (!isLoggedIn) {
+        if (settings.trace) {
+            log.debug "login> no access_token..., failed"
+        }    
+        exit
+    }            
+    
+}
+
+def getEcobeePinAndAuth() {
+    String SCOPE = "smartWrite"
+    String URI_ROOT= "https://api.ecobee.com"
+    String appKey= settings.appKey
+    
+    def method=[
+        
+        headers: [
+            'Content-Type': "application/json",
+            'charset': "UTF-8"
+        ],
+        uri: "${URI_ROOT}/authorize?" +
+            "response_type=ecobeePin&" + 
+            "client_id=${appKey}&" + 
+            "scope=${SCOPE}" 
+    ]
+    def successEcobeePin = {response->
+        if (settings.trace) {
+            log.debug "getEcobeePinAndAuth> response = ${response.data}"
+        }    
+        data.auth=response.data 
+        data.auth.code = response.data.code
+ 
+        data.auth.expires_in = response.data.expires_in
+        data.auth.interval = response.data.interval
+        data.auth.ecobeePin = response.data.ecobeePin
+        sendEvent name: "verboseTrace", value: "getEcobeePin>${data.auth.ecobeePin}"
+
+        data.auth.access_token=null     // for isLoggedIn() later
+        data.thermostatCount=null      // for iteration functions later
+    }
+    try {
+        httpGet(method, successEcobeePin ) 
+           
+    } catch ( java.net.UnknownHostException e) {
+        log.error "getEcobeePinAndAuth> Unknown host - check the URL " + method.uri
+        sendEvent name: "verboseTrace", value: "getEcobeePin> Unknown host " + method.uri
+        return
+    } catch (java.net.NoRouteToHostException t) {
+        log.error "getEcobeePinAndAuth> No route to host - check the URL " + method.uri
+        sendEvent name: "verboseTrace", value: "getEcobeePin> No route to host " + method.uri
+        return
+    } catch (java.io.IOException e) {
+        log.error "getEcobeePinAndAuth> Authentication error, bad URL or settings missing " + method.uri
+        sendEvent name: "verboseTrace", value: "getEcobeePin> Auth error " + method.uri
+        return
+    } catch (any) {
+        log.error "getEcobeePinAndAuth> general error " + method.uri
+        sendEvent name: "verboseTrace", value: "getEcobeePin> general error " + method.uri
+        return
+    }    
+    if (settings.trace) {
+        log.debug "getEcobeePinAndAuth> ecobeePin= ${data.auth.ecobeePin}, authorizationCode=${data.auth.code},scope=${data.auth.scope} expires_in=${data.auth.expires_in} done"
+    }    
+}
+
+
+    
+    
+def setAuthTokens(){
+ 	String URI_ROOT= "https://api.ecobee.com"
+    String appKey= settings.appKey
+
+    def method=[
+        headers: [
+            'X-nl-protocol-version': 1,
+            'Content-Type': "application/json",
+            'charset': "UTF-8"
+        ],
+        uri: "${URI_ROOT}/token?" +
+            "grant_type=ecobeePin&" + 
+             "code=${data.auth.code}&" +
+             "client_id=${appKey}"
+    ]
+
+  
+    if (data.auth.access_token == null){
+        def successTokens = {resp->
+            data.auth.access_token = resp.data.access_token
+            data.auth.refresh_token = resp.data.refresh_token
+            data.auth.expires_in = resp.data.expires_in
+            data.auth.token_type = resp.data.token_type
+            data.auth.scope = resp.data.scope
+            
+            if (settings.trace) {
+                log.debug "setAuthTokens> accessToken= ${data.auth.access_token}, refreshToken=${data.auth.refresh_token}," + 
+            	    "tokenType=${data.auth.token_type},scope=${data.auth.scope}"
+            }        
+        }
+        try {
+            log.debug "setAuthTokens> about to call httpPost with code= ${data.auth.code}"
+ 	        httpPostJson(method, successTokens)
+            
+        } catch ( java.net.UnknownHostException e) {
+    	    log.error "setAuthTokens> Unknown host - check the URL " + method.uri
+    	    sendEvent name: "verboseTrace", value: "setAuthTokens> Unknown host " + method.uri
+            return
+   	    } catch (java.net.NoRouteToHostException t) {
+    	    log.error "setAuthTokens> No route to host - check the URL " + method.uri
+    	    sendEvent name: "verboseTrace", value: "setAuthTokens> No route to host" + method.uri
+            return
+        } catch (java.io.IOException e) {
+    	    log.error "setAuthTokens> Auth error, ecobee site cannot be reached " + method.uri
+            sendEvent name: "verboseTrace", value: "setAuthTokens> Auth error " + method.uri
+            return
+        } catch (any) {
+    	    log.error "setAuthTokens> general error " + method.uri
+    	    sendEvent name: "verboseTrace", value: "setAuthTokens>general error " + method.uri
+            return
+        }   
+         // determine token's expire time
+        def now = new Date().getTime();
+        def authexptime=  new Date( (now + (data.auth.expires_in *60 *1000)) ).getTime()
+        data.auth.authexptime = authexptime
+        if (settings.trace) {
+        	log.debug "setAuthTokens> expires in ${data.auth.expires_in} minutes"
+            log.debug "setAuthTokens> data_auth.expires_in in time = ${authexptime}"
+     	    sendEvent name: "verboseTrace", value: "setAuthTokens>expire in ${data.auth.expires_in} minutes"
+        }    
+    }
+}
+
+
+def isLoggedIn() {
+
+    if (data.auth == null) {
+    
+        if (settings.trace) {
+            log.debug "isLoggedIn> no data auth"
+        }    
+        return false
+ 
+    }
+    else {
+        if (data.auth.access_token == null) {
+             if (settings.trace) {
+         	     log.debug "isLoggedIn> no access token"
+        	     return false
+	         }   
+        }    
+    }
+    return true
+}
+
+def isTokenExpired() {
+    
+    def now = new Date().getTime();
+    if (settings.trace) {
+        log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time now: ${now}"
+    }
+    
+    if (data.auth.authexptime > now) {
+        if (settings.trace) {
+            log.debug "isTokenExpired> not expired"
+        }    
+        return false
+    }
+  
+    if (settings.trace) {
+        log.debug "isTokenExpired> expired"
+    }
+    return true 
+}
+
+def cToF(temp) {
+    return (temp * 1.8 + 32)
+}
+ 
+def fToC(temp) {
+    return (temp - 32) / 1.8
+}
