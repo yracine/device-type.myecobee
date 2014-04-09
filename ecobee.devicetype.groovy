@@ -6,8 +6,8 @@
  *  Date: 2014-03-31
  *  Code: https://github.com/yracine/device-type.myecobee
  *
- * INSTALLATION
- * =========================================
+ * INSTALLATION STEPS
+ * ==================
  *
  * 1) Connect to the ecobee portal (www.ecobee.com) and create an application key with an application name (such as ecobeeTstat)
  *    and indicate the PIN method authentication (at the bottom of the window).
@@ -23,7 +23,7 @@
  *     Location: Choose the correct location
  *     Hub/Group: (optional) leave blank or set it up to your liking
  *
- * 4) Update device preferences
+ * 4) Update device's preferences
  *     Click on the new device 
  *     Click the edit button next to Preferences
  *     Fill in your device 
@@ -81,7 +81,7 @@ preferences {
     	input("trace", "text", title: "trace", description: "Set it to true to enable tracing")
 	}
     metadata {
-	definition (name: "My Ecobee Device", author: "Yves Racine") {
+	    definition (name: "My Ecobee Device", author: "Yves Racine") {
         capability "Polling"
         capability "Thermostat"
         capability "Relative Humidity Measurement"
@@ -93,6 +93,16 @@ preferences {
         attribute "dehumidifierLevel", "string" 
         attribute "condensationAvoid", "string" 
     
+        command "humidifierOn"
+        command "humidifierManual"
+        command "humidifierAuto"
+        command "setHumidifierLevel"
+        command "dehumidifierOn"
+        command "dehumidifierManual"
+        command "dehumidifierAuto"
+        command "setDehumidifierLevel"
+        command "setFanMinOnTime"	
+        command "setCondensationAvoid"
         command "createVacation"
         command "deleteVacation"
         command "getEcobeePinAndAuth"
@@ -105,15 +115,6 @@ preferences {
         command "resumeProgram"
         command "setAuthTokens"
         command "setHold"
-        command "humidifierOn"
-        command "humidifierManual"
-        command "humidifierAuto"
-        command "setHumidifierLevel"
-        command "dehumidifierOn"
-        command "dehumidifierManual"
-        command "dehumidifierAuto"
-        command "setDehumidifierLevel"
-        command "setFanMinOnTime"	
     }
 
     simulator {
@@ -123,17 +124,17 @@ preferences {
     tiles {
          valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
              state("temperature", label: '${currentValue}°', unit:"C", backgroundColors: [
-	            [value: 0, color: "#153591"],
+                    [value: 0, color: "#153591"],
     	            [value: 8, color: "#1e9cbb"],
-        	    [value: 14, color: "#90d2a7"],
+        	        [value: 14, color: "#90d2a7"],
             	    [value: 20, color: "#44b621"],
                     [value: 24, color: "#f1d801"],
-                    [value: 25, color: "#d04e00"],
-                    [value: 27, color: "#bc2323"]
-                ]
-            )
+                    [value: 29, color: "#d04e00"],
+                    [value: 36, color: "#bc2323"]           
+              ])       
         }
-        standardTile("mode", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+
+       standardTile("mode", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
             state "heat", label:'${name}', action:"thermostat.off", icon: "st.Weather.weather14", backgroundColor: '#E14902'
             state "off", label:'${name}', action:"thermostat.cool", icon: "st.Outdoor.outdoor19"
             state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7", backgroundColor: '#003CEC'
@@ -141,15 +142,15 @@ preferences {
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
             state "off", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11"
             state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
-   	    state "auto", label:'${name}', action:"thermostat.fanOff"
+   	        state "auto", label:'${name}', action:"thermostat.fanOff"
         }
         controlTile("heatSliderControl", "device.heatingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
- 	    state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
-  	}
+ 	        state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
+  	    }
  	
-	valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
-	    state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
- 	}
+	    valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
+	        state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
+ 	    }
         controlTile("coolSliderControl", "device.coolingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
             state "setCoolingSetpoint", label:'Set temperature to', action:"thermostat.setCoolingSetpoint" 
         }
@@ -175,13 +176,13 @@ def parse(String description) {
  
 // handle commands
 def setHeatingSetpoint(temp) {
-//    poll() // to get the latest temperatures values at the thermostat
+    poll() // to get the latest temperatures values at the thermostat
     setHold(settings.thermostatId, device.coolingSetpoint, temp, null)
     sendEvent(name: 'heatingSetpoint', value: temp)
 }
  
 def setCoolingSetpoint(temp) {
-//    poll() // to get the latest temperatures values at the thermostat
+    poll() // to get the latest temperatures values at the thermostat
     setHold(settings.thermostatId,  temp, device.heatingSetpoint, null) 
     sendEvent(name: 'coolingSetpoint', value: temp)
 }
@@ -205,7 +206,7 @@ def cool() {
 }
  
 def setThermostatMode(mode) {
-//    poll() // to get the latest temperatures values at the thermostat
+    poll() // to get the latest temperatures values at the thermostat
     mode = mode == 'emergency heat'? 'heat' : mode
     setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['hvacMode':mode]) 
     sendEvent(name: 'thermostatMode', value: mode)
@@ -226,20 +227,20 @@ def fanOff() {
 
 def setFanMinOnTime(minutes) {
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['ventilatorMinOnTime':minutes])
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [ventilatorMinOnTime:minutes])
     sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 
 def setThermostatFanMode(mode) {    
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['vent':mode]) 
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [vent:mode]) 
     sendEvent(name: 'thermostatFanMode', value: mode)
 }
 
 def setCondensationAvoid(flag) {  // set the flag to true or false
     poll() // to get the latest temperatures values at the thermostat
     flag = flag == 'true'? 'true' : 'false'
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['condensationAvoid':flag]) 
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [condensationAvoid:flag]) 
     sendEvent(name: 'condensationAvoid', value: flag)
 }
 
@@ -264,14 +265,14 @@ def dehumidifierAuto() {
 
  
 def setDehumidifierMode(mode) {  
-//    poll()// to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['dehumidifierMode':mode]) 
+    poll()// to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [dehumidifierMode:mode]) 
     sendEvent(name: 'dehumidifierMode', value: mode)
 }
 
 def setDehumidifierLevel(level) {
-//    poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, ['dehumidifierLevel':level])
+    poll() // to get the latest temperatures values at the thermostat
+    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, [dehumidifierLevel:level])
     sendEvent(name: 'dehumidifierLevel', value: level)
 }
 
@@ -290,7 +291,7 @@ def humidifierAuto() {
  
 def setHumidifierMode(mode) {    
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['humidifierMode':mode]) 
+    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [humidifierMode:mode]) 
     sendEvent(name: 'humidifierMode', value: mode)
 }
  
@@ -299,7 +300,7 @@ def setHumidifierMode(mode) {
 def setHumidifierLevel(level) {
     poll()  // to get the latest temperatures values at the thermostat
     
-    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, ['humidity':level])
+    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, [humidity:level])
     sendEvent(name: 'humidifierLevel', value: level)
 }
 
@@ -328,12 +329,12 @@ def poll() {
     sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
     def scale = getTemperatureScale()
     if (scale == 'C') {
-        Integer actualTemp= (int)fToC(data.thermostatList.runtime.actualTemperature/10)
-        Integer actualCoolTemp = (int)fToC(data.thermostatList.runtime.desiredCool/10)
-        Integer actualHeatTemp = (int)fToC(data.thermostatList.runtime.desiredHeat/10)
-        sendEvent(name: 'temperature', value: String.format('%d',actualTemp), unit:"C", state: data.thermostatList.settings.hvacMode)
-        sendEvent(name: 'coolingSetpoint', value: String.format('%d',actualCoolTemp))
-        sendEvent(name: 'heatingSetpoint', value: String.format('%d',actualHeatTemp))
+        def actualTemp= fToC((data.thermostatList.runtime.actualTemperature/10))
+        def actualCoolTemp =  fToC((data.thermostatList.runtime.desiredCool/10))
+        def actualHeatTemp = fToC((data.thermostatList.runtime.desiredHeat/10))
+        sendEvent(name: 'temperature', value: actualTemp, unit:"C", state: data.thermostatList.settings.hvacMode)
+        sendEvent(name: 'coolingSetpoint', value: actualCoolTemp, unit:"C")
+        sendEvent(name: 'heatingSetpoint', value: actualHeatTemp, unit:"C")
     }
     else {
     
@@ -379,6 +380,7 @@ def api(method,  args, success = {}) {
     
     def args_encoded = URLEncoder.encode(args.toString(),"UTF-8")
 
+
     def methods = [
         'thermostatSummary': [uri: "${URI_ROOT}/thermostatSummary?format=json&body=${args_encoded}", type: 'get'],        
         'thermostatInfo':    [uri: "${URI_ROOT}/thermostat?format=json&body=${args_encoded}", type: 'get'],
@@ -390,17 +392,23 @@ def api(method,  args, success = {}) {
 
     def request = methods.getAt(method)
 
-    doRequest(request.uri, args, request.type, success)
+    if (settings.trace) {
+
+       log.debug "api> about to call doRequest with (unencoded) args = ${args}"
+  	   sendEvent name: "verboseTrace", value: "api> about to call doRequest with (unencoded) args = ${args}"
+       
+    }   
+
+    doRequest(request.uri, args_encoded, request.type, success)
 
 }
  
 
 
-// Need to be logged in before this is called. So don't call this. Call api.
+// Need to be authenticated in before this is called. So don't call this. Call api.
 
 def doRequest(uri, args, type, success) {
     
-    def args_encoded = URLEncoder.encode(args.toString(),"UTF-8")
     
     def params = [
             uri: uri,
@@ -410,15 +418,15 @@ def doRequest(uri, args, type, success) {
                 'charset': "UTF-8",
                 'Accept':"application/json"
   	        ],
-            body: args_encoded
+            body: args
     ]
     
     try {
 
         if (settings.trace) {
            
-  	        sendEvent name: "verboseTrace", value: "doRequest>about to ${type} with uri ${params.uri}, (unencoded)args= ${args}"
-            log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args_encoded}"
+  	        sendEvent name: "verboseTrace", value: "doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
+            log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args}"
         }
         if(type == 'post') {
             httpPostJson(params, success)
@@ -441,7 +449,7 @@ def doRequest(uri, args, type, success) {
 
 }
 
-private def build_body_request(method, thermostatId,  tstatParams, tstatSettings) {
+private def build_body_request(method, thermostatId,  tstatParams =[], tstatSettings=[]) {
 
     def selectionJson=null
     def selection=null
@@ -518,7 +526,7 @@ private def build_body_request(method, thermostatId,  tstatParams, tstatSettings
     
 }
 
-def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings) {    // fan_mode or thermostat_mode
+def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // settings can be anything supported by ecobee
 
     if (data.thermostatCount==null)
     {
@@ -555,7 +563,7 @@ def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings) {    // fan_
 }
 
 
-def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // settings are for fan_mode or thermostat_mode
+def setHold(thermostatId, coolingSetPoint, heatingSetPoint=[], tstatSettings= []) {    // settings can be anything supported by ecobee
     Integer targetCoolTemp=null
     Integer targetHeatTemp=null
     
@@ -1034,7 +1042,7 @@ def getEcobeePinAndAuth() {
         sendEvent name: "verboseTrace", value: "getEcobeePin>${data.auth.ecobeePin}"
 
         data.auth.access_token=null     // for isLoggedIn() later
-        data.thermostatCount=null      // for iteration functions later
+        data.thermostatCount=null      // for iterate functions later
     }
     try {
         httpGet(method, successEcobeePin ) 
@@ -1169,10 +1177,10 @@ def isTokenExpired() {
     return true 
 }
 
-def cToF(temp) {
-    return (temp * 1.8 + 32)
+Integer cToF(temp) {
+    return (int)(temp * 1.8 + 32)
 }
  
-def fToC(temp) {
-    return (temp - 32) / 1.8
+Integer fToC(temp) {
+    return (int)(temp - 32) / 1.8
 }
