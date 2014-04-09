@@ -39,15 +39,12 @@ Ecobee-Smartthings integration
  * 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
  *
 preferences {
-    
- 	  section("Initialize this ecobee thermostat") {
-  	   	input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
-	  }
- 
+    section("Initialize this ecobee thermostat") {
+  	input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+    }
 }
  
 def installed() {
-    
     log.debug "installed> calling getEcobeePinAuth... "
     ecobee.getEcobeePinAndAuth()
 }
