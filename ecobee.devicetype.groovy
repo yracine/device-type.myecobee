@@ -141,15 +141,15 @@ preferences {
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
             state "off", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11"
             state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
-   	        state "auto", label:'${name}', action:"thermostat.fanOff"
+   	    state "auto", label:'${name}', action:"thermostat.fanOff"
         }
         controlTile("heatSliderControl", "device.heatingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
- 	        state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
-  	    }
+ 	    state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
+  	}
  	
-	    valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
-	        state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
- 	    }
+	valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
+	    state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
+ 	}
         controlTile("coolSliderControl", "device.coolingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
             state "setCoolingSetpoint", label:'Set temperature to', action:"thermostat.setCoolingSetpoint" 
         }
