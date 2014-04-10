@@ -80,8 +80,8 @@ preferences {
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee")
     	input("trace", "text", title: "trace", description: "Set it to true to enable tracing")
 	}
-    metadata {
-	    definition (name: "My Ecobee Device", author: "Yves Racine") {
+metadata {
+    definition (name: "My Ecobee Device", author: "Yves Racine") {
         capability "Polling"
         capability "Thermostat"
         capability "Relative Humidity Measurement"
@@ -124,17 +124,17 @@ preferences {
     tiles {
          valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
              state("temperature", label: '${currentValue}°', unit:"C", backgroundColors: [
-                    [value: 0, color: "#153591"],
-    	            [value: 8, color: "#1e9cbb"],
-        	        [value: 14, color: "#90d2a7"],
-            	    [value: 20, color: "#44b621"],
-                    [value: 24, color: "#f1d801"],
-                    [value: 29, color: "#d04e00"],
-                    [value: 36, color: "#bc2323"]           
+                 [value: 0, color: "#153591"],
+    	         [value: 8, color: "#1e9cbb"],
+                 [value: 14, color: "#90d2a7"],
+            	 [value: 20, color: "#44b621"],
+                 [value: 24, color: "#f1d801"],
+                 [value: 29, color: "#d04e00"],
+                 [value: 36, color: "#bc2323"]           
               ])       
         }
 
-       standardTile("mode", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+        standardTile("mode", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
             state "heat", label:'${name}', action:"thermostat.off", icon: "st.Weather.weather14", backgroundColor: '#E14902'
             state "off", label:'${name}', action:"thermostat.cool", icon: "st.Outdoor.outdoor19"
             state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7", backgroundColor: '#003CEC'
@@ -142,15 +142,15 @@ preferences {
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
             state "off", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11"
             state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
-   	        state "auto", label:'${name}', action:"thermostat.fanOff"
+            state "auto", label:'${name}', action:"thermostat.fanOff"
         }
         controlTile("heatSliderControl", "device.heatingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
- 	        state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
-  	    }
- 	
-	    valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
-	        state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
- 	    }
+            state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
+        }
+ 
+        valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
+            state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
+        }
         controlTile("coolSliderControl", "device.coolingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
             state "setCoolingSetpoint", label:'Set temperature to', action:"thermostat.setCoolingSetpoint" 
         }
@@ -974,7 +974,7 @@ def refresh_tokens() {
     	    log.error "refresh_tokens> Unknown host - check the URL " + method.uri
     	    sendEvent name: "verboseTrace", value: "refresh_tokens> Unknown host"
             return false
-   	} catch (java.net.NoRouteToHostException t) {
+    } catch (java.net.NoRouteToHostException t) {
     	    log.error "refresh_tokens> No route to host - check the URL " + method.uri
     	    sendEvent name: "verboseTrace", value: "refresh_tokens> No route to host"
             return false
@@ -1115,7 +1115,7 @@ def setAuthTokens(){
     	    log.error "setAuthTokens> Unknown host - check the URL " + method.uri
     	    sendEvent name: "verboseTrace", value: "setAuthTokens> Unknown host " + method.uri
             return
-   	    } catch (java.net.NoRouteToHostException t) {
+        } catch (java.net.NoRouteToHostException t) {
     	    log.error "setAuthTokens> No route to host - check the URL " + method.uri
     	    sendEvent name: "verboseTrace", value: "setAuthTokens> No route to host" + method.uri
             return
