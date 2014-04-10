@@ -36,7 +36,7 @@
  *  preferences {
  *   
  *	   section("Initialize this ecobee thermostat") {
- *		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+ *		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
  *	   }
  *
  *   }
