@@ -568,7 +568,7 @@ def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // s
 }
 
 
-def setHold(thermostatId, coolingSetPoint, heatingSetPoint=[], tstatSettings= []) {    // settings can be anything supported by ecobee
+def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {    // settings can be anything supported by ecobee
     Integer targetCoolTemp=null
     Integer targetHeatTemp=null
     
