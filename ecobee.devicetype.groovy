@@ -47,7 +47,7 @@
  *   ecobee.getEcobeePinAndAuth()
  * }
  *
- * 6) Click on your ecobee device again to get the 4-alphanumeric PIN number from the list ((https://graph.api.smartthings.com/device/list). 
+ * 6) Click on your ecobee device again to get the 4-alphanumeric PIN from the list ((https://graph.api.smartthings.com/device/list). 
  *    It should appear under the verboseTrace attribute.
  *
  * 7) Go to the ecobee web portal within the next 9 minutes and enter your pin number under settings/my apps
@@ -314,6 +314,10 @@ def poll() {
     }
     getThermostatInfo(settings.thermostatId)
     
+    sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
+    sendEvent(name: 'temperature', value: actualTemp, unit:"C", state: data.thermostatList.settings.hvacMode)
+    sendEvent(name: 'coolingSetpoint', value: actualCoolTemp, unit:"C")
+    sendEvent(name: 'heatingSetpoint', value: actualHeatTemp, unit:"C")
     sendEvent(name: 'thermostatFanMode', value: data.thermostatList.settings.vent)
     sendEvent(name: 'humidity', value: data.thermostatList.runtime.actualHumidity)
     sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
@@ -326,22 +330,26 @@ def poll() {
         sendEvent(name: 'dehumidifierMode', value: data.thermostatList.settings.dehumidifierMode)
         sendEvent(name: 'dehumidifierLevel', value: data.thermostatList.settings.dehumidifierLevel)
     }
-    sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
     def scale = getTemperatureScale()
-    if (scale == 'C') {
-        def actualTemp= fToC((data.thermostatList.runtime.actualTemperature/10))
-        def actualCoolTemp =  fToC((data.thermostatList.runtime.desiredCool/10))
-        def actualHeatTemp = fToC((data.thermostatList.runtime.desiredHeat/10))
-        sendEvent(name: 'temperature', value: actualTemp, unit:"C", state: data.thermostatList.settings.hvacMode)
-        sendEvent(name: 'coolingSetpoint', value: actualCoolTemp, unit:"C")
-        sendEvent(name: 'heatingSetpoint', value: actualHeatTemp, unit:"C")
-    }
+    if (scale =='C') {
+        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature/10))
+        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool/10))
+        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat/10))
+        def actualTempFormat = String.format('%2.1f', actualTemp)
+        def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp)
+        def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp)
+        sendEvent(name: 'temperature', value: actualTempFormat, 
+            unit:"C", state: data.thermostatList.settings.hvacMode)
+        sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat, unit: "C")
+        sendEvent(name: 'heatingSetpoint', value:  desiredHeatFormat, unit: "C")
+    
+    }        
     else {
     
         sendEvent(name: 'temperature', value: (data.thermostatList.runtime.actualTemperature/10), 
             unit:"F", state: data.thermostatList.settings.hvacMode)
-        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList.runtime.desiredCool/10))
-        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList.runtime.desiredHeat/10))
+        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList.runtime.desiredCool/10), unit: "F")
+        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList.runtime.desiredHeat/10), unit: "F")
     
     }
 }
@@ -1177,10 +1185,10 @@ def isTokenExpired() {
     return true 
 }
 
-Integer cToF(temp) {
-    return (int)(temp * 1.8 + 32)
+def cToF(temp) {
+    return (temp * 1.8 + 32)
 }
  
-Integer fToC(temp) {
-    return (int)(temp - 32) / 1.8
+def fToC(temp) {
+    return (temp - 32) / 1.8
 }
