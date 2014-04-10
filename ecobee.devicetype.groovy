@@ -329,9 +329,9 @@ def poll() {
     }
     def scale = getTemperatureScale()
     if (scale =='C') {
-        float actualTemp= fToC((data.thermostatList.runtime.actualTemperature/10))
-        float desiredCoolTemp =  fToC((data.thermostatList.runtime.desiredCool/10))
-        float desiredHeatTemp = fToC((data.thermostatList.runtime.desiredHeat/10))
+        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature/10))
+        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool/10))
+        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat/10))
         def actualTempFormat = String.format('%2.1f', actualTemp)
         def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp)
         def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp)
@@ -933,7 +933,7 @@ def getThermostatSummary() {
         }
     
     }
-	
+
 }
 
 
