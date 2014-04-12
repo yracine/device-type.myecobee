@@ -112,10 +112,6 @@ metadata {
         command "getEcobeePinAndAuth"
         command "getThermostatInfo"
         command "getThermostatSummary"
-        command "heatLevelUp"
-        command "heatLevelDown"
-        command "coolLevelUp"
-        command "coolLevelDown"
         command "iterateCreateVacation"
         command "iterateDeleteVacation"
         command "iterateResumeProgram"
@@ -124,6 +120,10 @@ metadata {
         command "resumeThisTstat"
         command "setAuthTokens"
         command "setHold"
+        command "heatLevelUp"
+        command "heatLevelDown"
+        command "coolLevelUp"
+        command "coolLevelDown"
     }
 
     simulator {
@@ -161,13 +161,13 @@ metadata {
             state "cool", label:'${currentValue}° cool', unit:"C", backgroundColor:"#ffffff"
         }
         valueTile("humidity", "device.humidity", inactiveLabel: false, decoration: "flat") {
-            state "default", label:'${currentValue}%', unit:"humidity", backgroundColor:"#ffffff"
+            state "default", label:'${currentValue}%', unit:"humidity"
         }
         standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
         }
         standardTile("resProgram", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "default", action:"resumeThisTstat", icon:"st.Office.office7", backgroundColor:"#ffffff"
+            state "default", action:"resumeThisTstat", icon:"st.Office.office7"
         }
         standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "heatLevelUp", label:'  ', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"
@@ -190,7 +190,7 @@ metadata {
 }
 
 def coolLevelUp(){
-    def nextLevel = device.currentValue("coolingSetpoint") + 1
+    int nextLevel = device.currentValue("coolingSetpoint") + 1
     
     if( nextLevel > 30){
     	nextLevel = 30
@@ -199,7 +199,7 @@ def coolLevelUp(){
 }
 
 def coolLevelDown(){
-    def nextLevel = device.currentValue("coolingSetpoint") - 1
+    int nextLevel = device.currentValue("coolingSetpoint") - 1
     
     if( nextLevel < 10){
     	nextLevel = 10
@@ -208,7 +208,7 @@ def coolLevelDown(){
 }
 
 def heatLevelUp(){
-    def nextLevel = device.currentValue("heatingSetpoint") + 1
+    int nextLevel = device.currentValue("heatingSetpoint") + 1
     
     if( nextLevel > 30){
     	nextLevel = 30
@@ -217,7 +217,7 @@ def heatLevelUp(){
 }
 
 def heatLevelDown(){
-    def nextLevel = device.currentValue("heatingSetpoint") - 1
+    int nextLevel = device.currentValue("heatingSetpoint") - 1
     
     if( nextLevel < 10){
     	nextLevel = 10
@@ -376,39 +376,39 @@ def poll() {
     }
     getThermostatInfo(settings.thermostatId)
     
-    sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
-    sendEvent(name: 'thermostatFanMode', value: data.thermostatList.settings.vent)
-    sendEvent(name: 'humidity', value: data.thermostatList.runtime.actualHumidity)
-    sendEvent(name: 'thermostatMode', value: data.thermostatList.settings.hvacMode)
+    sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
+    sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].settings.vent)
+    sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity)
+    sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
     if (data.thermostatList.settings.hasHumidifier) {
-        sendEvent(name: 'humidifierMode', value: data.thermostatList.settings.humidifierMode)
-        sendEvent(name: 'humidifierLevel', value: data.thermostatList.settings.humidity)
+        sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
+        sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity)
         
     }
     if (data.thermostatList.settings.hasDehumidifier) {
-        sendEvent(name: 'dehumidifierMode', value: data.thermostatList.settings.dehumidifierMode)
-        sendEvent(name: 'dehumidifierLevel', value: data.thermostatList.settings.dehumidifierLevel)
+        sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
+        sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel)
     }
     def scale = getTemperatureScale()
     if (scale =='C') {
-        float actualTemp= fToC((data.thermostatList.runtime.actualTemperature/10))
-        float desiredCoolTemp =  fToC((data.thermostatList.runtime.desiredCool/10))
-        float desiredHeatTemp = fToC((data.thermostatList.runtime.desiredHeat/10))
+        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature/10))
+        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool/10))
+        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat/10))
         def actualTempFormat = String.format('%2.1f', actualTemp)
         def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp)
         def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp)
         sendEvent(name: 'temperature', value: actualTempFormat, 
-            unit:"C", state: data.thermostatList.settings.hvacMode)
+            unit:"C", state: data.thermostatList[0].settings.hvacMode)
         sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat, unit: "C")
         sendEvent(name: 'heatingSetpoint', value:  desiredHeatFormat, unit: "C")
     
     }        
     else {
     
-        sendEvent(name: 'temperature', value: (data.thermostatList.runtime.actualTemperature/10), 
-            unit:"F", state: data.thermostatList.settings.hvacMode)
-        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList.runtime.desiredCool/10), unit: "F")
-        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList.runtime.desiredHeat/10), unit: "F")
+        sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature/10), 
+            unit:"F", state: data.thermostatList[0].settings.hvacMode)
+        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].runtime.desiredCool/10), unit: "F")
+        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat/10), unit: "F")
     
     }
 }
@@ -657,7 +657,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     
     }
     if (settings.trace) {
-	   sendEvent name: "verboseTrace", value: "setHold>about to build_body_req with ${tstatSettings}"
+	   sendEvent name: "verboseTrace", value: "setHold>about to build_body_req with settings=${tstatSettings}"
     }
     def tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString()]
        
