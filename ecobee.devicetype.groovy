@@ -1,4 +1,4 @@
-//***
+/***
  *  My Ecobee Device
  *
  *  Author: Yves Racine
@@ -106,6 +106,7 @@ metadata {
         command "dehumidifierAuto"
         command "setDehumidifierLevel"
         command "setFanMinOnTime"	
+        command "setThermostatFanMode"    
         command "setCondensationAvoid"
         command "createVacation"
         command "deleteVacation"
@@ -146,14 +147,14 @@ metadata {
         }
 
         standardTile("mode", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "heat", label:'${name}', action:"thermostat.off", icon: "st.Weather.weather14", backgroundColor: '#E14902'
+            state "heat", label:'${name}', action:"thermostat.off", icon: "st.Weather.weather14",backgroundColor:"#ffffff"
             state "off", label:'${name}', action:"thermostat.cool", icon: "st.Outdoor.outdoor19"
-            state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7", backgroundColor: '#003CEC'
+            state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7"
         }
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "off", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11"
-            state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
-            state "auto", label:'${name}', action:"thermostat.fanOff",icon: "st.Appliances.appliances11"
+            state "off", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11",backgroundColor:"#ffffff"
+            state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11" 
+            state "auto", label:'${name}', action:"thermostat.fanOff",icon: "st.Appliances.appliances11" 
         }
  
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
@@ -266,6 +267,7 @@ def setThermostatMode(mode) {
     setHold(settings.thermostatId,device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
        ['hvacMode':mode]) 
     sendEvent(name: 'thermostatMode', value: mode)
+    poll()
 }
  
 def fanOn() {
@@ -291,6 +293,7 @@ def setThermostatFanMode(mode) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
          ['vent':mode]) 
     sendEvent(name: 'thermostatFanMode', value: mode)
+    poll()
 }
 
 def setCondensationAvoid(flag) {  // set the flag to true or false
@@ -388,9 +391,9 @@ def poll() {
     }
     def scale = getTemperatureScale()
     if (scale =='C') {
-        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature/10))
-        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool/10))
-        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat/10))
+        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature))
+        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool))
+        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat))
         def actualTempFormat = String.format('%2.1f', actualTemp)
         def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp)
         def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp)
@@ -402,10 +405,10 @@ def poll() {
     }        
     else {
     
-        sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature/10), 
+        sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature), 
             unit:"F", state: data.thermostatList[0].settings.hvacMode)
-        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].runtime.desiredCool/10), unit: "F")
-        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat/10), unit: "F")
+        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].runtime.desiredCool), unit: "F")
+        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat), unit: "F")
     
     }
 }
@@ -934,7 +937,11 @@ def getThermostatInfo(thermostatId){
         if (!statusCode) {
             
             data.thermostatList = resp.data.thermostatList
-            def thermostatName = data.thermostatList.name
+            def thermostatName = data.thermostatList.name  
+            // divide the temperature by 10 before for display later.
+            data.thermostatList[0].runtime.actualTemperature = data.thermostatList[0].runtime.actualTemperature /10
+            data.thermostatList[0].runtime.desiredCool = data.thermostatList[0].runtime.desiredCool /10
+            data.thermostatList[0].runtime.desiredHeat = data.thermostatList[0].runtime.desiredHeat /10
             if (settings.trace) {
      	        log.debug "getTstatInfo> got info for ${thermostatId} name=${thermostatName}, features=${resp.data}"
             }    
