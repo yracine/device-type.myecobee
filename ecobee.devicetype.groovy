@@ -524,7 +524,10 @@ def doRequest(uri, args, type, success) {
 
 }
 
-private def build_body_request(method, thermostatId,  tstatParams =[], tstatSettings=[]) {
+// tstatType ='managementSet' or 'registered'
+// thermostatId could be a list of serial# separated by "," 
+
+private def build_body_request(method, tstatType, thermostatId,  tstatParams =[], tstatSettings=[]) {
 
     def selectionJson=null
     def selection=null
@@ -534,7 +537,8 @@ private def build_body_request(method, thermostatId,  tstatParams =[], tstatSett
     }
     if (method == 'thermostatSummary') {
     
-        selection = [selection: [selectionType: 'registered', 
+       
+        selection = [selection: [selectionType: tstatType, 
                     selectionMatch: '']
                     ]                                    
                        
@@ -558,7 +562,7 @@ private def build_body_request(method, thermostatId,  tstatParams =[], tstatSett
     if (settings.trace) {
         log.debug "build_body_request> about to build request for method = ${method} & thermostatId= ${thermostatId} with selection = ${selectionJson}"
     }
-    if (tstatSettings != null) {
+    if ((tstatSettings != null) && (tstatSettings != "")) {
         
         def function_clause = [type:method,params:tstatParams]
         def bodyWithSettings= [functions:[function_clause],selection:selection,thermostat:[settings:tstatSettings]]
@@ -568,7 +572,7 @@ private def build_body_request(method, thermostatId,  tstatParams =[], tstatSett
         }    
         return bodyWithSettingsJson
     }
-    else if (tstatParams != null) {
+    else if ((tstatParams != null) && (tsatParams != "")) {
         def function_clause = [type:method,params:tstatParams]
         def simpleBody= [functions:[function_clause],selection:selection]
         
@@ -601,12 +605,16 @@ private def build_body_request(method, thermostatId,  tstatParams =[], tstatSett
     
 }
 
-def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // settings can be anything supported by ecobee
+// tstatType ='managementSet' or 'registered'
+// settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+
+
+def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    
 
     if (data.thermostatCount==null)
     {
     
-         getThermostatSummary()
+         getThermostatSummary(tstatType)
     }
     if (settings.trace) {
         log.debug "iterateSetHold> about to loop ${data.thermostatCount} thermostat(s)"
@@ -615,7 +623,7 @@ def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // s
     for (i in 0..data.thermostatCount-1) {
     
          def thermostatDetails = data.revisionList[i].split(':')
-         def thermostatId = thermostatDetails[0]
+         def Id = thermostatDetails[0]
          def thermostatName = thermostatDetails[1]
          def connected = thermostatDetails[2]
          def thermostatRevision = thermostatDetails[3]
@@ -626,10 +634,10 @@ def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // s
          
              if (settings.trace) {
              
-       	         sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${thermostatId}"
-                 log.debug "iterateSethold> about to call setHold for ${thermostatId}"
+       	         sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${Id}"
+                 log.debug "iterateSethold> about to call setHold for ${Id}"
              }
-             setHold (thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings)         
+             setHold (Id, coolingSetPoint, heatingSetPoint, tstatSettings)         
              
          }    
     
@@ -637,6 +645,8 @@ def iterateSetHold(coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    // s
    
 }
 
+// thermostatId could be a list of serial# separated by "," 
+// settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 
 def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {    // settings can be anything supported by ecobee
     Integer targetCoolTemp=null
@@ -662,7 +672,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     }
     def tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString()]
        
-    def bodyReq = build_body_request('setHold', thermostatId, tstatParams, tstatSettings)
+    def bodyReq = build_body_request('setHold', 'registered', thermostatId, tstatParams, tstatSettings)
     
     
     if (settings.trace) {
@@ -679,7 +689,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
             
                 if (settings.trace) {
                     log.debug "setHold> fan mode= ${data.thermostatList.settings.vent}, mode=${data.thermostatList.settings.hvacMode}" 
-                    log.debug "setHold> current Temp= ${data.thermostatList.runtime.actualTemperature}, desiredHeat=${data.thermostatList.runtime.desiredHeat}"
+                    log.debug "setHold> current Temp= ${data.thermostatList[0].runtime.actualTemperature}, desiredHeat=${data.thermostatList[0].runtime.desiredHeat}"
     	            sendEvent name: "verboseTrace", value: "setHold>done for ${thermostatId}"
                 }
                 return
@@ -694,12 +704,15 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     }
 }
 
-def iterateCreateVacation(vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
+// tstatType ='managementSet' or 'registered'
+
+
+def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
 
     if (data.thermostatCount==null)
     {
     
-         getThermostatSummary()
+         getThermostatSummary(tstatType)
     }
     if (settings.trace) {
         log.debug "iterateCreateVacation> about to loop ${data.thermostatCount}"
@@ -708,7 +721,7 @@ def iterateCreateVacation(vacationName, targetCoolTemp, targetHeatTemp, targetSt
     for (i in 0..data.thermostatCount-1) {
     
          def thermostatDetails = data.revisionList[i].split(':')
-         def thermostatId = thermostatDetails[0]
+         def Id = thermostatDetails[0]
          def thermostatName = thermostatDetails[1]
          def connected = thermostatDetails[2]
          def thermostatRevision = thermostatDetails[3]
@@ -719,15 +732,16 @@ def iterateCreateVacation(vacationName, targetCoolTemp, targetHeatTemp, targetSt
          
              if (settings.trace) {
              
-      	         sendEvent name: "verboseTrace", value: "iterateCreateVacation> about to call createVacation for ${thermostatId}"
-                 log.debug "iterateCreateVacation> about to call createVacation for ${thermostatId}"
+      	         sendEvent name: "verboseTrace", value: "iterateCreateVacation> about to call createVacation for ${Id}"
+                 log.debug "iterateCreateVacation> about to call createVacation for ${Id}"
              }
-             createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
+             createVacation(Id, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
          }    
     
     }
    
 }
+// thermostatId could be a list of serial# separated by "," 
 
 def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
      
@@ -761,7 +775,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
         endDate:vacationEndDate,  
         endTime:vacationEndTime 
     ]
-    def bodyReq = build_body_request('createVacation',thermostatId, vacationParams, null)
+    def bodyReq = build_body_request('createVacation','registered', thermostatId,  vacationParams, null)
     
     if (settings.trace) {
         log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
@@ -784,12 +798,16 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
     } 
 }
 
-def iterateDeleteVacation(vacationName) {
+// tstatType ='managementSet' or 'registered'
 
-    if (data.thermostatCount==null) {
+
+def iterateDeleteVacation(tstatType, vacationName) {
+
+    if (data.thermostatCount == null) {
     
-         getThermostatSummary()
+        getThermostatSummary(tstatType)
     }
+    
     if (settings.trace) {
         log.debug "iterateDeleteVacation> about to loop ${data.thermostatCount}"
    	    sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
@@ -797,7 +815,7 @@ def iterateDeleteVacation(vacationName) {
     for (i in 0..data.thermostatCount-1) {
     
          def thermostatDetails = data.revisionList[i].split(':')
-         def thermostatId = thermostatDetails[0]
+         def Id = thermostatDetails[0]
          def thermostatName = thermostatDetails[1]
          def connected = thermostatDetails[2]
          def thermostatRevision = thermostatDetails[3]
@@ -808,10 +826,10 @@ def iterateDeleteVacation(vacationName) {
          
              if (settings.trace) {
              
-      	         sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${thermostatId}"
-                 log.debug "iterateDeleteVacation> about to call deleteVacation for ${thermostatId}"
+      	         sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${Id}"
+                 log.debug "iterateDeleteVacation> about to call deleteVacation for ${Id}"
              }
-             deleteVacation(thermostatId, vacationName) 
+             deleteVacation(Id, vacationName) 
              
          }    
     
@@ -819,12 +837,13 @@ def iterateDeleteVacation(vacationName) {
    
 }
 
+// thermostatId could be a list of serial# separated by "," 
 
 def deleteVacation(thermostatId, vacationName) {
      
     def vacationParams = [name:vacationName]
     
-    def bodyReq = build_body_request('deleteVacation', thermostatId, vacationParams, null)
+    def bodyReq = build_body_request('deleteVacation', 'registered', thermostatId, vacationParams, null)
     
     if (settings.trace) {
         log.debug "deleteVacation> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -850,11 +869,11 @@ def deleteVacation(thermostatId, vacationName) {
 }
 
 
-def iterateResumeProgram() {
+def iterateResumeProgram(tstatType) {
 
     if (data.thermostatCount==null){
     
-         getThermostatSummary()
+         getThermostatSummary(tstatType)
     }
     if (settings.trace) {
         log.debug "iterateResumeProgram> about to loop ${data.thermostatCount}"
@@ -863,7 +882,7 @@ def iterateResumeProgram() {
     for (i in 0..data.thermostatCount-1) {
     
          def thermostatDetails = data.revisionList[i].split(':')
-         def thermostatId = thermostatDetails[0]
+         def Id = thermostatDetails[0]
          def thermostatName = thermostatDetails[1]
          def connected = thermostatDetails[2]
          def thermostatRevision = thermostatDetails[3]
@@ -873,10 +892,10 @@ def iterateResumeProgram() {
          if (connected) {
          
              if (settings.trace) {
-      	         sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${thermostatId}"
-                 log.debug "iterateResumeProgram> about to call resumeProgram for ${thermostatId}"
+      	         sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${Id}"
+                 log.debug "iterateResumeProgram> about to call resumeProgram for ${Id}"
              }    
-             resumeProgram(thermostatId)
+             resumeProgram(Id)
              
          }    
     
@@ -884,10 +903,12 @@ def iterateResumeProgram() {
    
 }
 
+// thermostatId could be a list of serial# separated by "," 
+
 def resumeProgram(thermostatId) {
      
     
-    def bodyReq = build_body_request('resumeProgram', thermostatId, null, null)
+    def bodyReq = build_body_request('resumeProgram', 'registered', thermostatId, null, null)
 
     if (settings.trace) {
         log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -927,7 +948,7 @@ def getThermostatInfo(thermostatId){
     if (settings.trace) {
         log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
     }
-    def bodyReq = build_body_request('thermostatInfo', thermostatId, null, null)
+    def bodyReq = build_body_request('thermostatInfo', 'registered', thermostatId, null, null)
     if (settings.trace) {
         log.debug "getThermostatInfo> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
     }
@@ -971,10 +992,10 @@ def getThermostatInfo(thermostatId){
     
 }
 
-def getThermostatSummary() {
+def getThermostatSummary(tstatType) {  // tstatType ='managementSet' or 'registered'
     
    
-    def bodyReq = build_body_request('thermostatSummary', null, null, null)
+    def bodyReq = build_body_request('thermostatSummary', tstatType, null, null, null)
     if (settings.trace) {
         log.debug "getThermostatSummary> about to call api with body = ${bodyReq}"
     }
