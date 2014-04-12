@@ -86,6 +86,10 @@ metadata {
         capability "Thermostat"
         capability "Relative Humidity Measurement"
 
+		attribute "heatLevelUp", "string"
+		attribute "heatLevelDown", "string"
+		attribute "coolLevelUp", "string"
+		attribute "coolLevelDown", "string"
         attribute "verboseTrace", "string"
         attribute "humidifierMode", "string"
         attribute "dehumidifierMode", "string"
@@ -108,11 +112,16 @@ metadata {
         command "getEcobeePinAndAuth"
         command "getThermostatInfo"
         command "getThermostatSummary"
+		command "heatLevelUp"
+		command "heatLevelDown"
+		command "coolLevelUp"
+        command "coolLevelDown"
         command "iterateCreateVacation"
         command "iterateDeleteVacation"
         command "iterateResumeProgram"
         command "iterateSetHold"
         command "resumeProgram"
+        command "resumeThisTstat"
         command "setAuthTokens"
         command "setHold"
     }
@@ -144,46 +153,88 @@ metadata {
             state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
             state "auto", label:'${name}', action:"thermostat.fanOff"
         }
-        controlTile("heatSliderControl", "device.heatingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
-            state "setHeatingSetpoint", action:"thermostat.setHeatingSetpoint", backgroundColor:"#d04e00"
-        }
  
-        valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
-            state "heat", label:'${currentValue}° heat', backgroundColor:"#ffffff"
-        }
-        controlTile("coolSliderControl", "device.coolingSetpoint", "slider", height: 1, width: 2, inactiveLabel: false) {
-            state "setCoolingSetpoint", label:'Set temperature to', action:"thermostat.setCoolingSetpoint" 
-        }
-        valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
-            state "default", label:'${currentValue}°', unit:"C", backgroundColor:"#ffffff", icon:"st.appliances.appliances8"
-        }
+ 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
+			state "heat", label:'${currentValue}° heat', unit:"C", backgroundColor:"#ffffff"
+		}
+		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
+			state "cool", label:'${currentValue}° cool', unit:"C", backgroundColor:"#ffffff"
+		}
         valueTile("humidity", "device.humidity", inactiveLabel: false, decoration: "flat") {
-            state "default", label:'${currentValue}%', unit:"Humidity"
+            state "default", label:'${currentValue}%', unit:"humidity", backgroundColor:"#ffffff"
         }
-        standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "default", action:"polling.poll", icon:"st.secondary.refresh"
+		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+			state "default", action:"polling.poll", icon:"st.secondary.refresh"
+		}
+		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+			state "default", action:"resumeThisTstat", icon:"st.Office.office7", backgroundColor:"#ffffff"
+		}
+        standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+            state "heatLevelUp", label:'  ', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"
         }
+        standardTile("heatLevelDown", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+            state "heatLevelDown", label:'  ', action:"heatLevelDown", icon:"st.thermostat.thermostat-down"
+        }
+        standardTile("coolLevelUp", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+            state "coolLevelUp", label:'  ', action:"coolLevelUp", icon:"st.thermostat.thermostat-up"
+        }
+        standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+            state "coolLevelDown", label:'  ', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"
+       
+        }
+
         main "temperature"
- 	details(["temperature", "mode", "fanMode", "heatSliderControl", "heatingSetpoint", "coolSliderControl", "coolingSetpoint", "refresh"])
+		details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "humidity", "refresh", "resProgram"])
+
     }
 }
 
-
-// parse events into attributes
-def parse(String description) {
+def coolLevelUp(){
+    def nextLevel = device.currentValue("coolingSetpoint") + 1
     
+    if( nextLevel > 30){
+    	nextLevel = 30
+    }
+    setCoolingSetpoint(nextLevel)
 }
- 
+
+def coolLevelDown(){
+    def nextLevel = device.currentValue("coolingSetpoint") - 1
+    
+    if( nextLevel < 10){
+    	nextLevel = 10
+    }
+    setCoolingSetpoint(nextLevel)
+}
+
+def heatLevelUp(){
+    def nextLevel = device.currentValue("heatingSetpoint") + 1
+    
+    if( nextLevel > 30){
+    	nextLevel = 30
+    }
+    setHeatingSetpoint(nextLevel)
+}
+
+def heatLevelDown(){
+    def nextLevel = device.currentValue("heatingSetpoint") - 1
+    
+    if( nextLevel < 10){
+    	nextLevel = 10
+    }
+    setHeatingSetpoint(nextLevel)
+}
+
+
 // handle commands
 def setHeatingSetpoint(temp) {
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, temp, null)
-    sendEvent(name: 'heatingSetpoint', value: temp)
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),temp, null)
 }
  
 def setCoolingSetpoint(temp) {
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId,  temp, device.heatingSetpoint, null) 
+    setHold(settings.thermostatId,  temp, device.currentValue("heatingSetpoint"), null) 
     sendEvent(name: 'coolingSetpoint', value: temp)
 }
  
@@ -208,7 +259,8 @@ def cool() {
 def setThermostatMode(mode) {
     poll() // to get the latest temperatures values at the thermostat
     mode = mode == 'emergency heat'? 'heat' : mode
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, ['hvacMode':mode]) 
+    setHold(settings.thermostatId,device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
+       ['hvacMode':mode]) 
     sendEvent(name: 'thermostatMode', value: mode)
 }
  
@@ -216,7 +268,7 @@ def fanOn() {
     setThermostatFanMode('on')
 }
  
-def fanCirculate() {
+def fanAuto() {
     setThermostatFanMode('auto')
 }
  
@@ -227,20 +279,23 @@ def fanOff() {
 
 def setFanMinOnTime(minutes) {
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [ventilatorMinOnTime:minutes])
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+        ['ventilatorMinOnTime':minutes]) 
     sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 
 def setThermostatFanMode(mode) {    
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [vent:mode]) 
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+         ['vent':mode]) 
     sendEvent(name: 'thermostatFanMode', value: mode)
 }
 
 def setCondensationAvoid(flag) {  // set the flag to true or false
     poll() // to get the latest temperatures values at the thermostat
     flag = flag == 'true'? 'true' : 'false'
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [condensationAvoid:flag]) 
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+         ['condensationAvoid':flag]) 
     sendEvent(name: 'condensationAvoid', value: flag)
 }
 
@@ -248,7 +303,6 @@ def setCondensationAvoid(flag) {  // set the flag to true or false
 def auto() {
     setThermostatMode('auto')
 }
-
 
 
 def dehumidifierOn() {
@@ -266,13 +320,15 @@ def dehumidifierAuto() {
  
 def setDehumidifierMode(mode) {  
     poll()// to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [dehumidifierMode:mode]) 
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+          ['dehumidifierMode':mode]) 
     sendEvent(name: 'dehumidifierMode', value: mode)
 }
 
 def setDehumidifierLevel(level) {
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, [dehumidifierLevel:level])
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+          ['dehumidifierLevel':level]) 
     sendEvent(name: 'dehumidifierLevel', value: level)
 }
 
@@ -291,7 +347,8 @@ def humidifierAuto() {
  
 def setHumidifierMode(mode) {    
     poll() // to get the latest temperatures values at the thermostat
-    setHold(settings.thermostatId, device.coolingSetpoint, device.heatingSetpoint, [humidifierMode:mode]) 
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+          ['humidifierMode':mode]) 
     sendEvent(name: 'humidifierMode', value: mode)
 }
  
@@ -300,11 +357,16 @@ def setHumidifierMode(mode) {
 def setHumidifierLevel(level) {
     poll()  // to get the latest temperatures values at the thermostat
     
-    setHold(settings.thermostatId,  device.coolingSetpoint, device.heatingSetpoint, [humidity:level])
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
+          ['humidity':level]) 
     sendEvent(name: 'humidifierLevel', value: level)
 }
 
-
+// parse events into attributes
+def parse(String description) {
+    
+}
+ 
 def poll() {
     
     if (settings.trace) {
@@ -329,9 +391,9 @@ def poll() {
     }
     def scale = getTemperatureScale()
     if (scale =='C') {
-        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature/10))
-        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool/10))
-        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat/10))
+        float actualTemp= fToC((data.thermostatList.runtime.actualTemperature/10))
+        float desiredCoolTemp =  fToC((data.thermostatList.runtime.desiredCool/10))
+        float desiredHeatTemp = fToC((data.thermostatList.runtime.desiredHeat/10))
         def actualTempFormat = String.format('%2.1f', actualTemp)
         def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp)
         def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp)
@@ -356,6 +418,13 @@ def poll() {
 def refresh() {
      poll()
 }
+
+
+def resumeThisTstat() {
+
+     resumeProgram(settings.thermostatId)
+}
+
 
 def api(method,  args, success = {}) {
     String URI_ROOT= "https://api.ecobee.com/1"
@@ -590,7 +659,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     if (settings.trace) {
 	   sendEvent name: "verboseTrace", value: "setHold>about to build_body_req with ${tstatSettings}"
     }
-    def tstatParams = [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp]
+    def tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString()]
        
     def bodyReq = build_body_request('setHold', thermostatId, tstatParams, tstatSettings)
     
