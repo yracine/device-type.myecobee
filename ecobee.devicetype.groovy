@@ -124,6 +124,8 @@ metadata {
         command "heatLevelDown"
         command "coolLevelUp"
         command "coolLevelDown"
+        command "setFanMinOnTime"
+
     }
 
     simulator {
@@ -280,7 +282,7 @@ def fanOff() {
 def setFanMinOnTime(minutes) {
     poll() // to get the latest temperatures values at the thermostat
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-        ['ventilatorMinOnTime':minutes]) 
+        ['vent': 'minontime', 'ventilatorMinOnTime':minutes]) 
     sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 
