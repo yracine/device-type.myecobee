@@ -86,10 +86,10 @@ metadata {
         capability "Thermostat"
         capability "Relative Humidity Measurement"
 
-		attribute "heatLevelUp", "string"
-		attribute "heatLevelDown", "string"
-		attribute "coolLevelUp", "string"
-		attribute "coolLevelDown", "string"
+        attribute "heatLevelUp", "string"
+        attribute "heatLevelDown", "string"
+        attribute "coolLevelUp", "string"
+        attribute "coolLevelDown", "string"
         attribute "verboseTrace", "string"
         attribute "humidifierMode", "string"
         attribute "dehumidifierMode", "string"
@@ -112,9 +112,9 @@ metadata {
         command "getEcobeePinAndAuth"
         command "getThermostatInfo"
         command "getThermostatSummary"
-		command "heatLevelUp"
-		command "heatLevelDown"
-		command "coolLevelUp"
+        command "heatLevelUp"
+        command "heatLevelDown"
+        command "coolLevelUp"
         command "coolLevelDown"
         command "iterateCreateVacation"
         command "iterateDeleteVacation"
@@ -154,21 +154,21 @@ metadata {
             state "auto", label:'${name}', action:"thermostat.fanOff"
         }
  
- 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") {
-			state "heat", label:'${currentValue}° heat', unit:"C", backgroundColor:"#ffffff"
-		}
-		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
-			state "cool", label:'${currentValue}° cool', unit:"C", backgroundColor:"#ffffff"
-		}
+        valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
+            state "heat", label:'${currentValue}° heat', unit:"C", backgroundColor:"#ffffff"
+        }
+        valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false, decoration: "flat") {
+            state "cool", label:'${currentValue}° cool', unit:"C", backgroundColor:"#ffffff"
+        }
         valueTile("humidity", "device.humidity", inactiveLabel: false, decoration: "flat") {
             state "default", label:'${currentValue}%', unit:"humidity", backgroundColor:"#ffffff"
         }
-		standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-			state "default", action:"polling.poll", icon:"st.secondary.refresh"
-		}
-		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-			state "default", action:"resumeThisTstat", icon:"st.Office.office7", backgroundColor:"#ffffff"
-		}
+        standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+            state "default", action:"polling.poll", icon:"st.secondary.refresh"
+        }
+        standardTile("resProgram", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
+            state "default", action:"resumeThisTstat", icon:"st.Office.office7", backgroundColor:"#ffffff"
+        }
         standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "heatLevelUp", label:'  ', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"
         }
