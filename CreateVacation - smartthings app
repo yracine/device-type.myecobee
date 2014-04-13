@@ -73,6 +73,8 @@ def initialize() {
     }
     dateTime = givenEndDate + givenEndTime
     def vacationEndDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
+
+    // if you have EMS thermostat(s), replace 'registered' with 'managementSet'
     
     ecobee.iterateCreateVacation('registered', vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime, vacationEndDateTime)
     send("CreateVacation> vacationName ${vacationName} created")
