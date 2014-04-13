@@ -100,8 +100,7 @@ private residentsHaveBeenQuiet()
     return result
 }
 
-def presence(evt)
-{
+def presence(evt) {
     log.debug "evt.name: $evt.value"
     ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     if (evt.value == "not present") {
@@ -130,8 +129,7 @@ def presence(evt)
 
 
 
-def takeActions()
-{
+def takeActions() {
     Integer ThresholdMinutes = "2"		// check that the security alarm is close in 2 minutes
     Integer delay = 60 * thresholdMinutes
     def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
@@ -158,8 +156,7 @@ def takeActions()
 
 }
 
-private checkAlarmSystem() 
-{
+private checkAlarmSystem() {
     if (alarmSwitch.currentContact == "open") {
         send("AwayFromHome>alarm not activated,repeat..." )
         alarmSwitch.on()								     // try to arm the alarm system again
@@ -168,8 +165,7 @@ private checkAlarmSystem()
 
 }
 
-private everyoneIsAway()
-{
+private everyoneIsAway() {
     def result = true
     for (person in people) { 
         if (person.currentPresence == "present") {
