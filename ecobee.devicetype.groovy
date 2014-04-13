@@ -85,6 +85,7 @@ metadata {
         capability "Polling"
         capability "Thermostat"
         capability "Relative Humidity Measurement"
+        capability "Temperature Measurement"
 
         attribute "heatLevelUp", "string"
         attribute "heatLevelDown", "string"
@@ -1114,7 +1115,7 @@ def login() {
 }
 
 def getEcobeePinAndAuth() {
-    String SCOPE = "smartWrite"
+    String SCOPE = "smartWrite,ems"
     String URI_ROOT= "https://api.ecobee.com"
     String appKey= settings.appKey
     
