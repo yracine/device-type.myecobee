@@ -194,28 +194,58 @@ metadata {
 }
 
 def coolLevelUp(){
+
     int nextLevel = device.currentValue("coolingSetpoint") + 1
     
-    if( nextLevel > 30){
-    	nextLevel = 30
+    def scale = getTemperatureScale()
+    if (scale == 'C') { 
+    
+        if( nextLevel > 30){
+    	    nextLevel = 30
+        }
+    }
+    else {
+    
+
+        if( nextLevel > 99){
+    	    nextLevel = 99
+        }
+    
     }
     setCoolingSetpoint(nextLevel)
 }
 
 def coolLevelDown(){
     int nextLevel = device.currentValue("coolingSetpoint") - 1
+    def scale = getTemperatureScale()
+    if (scale == 'C') { 
+        if( nextLevel < 10){
+    	    nextLevel = 10
+        }
+    }
+    else {
     
-    if( nextLevel < 10){
-    	nextLevel = 10
+        if( nextLevel < 50){
+    	    nextLevel = 50
+        }
     }
     setCoolingSetpoint(nextLevel)
 }
 
 def heatLevelUp(){
     int nextLevel = device.currentValue("heatingSetpoint") + 1
-    
-    if( nextLevel > 30){
-    	nextLevel = 30
+
+    def scale = getTemperatureScale()
+    if (scale == 'C') { 
+        if( nextLevel > 30){
+    	    nextLevel = 30
+        }
+    }
+    else {
+        if( nextLevel > 99){
+    	    nextLevel = 99
+        }
+        
     }
     setHeatingSetpoint(nextLevel)
 }
@@ -223,8 +253,17 @@ def heatLevelUp(){
 def heatLevelDown(){
     int nextLevel = device.currentValue("heatingSetpoint") - 1
     
-    if( nextLevel < 10){
-    	nextLevel = 10
+    def scale = getTemperatureScale()
+    if (scale == 'C') { 
+        if( nextLevel < 10){
+    	    nextLevel = 10
+        }
+    }
+    else {
+    
+        if( nextLevel < 50){
+    	    nextLevel = 50
+        }
     }
     setHeatingSetpoint(nextLevel)
 }
@@ -1174,7 +1213,7 @@ def getEcobeePinAndAuth() {
     
     
 def setAuthTokens(){
- 	String URI_ROOT= "https://api.ecobee.com"
+    String URI_ROOT= "https://api.ecobee.com"
     String appKey= settings.appKey
 
     def method=[
