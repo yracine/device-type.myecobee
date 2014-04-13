@@ -109,7 +109,7 @@ def setHumidityLevel() {
 
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s)
 
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifyWithAC': true, 'holdType':'nextTransition']) 
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifyWithAC': true, 'dehumidifierMode':'manual', 'holdType':'nextTransition']) 
        send "Monitor humidity>dehumidifyWithAC flag in cooling mode"
              
     }
