@@ -170,7 +170,7 @@ metadata {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
         }
         standardTile("resProgram", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
-            state "default", action:"resumeThisTstat", icon:"st.Office.office7"
+            state "default", label:'ResumeProg',action:"resumeThisTstat", icon:"st.Office.office7",backgroundColor:"#ffffff"
         }
         standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "heatLevelUp", label:'  ', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"
