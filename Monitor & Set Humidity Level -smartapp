@@ -85,40 +85,40 @@ def setHumidityLevel() {
     
     def heatTemp = ecobee.currentHeatingSetpoint
     def coolTemp = ecobee.currentCoolingSetpoint
-    def ecobeeHumidity = ecobee.currentHumidity
-    def outdoorHumidity = sensor.currentHumidity
+	def ecobeeHumidity = ecobee.currentHumidity
+	def outdoorHumidity = sensor.currentHumidity
     def ecobeeMode = ecobee.currentThermostatMode
     
-    log.trace("setHumidity> evaluate:, Ecobee's humidity: ${ecobeeHumidity} vs. outdoor's humidity ${outdoorHumidity},"  +
+	log.trace("setHumidity> evaluate:, Ecobee's humidity: ${ecobeeHumidity} vs. outdoor's humidity ${outdoorHumidity},"  +
 	    "coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}")
 
     if (((ecobeeMode == 'cool') && (outdoorHumidity <= target_humidity) && (ecobeeHumidity > target_humidity)) ||
         ((ecobeeMode == 'heat')  && (ecobeeHumidity > target_humidity))) {  
-       log.trace("Ecobee is in ${ecobeeMode} mode and its humidity level is higher than target humidity level=${target_humidity_level}, need to dehumidify the house and outdoor's humidity is ${outdoorHumidity}")
+	   log.trace("Ecobee is in ${ecobeeMode} mode and its humidity level is higher than target humidity level=${target_humidity_level}, need to dehumidify the house and outdoor's humidity is ${outdoorHumidity}")
                         
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s)
 
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode': 'auto', 'dehumidifierLevel': target_humidity, 'humidifierMode':'manual',
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode': 'on', 'dehumidifierLevel': target_humidity, 'humidifierMode':'off',
            'dehumidifyWithAC': false, 'holdType':'nextTransition']) 
 
        send "Monitor humidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }
     else if ((ecobeeMode == 'cool') && (ecobeeHumidity > target_humidity) && (outdoorHumidity > ecobeeHumidity)){   // if mode is cooling then use the A/C to lower humidity in the house
                           
-       log.trace("setHumidity> Ecobee's humidity provided is higher than target humidity level=${target_humidity_level}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
+	   log.trace("setHumidity> Ecobee's humidity provided is higher than target humidity level=${target_humidity_level}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
 
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s)
 
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifyWithAC': true, 'dehumidifierMode':'manual', 'holdType':'nextTransition']) 
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifyWithAC': true, 'dehumidiferMode':'off', 'holdType':'nextTransition']) 
        send "Monitor humidity>dehumidifyWithAC flag in cooling mode"
              
     }
     else if ((ecobeeMode == 'heat') && (ecobeeHumidity < target_humidity)) {    
-       log.trace("setHumidity> In heat mode, Ecobee's humidity provided is lower than target humidity level=${target_humidity}, need to humidify the house")
+	   log.trace("setHumidity> In heat mode, Ecobee's humidity provided is lower than target humidity level=${target_humidity}, need to humidify the house")
                         
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s)
 
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['humidifierMode': 'on', 'humidity': target_humidity,'dehumidifierMode':'manual',
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['humidifierMode': 'on', 'humidity': target_humidity,'dehumidifierMode':'off',
            'condensationAvoid': true, 'holdType':'nextTransition']) 
 
        send "Monitor humidity>hum.level now= ${target_humidity} in heating mode"
