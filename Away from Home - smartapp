@@ -68,23 +68,19 @@ private initialize() {
 }
 
 
-def alarmSwitchContact(evt)
-
-{
+def alarmSwitchContact(evt) {
     log.info "alarmSwitchContact, $evt.name: $evt.value"
 }
 
 
-def motionEvtHandler(evt)
-{
+def motionEvtHandler(evt) {
     if (evt.value == "active") {
         state.lastIntroductionMotion = now()
         log.debug "Motion at home..."
     }
 }
 
-private residentsHaveBeenQuiet()
-{
+private residentsHaveBeenQuiet() {
     def threshold = (residentsQuietThreshold == null ? 3: residentsQuietThreshold) * 60 * 1000
     def result = true
     def t0 = new Date(now() - threshold)
