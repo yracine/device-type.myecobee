@@ -153,9 +153,9 @@ metadata {
             state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7"
         }
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "off", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11",backgroundColor:"#ffffff"
-            state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11" 
-            state "auto", label:'${name}', action:"thermostat.fanOff",icon: "st.Appliances.appliances11" 
+            state "auto", label:'${name}', action:"thermostat.fanOn",icon: "st.Appliances.appliances11" 
+            state "on", label:'${name}', action:"thermostat.fanOff", icon: "st.Appliances.appliances11" 
+            state "off", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11",backgroundColor:"#ffffff"
         }
  
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
@@ -908,6 +908,7 @@ def deleteVacation(thermostatId, vacationName) {
     }    
 }
 
+// tstatType ='managementSet' or 'registered'
 
 def iterateResumeProgram(tstatType) {
 
