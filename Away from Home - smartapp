@@ -169,7 +169,7 @@ private everyoneIsAway() {
     def result = true
     for (person in people) { 
         if (person.currentPresence == "present") {
-			result = false
+            result = false
             break
         }
     }
