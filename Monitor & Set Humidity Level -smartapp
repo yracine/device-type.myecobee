@@ -54,29 +54,24 @@ def initialize() {
 
 }
 
-def ecobeeHeatTempHandler(evt)
-{
+def ecobeeHeatTempHandler(evt) {
     log.debug "ecobee's heating temp: $evt, $settings"
 }
 
-def ecobeeCoolTempHandler(evt)
-{
+def ecobeeCoolTempHandler(evt) {
     log.debug "ecobee's cooling temp: $evt, $settings"
 }
 
-def ecobeeHumidityHandler(evt)
-{
+def ecobeeHumidityHandler(evt) {
     log.debug "ecobee's humidity level: $evt, $settings"
 }
 
-def ecobeeModeHandler(evt)
-{
+def ecobeeModeHandler(evt) {
     log.debug "ecobee's mode: $evt, $settings"
 }
 
 
-def sensorHumidityHandler(evt)
-{
+def sensorHumidityHandler(evt) {
     log.debug "outdoor sensor's humidity level: $evt, $settings"
 }
 
@@ -155,8 +150,7 @@ private send(msg) {
 
 
 // catchall
-def event(evt)
-{
+def event(evt) {
      log.debug "value: $evt.value, event: $evt, settings: $settings, handlerName: ${evt.handlerName}"
 }
 
