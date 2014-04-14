@@ -22,16 +22,16 @@ preferences {
     section("Heat Temp for vacation, default=14C") {
         input "givenHeatTemp", "number", title: "Heat Temp", required: false
     }        
-    section("Start date for the vacation, format = DD-MM-YYYY, default=now") {
+    section("Start date for the vacation, format = DD-MM-YYYY, default=today") {
         input "givenStartDate", "text", title: "Beginning Date", required: false
     }        
-    section("Start time for the vacation HH:MM, default= now") {
-        input "givenStartTime", "text", title: "Beginning time", required: false
+    section("Start time for the vacation HH:MM (24HR)") {
+        input "givenStartTime", "text", title: "Beginning time"
     }        
 	section("End date for the vacation format = DD-MM-YYYY") {
         input "givenEndDate", "text", title: "End Date"
     }        
-    section("End time for the vacation HH:MM") {
+    section("End time for the vacation HH:MM (24HR)" ) {
         input "givenEndTime", "text", title: "End time"
     }        
     
@@ -68,9 +68,7 @@ def initialize() {
         vacationStartDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
     } 
     else {
-    
-        vacationStartDateTime = new Date(now()).getTime()
-      
+        vacationStartDateTime = timeToday(givenStartTime, location.timeZone).getTime()
     }
     dateTime = givenEndDate + givenEndTime
     def vacationEndDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
