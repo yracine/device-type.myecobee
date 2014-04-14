@@ -99,12 +99,10 @@ metadata {
         attribute "condensationAvoid", "string" 
     
         command "humidifierOn"
-        command "humidifierManual"
-        command "humidifierAuto"
+        command "humidifierOff"
         command "setHumidifierLevel"
         command "dehumidifierOn"
-        command "dehumidifierManual"
-        command "dehumidifierAuto"
+        command "dehumidifierOff"
         command "setDehumidifierLevel"
         command "setFanMinOnTime"	
         command "setThermostatFanMode"    
@@ -353,12 +351,8 @@ def dehumidifierOn() {
     setDehumidifierMode('on')
 }
 
-def dehumidifierManual() {
-    setDehumidifierMode('manual')
-}
-
-def dehumidifierAuto() {
-    setDehumidifierMode('auto')
+def dehumidifierOff() {
+    setDehumidifierMode('off')
 }
 
  
@@ -378,14 +372,9 @@ def humidifierOn() {
     setHumidifierMode('on')
 }
  
-def humidifierManual() {
-    setHumidifierMode('manual')
+def humidifierOff() {
+    setHumidifierMode('off')
 }
-
-def humidifierAuto() {
-    setHumidifierMode('auto')
-}
-
  
 def setHumidifierMode(mode) {    
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
