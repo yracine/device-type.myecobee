@@ -1,4 +1,4 @@
-/***
+//***
  *  CreateVacation with Ecobee Thermostat
  *  create a vacation on the Ecobee thermostat
  * 
@@ -74,7 +74,9 @@ def initialize() {
     }
     dateTime = givenEndDate + givenEndTime
     def vacationEndDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
-    
+
+// If you have EMS thermostat(s) in a utility or other management sets, change from 'registered' to 'managementSet'
+
     ecobee.iterateCreateVacation('registered', vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime, 
         vacationEndDateTime)
     send("CreateVacation> vacationName ${vacationName} created")
