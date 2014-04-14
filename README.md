@@ -20,6 +20,7 @@ INSTALLATION STEPS
 
       Name: MyEcobee Device
       Author: Yves Racine
+      copy and paste the code from ecobee.devicetype.groovy
 3) Create a new device (https://graph.api.smartthings.com/device/list)
 
       Name: Your Choice
@@ -64,3 +65,4 @@ def installed() {
  
 8) Your device should now be ready to process your commands
 
+9) You can also use the smarttthings apps that I've developed and adapt them according to your needs
