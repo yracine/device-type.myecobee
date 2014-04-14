@@ -22,8 +22,8 @@ preferences {
     section("Heat Temp for vacation, default=14C") {
         input "givenHeatTemp", "number", title: "Heat Temp", required: false
     }        
-    section("Start date for the vacation, format = DD-MM-YYYY, default=today") {
-        input "givenStartDate", "text", title: "Beginning Date", required: false
+    section("Start date for the vacation, format = DD-MM-YYYY") {
+        input "givenStartDate", "text", title: "Beginning Date"
     }        
     section("Start time for the vacation HH:MM (24HR)") {
         input "givenStartTime", "text", title: "Beginning time"
@@ -63,13 +63,9 @@ def initialize() {
     def vacationStartDateTime=null
     String dateTime=null
     
-    if ((givenStartDate !=null) && (givenStartDate != "")) {
-        dateTime = givenStartDate + givenStartTime
-        vacationStartDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
-    } 
-    else {
-        vacationStartDateTime = timeToday(givenStartTime, location.timeZone).getTime()
-    }
+    dateTime = givenStartDate + givenStartTime
+    vacationStartDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
+    
     dateTime = givenEndDate + givenEndTime
     def vacationEndDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
 
