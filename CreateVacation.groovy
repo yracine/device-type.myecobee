@@ -1,6 +1,6 @@
 /***
- *  CreateVacation with Ecobee Thermostat
- *  create a vacation on the Ecobee thermostat(s)
+ *  CreateVacation with Ecobee Thermostat(s)
+ *  create a vacation period for the Ecobee thermostat(s)
  * 
  *  Author: Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
