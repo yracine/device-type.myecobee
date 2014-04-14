@@ -1,4 +1,4 @@
-//***
+/***
  *  CreateVacation with Ecobee Thermostat
  *  create a vacation on the Ecobee thermostat
  * 
