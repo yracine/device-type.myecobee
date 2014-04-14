@@ -640,6 +640,9 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
 
 def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    
 
+    Integer MAX_TSTAT_BATCH=25
+    def tstatlist=null
+    
     if (data.thermostatCount==null)
     {
     
@@ -660,17 +663,27 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
          def runtimeRevision = thermostatDetails[5]
          
          if (connected) {
-         
-             if (settings.trace) {
-             
-       	         sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${Id}"
-                 log.debug "iterateSethold> about to call setHold for ${Id}"
+             if (i==0) {
+                 tstatlist = Id
              }
-             setHold (Id, coolingSetPoint, heatingSetPoint, tstatSettings)         
+             if ((i==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                 if (settings.trace) {
+             
+       	             sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${tstatlist}"
+                     log.debug "iterateSethold> about to call setHold for ${tstatlist}"
+                 }
+                 setHold(tstatlist, coolingSetPoint, heatingSetPoint, tstatSettings) 
+                 tstatlist = Id
+             
+             }
+             else {
+                  tstatlist = tstatlist + "," +  Id
+             }     
              
          }    
     
     }
+    
    
 }
 
@@ -737,6 +750,8 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
 
 
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
+    Integer MAX_TSTAT_BATCH=25
+    def tstatlist=null
 
     if (data.thermostatCount==null)
     {
@@ -759,12 +774,22 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
          
          if (connected) {
          
-             if (settings.trace) {
-             
-      	         sendEvent name: "verboseTrace", value: "iterateCreateVacation> about to call createVacation for ${Id}"
-                 log.debug "iterateCreateVacation> about to call createVacation for ${Id}"
+             if (i==0) {
+                 tstatlist = Id
              }
-             createVacation(Id, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
+             if ((i==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                 if (settings.trace) {
+             
+       	             sendEvent name: "verboseTrace", value: "iterateCreateVacation>about to call createVacation for ${tstatlist}"
+                     log.debug "iterateCreateVacation>about to call createVacation for ${tstatlist}"
+                 }
+                 createVacation(tstatlist, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
+                 tstatlist = Id
+             
+             }
+             else {
+                  tstatlist = tstatlist + "," + Id
+             }     
          }    
     
     }
@@ -831,6 +856,8 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
 
 
 def iterateDeleteVacation(tstatType, vacationName) {
+    Integer MAX_TSTAT_BATCH=25
+    def tstatlist=null
 
     if (data.thermostatCount == null) {
     
@@ -853,12 +880,22 @@ def iterateDeleteVacation(tstatType, vacationName) {
          
          if (connected) {
          
-             if (settings.trace) {
-             
-      	         sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${Id}"
-                 log.debug "iterateDeleteVacation> about to call deleteVacation for ${Id}"
+             if (i==0) {
+                 tstatlist = Id
              }
-             deleteVacation(Id, vacationName) 
+             if ((i==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                 if (settings.trace) {
+             
+      	             sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
+                     log.debug "iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
+                 }
+                 deleteVacation(tstatlist, vacationName) 
+                 tstatlist = Id
+             
+             }
+             else {
+                  tstatlist = tstatlist + "," + Id
+             }     
              
          }    
     
@@ -900,6 +937,8 @@ def deleteVacation(thermostatId, vacationName) {
 // tstatType ='managementSet' or 'registered'
 
 def iterateResumeProgram(tstatType) {
+    Integer MAX_TSTAT_BATCH=25
+    def tstatlist=null
 
     if (data.thermostatCount==null){
     
@@ -921,11 +960,21 @@ def iterateResumeProgram(tstatType) {
          
          if (connected) {
          
-             if (settings.trace) {
-      	         sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${Id}"
-                 log.debug "iterateResumeProgram> about to call resumeProgram for ${Id}"
-             }    
-             resumeProgram(Id)
+             if (i==0) {
+                 tstatlist = Id
+             }
+             if ((i==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                 if (settings.trace) {
+      	             sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
+                     log.debug "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
+                 }    
+                 resumeProgram(tstatlist)
+                 tstatlist = Id
+             
+             }
+             else {
+                  tstatlist = tstatlist + "," + Id
+             }     
              
          }    
     
