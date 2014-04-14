@@ -94,7 +94,7 @@ def setHumidityLevel() {
 
     if (((ecobeeMode == 'cool') && (outdoorHumidity <= target_humidity) && (ecobeeHumidity > target_humidity)) ||
         ((ecobeeMode == 'heat')  && (ecobeeHumidity > target_humidity))) {  
-       log.trace("Ecobee is in ${ecobeeMode} mode and its humidity level is higher than target humidity level=${target_humidity_level}, need to dehumidify the house and outdoor's humidity is ${outdoorHumidity}")
+       log.trace("Ecobee is in ${ecobeeMode} mode and its humidity level is higher than target humidity level=${target_humidity}, need to dehumidify the house and outdoor's humidity is ${outdoorHumidity}")
                         
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s)
 
@@ -105,7 +105,7 @@ def setHumidityLevel() {
     }
     else if ((ecobeeMode == 'cool') && (ecobeeHumidity > target_humidity) && (outdoorHumidity > ecobeeHumidity)){   // if mode is cooling then use the A/C to lower humidity in the house
                           
-       log.trace("setHumidity> Ecobee's humidity provided is higher than target humidity level=${target_humidity_level}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
+       log.trace("setHumidity> Ecobee's humidity provided is higher than target humidity level=${target_humidity}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
 
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s)
 
