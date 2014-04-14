@@ -1,5 +1,5 @@
 /***
- *  Away from Home with Ecobee Thermostat
+ *  Away from Home with Ecobee Thermostat(s)
  *  Turn off the lights, turn on the security alarm, and set the temps at ecobee when away from home
  * 
  *  Author: Yves Racine
