@@ -186,7 +186,7 @@ metadata {
         }
 
         main "temperature"
-		details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "humidity", "refresh", "resProgram"])
+        details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "humidity", "refresh", "resProgram"])
 
     }
 }
@@ -677,7 +677,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
              
              }
              else {
-                  tstatlist = tstatlist + "," +  Id
+                 tstatlist = tstatlist + "," +  Id
              }     
              
          }    
@@ -687,10 +687,10 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
    
 }
 
-// thermostatId could be a list of serial# separated by "," 
+// thermostatId could be a list of serial# separated by ",", no spaces 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 
-def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {    // settings can be anything supported by ecobee
+def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {    
     Integer targetCoolTemp=null
     Integer targetHeatTemp=null
     
@@ -788,14 +788,14 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
              
              }
              else {
-                  tstatlist = tstatlist + "," + Id
+                 tstatlist = tstatlist + "," + Id
              }     
          }    
     
     }
    
 }
-// thermostatId could be a list of serial# separated by "," 
+// thermostatId could be a list of serial# separated by ",", no spaces 
 
 def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
      
@@ -894,7 +894,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
              
              }
              else {
-                  tstatlist = tstatlist + "," + Id
+                 tstatlist = tstatlist + "," + Id
              }     
              
          }    
@@ -903,7 +903,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
    
 }
 
-// thermostatId could be a list of serial# separated by "," 
+// thermostatId could be a list of serial# separated by ",", no spaces 
 
 def deleteVacation(thermostatId, vacationName) {
      
@@ -973,7 +973,7 @@ def iterateResumeProgram(tstatType) {
              
              }
              else {
-                  tstatlist = tstatlist + "," + Id
+                 tstatlist = tstatlist + "," + Id
              }     
              
          }    
@@ -982,7 +982,7 @@ def iterateResumeProgram(tstatType) {
    
 }
 
-// thermostatId could be a list of serial# separated by "," 
+// thermostatId could be a list of serial# separated by ",", no spaces 
 
 def resumeProgram(thermostatId) {
      
