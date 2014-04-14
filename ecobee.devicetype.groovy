@@ -73,7 +73,6 @@
  
 // for the UI
 import groovy.json.JsonBuilder
-import java.text.SimpleDateFormat
 import java.net.URLEncoder
 preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat")
@@ -98,10 +97,10 @@ metadata {
         attribute "dehumidifierLevel", "string" 
         attribute "condensationAvoid", "string" 
     
-        command "humidifierOn"
+        command "humidifierAuto"
         command "humidifierOff"
         command "setHumidifierLevel"
-        command "dehumidifierOn"
+        command "dehumidifierAuto"
         command "dehumidifierOff"
         command "setDehumidifierLevel"
         command "setFanMinOnTime"	
@@ -151,9 +150,9 @@ metadata {
             state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7"
         }
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "auto", label:'${name}', action:"thermostat.fanOn",icon: "st.Appliances.appliances11" 
-            state "on", label:'${name}', action:"thermostat.fanOff", icon: "st.Appliances.appliances11" 
-            state "off", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11",backgroundColor:"#ffffff"
+            state "fanAuto", label:'', action:"thermostat.fanOn",icon: "st.thermostat.fan-auto" 
+            state "fanOn", label:'', action:"thermostat.fanOff", icon: "st.thermostat.fan-on" 
+            state "fanOff", label:'  ', action:"thermostat.fanAuto", icon: "st.thermostat.fan-off"
         }
  
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
@@ -303,9 +302,8 @@ def cool() {
 def setThermostatMode(mode) {
     mode = mode == 'emergency heat'? 'heat' : mode
     setHold(settings.thermostatId,device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
-       ['hvacMode':mode]) 
+       ['hvacMode':"${mode}"]) 
     sendEvent(name: 'thermostatMode', value: mode)
-    poll()
 }
  
 def fanOn() {
@@ -323,21 +321,20 @@ def fanOff() {
 
 def setFanMinOnTime(minutes) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-        ['vent': 'minontime', 'ventilatorMinOnTime':minutes]) 
+        ['vent':'minontime','ventilatorMinOnTime':"${minutes}"]) 
     sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 
 def setThermostatFanMode(mode) {    
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-         ['vent':mode]) 
+         ['vent':"${mode}"]) 
     sendEvent(name: 'thermostatFanMode', value: mode)
-    poll()
 }
 
 def setCondensationAvoid(flag) {  // set the flag to true or false
     flag = flag == 'true'? 'true' : 'false'
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-         ['condensationAvoid':flag]) 
+         ['condensationAvoid':"${flag}"]) 
     sendEvent(name: 'condensationAvoid', value: flag)
 }
 
@@ -347,8 +344,8 @@ def auto() {
 }
 
 
-def dehumidifierOn() {
-    setDehumidifierMode('on')
+def dehumidifierAuto() {
+    setDehumidifierMode('auto')
 }
 
 def dehumidifierOff() {
@@ -358,18 +355,18 @@ def dehumidifierOff() {
  
 def setDehumidifierMode(mode) {  
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-          ['dehumidifierMode':mode]) 
+          ['dehumidifierMode':"${mode}"]) 
     sendEvent(name: 'dehumidifierMode', value: mode)
 }
 
 def setDehumidifierLevel(level) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-          ['dehumidifierLevel':level]) 
+          ['dehumidifierLevel':"${level}"]) 
     sendEvent(name: 'dehumidifierLevel', value: level)
 }
 
-def humidifierOn() {
-    setHumidifierMode('on')
+def humidifierAuto() {
+    setHumidifierMode('auto')
 }
  
 def humidifierOff() {
@@ -378,7 +375,7 @@ def humidifierOff() {
  
 def setHumidifierMode(mode) {    
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-          ['humidifierMode':mode]) 
+          ['humidifierMode':"${mode}"]) 
     sendEvent(name: 'humidifierMode', value: mode)
 }
  
@@ -387,7 +384,7 @@ def setHumidifierMode(mode) {
 def setHumidifierLevel(level) {
     
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
-          ['humidity':level]) 
+          ['humidity':"${level}"]) 
     sendEvent(name: 'humidifierLevel', value: level)
 }
 
@@ -576,8 +573,8 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     
         selection = [selection: [selectionType:'thermostats',
                                     selectionMatch:thermostatId, 
-                                    includeSettings:true,
-                                    includeRuntime:true]
+                                    includeSettings:'true',
+                                    includeRuntime:'true']
                     ]
  
                      
