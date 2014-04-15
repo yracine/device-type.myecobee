@@ -10,7 +10,7 @@
 
 preferences {
     
-    section("Initialize this ecobee thermostat") {
+    section("For this Ecobee thermostat") {
         input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
     }
     section("Vacation Name") { 
@@ -69,7 +69,7 @@ def initialize() {
     dateTime = givenEndDate + givenEndTime
     def vacationEndDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
 
-// If you have EMS thermostat(s) in a utility or other management sets, change from 'registered' to 'managementSet'
+// You may want to change to ecobee.createVacation('serial number list',....) if you own EMS thermostat(s)
 
     ecobee.iterateCreateVacation('registered', vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime, 
         vacationEndDateTime)
