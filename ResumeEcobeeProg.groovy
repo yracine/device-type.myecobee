@@ -1,5 +1,5 @@
 /***
- *  ResumeProgram when people arrived at home with Ecobee Thermostat
+ *  Resume Ecobee's Program when people arrived at home 
  *  
  * 
  *  Author: Yves Racine
@@ -15,7 +15,7 @@ preferences {
         section("Resume Program at this ecobee thermostat") {
             input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
         }
-	    section( "Notifications" ) {
+        section( "Notifications" ) {
             input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
             input "phone", "phone", title: "Send a Text Message?", required: false
         }
