@@ -15,7 +15,7 @@ preferences {
         section("Resume Program at this ecobee thermostat") {
             input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
         }
-	section( "Notifications" ) {
+	    section( "Notifications" ) {
             input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
             input "phone", "phone", title: "Send a Text Message?", required: false
         }
@@ -47,7 +47,7 @@ def presence(evt)
         def recentNotPresent = person.statesSince("presence", t0).find{it.value == "not present"}
         if (recentNotPresent) {
             log.debug "ResumeProg>skipping notification of arrival of ${person.displayName} because last departure was only ${now() - recentNotPresent.date.time} msec ago"
-                
+        }        
 	}
 	else {
             def message = "ResumeProg>${person.displayName} arrived, do it..."
