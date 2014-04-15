@@ -46,10 +46,6 @@ def presence(evt)
         def person = getPerson(evt)
         def recentNotPresent = person.statesSince("presence", t0).find{it.value == "not present"}
         if (recentNotPresent) {
-            log.debug "ResumeProg>skipping notification of arrival of ${person.displayName} because last departure was only ${now() - recentNotPresent.date.time} msec ago"
-        }        
-	}
-	else {
             def message = "ResumeProg>${person.displayName} arrived, do it..."
             log.info message
             send(message)
@@ -57,7 +53,8 @@ def presence(evt)
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s) in a utility or other management sets
                 
             ecobee.iterateResumeProgram('registered')
-	}
+        }    
+     }
 }
 
 private getPerson(evt)
