@@ -201,5 +201,8 @@ def event(evt) {
      log.debug "value: $evt.value, event: $evt, settings: $settings, handlerName: ${evt.handlerName}"
 }
 
+def cToF(temp) {
+    return (temp * 1.8 + 32)
+}
 
 
