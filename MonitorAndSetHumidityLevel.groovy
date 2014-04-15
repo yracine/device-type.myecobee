@@ -89,7 +89,7 @@ def sensorTemperatureHandler(evt) {
 def setHumidityLevel() {
 
     Integer MIN_TEMP_TO_DEHUMIDIFY=-15 // Min temp in Celcius for starting dehumidifier, otherwise too cold
-    Integer min_humidity_diff = givenHumidityDiff ?: -5       //  5% humidity differential by default
+    Integer min_humidity_diff = givenHumidityDiff ?: 5       //  5% humidity differential by default
     
     def target_humidity = givenHumidityLevel ?: 40  // by default,  40 is the humidity level to check for
     
