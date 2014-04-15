@@ -28,7 +28,7 @@ preferences {
     section("Start time for the vacation HH:MM (24HR)") {
         input "givenStartTime", "text", title: "Beginning time"
     }        
-	section("End date for the vacation format = DD-MM-YYYY") {
+    section("End date for the vacation format = DD-MM-YYYY") {
         input "givenEndDate", "text", title: "End Date"
     }        
     section("End time for the vacation HH:MM (24HR)" ) {
