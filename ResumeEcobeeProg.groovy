@@ -53,7 +53,6 @@ def presence(evt)
             def message = "ResumeProg>${person.displayName} arrived, do it..."
             log.info message
             send(message)
-            setLocationMode(newMode)
 
 //     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s) in a utility or other management sets
                 
