@@ -204,5 +204,7 @@ def event(evt) {
 def cToF(temp) {
     return (temp * 1.8 + 32)
 }
-
-
+ 
+def fToC(temp) {
+    return (temp - 32) / 1.8
+}
