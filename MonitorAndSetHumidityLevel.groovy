@@ -5,15 +5,7 @@
  *  Author: Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *  Date: 2014-04-12
-/***
- *  Monitor & Set Humidity with Ecobee Thermostat
- *  Adjust the humidity level according to indoor vs. outdoor's humidity level & temperature
- * 
- *  Author: Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Date: 2014-03-31
 */
-
 
 
 preferences {
