@@ -142,7 +142,7 @@ def takeActions() {
     switches?.off()											 // turn off the lights		
    
    
-    // Change from 'registered' to 'managementSet' if you own EMS thermostat(s)
+    // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
     
     ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null)// Set heating and cooling points at ecobee
     send("AwayFromHome>ecobee's temps are now lower")
