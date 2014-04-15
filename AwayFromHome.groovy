@@ -1,5 +1,5 @@
 /***
- *  Away from Home with Ecobee Thermostat(s)
+ *  Away from Home with Ecobee Thermostat
  *  Turn off the lights, turn on the security alarm, and set the temps at ecobee when away from home
  * 
  *  Author: Yves Racine
@@ -64,23 +64,27 @@ private initialize() {
     subscribe(alarmSwitch, "contact", alarmSwitchContact)
     subscribe(motions, "motion", motionEvtHandler)
     state.lastIntruderMotion = null
-	
+
 }
 
 
-def alarmSwitchContact(evt) {
+def alarmSwitchContact(evt)
+
+{
     log.info "alarmSwitchContact, $evt.name: $evt.value"
 }
 
 
-def motionEvtHandler(evt) {
+def motionEvtHandler(evt)
+{
     if (evt.value == "active") {
         state.lastIntroductionMotion = now()
         log.debug "Motion at home..."
     }
 }
 
-private residentsHaveBeenQuiet() {
+private residentsHaveBeenQuiet()
+{
     def threshold = (residentsQuietThreshold == null ? 3: residentsQuietThreshold) * 60 * 1000
     def result = true
     def t0 = new Date(now() - threshold)
@@ -100,10 +104,11 @@ def presence(evt) {
     log.debug "evt.name: $evt.value"
     ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     if (evt.value == "not present") {
-        send("AwayFromHome>${evt.name} not present at home")
+        def person = getPerson(evt)
+        send("AwayFromHome> ${person.displayName} not present at home")
         log.debug "checking if everyone is away  and quiet at home"
         if (everyoneIsAway()) {
-            send("AwayFromHome>Nobody is at home")
+            send("AwayFromHome>Nobody is at home now")
             if (residentsHaveBeenQuiet){
            
                 takeActions()
@@ -157,7 +162,7 @@ private checkAlarmSystem() {
         send("AwayFromHome>alarm not activated,repeat..." )
         alarmSwitch.on()								     // try to arm the alarm system again
     }
-	
+
 
 }
 
@@ -165,12 +170,16 @@ private everyoneIsAway() {
     def result = true
     for (person in people) { 
         if (person.currentPresence == "present") {
-            result = false
+			result = false
             break
         }
     }
     log.debug "everyoneIsAway: $result"
     return result
+}
+private getPerson(evt)
+{
+    people.find{evt.deviceId == it.id}
 }
 
 private send(msg) {
@@ -186,4 +195,3 @@ private send(msg) {
 
     log.debug msg
 }
-
