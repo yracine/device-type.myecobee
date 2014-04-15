@@ -1,5 +1,5 @@
 /***
- *  Resume Ecobee's Program when people arrived at home 
+ *  Resume Ecobee's Program when people arrive at home 
  *  
  * 
  *  Author: Yves Racine
@@ -46,12 +46,11 @@ def presence(evt)
         def person = getPerson(evt)
         def recentNotPresent = person.statesSince("presence", t0).find{it.value == "not present"}
         if (recentNotPresent) {
-            def message = "ResumeProg>${person.displayName} arrived, do it..."
+            def message = "ResumeProg>Do it, ${person.displayName} arrived"
             log.info message
             send(message)
 
-//     you'd need to change 'registered' to 'managementSet' if you own EMS thermostat(s) in a utility or other management sets
-                
+//          You may want to change to ecobee.resumeProgram('serial number list') if you own EMS thermostat(s)                
             ecobee.iterateResumeProgram('registered')
         }    
      }
