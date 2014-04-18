@@ -536,7 +536,7 @@ def doRequest(uri, args, type, success) {
             params.body=null  // already in the URL request
             httpGet(params, success)
 
-		}
+        }
     } catch ( java.net.UnknownHostException e) {
     	log.error "doRequest> Unknown host - check the URL " + params.uri
     	sendEvent name: "verboseTrace", value: "doRequest> Unknown host"
@@ -547,8 +547,8 @@ def doRequest(uri, args, type, success) {
       	log.error "doRequest> general or malformed request error " + params.body
         sendEvent name: "verboseTrace", value: "doRequest> general or malformed request body error " + params.body
     }
-
 }
+
 
 // tstatType ='managementSet' or 'registered'
 // thermostatId could be a list of serial# separated by "," 
@@ -677,11 +677,8 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
                  tstatlist = tstatlist + "," +  Id
              }     
              
-         }    
-    
-    }
-    
-   
+         }        
+    }      
 }
 
 // thermostatId could be a list of serial# separated by ",", no spaces 
@@ -742,6 +739,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
         
     }
 }
+
 
 // tstatType ='managementSet' or 'registered'
 
@@ -1019,6 +1017,8 @@ def resumeProgram(thermostatId) {
     }
 }
 
+// thermostatId could be a list of serial# separated by ",", no spaces 
+
 def getThermostatInfo(thermostatId){
     
     if (settings.trace) {
@@ -1062,8 +1062,7 @@ def getThermostatInfo(thermostatId){
             log.error "getThermostatInfo> error= ${statusCode}, message = ${message}"
     	    sendEvent name: "verboseTrace", value: "getTstatInfo>error=${statusCode} for ${thermostatId}"
         }
-    
-                               
+                                   
     }
     
 }
@@ -1136,7 +1135,7 @@ def refresh_tokens() {
         data.auth.expires_in = resp.data.expires_in
         data.auth.token_type = resp.data.token_type
         data.auth.scope = resp.data.scope
-     }
+    }
 
     try {
         httpPostJson(method, successRefreshTokens) 
@@ -1327,7 +1326,7 @@ def isLoggedIn() {
              if (settings.trace) {
          	     log.debug "isLoggedIn> no access token"
         	     return false
-	         }   
+             }   
         }    
     }
     return true
