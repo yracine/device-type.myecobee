@@ -550,7 +550,9 @@ def doRequest(uri, args, type, success) {
 }
 
 
-// tstatType ='managementSet' or 'registered'
+// tstatType ='managementSet' for utilities or other managmement sets, 
+//            'registered' for SMART thermostat, 
+//             null if relevant for the given method
 // thermostatId could be a list of serial# separated by "," 
 
 private def build_body_request(method, tstatType, thermostatId,  tstatParams =[], tstatSettings=[]) {
@@ -708,7 +710,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     }
     def tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString()]
        
-    def bodyReq = build_body_request('setHold', 'registered', thermostatId, tstatParams, tstatSettings)
+    def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams, tstatSettings)
     
     
     if (settings.trace) {
@@ -824,7 +826,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
         endDate:vacationEndDate,  
         endTime:vacationEndTime 
     ]
-    def bodyReq = build_body_request('createVacation','registered', thermostatId,  vacationParams, null)
+    def bodyReq = build_body_request('createVacation', null, thermostatId,  vacationParams, null)
     
     if (settings.trace) {
         log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
@@ -904,7 +906,7 @@ def deleteVacation(thermostatId, vacationName) {
      
     def vacationParams = [name:vacationName]
     
-    def bodyReq = build_body_request('deleteVacation', 'registered', thermostatId, vacationParams, null)
+    def bodyReq = build_body_request('deleteVacation', null, thermostatId, vacationParams, null)
     
     if (settings.trace) {
         log.debug "deleteVacation> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -982,7 +984,7 @@ def iterateResumeProgram(tstatType) {
 def resumeProgram(thermostatId) {
      
     
-    def bodyReq = build_body_request('resumeProgram', 'registered', thermostatId, null, null)
+    def bodyReq = build_body_request('resumeProgram', null, thermostatId, null, null)
 
     if (settings.trace) {
         log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
