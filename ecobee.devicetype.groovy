@@ -552,7 +552,7 @@ def doRequest(uri, args, type, success) {
 
 // tstatType ='managementSet' for utilities or other managmement sets, 
 //            'registered' for SMART thermostat, 
-//             null if relevant for the given method
+//             null if not relevant for the given method
 // thermostatId could be a list of serial# separated by "," 
 
 private def build_body_request(method, tstatType, thermostatId,  tstatParams =[], tstatSettings=[]) {
