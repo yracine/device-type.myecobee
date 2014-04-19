@@ -109,7 +109,7 @@ def presence(evt) {
         log.debug "checking if everyone is away  and quiet at home"
         if (everyoneIsAway()) {
             send("AwayFromHome>Nobody is at home now")
-            if (residentsHaveBeenQuiet){
+            if (residentsHaveBeenQuiet()){
            
                 takeActions()
             }     
@@ -177,6 +177,7 @@ private everyoneIsAway() {
     log.debug "everyoneIsAway: $result"
     return result
 }
+
 private getPerson(evt)
 {
     people.find{evt.deviceId == it.id}
