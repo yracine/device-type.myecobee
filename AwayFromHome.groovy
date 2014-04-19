@@ -31,7 +31,7 @@ preferences {
         input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
     }
  
-    section("Arm system when residents quiet for (default 3 minutes)") {
+    section("Trigger these actions when home has been quiet for (default 3 minutes)") {
         input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
 	}
     
