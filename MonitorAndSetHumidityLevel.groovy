@@ -1,7 +1,7 @@
 /***
  *  Monitor and set Humdity with Ecobee Thermostat(s)
  *
- *  Monitor humidity level indoor vs. outdoor every hour  and set the humidifier/dehumidifier accordingly
+ *  Monitor humidity level indoor vs. outdoor every hour and set the humidifier/dehumidifier accordingly
  *  Author: Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *  Date: 2014-04-12
@@ -12,7 +12,7 @@
 
 preferences {
 
-    section("Set the ecobee thermostat's humidifer/dehumidifer") {
+    section("Set the ecobee thermostat's humidifer/dehumidifer devices") {
         input "ecobee", "capability.thermostat", title: "Ecobee?"
 
     }
@@ -165,8 +165,8 @@ def setHumidityLevel() {
            'holdType':'nextTransition']) 
     
     }
-    else if ((ecobeeMode == 'cool') && (ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
-             (outdoorHumidity >= (ecobeeHumidity + min_humidity_diff))){   
+    else if ((ecobeeMode == 'cool') && (ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
+             (outdoorHumidity > (ecobeeHumidity + min_humidity_diff))){   
     
                           
        log.trace("setHumidity> Ecobee's humidity provided is higher than target humidity level=${target_humidity}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
