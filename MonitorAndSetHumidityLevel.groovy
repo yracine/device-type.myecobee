@@ -13,7 +13,7 @@
 
 preferences {
 
-    section("Set the ecobee thermostat's humidifer/dehumidifer devices") {
+    section("Monitor & set the ecobee thermostat's humidifer/dehumidifer devices") {
         input "ecobee", "capability.thermostat", title: "Ecobee?"
 
     }	  
@@ -196,7 +196,7 @@ def setHumidityLevel() {
        send "Monitor humidity>humidfy to ${target_humidity} in heating mode"
     }
     else {
-	   log.trace("setHumidity>all off, humidity level within range")
+       log.trace("setHumidity>all off, humidity level within range")
        send "Monitor humidity>all off, humidity level within range"
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode':'off','humidifierMode':'off',
            'holdType':'nextTransition']) 
