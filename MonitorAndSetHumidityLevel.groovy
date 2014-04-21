@@ -20,9 +20,9 @@ preferences {
     section("To this humidity level") {
         input "givenHumidityLevel", "number", title: "humidity level (default=40%)", required:false
     }
-	section("At which interval in minutes (default =59)?"){
-		input "givenInterval", "number", required: false
-	}
+    section("At which interval in minutes (default =59)?"){
+        input "givenInterval", "number", required: false
+    }
     
     section("Humidity differential for adjustments") {
         input "givenHumidityDiff", "number", title: "Humidity Differential (default=5%)", required:false
