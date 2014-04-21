@@ -1,7 +1,8 @@
 /***
  *  Monitor and set Humdity with Ecobee Thermostat(s)
  *
- *  Monitor humidity level indoor vs. outdoor every hour and set the humidifier/dehumidifier accordingly
+ *  Monitor humidity level indoor vs. outdoor at a regular interval (in minutes) and 
+ *  set the humidifier/dehumidifier to a target humidity level
  *  Author: Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *  Date: 2014-04-12
@@ -15,11 +16,13 @@ preferences {
     section("Set the ecobee thermostat's humidifer/dehumidifer devices") {
         input "ecobee", "capability.thermostat", title: "Ecobee?"
 
-    }
-    	  
+    }	  
     section("To this humidity level") {
         input "givenHumidityLevel", "number", title: "humidity level (default=40%)", required:false
     }
+	section("At which interval in minutes (default =59)?"){
+		input "givenInterval", "number", required: false
+	}
     
     section("Humidity differential for adjustments") {
         input "givenHumidityDiff", "number", title: "Humidity Differential (default=5%)", required:false
@@ -66,7 +69,9 @@ def initialize() {
     subscribe(sensor, "humidity", sensorHumidityHandler)
     subscribe(sensor, "temperature", sensorTemperatureHandler)
     log.debug "Scheduling Humidity Monitoring & Change every 60 minutes"
-    schedule("0 59 * * * ?", setHumidityLevel)    // monitor the humidity every hour
+    Integer delay =givenInterval ?: 59   // By default, do it every hour
+    
+    schedule("0 ${delay} * * * ?", setHumidityLevel)    // monitor the humidity every hour
 
 }
 
@@ -105,10 +110,9 @@ def setHumidityLevel() {
     
     log.debug "setHumidity> location.mode = $location.mode"
 
-//  Polling of ecobee
+//  Polling of all devices
 
     ecobee.poll()
-
 
     def heatTemp = ecobee.currentHeatingSetpoint
     def coolTemp = ecobee.currentCoolingSetpoint
@@ -192,7 +196,7 @@ def setHumidityLevel() {
        send "Monitor humidity>humidfy to ${target_humidity} in heating mode"
     }
     else {
-       log.trace("setHumidity> Turning off all devices due to actual conditions ")
+	   log.trace("setHumidity>all off, humidity level within range")
        send "Monitor humidity>all off, humidity level within range"
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode':'off','humidifierMode':'off',
            'holdType':'nextTransition']) 
