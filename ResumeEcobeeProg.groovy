@@ -10,7 +10,10 @@
 preferences {
 
         section("When one of these people arrive at home") {
-	    input "people", "capability.presenceSensor", multiple: true
+	        input "people", "capability.presenceSensor", multiple: true
+        }
+        section("False alarm threshold (defaults to 3 min)") {
+            input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
         }
         section("Resume Program at this ecobee thermostat") {
             input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
@@ -38,22 +41,30 @@ def updated() {
 def presence(evt)
 {
     log.debug "evt.name: $evt.value"
-    def threshold =  2 * 60 * 1000L // 2 min threshold
-
+	def threshold = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? (falseAlarmThreshold * 60 * 1000) as Long : 3 * 60 * 1000L
+    def message=null
+    
     def t0 = new Date(now() - threshold)
     if (evt.value == "present") {
-
+		
         def person = getPerson(evt)
         def recentNotPresent = person.statesSince("presence", t0).find{it.value == "not present"}
         if (recentNotPresent) {
-            def message = "ResumeProg>Do it, ${person.displayName} arrived"
+            log.debug "skipping notification of arrival of ${person.displayName} because last departure was only ${now() - recentNotPresent.date.time} msec ago"
+            message = "EcobeeResumeProg> ${person.displayName}: too recent arrival..."
+            log.info message
+            send(message)
+        }
+        else {
+            message = "EcobeeResumeProg> ${person.displayName} finally arrived,do it.."
             log.info message
             send(message)
 
 //          You may want to change to ecobee.resumeProgram('serial number list') if you own EMS thermostat(s)                
             ecobee.iterateResumeProgram('registered')
-        }    
-     }
+        }
+    }
+        
 }
 
 private getPerson(evt)
