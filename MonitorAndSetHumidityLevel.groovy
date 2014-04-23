@@ -20,7 +20,7 @@ preferences {
     section("To this humidity level") {
         input "givenHumidityLevel", "number", title: "humidity level (default=40%)", required:false
     }
-    section("At which interval in minutes (default =59)?"){
+    section("At which interval in minutes (default =59 min.)?"){
         input "givenInterval", "number", required: false
     }
     
@@ -194,6 +194,12 @@ def setHumidityLevel() {
            'condensationAvoid':'true','vent':'minontime','ventilatorMinOnTime':"${min_fan_time}",'holdType':'nextTransition']) 
 
        send "Monitor humidity>humidfy to ${target_humidity} in heating mode"
+    }
+    else if (outdoorHumidity > (ecobeeHumidity + min_humidity_diff)) {
+       log.trace("setHumidity>all off, outdoor's humidity (${outdoorHumdity}%)is too high to dehumidify ")
+       send "Monitor humidity>all off, outdoor's humidity (${outdoorHumdity}%)is too high to dehumidify"
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode':'off','humidifierMode':'off',
+           'holdType':'nextTransition']) 
     }
     else {
        log.trace("setHumidity>all off, humidity level within range")
