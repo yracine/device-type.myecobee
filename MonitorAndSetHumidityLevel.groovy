@@ -57,6 +57,7 @@ def updated() {
     // we have had an update
     // remove everything and reinstall
     unschedule()
+    unsubscribe()
     initialize()
 }
 
@@ -68,10 +69,10 @@ def initialize() {
     subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
     subscribe(sensor, "humidity", sensorHumidityHandler)
     subscribe(sensor, "temperature", sensorTemperatureHandler)
-    log.debug "Scheduling Humidity Monitoring & Change every 60 minutes"
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     
-    schedule("0 ${delay} * * * ?", setHumidityLevel)    // monitor the humidity every hour
+    log.debug "Scheduling Humidity Monitoring & Change every ${delay} minutes" 
+    schedule("0 ${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
 
