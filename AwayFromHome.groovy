@@ -63,7 +63,6 @@ private initialize() {
     subscribe(people, "presence", presence)
     subscribe(alarmSwitch, "contact", alarmSwitchContact)
     subscribe(motions, "motion", motionEvtHandler)
-    state.lastIntruderMotion = null
 
 }
 
@@ -72,6 +71,12 @@ def alarmSwitchContact(evt)
 
 {
     log.info "alarmSwitchContact, $evt.name: $evt.value"
+    
+    if ((alarmSwitch.currentContact == "closed") && residentsHaveBeenQuiet()) {
+       send("AwayFromHome>alarm system armed, no motion at home")
+       log.debug "alarm is armed, nobody at home"  
+       takeActions()								    
+    }
 }
 
 
@@ -96,7 +101,6 @@ private residentsHaveBeenQuiet()
         }
     }
     log.debug "residentsHaveBeenQuiet: $result"
-    send("AwayFromHome>Quiet at home...")
     return result
 }
 
@@ -111,16 +115,19 @@ def presence(evt) {
             send("AwayFromHome>Nobody is at home now")
             if (residentsHaveBeenQuiet()){
            
+                send("AwayFromHome>Quiet at home...")
                 takeActions()
             }     
             else {
             
                 log.debug "Things are not quiet at home, doing nothing"
+                send("AwayFromHome>Things are not quiet at home...")
             }     
             
         }
         else {
             log.debug "not everyone is away, doing nothing"
+            send("AwayFromHome>Not everyone is away, doing nothing..")
         }
     }
 	else {
@@ -131,21 +138,20 @@ def presence(evt) {
 
 
 def takeActions() {
-    Integer ThresholdMinutes = "2"		// check that the security alarm is close in 2 minutes
+    Integer ThresholdMinutes = 2		// check that the security alarm is close in a 2-minute delay
     Integer delay = 60 * thresholdMinutes
     def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
     def minCoolTemp = givenCoolTemp ?: 27  // by default, 27C is the minimum cool temp
     
-    def messageswitch = "AwayFromHome>Switched off switches"
-    send(messageswitch)
-    log.info messageswitch
-    switches?.off()											 // turn off the lights		
-   
-   
     // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
     
     ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null)// Set heating and cooling points at ecobee
     send("AwayFromHome>ecobee's temps are now lower")
+
+    def messageswitch = "AwayFromHome>Switched off switches"
+    send(messageswitch)
+    log.info messageswitch
+    switches?.off()											 // turn off the lights		
 
     if (alarmSwitch.currentContact == "open") {
         log.debug "alarm is not set, arm it..."  
