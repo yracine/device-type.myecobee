@@ -138,7 +138,8 @@ def presence(evt) {
 
 
 def takeActions() {
-    Integer ThresholdMinutes = 2		// check that the security alarm is close in a 2-minute delay
+    send("AwayFromHome>about to take actions")
+    Integer thresholdMinutes = 2		// check that the security alarm is close in a 2-minute delay
     Integer delay = 60 * thresholdMinutes
     def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
     def minCoolTemp = givenCoolTemp ?: 27  // by default, 27C is the minimum cool temp
