@@ -50,12 +50,6 @@ def presence(evt)
         def person = getPerson(evt)
         def recentNotPresent = person.statesSince("presence", t0).find{it.value == "not present"}
         if (recentNotPresent) {
-            log.debug "skipping notification of arrival of ${person.displayName} because last departure was only ${now() - recentNotPresent.date.time} msec ago"
-            message = "EcobeeResumeProg> ${person.displayName}: too recent arrival..."
-            log.info message
-            send(message)
-        }
-        else {
             message = "EcobeeResumeProg> ${person.displayName} finally arrived,do it.."
             log.info message
             send(message)
