@@ -13,7 +13,7 @@
 
 preferences {
 
-    section("Monitor & set the ecobee thermostat's humidifer/dehumidifer devices") {
+    section("Monitor & set the ecobee thermostat(s)' humidifer/dehumidifer devices") {
         input "ecobee", "capability.thermostat", title: "Ecobee?"
 
     }	  
