@@ -15,7 +15,7 @@ preferences {
         section("False alarm threshold (defaults to 3 min)") {
             input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
         }
-        section("Resume Program at this ecobee thermostat") {
+        section("Resume Program at the ecobee thermostat(s)") {
             input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
         }
         section( "Notifications" ) {
