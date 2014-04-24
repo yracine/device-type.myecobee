@@ -21,7 +21,7 @@ preferences {
     section("And activate the alarm system") {
         input "alarmSwitch", "capability.switch", title: "Alarm Switch"
     }
-    section("Set this ecobee thermostat") {
+    section("Set the ecobee thermostat(s)") {
         input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
     }
     section("Heating set Point for ecobee, default =14C") {
