@@ -1,4 +1,4 @@
-/***
+//***
  *  My Ecobee Device
  *
  *  Author: Yves Racine
@@ -475,7 +475,6 @@ def api(method,  args, success = {}) {
            }    
            login()
         }
-        poll() // to get the latest data at the thermostat
         
     }
     
