@@ -167,7 +167,7 @@ def setHumidityLevel() {
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode':'off','dehumidifierLevel':"${target_humidity}",
-                             'humidifierMode':'off']) 
+           'humidifierMode':'off']) 
     
     }
     else if ((ecobeeMode == 'cool') && (ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
@@ -180,7 +180,7 @@ def setHumidityLevel() {
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifyWithAC':'true','dehumidifierLevel':"${target_humidity}",
-          'dehumidiferMode':'off','vent':'minontime','ventilatorMinOnTime':"${min_fan_time}"]) 
+           'dehumidiferMode':'off','vent':'minontime','ventilatorMinOnTime':"${min_fan_time}"]) 
           
        send "Monitor humidity>dehumidifyWithAC in cooling mode"
              
@@ -200,7 +200,7 @@ def setHumidityLevel() {
        log.trace("setHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify ")
        send "Monitor humidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode':'off',
-                             'humidifierMode':'off']) 
+           'humidifierMode':'off']) 
     }
     else {
        log.trace("setHumidity>all off, humidity level within range")
