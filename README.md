@@ -31,13 +31,13 @@ INSTALLATION STEPS
  
 4) Update device's preferences
 
-      Click on the new device 
-      Click the edit button next to Preferences
-      Fill in your device 
-         (a) "appKey" provided at the ecobee web portal in step 1
-         (b) "serial number" of your ecobee thermostat
-         (c) "trace" when needed, set to true to get more tracing
- 
+
+        (a) <appKey> provided at the ecobee web portal in step 1
+        (b) <serial number> of your ecobee thermostat
+        (c) <trace> when needed, set to true to get more tracing
+        (d) <holdType> set to nextTransition or indefinite (by default) 
+        see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details 
+        
 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
 
 preferences {
