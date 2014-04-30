@@ -1,4 +1,4 @@
-//***
+/***
  *  My Ecobee Device
  *
  *  Author: Yves Racine
@@ -30,6 +30,8 @@
  *        (a) <appKey> provided at the ecobee web portal in step 1
  *        (b) <serial number> of your ecobee thermostat
  *        (c) <trace> when needed, set to true to get more tracing
+ *        (d) <holdType> set to nextTransition or indefinite (by default) 
+ *        see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details
  *
  * 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
  *
@@ -74,10 +76,12 @@
 // for the UI
 import groovy.json.JsonBuilder
 import java.net.URLEncoder
+
 preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee")
     	input("trace", "text", title: "trace", description: "Set it to true to enable tracing")
+    	input("holdType", "text", title: "holdType", description: "Set it 'nextTransition' or 'indefinite' (by default)")
 	}
 metadata {
     definition (name: "My Ecobee Device", author: "Yves Racine") {
@@ -273,7 +277,7 @@ def setHeatingSetpoint(temp) {
 }
  
 def setCoolingSetpoint(temp) {
-    setHold(settings.thermostatId,  temp, device.currentValue("heatingSetpoint"), null) 
+    setHold(settings.thermostatId,  temp, device.currentValue("heatingSetpoint"),null) 
     sendEvent(name: 'coolingSetpoint', value: temp)
 }
  
@@ -688,6 +692,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
 def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {    
     Integer targetCoolTemp=null
     Integer targetHeatTemp=null
+    def tstatParams=null
     
     if (settings.trace) {
         log.debug "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${tstatSettings} for ${thermostatId}"
@@ -707,8 +712,21 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     if (settings.trace) {
 	   sendEvent name: "verboseTrace", value: "setHold>about to build_body_req with settings=${tstatSettings}"
     }
-    def tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString()]
-       
+    /* if settings.holdType has a value, include it in the list of params
+    */
+    
+    if (settings.holdType != "") {
+    
+        tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString(),   
+                       holdType:"${settings.holdType}"
+                      ]
+    
+    }
+    else {
+    
+        tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString()]
+    }
+    
     def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams, tstatSettings)
     
     
