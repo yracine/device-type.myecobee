@@ -11,9 +11,21 @@
 
 
 
+
+// Automatically generated. Make future change here.
+definition(
+    name: "Monitor And Set Ecobee's humidity",
+    namespace: "",
+    author: "Yves Racine",
+    description: "Monitor And set Ecobee's humidity",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+)
+
 preferences {
 
-    section("Monitor & set the ecobee thermostat(s)' humidifer/dehumidifer devices") {
+    section("Monitor & set the ecobee thermostat's humidifer/dehumidifer devices") {
         input "ecobee", "capability.thermostat", title: "Ecobee?"
 
     }	  
@@ -23,7 +35,6 @@ preferences {
     section("At which interval in minutes (default =59 min.)?"){
         input "givenInterval", "number", required: false
     }
-    
     section("Humidity differential for adjustments") {
         input "givenHumidityDiff", "number", title: "Humidity Differential (default=5%)", required:false
     }
@@ -37,6 +48,10 @@ preferences {
     }	
     section("Min temperature for dehumidification (in Farenheits)") {
         input "givenMinTemp", "number", title: "Min Temp (default=0)", required:false
+    }
+
+    section("Do not run above this power consumption level (default=3000W") {
+        input "givenPowerLevel", "number", title: "power?", required:false
     }
 
     section( "Notifications" ) {
@@ -70,8 +85,8 @@ def initialize() {
     subscribe(sensor, "humidity", sensorHumidityHandler)
     subscribe(sensor, "temperature", sensorTemperatureHandler)
     Integer delay =givenInterval ?: 59   // By default, do it every hour
+    log.debug "Scheduling Humidity Monitoring & Change every ${delay}  minutes"
     
-    log.debug "Scheduling Humidity Monitoring & Change every ${delay} minutes" 
     schedule("0 ${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
@@ -106,6 +121,7 @@ def setHumidityLevel() {
     def min_temp_in_Farenheits =givenMinTemp ?: 0        // Min temp in Farenheits for starting dehumidifier,otherwise too cold
     def min_humidity_diff = givenHumidityDiff ?: 5       //  5% humidity differential by default
     def min_fan_time = givenFanMinTime ?: 10           //  10 min. fan time per hour by default
+    def max_power = givenPowerLevel ?: 3000              //  Do not run above 3000w consumption level by default
     
     def target_humidity = givenHumidityLevel ?: 40  // by default,  40 is the humidity level to check for
     
