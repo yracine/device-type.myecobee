@@ -1,5 +1,5 @@
 /***
- *  Resume Ecobee's Program when people arrive at home 
+ *  Resume Ecobee's Program when people arrive or there is been recent motion at home
  *  
  * 
  *  Author: Yves Racine
@@ -7,39 +7,86 @@
  *  Date: 2014-04-13
 */
 
+
+// Automatically generated. Make future change here.
+definition(
+    name: "EcobeeResumeProg",
+    namespace: "",
+    author: "Yves Racine",
+    description: "EcobeeResumeProg",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+)
+
 preferences {
 
-        section("When one of these people arrive at home") {
-	        input "people", "capability.presenceSensor", multiple: true
-        }
-        section("False alarm threshold (defaults to 3 min)") {
-            input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
-        }
-        section("Resume Program at the ecobee thermostat(s)") {
-            input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
-        }
-        section( "Notifications" ) {
-            input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
-            input "phone", "phone", title: "Send a Text Message?", required: false
-        }
+    section("When one of these people arrive at home") {
+	    input "people", "capability.presenceSensor", multiple: true
+    }
+    section("Or there is motion at home on these sensors") {
+        input "motions", "capability.motionSensor", title: "Where?",  multiple: true
+    }
+
+    section("False alarm threshold (defaults to 3 min)") {
+        input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
+    }
+    section("Resume Program at all ecobee thermostat(s)") {
+        input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+    }
+    section( "Notifications" ) {
+        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+        input "phone", "phone", title: "Send a Text Message?", required: false
+    }
 
 }
+
 
 def installed() {
     log.debug "Installed with settings: ${settings}"
     log.debug "Current mode = ${location.mode}, people = ${people.collect{it.label + ': ' + it.currentPresence}}"
-    subscribe(people, "presence", presence)
+    initialize()    
 }
 
 def updated() {
     log.debug "Updated with settings: ${settings}"
     log.debug "Current mode = ${location.mode}, people = ${people.collect{it.label + ': ' + it.currentPresence}}"
     unsubscribe()
-    subscribe(people, "presence", presence)
+    initialize()    
 }
 
-def presence(evt)
-{
+def initialize() {
+    subscribe(people, "presence", presence)
+    subscribe(motions, "motion", motionEvtHandler)
+
+}
+
+def motionEvtHandler(evt) {
+    if ((evt.value == "active") && residentsHaveJustBeenActive()) {
+        message = "EcobeeResumeProg>Recent motion just detected at home, do it"
+        log.info message
+        send(message)
+        takeActions()
+    }
+}
+
+private residentsHaveJustBeenActive() {
+    def threshold = (residentsQuietThreshold == null ? 3: residentsQuietThreshold) * 60 * 1000
+    def result = true
+    def t0 = new Date(now() - threshold)
+    for (sensor in motions) {
+        def recentStates = sensor.statesSince("motion", t0)
+        if (recentStates.find{it.value == "active"}) {
+            result = false
+            break
+        }
+    }
+    log.debug "residentsHaveJustBeenActive: $result"
+    return result
+}
+
+
+def presence(evt) {
     log.debug "evt.name: $evt.value"
 	def threshold = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? (falseAlarmThreshold * 60 * 1000) as Long : 3 * 60 * 1000L
     def message=null
@@ -53,16 +100,21 @@ def presence(evt)
             message = "EcobeeResumeProg> ${person.displayName} finally arrived,do it.."
             log.info message
             send(message)
-
-//          You may want to change to ecobee.resumeProgram('serial number list') if you own EMS thermostat(s)                
-            ecobee.iterateResumeProgram('registered')
+            takeActions()
         }
     }
         
 }
 
-private getPerson(evt)
-{
+def takeActions() {
+
+//  You may want to change to ecobee.resumeProgram('serial number list') if you own EMS thermostat(s)                
+    ecobee.iterateResumeProgram('registered')
+
+}
+
+
+private getPerson(evt){
     people.find{evt.deviceId == it.id}
 }
 
