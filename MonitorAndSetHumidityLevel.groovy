@@ -50,10 +50,6 @@ preferences {
         input "givenMinTemp", "number", title: "Min Temp (default=0)", required:false
     }
 
-    section("Do not run above this power consumption level (default=3000W") {
-        input "givenPowerLevel", "number", title: "power?", required:false
-    }
-
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
         input "phoneNumber", "phone", title: "Send a text message?", required: false
@@ -121,8 +117,7 @@ def setHumidityLevel() {
     def min_temp_in_Farenheits =givenMinTemp ?: 0        // Min temp in Farenheits for starting dehumidifier,otherwise too cold
     def min_humidity_diff = givenHumidityDiff ?: 5       //  5% humidity differential by default
     def min_fan_time = givenFanMinTime ?: 10           //  10 min. fan time per hour by default
-    def max_power = givenPowerLevel ?: 3000              //  Do not run above 3000w consumption level by default
-    
+
     def target_humidity = givenHumidityLevel ?: 40  // by default,  40 is the humidity level to check for
     
     log.debug "setHumidity> location.mode = $location.mode"
