@@ -7,6 +7,18 @@
  *  Date: 2014-03-31
 */
 
+
+// Automatically generated. Make future change here.
+definition(
+    name: "Away From Home",
+    namespace: "",
+    author: "Yves Racine",
+    description: "Away From Home",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+)
+
 preferences {
     section("When all of these people leave home") {
         input "people", "capability.presenceSensor", multiple: true
@@ -73,7 +85,7 @@ def alarmSwitchContact(evt)
     log.info "alarmSwitchContact, $evt.name: $evt.value"
     
     if ((alarmSwitch.currentContact == "closed") && residentsHaveBeenQuiet()) {
-       send("AwayFromHome>alarm system armed, no motion at home")
+       send("AwayFromHome>alarm system just armed, no motion at home")
        log.debug "alarm is armed, nobody at home"  
        takeActions()								    
     }
