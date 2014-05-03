@@ -75,14 +75,17 @@ def initialize() {
     def vacationStartDateTime=null
     String dateTime=null
     
-    dateTime = givenStartDate + givenStartTime
+    dateTime = givenStartDate + " " + givenStartTime
+    log.debug( "Start datetime= ${datetime}" )
     vacationStartDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
     
-    dateTime = givenEndDate + givenEndTime
+    dateTime = givenEndDate  + " " + givenEndTime
+    log.debug( "End datetime= ${datetime}" )
     def vacationEndDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
 
 // You may want to change to ecobee.createVacation('serial number list',....) if you own EMS thermostat(s)
 
+    log.debug( "About to call iterateCreateVacation for ${vacationName}" )
     ecobee.iterateCreateVacation('registered', vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime, 
         vacationEndDateTime)
     send("CreateVacation> vacationName ${vacationName} created")
