@@ -83,7 +83,7 @@ def initialize() {
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     log.debug "Scheduling Humidity Monitoring & Change every ${delay}  minutes"
     
-    schedule("0 ${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
+    schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
 
