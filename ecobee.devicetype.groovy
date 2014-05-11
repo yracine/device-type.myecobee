@@ -421,12 +421,12 @@ def poll() {
     }
     def scale = getTemperatureScale()
     if (scale =='C') {
+        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature))
+        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool))
+        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat))
         def actualTempFormat = String.format('%2.1f', actualTemp.round(1))
         def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp.round(1))
         def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp.round(1))
-        def actualTempFormat = String.format('%2.1f', actualTemp)
-        def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp)
-        def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp)
         sendEvent(name: 'temperature', value: actualTempFormat, 
             unit:"C", state: data.thermostatList[0].settings.hvacMode)
         sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat, unit: "C")
