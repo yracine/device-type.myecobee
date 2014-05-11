@@ -224,7 +224,7 @@ metadata {
         }
         // Weather Tiles
 
-        valueTile("weatherCondition", "device.weatherCondition", inactiveLabel: false,width: 1, height: 1, decoration: "flat") {
+        valueTile("weatherCondition", "device.weatherCondition", inactiveLabel: false,width: 2, height: 1, decoration: "flat") {
             state "default", label:'Forecast ${currentValue}'
         }
         valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel: false,width: 1, height: 1, decoration: "flat") {
