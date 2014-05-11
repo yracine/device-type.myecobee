@@ -76,7 +76,6 @@
 // for the UI
 import groovy.json.JsonBuilder
 import java.net.URLEncoder
-import java.util.HashMap
 
 preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat")
@@ -241,7 +240,7 @@ metadata {
             state "default", label:'Fcast Low ${currentValue}°', unit:"C"
         }
         valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false, width: 1, height: 1,decoration: "flat") {
-            state "default", label:'Pressure ${currentValue}°', unit:"hpa"
+            state "default", label:'Pressure ${currentValue}', unit:"hpa"
         }
         valueTile("weatherWindDirection", "device.weatherWindDirection", inactiveLabel: false, width: 1, height: 1,decoration: "flat") {
             state "default", label:'W.Dir ${currentValue}'
@@ -520,6 +519,7 @@ def poll() {
     
          if (it.climateRef== data.thermostatList[0].program.currentClimateRef){
              currentClimate = it
+             exit
          }
     }
      
