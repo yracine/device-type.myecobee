@@ -100,7 +100,19 @@ metadata {
         attribute "humidifierLevel", "string" 
         attribute "dehumidifierLevel", "string" 
         attribute "condensationAvoid", "string" 
-    
+        
+        attribute "weatherDateTime", "string"
+        attribute "weatherStation", "string"
+        attribute "weatherCondition","string"	
+        attribute "weatherTemperature","string"
+        attribute "weatherPressure", "string"
+        attribute "weatherRelativeHumidity", "string"
+        attribute "weatherWindSpeed", "string"	 
+        attribute "weatherWindDirection", "string"
+        attribute "weatherPop","string"
+        attribute "weatherTempHigh", "string"
+        attribute "weatherTempLow", "string"
+        
         command "humidifierAuto"
         command "humidifierOff"
         command "setHumidifierLevel"
@@ -166,7 +178,7 @@ metadata {
             state "cool", label:'${currentValue}° cool', unit:"C", backgroundColor:"#ffffff"
         }
         valueTile("humidity", "device.humidity", inactiveLabel: false, decoration: "flat") {
-            state "default", label:'${currentValue}%Hum', unit:"humidity"
+            state "default", label:'Indoor Humidity\n${currentValue}%', unit:"humidity"
         }
         standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
@@ -185,11 +197,40 @@ metadata {
         }
         standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "coolLevelDown", label:'  ', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"
-       
+        }       
+        valueTile("weatherCondition", "device.weatherCondition", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Forecast\n${currentValue}'
         }
+        valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Outdoor Temp\n${currentValue}°', unit:"C"
+        }
+        valueTile("weatherRelativeHumidity", "device.weatherRelativeHumidity", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Outdoor Humidity\n${currentValue}%', unit:"humidity"
+        }
+        valueTile("weatherTempHigh", "device.weatherTempHigh", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Forecast Temp High\n${currentValue}°', unit:"C"
+        }
+        valueTile("weatherTempLow", "device.weatherTempLow", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Forecast Temp Low\n${currentValue}°', unit:"C"
+        }
+        valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Pressure\n${currentValue}°', unit:"hpa"
+        }
+        valueTile("weatherWindDirection", "device.weatherWindDirection", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Wind Direction\n${currentValue}'
+        }
+        valueTile("weatherWindSpeed", "device.weatherWindSpeed", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'Wind Speed\n${currentValue}'
+        }
+        valueTile("weatherPop", "device.weatherPop", inactiveLabel: false, decoration: "flat") {
+            state "default", label:'PoP\n${currentValue}%', unit:"%"
+        }
+       
 
         main "temperature"
-        details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", "humidity", "refresh", "resProgram"])
+        details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
+                "humidity", "refresh", "resProgram", "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
+                "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop"])
 
     }
 }
@@ -408,22 +449,32 @@ def poll() {
     
     sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
     sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].settings.vent)
-    sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity)
+    sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity, unit:"%")
     sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
     if (data.thermostatList.settings.hasHumidifier) {
         sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
-        sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity)
+        sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,unit:"%")
         
     }
     if (data.thermostatList.settings.hasDehumidifier) {
         sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
-        sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel)
+        sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel, unit:"%")
     }
+
+    sendEvent(name: 'weatherStation', value: data.thermostatList[0].weather.weatherStation)
+    sendEvent(name: 'weatherDateTime', value: data.thermostatList[0].weather.forecasts[0].dateTime)
+    sendEvent(name: 'weatherCondition', value: data.thermostatList[0].weather.forecasts[0].condition)
+    sendEvent(name: 'weatherPressure', value: data.thermostatList[0].weather.forecasts[0].pressure, unit:"hpa")
+    sendEvent(name: 'weatherRelativeHumidity', value: data.thermostatList[0].weather.forecasts[0].relativeHumidity, 
+        unit:"%")
+    sendEvent(name: 'weatherWindDirection', value: data.thermostatList[0].weather.forecasts[0].windDirection)
+    sendEvent(name: 'weatherPop', value: data.thermostatList[0].weather.forecasts[0].pop)
+
     def scale = getTemperatureScale()
     if (scale =='C') {
-        float actualTemp= fToC((data.thermostatList[0].runtime.actualTemperature))
-        float desiredCoolTemp =  fToC((data.thermostatList[0].runtime.desiredCool))
-        float desiredHeatTemp = fToC((data.thermostatList[0].runtime.desiredHeat))
+        float actualTemp= fToC(data.thermostatList[0].runtime.actualTemperature)
+        float desiredCoolTemp =  fToC(data.thermostatList[0].runtime.desiredCool)
+        float desiredHeatTemp = fToC(data.thermostatList[0].runtime.desiredHeat)
         def actualTempFormat = String.format('%2.1f', actualTemp.round(1))
         def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp.round(1))
         def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp.round(1))
@@ -431,7 +482,24 @@ def poll() {
             unit:"C", state: data.thermostatList[0].settings.hvacMode)
         sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat, unit: "C")
         sendEvent(name: 'heatingSetpoint', value:  desiredHeatFormat, unit: "C")
-    
+        
+        float weatherTemp =  fToC(data.thermostatList[0].weather.forecasts[0].temperature)
+        float weatherTempHigh = fToC(data.thermostatList[0].weather.forecasts[0].tempHigh)
+        float weatherTempLow = fToC(data.thermostatList[0].weather.forecasts[0].tempLow)
+        def weatherTempFormat = String.format('%2.1f', weatherTemp.round(1))
+        def weatherHighFormat = String.format('%2.1f', weatherTempHigh.round(1))
+        def weatherLowFormat = String.format('%2.1f', weatherTempLow.round(1))
+
+        sendEvent(name: 'weatherTemperature', value: weatherTempFormat, unit: "C")
+        sendEvent(name: 'weatherTempHigh', value: weatherHighFormat, unit: "C")
+        sendEvent(name: 'weatherTempLow', value: weatherLowFormat, unit: "C")
+        
+        float windSpeed = milesToKm((data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/1000))
+        String windSpeedFormat = String.format('%2.1f',windSpeed.round(1))
+        sendEvent(name: 'weatherWindSpeed', value: windSpeedFormat, unit:'kmh')
+
+
+
     }        
     else {
     
@@ -439,8 +507,18 @@ def poll() {
             unit:"F", state: data.thermostatList[0].settings.hvacMode)
         sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].runtime.desiredCool), unit: "F")
         sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat), unit: "F")
+        sendEvent(name: 'weatherTemperature', value: data.thermostatList[0].weather.forecasts[0].temperature,  
+            unit: "F")
+        sendEvent(name: 'weatherTempHigh', value: data.thermostatList[0].weather.forecasts[0].tempHigh,
+            unit: "F")
+        sendEvent(name: 'weatherTempLow', value: data.thermostatList[0].weather.forecasts[0].tempLow, 
+            unit: "F")
+        float windSpeed = data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/1000
+        String windSpeedFormat = String.format('%2.1f',windSpeed.round(1))
+        sendEvent(name: 'weatherWindSpeed', value: windSpeedFormat, unit:'mph')
     
     }
+
 }
 
 
@@ -507,8 +585,6 @@ def api(method,  args, success = {}) {
 
 }
  
-
-
 // Need to be authenticated in before this is called. So don't call this. Call api.
 
 def doRequest(uri, args, type, success) {
@@ -579,7 +655,8 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
         selection = [selection: [selectionType:'thermostats',
                                     selectionMatch:thermostatId, 
                                     includeSettings:'true',
-                                    includeRuntime:'true']
+                                    includeRuntime:'true',
+                                    includeWeather:'true']
                     ]
  
                      
@@ -1058,6 +1135,10 @@ def getThermostatInfo(thermostatId){
             data.thermostatList[0].runtime.actualTemperature = data.thermostatList[0].runtime.actualTemperature /10
             data.thermostatList[0].runtime.desiredCool = data.thermostatList[0].runtime.desiredCool /10
             data.thermostatList[0].runtime.desiredHeat = data.thermostatList[0].runtime.desiredHeat /10
+            data.thermostatList[0].weather.forecasts[0].temperature = data.thermostatList[0].weather.forecasts[0].temperature/10
+            data.thermostatList[0].weather.forecasts[0].tempLow = data.thermostatList[0].weather.forecasts[0].tempLow/10
+            data.thermostatList[0].weather.forecasts[0].tempHigh = data.thermostatList[0].weather.forecasts[0].tempHigh/10
+            
             if (settings.trace) {
      	        log.debug "getTstatInfo> got info for ${thermostatId} name=${thermostatName}, features=${resp.data}"
             }    
@@ -1075,7 +1156,9 @@ def getThermostatInfo(thermostatId){
                     "vent = ${thermostatSettings.vent}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
-            }            
+                    
+            }
+            
         }
         else {
             log.error "getThermostatInfo> error= ${statusCode}, message = ${message}"
@@ -1378,3 +1461,8 @@ def cToF(temp) {
 def fToC(temp) {
     return (temp - 32) / 1.8
 }
+
+def milesToKm(distance) {
+    return (distance * 1.609344)
+}
+
