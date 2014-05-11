@@ -494,7 +494,7 @@ def poll() {
         sendEvent(name: 'weatherTempHigh', value: weatherHighFormat, unit: "C")
         sendEvent(name: 'weatherTempLow', value: weatherLowFormat, unit: "C")
         
-        float windSpeed = milesToKm((data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/1000))
+        float windSpeed = milesToKm((data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/10000))
         String windSpeedFormat = String.format('%2.1f',windSpeed.round(1))
         sendEvent(name: 'weatherWindSpeed', value: windSpeedFormat, unit:'kmh')
 
@@ -513,7 +513,7 @@ def poll() {
             unit: "F")
         sendEvent(name: 'weatherTempLow', value: data.thermostatList[0].weather.forecasts[0].tempLow, 
             unit: "F")
-        float windSpeed = data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/1000
+        float windSpeed = data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/10000
         String windSpeedFormat = String.format('%2.1f',windSpeed.round(1))
         sendEvent(name: 'weatherWindSpeed', value: windSpeedFormat, unit:'mph')
     
