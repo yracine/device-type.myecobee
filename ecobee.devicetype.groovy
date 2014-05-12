@@ -159,10 +159,10 @@ metadata {
     }
  
     tiles {
-        valueTile("name", "device.thermostatName", inactiveLabel: false, decoration: "flat") {
+        valueTile("name", "device.thermostatName", inactiveLabel: false, width: 3, height: 1,decoration: "flat") {
             state "default", label:'Name\n${currentValue}'
         }
-         valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
+        valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
              state("temperature", label: '${currentValue}°', unit:"C", backgroundColors: [
                  [value: 0, color: "#153591"],
     	         [value: 8, color: "#1e9cbb"],
@@ -214,7 +214,10 @@ metadata {
         }       
         // Program Tiles
         valueTile("programScheduleName", "device.programScheduleName", inactiveLabel: false,width: 1, height: 1, decoration: "flat") {
-            state "default", label:'ProgName ${currentValue}'
+            state "default", label:'Mode ${currentValue}'
+        }
+        valueTile("programType", "device.programType", inactiveLabel: false,width: 1, height: 1, decoration: "flat") {
+            state "default", label:'Type ${currentValue}'
         }
         valueTile("programCoolTemp", "device.programCoolTemp",inactiveLabel: false,width: 1, height: 1,decoration: "flat") {
             state "default", label:'ProgCool ${currentValue}°'
@@ -255,8 +258,8 @@ metadata {
 
 
         main "temperature"
-        details(["temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
-                "name", "humidity", "programScheduleName",  "programCoolTemp", "programHeatTemp",  "resProgram",
+        details(["name","temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
+                "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
                 "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
                 "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop","refresh",])
 
