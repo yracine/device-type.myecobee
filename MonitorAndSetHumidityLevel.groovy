@@ -150,7 +150,7 @@ def setHumidityLevel() {
 
        send "Monitor humidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }
-    else if ((ecobeeMode == 'heat') &&
+    else if (((ecobeeMode == 'heat')  ||  (ecobeeMode == 'off')) && 
              ((ecobeeHumidity < (target_humidity + min_humidity_diff)) && (ecobeeHumidity >= (target_humidity - min_humidity_diff))) && 
              ((ecobeeHumidity < (outdoorHumidity + min_humidity_diff)) && (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff))) && 
              (outdoorTemp > fToC(min_temp_in_Farenheits))) {
@@ -165,7 +165,7 @@ def setHumidityLevel() {
 
        send "Monitor humidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }    
-    else if ((ecobeeMode == 'heat') && 
+    else if (((ecobeeMode == 'heat')  ||  (ecobeeMode == 'off')) && 
              ((ecobeeHumidity < (target_humidity + min_humidity_diff)) && (ecobeeHumidity >= (target_humidity - min_humidity_diff))) &&
              ((ecobeeHumidity < (outdoorHumidity + min_humidity_diff)) && (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff))) && 
              (outdoorTemp <= fToC(min_temp_in_Farenheits))) {
@@ -196,8 +196,8 @@ def setHumidityLevel() {
        send "Monitor humidity>dehumidifyWithAC in cooling mode"
              
     }
-    else if ((ecobeeMode == 'heat') && (ecobeeHumidity  < (target_humidity - min_humidity_diff))) {    
-       log.trace("setHumidity> In heat mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house")
+    else if (((ecobeeMode == 'heat')  ||  (ecobeeMode == 'off')) && (ecobeeHumidity  < (target_humidity - min_humidity_diff))) {    
+       log.trace("setHumidity> In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house")
                         
 //     Need a minimum differential to humidify the house to the target
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
@@ -220,8 +220,7 @@ def setHumidityLevel() {
         
     }
             
-    log.debug "End of Fcn"
-}
+    log.debug "End of Fcn"}
 
 
 private send(msg) {
