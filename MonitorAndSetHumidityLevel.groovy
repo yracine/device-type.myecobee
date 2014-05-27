@@ -88,28 +88,28 @@ def initialize() {
 }
 
 def ecobeeHeatTempHandler(evt) {
-    log.debug "ecobee's heating temp: $evt"
+    log.debug "ecobee's heating temp: $evt.value"
 }
 
 def ecobeeCoolTempHandler(evt) {
-    log.debug "ecobee's cooling temp: $evt"
+    log.debug "ecobee's cooling temp: $evt.value"
 }
 
 def ecobeeHumidityHandler(evt) {
-    log.debug "ecobee's humidity level: $evt"
+    log.debug "ecobee's humidity level: $evt.value"
 }
 
 def ecobeeModeHandler(evt) {
-    log.debug "ecobee's mode: $evt"
+    log.debug "ecobee's mode: $evt.value"
 }
 
 
 def sensorHumidityHandler(evt) {
-    log.debug "outdoor sensor's humidity level: $evt"
+    log.debug "outdoor sensor's humidity level: $evt.value"
 }
 
 def sensorTemperatureHandler(evt) {
-    log.debug "outdoor's temperature is': $evt"
+    log.debug "outdoor's temperature is': $evt.value"
 }
 
 def setHumidityLevel() {
