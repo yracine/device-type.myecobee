@@ -204,7 +204,7 @@ def setHumidityLevel() {
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['humidifierMode':'auto','humidity':"${target_humidity}",'dehumidifierMode':'off',
-           'condensationAvoid':'true','vent':'minontime','ventilatorMinOnTime':"${min_fan_time}"]) 
+           'condensationAvoid':'true','vent':'minontime','fanMinOnTime':"${min_fan_time}"]) 
 
        send "MonitorHumidity>humidfy to ${target_humidity} in ${ecobeeMode} mode"
     }
