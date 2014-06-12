@@ -694,7 +694,7 @@ def poll() {
     
     }
     
-    def equipStatus = 'Idle'
+    def equipStatus = null
     
     data.statusList.each() {
         def equipStatusDetails = it.split(':')
@@ -712,36 +712,37 @@ def poll() {
         }
             
     }
-    if (equipStatus != 'Idle') {
-        equipStatus = equipStatus + ' running'
-    }
+    equipStatus = (equipStatus != null) ? equipStatus + ' running' : 'Idle'  
     
     sendEvent(name: 'equipementStatus', value: equipStatus)
+
+    def groupList = 'No groups'
+    if (settings.ecobeeType != 'managementSet') {
     
-    log.debug "poll> about to execute getGroups"
-    sendEvent name: "verboseTrace", value: "poll> about to execute getGroups"
+        log.debug "poll> about to execute getGroups"
+        sendEvent name: "verboseTrace", value: "poll> about to execute getGroups"
         
-    // get Groups associated to this thermostatId
+        // get Groups associated to this thermostatId
         
-    getGroups(settings.thermostatId)
+        getGroups(settings.thermostatId)
          
-    // post group names associated to this thermostatId
+        // post group names associated to this thermostatId
 
-    def groupList = 'Groups '
-    if (data.groups.size() == 0) {
+        if (data.groups.size() > 0) {
             
-        groupList = 'No groups'
-    }
-    else {
-        for (i in 0..data.groups.size()-1) { 
-            groupList = groupList + ' \n' + data.groups[i].groupName
+            groupList = 'Groups '
         }
-
+        else {
+            for (i in 0..data.groups.size()-1) { 
+                groupList = groupList  + data.groups[i].groupName + ' \n'
+            }
+        }
+        if (settings.trace) {
+            log.debug "poll> thermostatId = ${settings.thermostatId}, groups= ${groupList}"
+            sendEvent name: "verboseTrace", value: "poll> thermostatId = ${settings.thermostatId}, groups= ${groupList}"
+        }
     }
-    if (settings.trace) {
-        log.debug "poll> thermostatId = ${settings.thermostatId}, groups= ${groupList}"
-        sendEvent name: "verboseTrace", value: "poll> thermostatId = ${settings.thermostatId}, groups= ${groupList}"
-    }
+    
     sendEvent(name: 'groups', value: groupList)
 }
 
