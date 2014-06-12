@@ -37,7 +37,8 @@ INSTALLATION STEPS
         (c) <trace> when needed, set to true to get more tracing
         (d) <holdType> set to nextTransition or indefinite (by default) 
         see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details 
-        
+        (e) <ecobeeType> set to 'registered' (by default) or 'managementSet'
+
 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
 
 preferences {
