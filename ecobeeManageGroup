@@ -89,15 +89,16 @@ def appTouch(evt) {
     Boolean syncSystemModeFlag = (synchronizeSystemMode != null) ? synchronizeSystemMode : false
     Boolean syncAlertsFlag = (synchronizeAlerts != null) ? synchronizeAlerts : false         
     Boolean syncQuickSaveFlag = (synchronizeQuickSave != null) ? synchronizeQuickSave : false   
+    Boolean deleteGroupFlag = (deleteGroup != null) ? deleteGroup  : false
     
     def groupSettings = [synchronizeVacation:"${syncVacationFlag}",synchronizeSchedule:"${syncScheduleFlag}",
                         synchronizeSystemMode:"${syncSystemModeFlag}",synchronizeAlerts:"${syncAlertsFlag}",
                         synchronizeQuickSave:"${syncQuickSaveFlag}"
                         ]
 
-    log.trace "ecobeeManageGroup>deleteGroup=${deleteGroup},  groupName = ${groupName}, groupSettings= ${groupSettings}" 
+    log.trace "ecobeeManageGroup>deleteGroupFlag=${deleteGroupFlag},  groupName = ${groupName}, groupSettings= ${groupSettings}" 
     
-    if (deleteGroup == true) {
+    if (deleteGroupFlag) {
        ecobee.deleteGroup(null,groupName )
        send("ecobeeManageGroup>groupName=${groupName} deleted")
     
