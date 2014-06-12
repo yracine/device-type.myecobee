@@ -25,9 +25,9 @@ definition(
 
 preferences {
     
-	section("For this ecobee thermostat") {
-		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
-	}
+    section("For this ecobee thermostat") {
+        input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+    }
     section("Create this group or update all groups (empty for all groups)") {
         input "groupName", "text", title: "group Name", required: false
     }
