@@ -50,13 +50,6 @@ preferences {
         input "givenMinTemp", "number", title: "Min Temp (default=0)", required:false
     }
 
-    section("Check TED energy consumption at") {
-        input "ted", "capability.powerMeter", title: "TED5000?"
-    }
-    section("Do not run above this power consumption level (default=3000W") {
-        input "givenPowerLevel", "number", title: "power?", required:false
-    }
-
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
         input "phoneNumber", "phone", title: "Send a text message?", required: false
@@ -81,7 +74,6 @@ def updated() {
 
 def initialize() {
     
-    subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
     subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
     subscribe(ecobee, "humidity", ecobeeHumidityhandler)
@@ -93,9 +85,6 @@ def initialize() {
     
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
-}
-def tedPowerHandler(evt) {
-    log.debug "ted power: $evt.value"
 }
 
 def ecobeeHeatTempHandler(evt) {
@@ -134,24 +123,10 @@ def setHumidityLevel() {
     
     log.debug "setHumidity> location.mode = $location.mode"
 
-//  Polling of all devices
+//  Polling ecobee
 
     ecobee.poll()
-    ted.poll()    
 
-    Integer powerConsumed = ted.currentPower.toInteger()
-    if (powerConsumed > max_power){
-
-//  peak of energy consumption, turn off all devices
-
-       send "MonitorHumidity>all off,power is too high=${ted.currentPower}"
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, ['dehumidifierMode':'off','humidifierMode':'off',
-           'holdType':'nextTransition']) 
-       return
-           
-
-    }
-    
     def heatTemp = ecobee.currentHeatingSetpoint
     def coolTemp = ecobee.currentCoolingSetpoint
     def ecobeeHumidity = ecobee.currentHumidity
