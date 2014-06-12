@@ -240,7 +240,7 @@ metadata {
  
     tiles {
         valueTile("name", "device.thermostatName", inactiveLabel: false, width: 1,height: 1,decoration: "flat") {
-            state "default", label:'${currentValue}'
+            state "default", label:'${currentValue}\n '
         }
         valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
              state("temperature", label: '${currentValue}°', unit:"C", backgroundColors: [
@@ -730,11 +730,9 @@ def poll() {
 
         if (data.groups.size() > 0) {
             
-            groupList = 'Groups '
-        }
-        else {
+            groupList = 'Group(s) '
             for (i in 0..data.groups.size()-1) { 
-                groupList = groupList  + data.groups[i].groupName + ' \n'
+                groupList = groupList +  data.groups[i].groupName  + ' \n'  
             }
         }
         if (settings.trace) {
