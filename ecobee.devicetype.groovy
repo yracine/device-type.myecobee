@@ -491,7 +491,7 @@ def fanOff() {
 
 def setFanMinOnTime(minutes) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-        ['vent':'minontime','ventilatorMinOnTime':"${minutes}"]) 
+        ['vent':'minontime','fanMinOnTime':"${minutes}"]) 
     sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 
