@@ -32,7 +32,7 @@ preferences {
         input "groupName", "text", title: "group Name", required: false
     }
     section("Or delete the group (By default=false)") {
-        input "deleteFlag", "Boolean", title: "delete?",metadata:[values:["true", "false"]], required:false
+        input "deleteGroup", "Boolean", title: "delete?",metadata:[values:["true", "false"]], required:false
     }
     section("Synchronize Vacation") {
         input "synchronizeVacation", "Boolean", title: "synchronize Vacation (default=false)?",metadata:[values:["true", "false"]], required: false
@@ -82,21 +82,22 @@ def updated() {
 def appTouch(evt) {
     log.debug "EcobeeManageGroup> about to take actions"
      
-    Boolean syncVacationFlag = synchronizeVacation ?: false         // by default,  it is set to false
-    Boolean syncScheduleFlag = synchronizeSchedule ?: false         // by default,  it is set to false
-    Boolean syncSystemModeFlag = synchronizeSystemMode ?: false         // by default,  it is set to fa
-    Boolean syncAlertsFlag = synchronizeAlerts ?: false         // by default,  it is set to false
-    Boolean syncQuickSaveFlag = synchronizeQuickSave ?: false         // by default,  it is set to false
-    
+    // by default,  all flags are set to false
+ 
+    Boolean syncVacationFlag = (synchronizeVacation != null) ? synchronizeVacation : false      
+    Boolean syncScheduleFlag = (synchronizeSchedule != null) ? synchronizeSchedule: false    
+    Boolean syncSystemModeFlag = (synchronizeSystemMode != null) ? synchronizeSystemMode : false
+    Boolean syncAlertsFlag = (synchronizeAlerts != null) ? synchronizeAlerts : false         
+    Boolean syncQuickSaveFlag = (synchronizeQuickSave != null) ? synchronizeQuickSave : false   
     
     def groupSettings = [synchronizeVacation:"${syncVacationFlag}",synchronizeSchedule:"${syncScheduleFlag}",
                         synchronizeSystemMode:"${syncSystemModeFlag}",synchronizeAlerts:"${syncAlertsFlag}",
                         synchronizeQuickSave:"${syncQuickSaveFlag}"
                         ]
 
-    log.trace "ecobeeManageGroup>deleteGroup=${deleteGroup}, groupName = ${groupName}" 
+    log.trace "ecobeeManageGroup>deleteGroup=${deleteGroup},  groupName = ${groupName}, groupSettings= ${groupSettings}" 
     
-    if (deleteFlag) {
+    if (deleteGroup == true) {
        ecobee.deleteGroup(null,groupName )
        send("ecobeeManageGroup>groupName=${groupName} deleted")
     
