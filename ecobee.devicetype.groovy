@@ -694,6 +694,8 @@ def poll() {
     
     }
     
+    // post equipment status
+    
     def equipStatus = null
     
     data.statusList.each() {
@@ -716,6 +718,8 @@ def poll() {
     
     sendEvent(name: 'equipementStatus', value: equipStatus)
 
+    // post group(s)
+
     def groupList = 'No groups'
     if (settings.ecobeeType != 'managementSet') {
     
@@ -732,7 +736,7 @@ def poll() {
             
             groupList = 'Group(s) '
             for (i in 0..data.groups.size()-1) { 
-                groupList = groupList +  data.groups[i].groupName  + ' \n'  
+                groupList = (i>0) ?  ' \n' + groupList +  data.groups[i].groupName: groupList +  data.groups[i].groupName
             }
         }
         if (settings.trace) {
@@ -1383,7 +1387,6 @@ def getGroups(thermostatId) {
                     sendEvent name: "verboseTrace", value: "getGroups>about to process ${data.groups}"
                 }
         
-                int k=0
                 if (data.groups.thermostats.size() > 0) {
 
                     for (i in 0..data.groups.size()-1) {
@@ -1396,7 +1399,7 @@ def getGroups(thermostatId) {
                                 }
                             }
                             else {
-                                data.groups[i] = ' '   // Not the right group for this thermostat
+                                data.groups[i] = ' '   // Not the right group for this thermostat, set it to blanks
                             
                             }
                         }    
