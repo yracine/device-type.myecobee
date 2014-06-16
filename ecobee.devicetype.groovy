@@ -106,6 +106,7 @@ metadata {
 		attribute "condensationAvoid", "string"
 		attribute "groups", "string"
 		attribute "equipementStatus", "string"
+		attribute "alerts", "string"
 		attribute "programScheduleName", "string"
 		attribute "programFanMode", "string"
 		attribute "programType", "string"
@@ -155,6 +156,7 @@ metadata {
 		command "createGroup"
 		command "deleteGroup"
 		command "dehumidifierOn"
+		command "updateClimate"
 	}
 
     definition (name: "My Ecobee Device", author: "Yves Racine") {
@@ -242,6 +244,9 @@ metadata {
         valueTile("name", "device.thermostatName", inactiveLabel: false, width: 1,height: 1,decoration: "flat") {
             state "default", label:'${currentValue}\n '
         }
+        valueTile("groups", "device.groups", inactiveLabel: false, width: 2, height: 1,decoration: "flat") {
+            state "default", label:'${currentValue}%'
+        }
         valueTile("temperature", "device.temperature", width: 2, height: 2, canChangeIcon: true) {
              state("temperature", label: '${currentValue}°', unit:"C", backgroundColors: [
                  [value: 0, color: "#153591"],
@@ -288,7 +293,11 @@ metadata {
             state "coolLevelDown", label:'  ', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"
         }       
         valueTile("equipementStatus", "device.equipementStatus", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
-             state "default", label:'Run\n${currentValue}'
+             state "default", label:'${currentValue}'
+        }
+
+        valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
+             state "default", label:'${currentValue}'
         }
 
         // Program Tiles
@@ -336,9 +345,6 @@ metadata {
         valueTile("weatherPop", "device.weatherPop", inactiveLabel: false, width: 1, height: 1,decoration: "flat") {
             state "default", label:'PoP\n${currentValue}%', unit:"%"
         }
-        valueTile("groups", "device.groups", inactiveLabel: false, width: 2, height: 1,decoration: "flat") {
-            state "default", label:'${currentValue}%'
-        }
        
         standardTile("refresh", "device.thermostatMode", inactiveLabel: false, decoration: "flat") {
             state "default", action:"polling.poll", icon:"st.secondary.refresh"
@@ -347,7 +353,7 @@ metadata {
 
         main "temperature"
         details(["name","groups","temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
-                "equipementStatus", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
+                "equipementStatus", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
                 "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
                 "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop","refresh",])
 
@@ -573,8 +579,8 @@ def poll() {
         ecobeeType = settings.ecobeeType    
     }
          
-    
-    getThermostatSummary(ecobeeType)
+    // need to call getThermostatSummmary in order to get Equipment Status
+    getThermostatSummary(ecobeeType)        
     getThermostatInfo(settings.thermostatId)
         
     sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
@@ -718,6 +724,7 @@ def poll() {
     
     sendEvent(name: 'equipementStatus', value: equipStatus)
 
+
     // post group(s)
 
     def groupList = 'No groups'
@@ -746,6 +753,25 @@ def poll() {
     }
     
     sendEvent(name: 'groups', value: groupList)
+    // post alerts
+    
+    def alerts = null
+    
+    if (data.thermostatList[0].alerts.size() > 0) {
+            
+        alerts = 'Alert(s) '
+        for (i in 0..data.thermostatList[0].alerts.size()-1) { 
+            if (settings.trace) {
+                log.debug "poll> thermostatId = ${thermostatId}, found alert= ${data.thermostatList[0].alerts[i]}"
+                sendEvent name: "verboseTrace", value: "thermostatId = ${thermostatId}, found alert= ${data.thermostatList[0].alerts[i]}"
+            }
+            alerts = (i>0) ?  ' \n' + alerts +  data.thermostatList[0].alerts[i].notificationType: alerts + 
+                data.thermostatList[0].alerts[i].notificationType
+        }
+    }
+    alerts = (alerts != null) ? alerts + '\ngo to ecobee portal': 'No alerts'  
+    
+    sendEvent(name: 'alerts', value: alerts)
 }
 
 
@@ -798,7 +824,8 @@ def api(method,  args, success = {}) {
         'createVacation':    [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
         'deleteVacation':    [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
         'getGroups':         [uri: "${URI_ROOT}/group?format=json&body=${args_encoded}", type: 'get'],
-        'updateGroup':       [uri: "${URI_ROOT}/group?format=json", type: 'post']
+        'updateGroup':       [uri: "${URI_ROOT}/group?format=json", type: 'post'],
+        'updateClimate':     [uri: "${URI_ROOT}/thermostat?format=json", type: 'post']
     ]
 
     def request = methods.getAt(method)
@@ -885,7 +912,8 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
                                     includeSettings:'true',
                                     includeRuntime:'true',
                                     includeProgram:'true',
-                                    includeWeather:'true'
+                                    includeWeather:'true',
+                                    includeAlerts:'true'
                                 ]
                     ]
  
@@ -1142,7 +1170,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
     }
 
     def vacationParams = [ 
-        name:vacationName,
+        name:vacationName.trim(),
         coolHoldTemp:targetCool.toString(),
         heatHoldTemp:targetHeat.toString(),
         startDate:vacationStartDate, 
@@ -1228,7 +1256,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
 
 def deleteVacation(thermostatId, vacationName) {
      
-    def vacationParams = [name:vacationName]
+    def vacationParams = [name:vacationName.trim()]
     
     def bodyReq = build_body_request('deleteVacation', null, thermostatId, vacationParams, null)
     
@@ -1344,8 +1372,8 @@ def resumeProgram(thermostatId) {
 }
 
 // Only valid for Smart and Antenna thermostats
-// Get all groups related to a thermostatId
-// thermostatId can be only 1 thermostat (not a list)
+// Get all groups related to a thermostatId or all groups
+// thermostatId can be only 1 thermostat (not a list) or null (for all groups)
 
 def getGroups(thermostatId) {    
 
@@ -1490,13 +1518,13 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
     
     if ((groupRef != null) && (groupRef !="")) {
    
-        updateGroupParams = '"groupRef":"' + groupRef + '","groupName":"' + groupName + 
+        updateGroupParams = '"groupRef":"' + groupRef.trim() + '","groupName":"' + groupName.trim() + 
            '",' + groupSet  + ',"thermostats":["' + thermostatId + '"]' 
     }
     else {
     
    
-        updateGroupParams =  '"groupName":"'  + groupName + '",' + groupSet  + ',"thermostats":["' + thermostatId + '"]'
+        updateGroupParams =  '"groupName":"'  + groupName.trim() + '",' + groupSet  + ',"thermostats":["' + thermostatId + '"]'
     
     }
     if (settings.trace) {
@@ -1529,17 +1557,18 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
 
   
 }
+
 def deleteGroup(groupRef, groupName) {    
     String updateGroupParams
     
     if ((groupRef != null) && (groupRef !="")) {
    
-        updateGroupParams = '"groupRef":"' + groupRef + '","groupName":"' + groupName + '"'
+        updateGroupParams = '"groupRef":"' + groupRef.trim() + '","groupName":"' + groupName.trim() + '"'
     }
     else {
     
    
-        updateGroupParams =  '"groupName":"'  + groupName + '"'
+        updateGroupParams =  '"groupName":"'  + groupName.trim() + '"'
     
     }
     if (settings.trace) {
@@ -1574,7 +1603,7 @@ def deleteGroup(groupRef, groupName) {
 }
 
 // Only valid for Smart and Antenna thermostats
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //    if no thermostatID is provided, it is defaulted to this thermostatId (setttings)
 // groupSettings could be a map of settings separated by ",", no spaces; 
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
@@ -1584,7 +1613,82 @@ def createGroup(groupName, thermostatId, groupSettings=[]) {
     updateGroup(null, groupName, thermostatId, groupSettings)  
 }
 
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+
+// thermostatId can be only 1 thermostat (not a list) 
+// climate name is the name of the climate to be updated (ex. "Home", "Away").
+
+def updateClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, vent) {
+
+    Integer targetCoolTemp
+    Integer targetHeatTemp
+    
+    if ((thermostatId == null) || (thermostatId == "")) {
+        thermostatId = settings.thermostatId
+    }
+    def scale = getTemperatureScale()
+    if (scale == 'C') {
+        targetCoolTemp =  (cToF(coolTemp)*10) as Integer  // need to send temperature in F multiply by 10
+        targetHeatTemp =  (cToF(heatTemp)*10) as Integer
+    }
+    else {
+    
+        targetCoolTemp =  (coolTemp*10) as Integer   // need to send temperature in F multiply by 10
+        targetHeatTemp =  (heatTemp*10) as Integer
+        
+    
+    }
+    getThermostatInfo(thermostatId)
+ 
+    def bodyReq = '{"selection":{"selectionType":"thermostats","selectionMatch":"' + thermostatId + '"}'
+
+    bodyReq = bodyReq + ',"program":{"schedule":[' 
+                            
+    for (i in 0..data.thermostatList[0].program.schedule.size()-1) {
+             bodyReq = (i==0)? bodyReq  + '"' + data.thermostatList[0].program.schedule[i].toString().minus('[').minus(']') + '"' :        
+                         bodyReq + ',"' + data.thermostatList[0].program.schedule[i].toString().minus('[').minus(']') + '"' 
+                         
+    }
+    bodyReq = bodyReq + '],"climates":[' 
+    
+    for (i in 0..data.thermostatList[0].program.climates.size()-1) {
+        if ((i != 0) && (i < data.thermostatList[0].program.climates.size())) {
+                bodyReq = bodyReq + ','
+        }
+        bodyReq = (climateName.trim().toUpperCase() == data.thermostatList[0].program.climates[i].name.toUpperCase()) ? 
+            bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","coolTemp":"' + targetCoolTemp.toString() +
+                  '","heatTemp":"' + targetHeatTemp.toString() + '","isOptimized":"' + isOptimized + '","vent":"' + vent + '"}' :
+            bodyReq  + '{"name":"' + data.thermostatList[0].program.climates[i].name + '"}'
+ 
+    }
+    
+    bodyReq = bodyReq + ']}}' 
+    
+    if (settings.trace) {
+        log.debug "updateClimate> about to call api with body = ${bodyReq}..."
+        sendEvent name: "verboseTrace", value: "updateClimate>body = ${bodyReq}..."
+    }
+            
+    api('updateClimate',bodyReq) {resp->
+         def statusCode = resp.data.status.code
+         def message = resp.data.status.message
+        
+         if (!statusCode) {
+             if (settings.trace) {
+                 log.debug  "updateClimate>done for climateName =${climateName}"            
+                 sendEvent name: "verboseTrace", value: "updateClimate>done for climateName =${climateName}" 
+             }
+         }
+        else {
+            log.error "updateClimate> error= ${statusCode}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "updateClimate>${statusCode} for ${climateName}"
+        }
+            
+    }
+}
+     
+
+
+// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 def getThermostatInfo(thermostatId){
     
@@ -1802,8 +1906,8 @@ def getEcobeePinAndAuth() {
         sendEvent name: "verboseTrace", value: "getEcobeePin>${data.auth.ecobeePin}"
 
         data.auth.access_token=null     // for isLoggedIn() later
-        data.thermostatCount=null      // for iterate functions later
-        data.groups=null               // for iterateUpdateGroups later
+        data.thermostatCount=null       // for iterate functions later
+        data.groups=null                // for iterateUpdateGroups later
   
     }
     try {
