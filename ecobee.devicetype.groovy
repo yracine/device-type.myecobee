@@ -159,6 +159,7 @@ metadata {
 		command "updateClimate"
         command "iterateUpdateClimate"
         command "createClimate"
+        command "deleteClimate"
     }
 
     definition (name: "My Ecobee Device", author: "Yves Racine") {
@@ -903,7 +904,7 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     if (method == 'thermostatSummary') {
     
        
-        selection = [selection: [selectionType: tstatType, selectionMatch: '',includeEquipmentStatus:'true']
+        selection = [selection: [selectionType: tstatType, selectionMatch:'',includeEquipmentStatus:'true']
                     ]                                    
                        
     }
@@ -981,6 +982,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
 
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
+    Integer nTstats=0
     
     if (data.thermostatCount==null)
     {
@@ -1002,10 +1004,11 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
          def runtimeRevision = thermostatDetails[5]
          
          if (connected) {
-             if (i==0) {
+             if (nTstats==0) {
                  tstatlist = Id
+                 nTstats=1
              }
-             if ((i==(MAX_TSTAT_BATCH-1)) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                  if (settings.trace) {
              
        	             sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${tstatlist}"
@@ -1013,10 +1016,13 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
                  }
                  setHold(tstatlist, coolingSetPoint, heatingSetPoint, tstatSettings) 
                  tstatlist = Id
+                 nTstats=1
              
              }
              else {
                  tstatlist = tstatlist + "," +  Id
+                 nTstats=nTstats+1
+
              }     
              
          }        
@@ -1103,14 +1109,15 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
-
+    Integer nTstats=0
+    
     if (data.thermostatCount==null)
     {
     
          getThermostatSummary(tstatType)
     }
     if (settings.trace) {
-        log.debug "iterateCreateVacation> about to loop ${data.thermostatCount}"
+        log.debug "iterateCreateVacation> about to loop ${data.thermostatCount} thermostat(s)"
    	    sendEvent name: "verboseTrace", value: "iterateCreateVacation> about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
@@ -1124,29 +1131,31 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
          def runtimeRevision = thermostatDetails[5]
          
          if (connected) {
-         
-             if (i==0) {
+             if (nTstats==0) {
                  tstatlist = Id
+                 nTstats=1
              }
-             if ((i==(MAX_TSTAT_BATCH-1)) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                  if (settings.trace) {
              
        	             sendEvent name: "verboseTrace", value: "iterateCreateVacation>about to call createVacation for ${tstatlist}"
                      log.debug "iterateCreateVacation>about to call createVacation for ${tstatlist}"
                  }
                  createVacation(tstatlist, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
-                 tstatlist = Id
+                 nTstats=1
              
              }
              else {
-                 tstatlist = tstatlist + "," + Id
+                 tstatlist = tstatlist + "," +  Id
+                 nTstats=nTstats+1
+
              }     
-         }    
-    
-    }
-   
+             
+         }        
+    }      
 }
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+         
+// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
      
@@ -1209,14 +1218,15 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
 def iterateDeleteVacation(tstatType, vacationName) {
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
-
-    if (data.thermostatCount == null) {
+    Integer nTstats=0
     
-        getThermostatSummary(tstatType)
+    if (data.thermostatCount==null)
+    {
+    
+         getThermostatSummary(tstatType)
     }
-    
     if (settings.trace) {
-        log.debug "iterateDeleteVacation> about to loop ${data.thermostatCount}"
+        log.debug "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
    	    sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
@@ -1230,11 +1240,11 @@ def iterateDeleteVacation(tstatType, vacationName) {
          def runtimeRevision = thermostatDetails[5]
          
          if (connected) {
-         
-             if (i==0) {
+             if (nTstats==0) {
                  tstatlist = Id
+                 nTstats=1
              }
-             if ((i==(MAX_TSTAT_BATCH-1)) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                  if (settings.trace) {
              
       	             sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
@@ -1242,10 +1252,11 @@ def iterateDeleteVacation(tstatType, vacationName) {
                  }
                  deleteVacation(tstatlist, vacationName) 
                  tstatlist = Id
-             
+                 nTstats=1
              }
              else {
                  tstatlist = tstatlist + "," + Id
+                 nTstats=nTstats+1
              }     
              
          }    
@@ -1290,13 +1301,15 @@ def deleteVacation(thermostatId, vacationName) {
 def iterateResumeProgram(tstatType) {
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
-
-    if (data.thermostatCount==null){
+    Integer nTstats=0
+    
+    if (data.thermostatCount==null)
+    {
     
          getThermostatSummary(tstatType)
     }
     if (settings.trace) {
-        log.debug "iterateResumeProgram> about to loop ${data.thermostatCount}"
+        log.debug "iterateResumeProgram> about to loop ${data.thermostatCount} thermostat(s)"
    	    sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
@@ -1310,21 +1323,23 @@ def iterateResumeProgram(tstatType) {
          def runtimeRevision = thermostatDetails[5]
          
          if (connected) {
-         
-             if (i==0) {
+             if (nTstats==0) {
                  tstatlist = Id
+                 nTstats=1
              }
-             if ((i==(MAX_TSTAT_BATCH-1)) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                  if (settings.trace) {
       	             sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
                      log.debug "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
                  }    
                  resumeProgram(tstatlist)
                  tstatlist = Id
+                 nTstats=1
              
              }
              else {
                  tstatlist = tstatlist + "," + Id
+                 nTstats=nTstats+1
              }     
              
          }    
@@ -1617,7 +1632,7 @@ def createGroup(groupName, thermostatId, groupSettings=[]) {
 
 // tstatType ='managementSet' or 'registered'
 
-def iterateUpdateClimate(tstatType, climateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
 
     if (data.thermostatCount==null){
     
@@ -1643,7 +1658,7 @@ def iterateUpdateClimate(tstatType, climateName, coolTemp, heatTemp, isOptimized
       	         sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
                  log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
              }    
-             updateClimate(Id, climateName, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
+             updateClimate(Id, climateName, deleteFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
          }    
     
     }
@@ -1653,14 +1668,22 @@ def iterateUpdateClimate(tstatType, climateName, coolTemp, heatTemp, isOptimized
 
 
 // thermostatId can be only 1 thermostat (not a list) 
-// climate name is the name of the climate to be updated (ex. "Home", "Away").
-// indice is the corresponding indice in the thermostatList (used for iterateUpdateClimate, 0 by default)
+// climate name is the name of the climate to be created (ex. "Bedtime").
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 
 def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
 
-    updateClimate(thermostatId, climateName, null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
+    updateClimate(thermostatId, climateName, 'false', null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
+    
+}
+
+// thermostatId can be only 1 thermostat (not a list) 
+// climate name is the name of the climate to be deleted (ex. "Bedtime").
+
+def deleteClimate(thermostatId, climateName) {
+
+    updateClimate(thermostatId, climateName, 'true', null, null, null, null, null, null) 
     
 }
 
@@ -1668,29 +1691,33 @@ def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, co
 
 // thermostatId can be only 1 thermostat (not a list) 
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
+// deleteFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // indice is the corresponding indice in the thermostatList (used for iterateUpdateClimate, 0 by default)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 
-def updateClimate(thermostatId, climateName, indice, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+def updateClimate(thermostatId, climateName, deleteFlag, indice, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
 
     Integer targetCoolTemp
     Integer targetHeatTemp
     Boolean foundClimate = false
+    String scheduleAsString
     
     if ((thermostatId == null) || (thermostatId == "")) {
         thermostatId = settings.thermostatId
     }
-    def scale = getTemperatureScale()
-    if (scale == 'C') {
-        targetCoolTemp =  (cToF(coolTemp)*10) as Integer  // need to send temperature in F multiply by 10
-        targetHeatTemp =  (cToF(heatTemp)*10) as Integer
-    }
-    else {
+    if (!deleteFlag) {
+        def scale = getTemperatureScale()
+        if (scale == 'C') {
+            targetCoolTemp =  (cToF(coolTemp)*10) as Integer  // need to send temperature in F multiply by 10
+            targetHeatTemp =  (cToF(heatTemp)*10) as Integer
+        }
+        else {
     
-        targetCoolTemp =  (coolTemp*10) as Integer   // need to send temperature in F multiply by 10
-        targetHeatTemp =  (heatTemp*10) as Integer
+            targetCoolTemp =  (coolTemp*10) as Integer   // need to send temperature in F multiply by 10
+            targetHeatTemp =  (heatTemp*10) as Integer
         
+        }
     
     }
     getThermostatInfo(thermostatId)
@@ -1712,9 +1739,18 @@ def updateClimate(thermostatId, climateName, indice, coolTemp, heatTemp, isOptim
     bodyReq = bodyReq + ',"thermostat":{"program":{"schedule":[' 
                             
     for (i in 0..data.thermostatList[indice].program.schedule.size()-1) {
-             bodyReq = (i==0)? bodyReq  + data.thermostatList[indice].program.schedule[i].toString()  :        
-                       bodyReq + ',' + data.thermostatList[indice].program.schedule[i].toString()  
-                         
+    
+        bodyReq = bodyReq + '['
+        // loop thru all the schedule items to create the json structure
+        
+        for (j in 0..data.thermostatList[indice].program.schedule[i].size()-1) {
+
+            scheduleAsString = '"' + data.thermostatList[indice].program.schedule[i][j].toString() + '"'
+        
+            bodyReq = (j==0)? bodyReq  + scheduleAsString : bodyReq + ',' + scheduleAsString
+        }
+        bodyReq = (i == (data.thermostatList[indice].program.schedule.size()-1)) ? bodyReq + ']': bodyReq + '],' 
+        
     }
     bodyReq = bodyReq + '],"climates":[' 
     
@@ -1724,11 +1760,17 @@ def updateClimate(thermostatId, climateName, indice, coolTemp, heatTemp, isOptim
         }
         if (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase()) {
             foundClimate= true
-           
-            bodyReq = bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' + 
+            
+            if (!deleteFlag) {
+                bodyReq = bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' + 
                    data.thermostatList[indice].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp.toString() +
                   '","heatTemp":"' + targetHeatTemp.toString() + '","isOptimized":"' + isOptimized + '","coolFan":"' +
-                  coolFan  + '","heatFan":"' + heatFan + '"}' 
+                   coolFan  + '","heatFan":"' + heatFan + '"}' 
+            }
+            else {
+               bodyReq = bodyReq.substring(0,(bodyReq.size()-1))     // trim the last ','
+            }
+             
         }
         else {
             bodyReq = bodyReq  + '{"name":"' + data.thermostatList[indice].program.climates[i].name + '","climateRef":"' +
@@ -1736,7 +1778,7 @@ def updateClimate(thermostatId, climateName, indice, coolTemp, heatTemp, isOptim
         }
  
     }
-    if (!foundClimate) {
+    if ((!foundClimate) && (!deleteFlag)) {
     
             bodyReq = bodyReq + ',{"name":"' + climateName.trim() + '","coolTemp":"' + targetCoolTemp.toString() +
                   '","heatTemp":"' + targetHeatTemp.toString() + '","isOptimized":"' + isOptimized + 
