@@ -582,8 +582,6 @@ def poll() {
         ecobeeType = settings.ecobeeType    
     }
          
-    // need to call getThermostatSummmary in order to get Equipment Status
-    getThermostatSummary(ecobeeType)        
     getThermostatInfo(settings.thermostatId)
         
     sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
@@ -703,27 +701,7 @@ def poll() {
     
     }
     
-    // post equipment status
-    
-    def equipStatus = null
-    
-    data.statusList.each() {
-        def equipStatusDetails = it.split(':')
-        if (equipStatusDetails[0] == settings.thermostatId) {     // Get the right equipement status for the thermostatId
-
-            if (equipStatusDetails.size() >1) {
-            
-                equipStatus = equipStatusDetails[1]
-            }    
-            if (settings.trace) {
-                log.debug "poll> thermostatId = ${equipStatusDetails[0]}, status= ${equipStatus}"
-                sendEvent name: "verboseTrace", value: "poll> thermostatId = ${equipStatusDetails[0]}, status= ${equipStatus}"
-            }
-            exit
-        }
-            
-    }
-    equipStatus = (equipStatus != null) ? equipStatus + ' running' : 'Idle'  
+    def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0)? data.thermostatList[0].equipmentStatus + ' running': 'Idle'  
     
     sendEvent(name: 'equipementStatus', value: equipStatus)
 
@@ -916,7 +894,8 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
                                     includeRuntime:'true',
                                     includeProgram:'true',
                                     includeWeather:'true',
-                                    includeAlerts:'true'
+                                    includeAlerts:'true',
+                                    includeEquipmentStatus:'true'
                                 ]
                     ]
  
@@ -1892,7 +1871,7 @@ def getThermostatSummary(tstatType) {
                 def equipStatusDetails = data.statusList[i].split(':')
                 if (settings.trace) {
                     String equipStatus= 'Idle'
-                    if (equipStatusDetails.size() > 1) {
+                    if (equipStatusDetails.size() != 0) {
                          equipStatus = equipStatusDetails[1] + " running"
                     }     
                     log.debug "getThermostatSummary> thermostatId = ${equipStatusDetails[0]}, status= ${equipStatus}"
