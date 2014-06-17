@@ -995,35 +995,35 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
     }    
     for (i in 0..data.thermostatCount-1) {
     
-         def thermostatDetails = data.revisionList[i].split(':')
-         def Id = thermostatDetails[0]
-         def thermostatName = thermostatDetails[1]
-         def connected = thermostatDetails[2]
-         def thermostatRevision = thermostatDetails[3]
-         def alertRevision = thermostatDetails[4]
-         def runtimeRevision = thermostatDetails[5]
+        def thermostatDetails = data.revisionList[i].split(':')
+        def Id = thermostatDetails[0]
+        def thermostatName = thermostatDetails[1]
+        def connected = thermostatDetails[2]
+        def thermostatRevision = thermostatDetails[3]
+        def alertRevision = thermostatDetails[4]
+        def runtimeRevision = thermostatDetails[5]
          
-         if (connected) {
-             if (nTstats==0) {
-                 tstatlist = Id
-                 nTstats=1
-             }
-             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
-                 if (settings.trace) {
+        if (connected) {
+            if (nTstats==0) {
+                tstatlist = Id
+                nTstats=1
+            }
+            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                if (settings.trace) {
              
-       	             sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${tstatlist}"
-                     log.debug "iterateSethold> about to call setHold for ${tstatlist}"
-                 }
-                 setHold(tstatlist, coolingSetPoint, heatingSetPoint, tstatSettings) 
-                 tstatlist = Id
-                 nTstats=1
+     	            sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${tstatlist}"
+                    log.debug "iterateSethold> about to call setHold for ${tstatlist}"
+                }
+                setHold(tstatlist, coolingSetPoint, heatingSetPoint, tstatSettings) 
+                tstatlist = Id
+                nTstats=1
              
-             }
-             else {
-                 tstatlist = tstatlist + "," +  Id
-                 nTstats=nTstats+1
+            }
+            else {
+                tstatlist = tstatlist + "," +  Id
+                nTstats=nTstats+1
 
-             }     
+            }     
              
          }        
     }      
@@ -1113,8 +1113,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
     
     if (data.thermostatCount==null)
     {
-    
-         getThermostatSummary(tstatType)
+        getThermostatSummary(tstatType)
     }
     if (settings.trace) {
         log.debug "iterateCreateVacation> about to loop ${data.thermostatCount} thermostat(s)"
@@ -1122,34 +1121,34 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
     }    
     for (i in 0..data.thermostatCount-1) {
     
-         def thermostatDetails = data.revisionList[i].split(':')
-         def Id = thermostatDetails[0]
-         def thermostatName = thermostatDetails[1]
-         def connected = thermostatDetails[2]
-         def thermostatRevision = thermostatDetails[3]
-         def alertRevision = thermostatDetails[4]
-         def runtimeRevision = thermostatDetails[5]
+        def thermostatDetails = data.revisionList[i].split(':')
+        def Id = thermostatDetails[0]
+        def thermostatName = thermostatDetails[1]
+        def connected = thermostatDetails[2]
+        def thermostatRevision = thermostatDetails[3]
+        def alertRevision = thermostatDetails[4]
+        def runtimeRevision = thermostatDetails[5]
          
-         if (connected) {
-             if (nTstats==0) {
+        if (connected) {
+            if (nTstats==0) {
                  tstatlist = Id
                  nTstats=1
-             }
-             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
-                 if (settings.trace) {
+            }
+            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                if (settings.trace) {
              
        	             sendEvent name: "verboseTrace", value: "iterateCreateVacation>about to call createVacation for ${tstatlist}"
                      log.debug "iterateCreateVacation>about to call createVacation for ${tstatlist}"
-                 }
-                 createVacation(tstatlist, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
-                 nTstats=1
+                }
+                createVacation(tstatlist, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
+                nTstats=1
              
-             }
-             else {
-                 tstatlist = tstatlist + "," +  Id
-                 nTstats=nTstats+1
+            }
+            else {
+                tstatlist = tstatlist + "," +  Id
+                nTstats=nTstats+1
 
-             }     
+            }     
              
          }        
     }      
@@ -1222,8 +1221,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
     
     if (data.thermostatCount==null)
     {
-    
-         getThermostatSummary(tstatType)
+        getThermostatSummary(tstatType)
     }
     if (settings.trace) {
         log.debug "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
@@ -1231,33 +1229,33 @@ def iterateDeleteVacation(tstatType, vacationName) {
     }    
     for (i in 0..data.thermostatCount-1) {
     
-         def thermostatDetails = data.revisionList[i].split(':')
-         def Id = thermostatDetails[0]
-         def thermostatName = thermostatDetails[1]
-         def connected = thermostatDetails[2]
-         def thermostatRevision = thermostatDetails[3]
-         def alertRevision = thermostatDetails[4]
-         def runtimeRevision = thermostatDetails[5]
+        def thermostatDetails = data.revisionList[i].split(':')
+        def Id = thermostatDetails[0]
+        def thermostatName = thermostatDetails[1]
+        def connected = thermostatDetails[2]
+        def thermostatRevision = thermostatDetails[3]
+        def alertRevision = thermostatDetails[4]
+        def runtimeRevision = thermostatDetails[5]
          
-         if (connected) {
-             if (nTstats==0) {
-                 tstatlist = Id
-                 nTstats=1
-             }
-             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
-                 if (settings.trace) {
+        if (connected) {
+            if (nTstats==0) {
+                tstatlist = Id
+                nTstats=1
+            }
+            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                if (settings.trace) {
              
       	             sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
                      log.debug "iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
-                 }
-                 deleteVacation(tstatlist, vacationName) 
-                 tstatlist = Id
-                 nTstats=1
-             }
-             else {
-                 tstatlist = tstatlist + "," + Id
-                 nTstats=nTstats+1
-             }     
+                }
+                deleteVacation(tstatlist, vacationName) 
+                tstatlist = Id
+                nTstats=1
+            }
+            else {
+                tstatlist = tstatlist + "," + Id
+                nTstats=nTstats+1
+            }     
              
          }    
     
@@ -1305,8 +1303,7 @@ def iterateResumeProgram(tstatType) {
     
     if (data.thermostatCount==null)
     {
-    
-         getThermostatSummary(tstatType)
+        getThermostatSummary(tstatType)
     }
     if (settings.trace) {
         log.debug "iterateResumeProgram> about to loop ${data.thermostatCount} thermostat(s)"
@@ -1314,41 +1311,41 @@ def iterateResumeProgram(tstatType) {
     }    
     for (i in 0..data.thermostatCount-1) {
     
-         def thermostatDetails = data.revisionList[i].split(':')
-         def Id = thermostatDetails[0]
-         def thermostatName = thermostatDetails[1]
-         def connected = thermostatDetails[2]
-         def thermostatRevision = thermostatDetails[3]
-         def alertRevision = thermostatDetails[4]
-         def runtimeRevision = thermostatDetails[5]
+        def thermostatDetails = data.revisionList[i].split(':')
+        def Id = thermostatDetails[0]
+        def thermostatName = thermostatDetails[1]
+        def connected = thermostatDetails[2]
+        def thermostatRevision = thermostatDetails[3]
+        def alertRevision = thermostatDetails[4]
+        def runtimeRevision = thermostatDetails[5]
          
-         if (connected) {
-             if (nTstats==0) {
-                 tstatlist = Id
-                 nTstats=1
-             }
-             if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
-                 if (settings.trace) {
-      	             sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
-                     log.debug "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
-                 }    
-                 resumeProgram(tstatlist)
-                 tstatlist = Id
-                 nTstats=1
+        if (connected) {
+            if (nTstats==0) {
+                tstatlist = Id
+                nTstats=1
+            }
+            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                if (settings.trace) {
+      	            sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
+                    log.debug "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
+                }    
+                resumeProgram(tstatlist)
+                tstatlist = Id
+                nTstats=1
              
-             }
-             else {
-                 tstatlist = tstatlist + "," + Id
-                 nTstats=nTstats+1
-             }     
+            }
+            else {
+                tstatlist = tstatlist + "," + Id
+                nTstats=nTstats+1
+            }     
              
-         }    
+        }    
     
     }
    
 }
 
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 def resumeProgram(thermostatId) {
      
@@ -1636,7 +1633,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp,
 
     if (data.thermostatCount==null){
     
-         getThermostatSummary(tstatType)
+        getThermostatSummary(tstatType)
     }
     if (settings.trace) {
         log.debug "iterateUpdateClimate> about to loop ${data.thermostatCount}"
@@ -1644,22 +1641,22 @@ def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp,
     }    
     for (i in 0..data.thermostatCount-1) {
     
-         def thermostatDetails = data.revisionList[i].split(':')
-         def Id = thermostatDetails[0]
-         def thermostatName = thermostatDetails[1]
-         def connected = thermostatDetails[2]
-         def thermostatRevision = thermostatDetails[3]
-         def alertRevision = thermostatDetails[4]
-         def runtimeRevision = thermostatDetails[5]
+        def thermostatDetails = data.revisionList[i].split(':')
+        def Id = thermostatDetails[0]
+        def thermostatName = thermostatDetails[1]
+        def connected = thermostatDetails[2]
+        def thermostatRevision = thermostatDetails[3]
+        def alertRevision = thermostatDetails[4]
+        def runtimeRevision = thermostatDetails[5]
          
-         if (connected) {
+        if (connected) {
          
-             if (settings.trace) {
-      	         sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
-                 log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
-             }    
-             updateClimate(Id, climateName, deleteFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
-         }    
+            if (settings.trace) {
+      	        sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
+                log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
+            }    
+            updateClimate(Id, climateName, deleteFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
+        }    
     
     }
    
