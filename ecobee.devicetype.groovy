@@ -1650,16 +1650,16 @@ def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp,
 
 def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
 
-    updateClimate(thermostatId, climateName, 'false', null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
+    updateClimate(thermostatId, climateName, 'false', null, null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
     
 }
 
 // thermostatId can be only 1 thermostat (not a list) 
 // climate name is the name of the climate to be deleted (ex. "Bedtime").
 
-def deleteClimate(thermostatId, climateName) {
+def deleteClimate(thermostatId, climateName, substituteClimateName) {
 
-    updateClimate(thermostatId, climateName, 'true', null, null, null, null, null, null) 
+    updateClimate(thermostatId, climateName, 'true', substituteClimateName, null, null, null, null, null, null) 
     
 }
 
@@ -1668,16 +1668,20 @@ def deleteClimate(thermostatId, climateName) {
 // thermostatId can be only 1 thermostat (not a list) 
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
 // deleteFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
+// substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // indice is the corresponding indice in the thermostatList (used for iterateUpdateClimate, 0 by default)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 
-def updateClimate(thermostatId, climateName, deleteFlag, indice, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indice,
+            coolTemp,heatTemp,isOptimized,coolFan,heatFan) {
 
     Integer targetCoolTemp
     Integer targetHeatTemp
     Boolean foundClimate = false
     String scheduleAsString
+    def substituteClimateRef =null
+    def climateRefToBeReplaced = null
     
     if ((thermostatId == null) || (thermostatId == "")) {
         thermostatId = settings.thermostatId
@@ -1708,8 +1712,38 @@ def updateClimate(thermostatId, climateName, deleteFlag, indice, coolTemp, heatT
          return
     
     }
+    if ((substituteClimateName != null) && (substituteClimateName != "")) {  // find the subsituteClimateRef for the subsitute Climate Name if not null
+    
+        for (i in 0..data.thermostatList[indice].program.climates.size()-1) {
 
-
+            if (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase()) {
+                climateRefToBeReplaced = data.thermostatList[indice].program.climates[i].climateRef
+            }    
+            if (substituteClimateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase()) {
+                foundClimate = true
+                substituteClimateRef = data.thermostatList[indice].program.climates[i].climateRef
+                if (settings.trace) {
+                    log.debug  "updateClimate>found climateName ${climateName} at index ({$i}) for substitution by ${substituteClimateName}"            
+                }
+            }
+        }    
+        if (!foundClimate) {
+        
+             if (settings.trace) {
+                 log.debug  "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"            
+                 sendEvent name: "verboseTrace", value: "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
+             }
+             return
+        }
+        if (climateRefToBeReplaced == null) {
+        
+             if (settings.trace) {
+                 log.debug  "updateClimate>climateName ${climateName} for substitution not found"            
+                 sendEvent name: "verboseTrace", value: "updateClimate>climateName ${climateName} for substitution not found"
+             }
+             return
+        }
+    }
     def bodyReq = '{"selection":{"selectionType":"thermostats","selectionMatch":"' + thermostatId + '"}'
 
     bodyReq = bodyReq + ',"thermostat":{"program":{"schedule":[' 
@@ -1718,10 +1752,20 @@ def updateClimate(thermostatId, climateName, deleteFlag, indice, coolTemp, heatT
     
         bodyReq = bodyReq + '['
         // loop thru all the schedule items to create the json structure
+        // replace the climateRef with right substituteClimateRef if needed
         
         for (j in 0..data.thermostatList[indice].program.schedule[i].size()-1) {
 
-            scheduleAsString = '"' + data.thermostatList[indice].program.schedule[i][j].toString() + '"'
+            if (substituteClimateRef != null) {
+                scheduleAsString = (data.thermostatList[indice].program.schedule[i][j] == climateRefToBeReplaced) ?
+                    '"' + substituteClimateRef + '"' :
+                    '"' + data.thermostatList[indice].program.schedule[i][j].toString() + '"'
+            }
+            else {
+            
+                scheduleAsString = '"' + data.thermostatList[indice].program.schedule[i][j].toString() + '"'
+            
+            }
         
             bodyReq = (j==0)? bodyReq  + scheduleAsString : bodyReq + ',' + scheduleAsString
         }
@@ -1730,6 +1774,7 @@ def updateClimate(thermostatId, climateName, deleteFlag, indice, coolTemp, heatT
     }
     bodyReq = bodyReq + '],"climates":[' 
     
+    foundClimate = false
     for (i in 0..data.thermostatList[indice].program.climates.size()-1) {
         if ((i != 0) && (i < data.thermostatList[indice].program.climates.size())) {
                 bodyReq = bodyReq + ','
@@ -1756,7 +1801,7 @@ def updateClimate(thermostatId, climateName, deleteFlag, indice, coolTemp, heatT
     }
     if ((!foundClimate) && (!deleteFlag)) {
     
-            bodyReq = bodyReq + ',{"name":"' + climateName.trim() + '","coolTemp":"' + targetCoolTemp.toString() +
+        bodyReq = bodyReq + ',{"name":"' + climateName.capitalize().trim() + '","coolTemp":"' + targetCoolTemp.toString() +
                   '","heatTemp":"' + targetHeatTemp.toString() + '","isOptimized":"' + isOptimized + 
                   '","coolFan":"' + coolFan  + '","heatFan":"' + heatFan + '"}' 
   
@@ -1764,18 +1809,18 @@ def updateClimate(thermostatId, climateName, deleteFlag, indice, coolTemp, heatT
     bodyReq = bodyReq + ']}}}' 
     
     api('updateClimate',bodyReq) {resp->
-         def statusCode = resp.data.status.code
-         def message = resp.data.status.message
+        def statusCode = resp.data.status.code
+        def message = resp.data.status.message
         
-         if (!statusCode) {
-             if (settings.trace) {
-                 log.debug  "updateClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"            
-                 sendEvent name: "verboseTrace", value: "updateClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
-             }
-         }
+        if (!statusCode) {
+            if (settings.trace) {
+                log.debug  "updateClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"            
+                sendEvent name: "verboseTrace", value: "updateClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
+            }
+        }
         else {
             log.error "updateClimate> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "updateClimate>${statusCode} for ${climateName}"
+    	    sendEvent name: "verboseTrace", value: "updateClimate>error ${statusCode} for ${climateName}"
         }
             
     }
