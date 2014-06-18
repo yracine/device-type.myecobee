@@ -577,11 +577,6 @@ def poll() {
     def ecobeeType = 'registered'   // by default, the ecobeeType is 'registered'
     
     
-    if (settings.ecobeeType =='managementSet') {
-    
-        ecobeeType = settings.ecobeeType    
-    }
-         
     getThermostatInfo(settings.thermostatId)
         
     sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
@@ -849,7 +844,7 @@ def doRequest(uri, args, type, success) {
             httpPostJson(params, success)
             
         } else if (type == 'get') {    
-            params.body=null  // already in the URL request
+            params.body=null  // parameters already in the URL request
             httpGet(params, success)
 
         }
@@ -869,7 +864,7 @@ def doRequest(uri, args, type, success) {
 // tstatType ='managementSet' for utilities or other managmement sets, 
 //            'registered' for SMART thermostat, 
 //             null if not relevant for the given method
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 private def build_body_request(method, tstatType, thermostatId,  tstatParams =[], tstatSettings=[]) {
 
@@ -962,11 +957,20 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
     Integer nTstats=0
+    def ecobeeType
     
-    if (data.thermostatCount==null)
-    {
+    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
     
-         getThermostatSummary(tstatType)
+        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType : 'registered'
+    }
+    else {
+         
+        ecobeeType = tstatType        
+    }
+    
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary(ecobeeType)
     }
     if (settings.trace) {
         log.debug "iterateSetHold> about to loop ${data.thermostatCount} thermostat(s)"
@@ -1008,7 +1012,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
     }      
 }
 
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 
 def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {    
@@ -1073,8 +1077,8 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
             
             }
             else {
-                log.error "setHold> error= ${statusCode}, message = ${message}"
-    	        sendEvent name: "verboseTrace", value: "setHold> ${statusCode} for ${thermostatId}"
+                log.error "setHold> error=${statusCode.toString()}, message = ${message}"
+    	        sendEvent name: "verboseTrace", value: "setHold>error ${statusCode.toString()} for ${thermostatId}"
             }
         }        
         
@@ -1089,10 +1093,20 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
     Integer nTstats=0
+    def ecobeeType
     
-    if (data.thermostatCount==null)
-    {
-        getThermostatSummary(tstatType)
+    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
+    
+        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType : 'registered'
+    }
+    else {
+         
+        ecobeeType = tstatType        
+    }
+    
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary(ecobeeType)
     }
     if (settings.trace) {
         log.debug "iterateCreateVacation> about to loop ${data.thermostatCount} thermostat(s)"
@@ -1120,6 +1134,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
                      log.debug "iterateCreateVacation>about to call createVacation for ${tstatlist}"
                 }
                 createVacation(tstatlist, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) 
+                tstatlist = Id
                 nTstats=1
              
             }
@@ -1133,7 +1148,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
     }      
 }
          
-// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
      
@@ -1184,8 +1199,8 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
             }
         }
         else {
-            log.error "createVacation> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "createVacation>${statusCode} for ${thermostatId}"
+            log.error "createVacation>error=${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "createVacation>error ${statusCode.toString()} for ${thermostatId}"
         }
     } 
 }
@@ -1197,10 +1212,20 @@ def iterateDeleteVacation(tstatType, vacationName) {
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
     Integer nTstats=0
+    def ecobeeType
     
-    if (data.thermostatCount==null)
-    {
-        getThermostatSummary(tstatType)
+    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
+    
+        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType : 'registered'
+    }
+    else {
+         
+        ecobeeType = tstatType        
+    }
+    
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary(ecobeeType)
     }
     if (settings.trace) {
         log.debug "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
@@ -1242,7 +1267,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
    
 }
 
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 def deleteVacation(thermostatId, vacationName) {
      
@@ -1267,8 +1292,8 @@ def deleteVacation(thermostatId, vacationName) {
             
         }
         else {
-            log.error "deleteVacation> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "deleteVacation>${statusCode} for ${thermostatId}"
+            log.error "deleteVacation> error= ${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "deleteVacation>error ${statusCode.toString()} for ${thermostatId}"
         }
     }    
 }
@@ -1279,10 +1304,20 @@ def iterateResumeProgram(tstatType) {
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
     Integer nTstats=0
+    def ecobeeType
     
-    if (data.thermostatCount==null)
-    {
-        getThermostatSummary(tstatType)
+    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
+    
+        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType : 'registered'
+    }
+    else {
+         
+        ecobeeType = tstatType        
+    }
+    
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary(ecobeeType)
     }
     if (settings.trace) {
         log.debug "iterateResumeProgram> about to loop ${data.thermostatCount} thermostat(s)"
@@ -1324,7 +1359,7 @@ def iterateResumeProgram(tstatType) {
    
 }
 
-// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 def resumeProgram(thermostatId) {
      
@@ -1357,8 +1392,8 @@ def resumeProgram(thermostatId) {
             
         }
         else {
-            log.error "resumeProgram> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "resumeProgram>${statusCode} for ${thermostatId}"
+            log.error "resumeProgram>error=${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "resumeProgram>error=${statusCode.toString()} for ${thermostatId}"
         }
     
     }
@@ -1366,7 +1401,7 @@ def resumeProgram(thermostatId) {
 
 // Only valid for Smart and Antenna thermostats
 // Get all groups related to a thermostatId or all groups
-// thermostatId can be only 1 thermostat (not a list) or null (for all groups)
+// thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 
 def getGroups(thermostatId) {    
 
@@ -1429,8 +1464,8 @@ def getGroups(thermostatId) {
             }   
         }
         else {
-            log.error "getGroups>> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "getGroups>>${statusCode} for ${thermostatId}"
+            log.error "getGroups>> error=${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "getGroups>>error ${statusCode.toString()} for ${thermostatId}"
         }
     
     }
@@ -1440,8 +1475,8 @@ def getGroups(thermostatId) {
 
 // Only valid for Smart and Antenna thermostats
 // Get all groups related to a thermostatId and update them with the groupSettings
-// thermostatId can be only 1 thermostat (not a list), if null or empty, then defaulted to this thermostatId (settings)
-// groupSettings could be a map of settings separated by ",", no spaces; 
+// thermostatId may only be 1 thermostat (not a list), if null or empty, then defaulted to this thermostatId (settings)
+// groupSettings may be a map of settings separated by ",", no spaces; 
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 
 
@@ -1487,8 +1522,8 @@ def iterateUpdateGroup(thermostatId, groupSettings=[]) {
 
 // Only valid for Smart and Antenna thermostats
 // If groupRef is not provided, it is assumed that a group creation needs to be done
-// thermostatId would be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//    if no thermostatID is provided, it is defaulted to this thermostatId (setttings)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+//    if no thermostatID is provided, it is defaulted to this thermostatId (settings)
 // groupSettings could be a map of settings separated by ",", no spaces; 
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 
@@ -1542,8 +1577,8 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
             
         }
         else {
-            log.error "updateGroup> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "updateGroup>${statusCode} for ${thermostatId}"
+            log.error "updateGroup> error=${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "updateGroup>error ${statusCode.toString()} for ${thermostatId}"
         }
     
     }
@@ -1586,8 +1621,8 @@ def deleteGroup(groupRef, groupName) {
             
         }
         else {
-            log.error "deleteGroup> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "deteteGroup>${statusCode} for ${groupName},groupRef = ${groupRef}"
+            log.error "deleteGroup> error=  ${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "deteteGroup>error ${statusCode.toString()} for ${groupName},groupRef = ${groupRef}"
         }
     
     }
@@ -1596,7 +1631,7 @@ def deleteGroup(groupRef, groupName) {
 }
 
 // Only valid for Smart and Antenna thermostats
-// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //    if no thermostatID is provided, it is defaulted to this thermostatId (setttings)
 // groupSettings could be a map of settings separated by ",", no spaces; 
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
@@ -1609,10 +1644,20 @@ def createGroup(groupName, thermostatId, groupSettings=[]) {
 // tstatType ='managementSet' or 'registered'
 
 def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
-
-    if (data.thermostatCount==null){
+    def ecobeeType
     
-        getThermostatSummary(tstatType)
+    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
+    
+        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType : 'registered'
+    }
+    else {
+         
+        ecobeeType = tstatType        
+    }
+    
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary(ecobeeType)
     }
     if (settings.trace) {
         log.debug "iterateUpdateClimate> about to loop ${data.thermostatCount}"
@@ -1642,8 +1687,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp,
 }
 
 
-
-// thermostatId can be only 1 thermostat (not a list) 
+// thermostatId may only be 1 thermostat (not a list) 
 // climate name is the name of the climate to be created (ex. "Bedtime").
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
@@ -1664,8 +1708,7 @@ def deleteClimate(thermostatId, climateName, substituteClimateName) {
 }
 
 
-
-// thermostatId can be only 1 thermostat (not a list) 
+// thermostatId may only be 1 thermostat (not a list) 
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
 // deleteFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
@@ -1819,8 +1862,8 @@ def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indi
             }
         }
         else {
-            log.error "updateClimate> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "updateClimate>error ${statusCode} for ${climateName}"
+            log.error "updateClimate>error=${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "updateClimate>error ${statusCode.toString()} for ${climateName}"
         }
             
     }
@@ -1828,7 +1871,7 @@ def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indi
      
 
 
-// thermostatId could be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 def getThermostatInfo(thermostatId){
     
@@ -1876,7 +1919,7 @@ def getThermostatInfo(thermostatId){
             
         }
         else {
-            log.error "getThermostatInfo> error= ${statusCode}, message = ${message}"
+            log.error "getThermostatInfo> error=${statusCode.toString()}, message = ${message}"
     	    sendEvent name: "verboseTrace", value: "getTstatInfo>error=${statusCode} for ${thermostatId}"
         }
                                    
@@ -1927,8 +1970,8 @@ def getThermostatSummary(tstatType) {
             
         }
         else {
-            log.error "getThermostatSummary> error= ${statusCode}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "getTstatSummary> error={statusCode}"
+            log.error "getThermostatSummary> error=${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "getTstatSummary> error= ${statusCode.toString()}"
         }
     
     }
@@ -2012,7 +2055,7 @@ def login() {
         if (settings.trace) {
             log.debug "login> no access_token..., failed"
         }    
-        exit
+        return
     }            
     
 }
