@@ -49,6 +49,9 @@ preferences {
     section("Synchronize QuickSave") {
         input "synchronizeQuickSave", "Boolean", title: "synchronize QuickSave (default=false)?",metadata:[values:["true", "false"]], required: false
     }
+    section("Synchronize User Preferences") {
+        input "synchronizeUserPreferences", "Boolean", title: "synchronize User Preferences (default=false)?",metadata:[values:["true", "false"]], required: false
+    }
 
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
@@ -89,11 +92,12 @@ def appTouch(evt) {
     Boolean syncSystemModeFlag = (synchronizeSystemMode != null) ? synchronizeSystemMode : false
     Boolean syncAlertsFlag = (synchronizeAlerts != null) ? synchronizeAlerts : false         
     Boolean syncQuickSaveFlag = (synchronizeQuickSave != null) ? synchronizeQuickSave : false   
+    Boolean syncUserPreferencesFlag = (synchronizeUserPreferences != null) ? synchronizeUserPreferences : false   
     Boolean deleteGroupFlag = (deleteGroup != null) ? deleteGroup  : false
     
     def groupSettings = [synchronizeVacation:"${syncVacationFlag}",synchronizeSchedule:"${syncScheduleFlag}",
                         synchronizeSystemMode:"${syncSystemModeFlag}",synchronizeAlerts:"${syncAlertsFlag}",
-                        synchronizeQuickSave:"${syncQuickSaveFlag}"
+                        synchronizeQuickSave:"${syncQuickSaveFlag}",synchronizeUserPreferences:"${syncUserPreferencesFlag}"
                         ]
 
     log.trace "ecobeeManageGroup>deleteGroupFlag=${deleteGroupFlag},  groupName = ${groupName}, groupSettings= ${groupSettings}" 
