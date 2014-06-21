@@ -1043,14 +1043,14 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     
     if (settings.holdType != "") {
     
-        tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString(),   
+        tstatParams = [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,   
                        holdType:"${settings.holdType}"
                       ]
     
     }
     else {
     
-        tstatParams = [coolHoldTemp:targetCoolTemp.toString(),heatHoldTemp:targetHeatTemp.toString()]
+        tstatParams = [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp]
     }
     
     def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams, tstatSettings)
@@ -1175,8 +1175,8 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
 
     def vacationParams = [ 
         name:vacationName.trim(),
-        coolHoldTemp:targetCool.toString(),
-        heatHoldTemp:targetHeat.toString(),
+        coolHoldTemp:targetCool,
+        heatHoldTemp:targetHeat,
         startDate:vacationStartDate, 
         startTime:vacationStartTime,
         endDate:vacationEndDate,  
@@ -1694,7 +1694,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp,
 
 def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
 
-    updateClimate(thermostatId, climateName, 'false', null, null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
+    updateClimate(thermostatId, climateName, false, null, null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
     
 }
 
@@ -1703,25 +1703,25 @@ def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, co
 
 def deleteClimate(thermostatId, climateName, substituteClimateName) {
 
-    updateClimate(thermostatId, climateName, 'true', substituteClimateName, null, null, null, null, null, null) 
+    updateClimate(thermostatId, climateName, true, substituteClimateName, null, null, null, null, null, null) 
     
 }
 
 
 // thermostatId may only be 1 thermostat (not a list) 
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
-// deleteFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
+// deleteClimateFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // indice is the corresponding indice in the thermostatList (used for iterateUpdateClimate, 0 by default)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 
-def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indice,
+def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateName,indice,
             coolTemp,heatTemp,isOptimized,coolFan,heatFan) {
 
     Integer targetCoolTemp
     Integer targetHeatTemp
-    Boolean foundClimate = false
+    def foundClimate = false
     String scheduleAsString
     def substituteClimateRef =null
     def climateRefToBeReplaced = null
@@ -1729,7 +1729,12 @@ def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indi
     if ((thermostatId == null) || (thermostatId == "")) {
         thermostatId = settings.thermostatId
     }
-    if (!deleteFlag) {
+    if ((coolTemp != null) && (heatTemp != null)) {
+    
+        if (settings.trace) {
+             log.debug  "updateClimate>thermostatId =${thermostatId} coolTemp=${coolTemp}, heatTemp= ${heatTemp}"            
+             sendEvent name: "verboseTrace", value: "updateClimate>thermostatId =${thermostatId} coolTemp=${coolTemp}, heatTemp= ${heatTemp}"
+        }
         def scale = getTemperatureScale()
         if (scale == 'C') {
             targetCoolTemp =  (cToF(coolTemp)*10) as Integer  // need to send temperature in F multiply by 10
@@ -1748,11 +1753,11 @@ def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indi
  
     if (data.thermostatList[indice].identifier != thermostatId) {
     
-         if (settings.trace) {
-             log.debug  "updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"            
-             sendEvent name: "verboseTrace", value: "updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"
-         }
-         return
+        if (settings.trace) {
+            log.debug  "updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"            
+            sendEvent name: "verboseTrace", value: "updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"
+        }
+        return
     
     }
     if ((substituteClimateName != null) && (substituteClimateName != "")) {  // find the subsituteClimateRef for the subsitute Climate Name if not null
@@ -1825,14 +1830,20 @@ def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indi
         if (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase()) {
             foundClimate= true
             
-            if (!deleteFlag) {
+            if (!deleteClimateFlag) {
                 bodyReq = bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' + 
-                   data.thermostatList[indice].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp.toString() +
-                  '","heatTemp":"' + targetHeatTemp.toString() + '","isOptimized":"' + isOptimized + '","coolFan":"' +
+                   data.thermostatList[indice].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp +
+                  '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized + '","coolFan":"' +
                    coolFan  + '","heatFan":"' + heatFan + '"}' 
             }
             else {
+            
                bodyReq = bodyReq.substring(0,(bodyReq.size()-1))     // trim the last ','
+               if (settings.trace) {
+                  log.debug   "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be deleted"           
+                  sendEvent name: "verboseTrace", value:  "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be deleted"
+               }
+    
             }
              
         }
@@ -1842,12 +1853,17 @@ def updateClimate(thermostatId,climateName,deleteFlag,substituteClimateName,indi
         }
  
     }
-    if ((!foundClimate) && (!deleteFlag)) {
     
-        bodyReq = bodyReq + ',{"name":"' + climateName.capitalize().trim() + '","coolTemp":"' + targetCoolTemp.toString() +
-                  '","heatTemp":"' + targetHeatTemp.toString() + '","isOptimized":"' + isOptimized + 
+    if (!foundClimate) {  // this is a new Climate object to create
+
+        if (settings.trace) {
+            log.debug   "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be created"           
+            sendEvent name: "verboseTrace", value:  "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be created"
+        }
+    
+        bodyReq = bodyReq + ',{"name":"' + climateName.capitalize().trim() + '","coolTemp":"' + targetCoolTemp +
+                  '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized + 
                   '","coolFan":"' + coolFan  + '","heatFan":"' + heatFan + '"}' 
-  
     }
     bodyReq = bodyReq + ']}}}' 
     
@@ -2237,4 +2253,5 @@ def fToC(temp) {
 def milesToKm(distance) {
     return (distance * 1.609344)
 }
+
 
