@@ -574,8 +574,7 @@ def poll() {
         log.debug "poll> about to execute with settings ${settings}.."
         sendEvent name: "verboseTrace", value: "poll>about to execute with settings ${settings}"
     }
-    def ecobeeType = 'registered'   // by default, the ecobeeType is 'registered'
-    
+
     
     getThermostatInfo(settings.thermostatId)
         
