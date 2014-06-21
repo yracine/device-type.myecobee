@@ -700,6 +700,25 @@ def poll() {
     sendEvent(name: 'equipementStatus', value: equipStatus)
 
 
+    // post alerts
+    
+    def alerts = null
+    
+    if (data.thermostatList[0].alerts.size() > 0) {
+            
+        alerts = 'Alert(s) '
+        for (i in 0..data.thermostatList[0].alerts.size()-1) { 
+            if (settings.trace) {
+                log.debug "poll> thermostatId = ${thermostatId}, found alert= ${data.thermostatList[0].alerts[i]}"
+                sendEvent name: "verboseTrace", value: "thermostatId = ${thermostatId}, found alert= ${data.thermostatList[0].alerts[i]}"
+            }
+            alerts = (i>0) ?  ' \n' + alerts +  data.thermostatList[0].alerts[i].notificationType: alerts + 
+                data.thermostatList[0].alerts[i].notificationType
+        }
+    }
+    alerts = (alerts != null) ? alerts + '\ngo to ecobee portal': 'No alerts'  
+    
+    sendEvent(name: 'alerts', value: alerts)
     // post group(s)
 
     def groupList = 'No groups'
@@ -733,25 +752,7 @@ def poll() {
     }
     
     sendEvent(name: 'groups', value: groupList)
-    // post alerts
-    
-    def alerts = null
-    
-    if (data.thermostatList[0].alerts.size() > 0) {
-            
-        alerts = 'Alert(s) '
-        for (i in 0..data.thermostatList[0].alerts.size()-1) { 
-            if (settings.trace) {
-                log.debug "poll> thermostatId = ${thermostatId}, found alert= ${data.thermostatList[0].alerts[i]}"
-                sendEvent name: "verboseTrace", value: "thermostatId = ${thermostatId}, found alert= ${data.thermostatList[0].alerts[i]}"
-            }
-            alerts = (i>0) ?  ' \n' + alerts +  data.thermostatList[0].alerts[i].notificationType: alerts + 
-                data.thermostatList[0].alerts[i].notificationType
-        }
-    }
-    alerts = (alerts != null) ? alerts + '\ngo to ecobee portal': 'No alerts'  
-    
-    sendEvent(name: 'alerts', value: alerts)
+
 }
 
 
@@ -1420,8 +1421,8 @@ def getGroups(thermostatId) {
     
     if (ecobeeType.toUpperCase() == 'MANAGEMENTSET') {
         if (settings.trace) {
-            log.debug "getGroups>ManagementSet is not a valid setting.ecobeeType for getGroups"
-            sendEvent name: "verboseTrace", value: "getGroups>ManagementSet is not a valid setting.ecobeeType for getGroups"       
+            log.debug "getGroups>'managementSet' is not a valid setting.ecobeeType for getGroups"
+            sendEvent name: "verboseTrace", value: "getGroups>'managementSet' is not a valid setting.ecobeeType for getGroups"       
         }
         data.groups = null
         return
