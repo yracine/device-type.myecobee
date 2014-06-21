@@ -574,7 +574,7 @@ def poll() {
         log.debug "poll> about to execute with settings ${settings}.."
         sendEvent name: "verboseTrace", value: "poll>about to execute with settings ${settings}"
     }
-
+    
     
     getThermostatInfo(settings.thermostatId)
         
@@ -703,7 +703,12 @@ def poll() {
     // post group(s)
 
     def groupList = 'No groups'
-    if (settings.ecobeeType != 'managementSet') {
+    
+    // by default, the ecobeeType is registered (SMART & SMART-SI thermostats)
+    
+    def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType:'registered'
+    
+    if (ecobeeType.toUpperCase() != 'MANAGEMENTSET') {
     
         log.debug "poll> about to execute getGroups"
         sendEvent name: "verboseTrace", value: "poll> about to execute getGroups"
@@ -1406,10 +1411,21 @@ def getGroups(thermostatId) {
 
     
     if (settings.trace) {
-        log.debug "getGroups> about to assemble bodyReq thermostatId = ${thermostatId}..."
-        sendEvent name: "verboseTrace", value: "getGroups> about to assemble bodyReq thermostatId = ${thermostatId}..."        
+        log.debug "getGroups> about to assemble bodyReq thermostatId = ${thermostatId}, settings = ${settings}..."
+        sendEvent name: "verboseTrace", value: "getGroups> about to assemble bodyReq thermostatId = ${thermostatId},settings = ${settings}..."        
     }
 
+    
+    def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType:'registered'
+    
+    if (ecobeeType.toUpperCase() == 'MANAGEMENTSET') {
+        if (settings.trace) {
+            log.debug "getGroups>ManagementSet is not a valid setting.ecobeeType for getGroups"
+            sendEvent name: "verboseTrace", value: "getGroups>ManagementSet is not a valid setting.ecobeeType for getGroups"       
+        }
+        data.groups = null
+        return
+    }
     def bodyReq = '{"selection":{"selectionType":"registered"}}'       
     
     if (settings.trace) {
@@ -1642,7 +1658,7 @@ def createGroup(groupName, thermostatId, groupSettings=[]) {
 
 // tstatType ='managementSet' or 'registered'
 
-def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
     def ecobeeType
     
     if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
@@ -1678,7 +1694,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteFlag, coolTemp, heatTemp,
       	        sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
                 log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
             }    
-            updateClimate(Id, climateName, deleteFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
+            updateClimate(Id, climateName, deleteClimateFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
         }    
     
     }
@@ -2252,5 +2268,4 @@ def fToC(temp) {
 def milesToKm(distance) {
     return (distance * 1.609344)
 }
-
 
