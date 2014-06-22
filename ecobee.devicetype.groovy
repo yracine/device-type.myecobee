@@ -73,11 +73,11 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+ 
 import groovy.json.JsonBuilder
 import java.net.URLEncoder
-
- 
 // for the UI
+
 preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
@@ -1026,6 +1026,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
     
     if (settings.trace) {
         log.debug "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${tstatSettings} for ${thermostatId}"
+        sendEvent name: "verboseTrace", value: "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${tstatSettings} for ${thermostatId}"
     }    
     def scale= getTemperatureScale()
     if (scale == 'C') {
@@ -1039,13 +1040,15 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
         
     
     }
-    if (settings.trace) {
-	   sendEvent name: "verboseTrace", value: "setHold>about to build_body_req with settings=${tstatSettings}"
-    }
     /* if settings.holdType has a value, include it in the list of params
     */
     
-    if ((settings.holdType != null) && (setting.holdType !="")) {
+    if ((settings.holdType != null) && (settings.holdType !="")) {
+        if (settings.trace) {
+            log.debug "setHold>settings.holdType= ${settings.holdType}"
+            sendEvent name: "verboseTrace", value: "setHold>settings.holdType= ${settings.holdType}"
+
+        }    
     
         tstatParams = [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,   
                        holdType:"${settings.holdType.trim()}"
@@ -1420,8 +1423,8 @@ def getGroups(thermostatId) {
     
     if (ecobeeType.toUpperCase() == 'MANAGEMENTSET') {
         if (settings.trace) {
-            log.debug "getGroups>'managementSet' is not a valid setting.ecobeeType for getGroups"
-            sendEvent name: "verboseTrace", value: "getGroups>'managementSet' is not a valid setting.ecobeeType for getGroups"       
+            log.debug "getGroups>'managementSet' is not a valid settings.ecobeeType for getGroups"
+            sendEvent name: "verboseTrace", value: "getGroups>'managementSet' is not a valid settings.ecobeeType for getGroups"       
         }
         data.groups = null
         return
