@@ -30,9 +30,9 @@
  *        (a) <appKey> provided at the ecobee web portal in step 1 (no spaces)
  *        (b) <serial number> of your ecobee thermostat (no spaces)
  *        (c) <trace> when needed, set to true to get more tracing (no spaces)
- *        (d) <holdType> set to 'nextTransition' or 'indefinite' (by default, no spaces) 
+ *        (d) <holdType> set to nextTransition or indefinite (by default, no spaces) 
  *        see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details
- *        (e) <ecobeeType> set to 'registered' (by default) or 'managementSet' (no spaces)
+ *        (e) <ecobeeType> set to registered (by default) or managementSet (no spaces)
  *
  * 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
  *
@@ -73,11 +73,11 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
- 
-// for the UI
 import groovy.json.JsonBuilder
 import java.net.URLEncoder
 
+ 
+// for the UI
 preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
