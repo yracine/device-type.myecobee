@@ -1,4 +1,3 @@
-
 /***
  *  My Ecobee Device
  *
@@ -28,12 +27,12 @@
  *     Click on the new device 
  *     Click the edit button next to Preferences
  *     Fill in your device 
- *        (a) <appKey> provided at the ecobee web portal in step 1
- *        (b) <serial number> of your ecobee thermostat
- *        (c) <trace> when needed, set to true to get more tracing
- *        (d) <holdType> set to nextTransition or indefinite (by default) 
+ *        (a) <appKey> provided at the ecobee web portal in step 1 (no spaces)
+ *        (b) <serial number> of your ecobee thermostat (no spaces)
+ *        (c) <trace> when needed, set to true to get more tracing (no spaces)
+ *        (d) <holdType> set to 'nextTransition' or 'indefinite' (by default, no spaces) 
  *        see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details
- *        (e) <ecobeeType> set to 'registered' (by default) or 'managementSet'
+ *        (e) <ecobeeType> set to 'registered' (by default) or 'managementSet' (no spaces)
  *
  * 5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
  *
@@ -80,11 +79,11 @@ import groovy.json.JsonBuilder
 import java.net.URLEncoder
 
 preferences {
-    	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat")
-    	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee")
-    	input("trace", "text", title: "trace", description: "Set it to true to enable tracing")
+    	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces")
+    	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
+    	input("trace", "text", title: "trace", description: "Set it to 'true' to enable tracing (no spaces)")
     	input("holdType", "text", title: "holdType", description: "Set it 'nextTransition' or 'indefinite' (latter by default)")
-    	input("ecobeeType", "text", title: "ecobee Tstat Type", description: "Set it to 'registered' or 'managementSet'(former by default)")
+    	input("ecobeeType", "text", title: "ecobee Tstat Type", description: "Set it to 'registered' (by default) or 'managementSet'(no spaces)")
 	}
 metadata {
 	// Automatically generated. Make future change here.
