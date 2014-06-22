@@ -841,7 +841,6 @@ def doRequest(uri, args, type, success) {
     try {
 
         if (settings.trace) {
-           
   	        sendEvent name: "verboseTrace", value: "doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
             log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args}"
         }
@@ -854,13 +853,13 @@ def doRequest(uri, args, type, success) {
 
         }
     } catch ( java.net.UnknownHostException e) {
-    	log.error "doRequest> Unknown host - check the URL " + params.uri
-    	sendEvent name: "verboseTrace", value: "doRequest> Unknown host"
+        log.error "doRequest> Unknown host - check the URL " + params.uri
+        sendEvent name: "verboseTrace", value: "doRequest> Unknown host"
    	} catch (java.net.NoRouteToHostException e) {
-    	log.error "doRequest> No route to host - check the URL " + params.uri
-    	sendEvent name: "verboseTrace", value: "doRequest> No route to host"
+        log.error "doRequest> No route to host - check the URL " + params.uri
+        sendEvent name: "verboseTrace", value: "doRequest> No route to host"
     } catch (java.io.IOException e) {
-      	log.error "doRequest> general or malformed request error " + params.body
+        log.error "doRequest> general or malformed request error " + params.body
         sendEvent name: "verboseTrace", value: "doRequest> general or malformed request body error " + params.body
     }
 }
@@ -1771,7 +1770,7 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     
         if (settings.trace) {
             log.debug  "updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"            
-            sendEvent name: "verboseTrace", value: "updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"
+            sendEvent name: "verboseTrace", value:"updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"
         }
         return
     
@@ -1838,30 +1837,33 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     }
     bodyReq = bodyReq + '],"climates":[' 
     
-    foundClimate = false
+    foundClimate= false
     for (i in 0..data.thermostatList[indice].program.climates.size()-1) {
+
         if ((i != 0) && (i < data.thermostatList[indice].program.climates.size())) {
                 bodyReq = bodyReq + ','
         }
-        if (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase()) {
+        if ((deleteClimateFlag=='true') && (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase())) {
+
             foundClimate= true
-            
-            if (!deleteClimateFlag) {
-                bodyReq = bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' + 
-                   data.thermostatList[indice].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp +
-                  '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized + '","coolFan":"' +
-                   coolFan  + '","heatFan":"' + heatFan + '"}' 
-            }
-            else {
-            
-               bodyReq = bodyReq.substring(0,(bodyReq.size()-1))     // trim the last ','
-               if (settings.trace) {
-                  log.debug   "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be deleted"           
-                  sendEvent name: "verboseTrace", value:  "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be deleted"
-               }
-    
-            }
-             
+
+            if (settings.trace) {
+                log.debug   "updateClimate>thermostatId =${thermostatId}, deleteClimateFlag=${deleteClimateFlag},Climate ${climateName} to be deleted..."           
+                sendEvent name: "verboseTrace", value:  "updateClimate>thermostatId =${thermostatId}, deleteClimateFlag=${deleteClimateFlag},Climate ${climateName} to be deleted..." 
+            }    
+            bodyReq = bodyReq.substring(0,(bodyReq.length()-1))     // trim the last ','
+        }
+        else if ((deleteClimateFlag =='false') && (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase())) {
+        // update the Climate Object
+            foundClimate= true
+            bodyReq = bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' + 
+                data.thermostatList[indice].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp +
+                '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized + '","coolFan":"' +
+                coolFan  + '","heatFan":"' + heatFan + '"}' 
+            if (settings.trace) {
+                log.debug   "updateClimate>thermostatId =${thermostatId}, deleteClimateFlag=${deleteClimateFlag},Climate ${climateName} to be updated..."           
+                sendEvent name: "verboseTrace", value:  "updateClimate>thermostatId =${thermostatId}, deleteClimateFlag=${deleteClimateFlag},Climate ${climateName} to be updated..." 
+            } 
         }
         else {
             bodyReq = bodyReq  + '{"name":"' + data.thermostatList[indice].program.climates[i].name + '","climateRef":"' +
