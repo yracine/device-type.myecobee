@@ -1423,8 +1423,8 @@ def getGroups(thermostatId) {
     
     if (ecobeeType.toUpperCase() == 'MANAGEMENTSET') {
         if (settings.trace) {
-            log.debug "getGroups>'managementSet' is not a valid settings.ecobeeType for getGroups"
-            sendEvent name: "verboseTrace", value: "getGroups>'managementSet' is not a valid settings.ecobeeType for getGroups"       
+            log.debug "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"
+            sendEvent name: "verboseTrace", value: "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"       
         }
         data.groups = null
         return
@@ -1483,7 +1483,7 @@ def getGroups(thermostatId) {
         }
         else {
             log.error "getGroups>> error=${statusCode.toString()}, message = ${message}"
-    	    sendEvent name: "verboseTrace", value: "getGroups>>error ${statusCode.toString()} for ${thermostatId}"
+    	    sendEvent name: "verboseTrace", value: "getGroups>error ${statusCode.toString()} for ${thermostatId}"
         }
     
     }
