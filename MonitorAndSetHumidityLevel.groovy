@@ -9,9 +9,6 @@
 */
 
 
-
-
-
 // Automatically generated. Make future change here.
 definition(
     name: "Monitor And Set Ecobee's humidity",
@@ -109,7 +106,7 @@ def sensorHumidityHandler(evt) {
 }
 
 def sensorTemperatureHandler(evt) {
-    log.debug "outdoor's temperature is': $evt.value"
+    log.debug "outdoor temperature is: $evt.value"
 }
 
 def setHumidityLevel() {
