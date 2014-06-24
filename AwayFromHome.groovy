@@ -43,6 +43,10 @@ preferences {
         input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
     }
  
+    section("Or set the ecobee to this Climate Name (ex. Away") {
+        input "givenClimateName", "text", title: "Climate Name", required: false
+    }
+ 
     section("Trigger these actions when home has been quiet for (default 3 minutes)") {
         input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
 	}
@@ -165,9 +169,22 @@ def takeActions() {
     def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
     def minCoolTemp = givenCoolTemp ?: 27  // by default, 27C is the minimum cool temp
     
-    // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
     
-    ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp,null, null)// Set heating and cooling points at ecobee
+    if ((givenClimateName != null) && (givenClimateName != "")) {
+    
+        // You may want to change to ecobee.setClimate('serial number list',...) if you own EMS thermostat(s)
+
+        ecobee.iterateSetClimate('registered',givenClimateName)// Set to the climateName
+    
+    
+    }
+    else {
+    
+       // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
+ 
+        ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp,null, null)// Set heating and cooling points at ecobee
+    }
+    
     send("AwayFromHome>ecobee's temps are now lower")
 
     def messageswitch = "AwayFromHome>Switched off all switches"
