@@ -79,30 +79,37 @@ private initialize() {
 }
 
 
-def alarmSwitchContact(evt)
-
-{
+def alarmSwitchContact(evt) {
     log.info "alarmSwitchContact, $evt.name: $evt.value"
     
-    if ((alarmSwitch.currentContact == "closed") && residentsHaveBeenQuiet()) {
-       send("AwayFromHome>alarm system just armed, no motion at home")
+    if ((alarmSwitch.currentContact == "closed") && residentsHaveBeenQuiet() && everyoneIsAway()) {
+       send("AwayFromHome>alarm system just armed, take actions")
        log.debug "alarm is armed, nobody at home"  
        takeActions()								    
     }
 }
 
 
-def motionEvtHandler(evt)
-{
+def motionEvtHandler(evt) {
     if (evt.value == "active") {
         state.lastIntroductionMotion = now()
         log.debug "Motion at home..."
     }
 }
 
-private residentsHaveBeenQuiet()
-{
+private doNothing() { 
+    log.debug "doNothing"
+}
+
+private residentsHaveBeenQuiet() {
+    
+
     def threshold = (residentsQuietThreshold == null ? 3: residentsQuietThreshold) * 60 * 1000
+    Integer delay = 60 * threshold
+
+//  Wait a certain threshold before checking if residents have been quiet
+    runIn (delay, "doNothing", [overwrite:false])
+
     def result = true
     def t0 = new Date(now() - threshold)
     for (sensor in motions) {
@@ -117,6 +124,7 @@ private residentsHaveBeenQuiet()
 }
 
 def presence(evt) {
+
     log.debug "evt.name: $evt.value"
     ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     if (evt.value == "not present") {
@@ -125,9 +133,10 @@ def presence(evt) {
         log.debug "checking if everyone is away  and quiet at home"
         if (everyoneIsAway()) {
             send("AwayFromHome>Nobody is at home now")
+
             if (residentsHaveBeenQuiet()){
            
-                send("AwayFromHome>Quiet at home...")
+                send("AwayFromHome>Quiet at home, take actions...")
                 takeActions()
             }     
             else {
@@ -158,27 +167,27 @@ def takeActions() {
     
     // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
     
-    ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null)// Set heating and cooling points at ecobee
+    ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp,null, null)// Set heating and cooling points at ecobee
     send("AwayFromHome>ecobee's temps are now lower")
 
-    def messageswitch = "AwayFromHome>Switched off switches"
+    def messageswitch = "AwayFromHome>Switched off all switches"
     send(messageswitch)
     log.info messageswitch
     switches?.off()											 // turn off the lights		
 
     if (alarmSwitch.currentContact == "open") {
         log.debug "alarm is not set, arm it..."  
+        send("AwayFromHome>quiet,alarm system now activated")
         alarmSwitch.on()								     // arm the alarm system
     }
-    send("AwayFromHome>quiet,Alarm system activated")
-    runIn (delay, "checkAlarmSystem")
+    runIn (delay, "checkAlarmSystem", [overwrite:false])     // check that the alarm system is armed
     
 
 }
 
 private checkAlarmSystem() {
     if (alarmSwitch.currentContact == "open") {
-        send("AwayFromHome>alarm not activated,repeat..." )
+        send("AwayFromHome>alarm still not activated,repeat..." )
         alarmSwitch.on()								     // try to arm the alarm system again
     }
 
