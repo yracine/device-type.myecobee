@@ -160,7 +160,9 @@ metadata {
         command "iterateUpdateClimate"
         command "createClimate"
         command "deleteClimate"
-    }
+        command "setClimate"
+        command "iterateSetClimate"
+}
 
     definition (name: "My Ecobee Device", author: "Yves Racine") {
         capability "Polling"
@@ -271,7 +273,7 @@ metadata {
             state "fanAuto", label:'', action:"thermostat.fanOn",icon: "st.thermostat.fan-auto" 
             state "fanOn", label:'', action:"thermostat.fanAuto", icon: "st.thermostat.fan-on" 
 //          fanOff is not suppported            
-//            state "fanOff", label:'  ', action:"thermostat.fanAuto", icon: "st.thermostat.fan-off" 
+//          state "fanOff", label:'  ', action:"thermostat.fanAuto", icon: "st.thermostat.fan-off" 
         }
  
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
@@ -867,9 +869,9 @@ def doRequest(uri, args, type, success) {
 }
 
 
-// tstatType ='managementSet' for utilities or other managmement sets, 
-//            'registered' for SMART thermostat, 
-//             null if not relevant for the given method
+// tstatType =managementSet or registered (no spaces)
+//            registered is for SMART thermostat, 
+//            may be null if not relevant for the given method
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 
 private def build_body_request(method, tstatType, thermostatId,  tstatParams =[], tstatSettings=[]) {
@@ -954,7 +956,7 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     
 }
 
-// tstatType ='managementSet' or 'registered'
+// tstatType =managementSet or registered (no spaces)
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 
 
@@ -1099,7 +1101,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettin
 }
 
 
-// tstatType ='managementSet' or 'registered'
+// tstatType =managementSet or registered (no spaces)
 
 
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
@@ -1218,7 +1220,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
     } 
 }
 
-// tstatType ='managementSet' or 'registered'
+// tstatType =managementSet or registered (no spaces)
 
 
 def iterateDeleteVacation(tstatType, vacationName) {
@@ -1311,7 +1313,7 @@ def deleteVacation(thermostatId, vacationName) {
     }    
 }
 
-// tstatType ='managementSet' or 'registered'
+// tstatType =managementSet or registered (no spaces)
 
 def iterateResumeProgram(tstatType) {
     Integer MAX_TSTAT_BATCH=25
@@ -1665,7 +1667,7 @@ def createGroup(groupName, thermostatId, groupSettings=[]) {
     updateGroup(null, groupName, thermostatId, groupSettings)  
 }
 
-// tstatType ='managementSet' or 'registered'
+// tstatType =managementSet or registered (no spaces)
 
 def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
     def ecobeeType
@@ -1730,6 +1732,130 @@ def deleteClimate(thermostatId, climateName, substituteClimateName) {
     updateClimate(thermostatId, climateName, true, substituteClimateName, null, null, null, null, null, null) 
     
 }
+
+// tstatType =managementSet or registered (no spaces)
+// climate name is the name of the climate bet set to(ex. "Home", "Away").
+
+def iterateSetClimate(tstatType, climateName) {
+    Integer MAX_TSTAT_BATCH=25
+    def tstatlist=null
+    Integer nTstats=0
+    def ecobeeType
+    
+    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
+    
+        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim() : 'registered'
+    }
+    else {
+         
+        ecobeeType = tstatType.trim()        
+    }
+    
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary(ecobeeType)
+    }
+    if (settings.trace) {
+        log.debug "iterateSetClimate> about to loop ${data.thermostatCount} thermostat(s)"
+   	    sendEvent name: "verboseTrace", value: "iterateSetClimate> about to loop ${data.thermostatCount} thermostat(s)"
+    }    
+    for (i in 0..data.thermostatCount-1) {
+    
+        def thermostatDetails = data.revisionList[i].split(':')
+        def Id = thermostatDetails[0]
+        def thermostatName = thermostatDetails[1]
+        def connected = thermostatDetails[2]
+        def thermostatRevision = thermostatDetails[3]
+        def alertRevision = thermostatDetails[4]
+        def runtimeRevision = thermostatDetails[5]
+         
+        if (connected) {
+            if (nTstats==0) {
+                tstatlist = Id
+                nTstats=1
+            }
+            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+                if (settings.trace) {
+      	            sendEvent name: "verboseTrace", value: "iterateSetClimate> about to call setClimate for ${tstatlist}"
+                    log.debug "iterateSetClimate> about to call setClimate for ${tstatlist}"
+                }    
+                setClimate(tstatlist, climateName)
+                tstatlist = Id
+                nTstats=1
+             
+            }
+            else {
+                tstatlist = tstatlist + "," + Id
+                nTstats=nTstats+1
+            }     
+             
+        }    
+    
+    }
+   
+}
+
+
+
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// climate name is the name of the climate to be set to (ex. "Home", "Away").
+
+def setClimate(thermostatId, climateName) {
+    def climateRef=null
+    
+    getThermostatInfo(thermostatId)
+    for (i in 0..data.thermostatList.size()-1) {
+        
+        def foundClimate=false
+        for (j in 0..data.thermostatList[i].program.climates.size()-1) {
+            
+            if (climateName.trim().toUpperCase() == data.thermostatList[i].program.climates[j].name.toUpperCase()) {
+                climateRef = data.thermostatList[i].program.climates[j].climateRef  // get the corresponding climateRef
+                foundClimate = true
+            }
+        } 
+        if (!foundClimate) {
+        
+            log.debug  "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostat[i].identifier}"            
+            sendEvent name: "verboseTrace", value: "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostat[i].identifier}"
+            return        
+        }
+    }
+    def bodyReq = '{"selection":{"selectionType":"thermostats","selectionMatch":"' + thermostatId + '"}'
+    bodyReq = bodyReq + ',"functions":[{"type":"setHold","params":{"holdClimateRef":"' + climateRef 
+    /* if settings.holdType has a value, include it in the list of params
+    */
+    
+    if ((settings.holdType != null) && (settings.holdType !="")) {
+        if (settings.trace) {
+            log.debug "setHold>settings.holdType= ${settings.holdType}"
+            sendEvent name: "verboseTrace", value: "setHold>settings.holdType= ${settings.holdType}"
+
+        }    
+        bodyReq = bodyReq + '","holdType":"' + settings.holdType 
+    }
+    
+    bodyReq= bodyReq +  '"}}]}' 
+        
+    api('setHold',bodyReq) {resp->
+        def statusCode = resp.data.status.code
+        def message = resp.data.status.message
+        
+        if (!statusCode) {
+            if (settings.trace) {
+                log.debug  "setClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"            
+                sendEvent name: "verboseTrace", value: "setClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
+            }
+        }
+        else {
+            log.error "setClimate>error=${statusCode.toString()}, message = ${message}"
+    	    sendEvent name: "verboseTrace", value: "setClimate>error ${statusCode.toString()} for ${climateName}"
+        }
+            
+    }
+    
+}    
+    
 
 
 // thermostatId may only be 1 thermostat (not a list) 
@@ -1970,7 +2096,7 @@ def getThermostatInfo(thermostatId){
     
 }
 
-// tstatType ='managementSet' or 'registered'
+// tstatType =managementSet or registered (no spaces)
 def getThermostatSummary(tstatType) {  
     
    
