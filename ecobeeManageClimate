@@ -101,7 +101,7 @@ def appTouch(evt) {
     else {
     
         send("ecobeeManageClimate>about to create or update climateName = ${climateName}")
-        ecobee.updateClimate(null, climateName, deleteClimateFlag, subClimateName, null, 
+        ecobee.updateClimate(null, climateName, deleteClimateFlag, subClimateName,  
             coolTemp, heatTemp, isOptimized, coolFanMode, heatFanMode)    
     }
         
