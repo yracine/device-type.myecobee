@@ -43,7 +43,7 @@ preferences {
         input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
     }
  
-    section("Or set the ecobee to this Climate Name (ex. Away") {
+    section("Or set the ecobee to this Climate Name (ex. Away)") {
         input "givenClimateName", "text", title: "Climate Name", required: false
     }
  
