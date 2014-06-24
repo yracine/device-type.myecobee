@@ -144,7 +144,7 @@ def setHumidityLevel() {
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on', ['dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",'humidifierMode':'off',
-           'dehumidifyWithAC':'false', 'vent':'minontime','fanMinOnTime':"${min_fan_time}"]) 
+           'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}"]) 
 
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }
@@ -158,7 +158,7 @@ def setHumidityLevel() {
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",
-           'humidifierMode':'off', 'vent':'minontime','fanMinOnTime':"${min_fan_time}"]) 
+           'humidifierMode':'off','fanMinOnTime':"${min_fan_time}"]) 
 
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }    
@@ -187,7 +187,7 @@ def setHumidityLevel() {
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['dehumidifyWithAC':'true','dehumidifierLevel':"${target_humidity}",
-           'dehumidiferMode':'off','vent':'minontime','fanMinOnTime':"${min_fan_time}"]) 
+           'dehumidiferMode':'off','fanMinOnTime':"${min_fan_time}"]) 
           
        send "MonitorHumidity>dehumidifyWithAC in cooling mode"
              
@@ -199,7 +199,7 @@ def setHumidityLevel() {
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['humidifierMode':'auto','humidity':"${target_humidity}",'dehumidifierMode':'off',
-           'condensationAvoid':'true','vent':'minontime','fanMinOnTime':"${min_fan_time}"]) 
+           'condensationAvoid':'true','fanMinOnTime':"${min_fan_time}"]) 
 
        send "MonitorHumidity>humidfy to ${target_humidity} in ${ecobeeMode} mode"
     }
