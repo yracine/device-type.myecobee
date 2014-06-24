@@ -85,7 +85,7 @@ def appTouch(evt) {
     def isOptimized = (isOptimizedFlag != null) ? isOptimizedFlag: false  // by default, isOptimized flag is false
     def coolFanMode = givenCoolFanMode ?: 'auto'  // By default, fanMode is auto
     def heatFanMode = givenHeatFanMode ?: 'auto'  // By default, fanMode is auto
-    def deleteClimateFlag = (deleteClimate != null) ? deleteClimate  : false
+    def deleteClimateFlag = (deleteClimate != null) ? deleteClimate  :'false'
     
     log.debug "ecobeeManageClimate> about to take actions"
      
@@ -93,8 +93,7 @@ def appTouch(evt) {
     log.trace "ecobeeManageClimate>climateName =${climateName},deleteClimateFlag =${deleteClimateFlag},subClimateName= ${subClimateName}, isOptimized=${isOptimized}" +
         ",coolTemp = ${coolTemp},heatTemp = ${heatTemp},coolFanMode= ${coolFanMode}, heatFanMode= ${heatFanMode}" 
         
-    if (deleteClimateFlag==true){
-    
+    if (deleteClimateFlag=='true') {   
         send("ecobeeManageClimate>about to delete climateName = ${climateName}")
         ecobee.deleteClimate(null, climateName, subClimateName)    
         
