@@ -2016,10 +2016,11 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     
         bodyReq = bodyReq + ',{"name":"' + climateName.capitalize().trim() + '","coolTemp":"' + targetCoolTemp +
                   '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized + 
-                  '","coolFan":"' + coolFan  + '","heatFan":"' + heatFan + '"}' 
+                  '","coolFan":"' + coolFan  + '","heatFan":"' + heatFan + '"' + 
+                  ',"ventilatorMinOnTime":"5"}'  // workaround due to ecobee create Climate bug, to be removed
     }
     bodyReq = bodyReq + ']}}}' 
-    
+
     api('updateClimate',bodyReq) {resp->
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
