@@ -1591,51 +1591,6 @@ def createGroup(groupName, thermostatId, groupSettings=[]) {
     updateGroup(null, groupName, thermostatId, groupSettings)  
 }
 
-// tstatType =managementSet or registered (no spaces)
-
-def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
-    def ecobeeType
-    
-    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
-    
-        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim() : 'registered'
-    }
-    else {
-         
-        ecobeeType = tstatType.trim()        
-    }
-    
-    if (data.thermostatCount==null) {
-    
-         getThermostatSummary(ecobeeType)
-    }
-    if (settings.trace) {
-        log.debug "iterateUpdateClimate> about to loop ${data.thermostatCount}"
-   	    sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to loop ${data.thermostatCount} thermostat(s)"
-    }    
-    for (i in 0..data.thermostatCount-1) {
-    
-        def thermostatDetails = data.revisionList[i].split(':')
-        def Id = thermostatDetails[0]
-        def thermostatName = thermostatDetails[1]
-        def connected = thermostatDetails[2]
-        def thermostatRevision = thermostatDetails[3]
-        def alertRevision = thermostatDetails[4]
-        def runtimeRevision = thermostatDetails[5]
-         
-        if (connected) {
-         
-            if (settings.trace) {
-      	        sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
-                log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
-            }    
-            updateClimate(Id, climateName, deleteClimateFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
-        }    
-    
-    }
-   
-}
-
 
 // thermostatId may only be 1 thermostat (not a list) 
 // climate name is the name of the climate to be created (ex. "Bedtime").
@@ -1644,7 +1599,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, he
 
 def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
 
-    updateClimate(thermostatId, climateName, 'false', null, null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
+    updateClimate(thermostatId, climateName, 'false', null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
     
 }
 
@@ -1653,7 +1608,7 @@ def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, co
 
 def deleteClimate(thermostatId, climateName, substituteClimateName) {
 
-    updateClimate(thermostatId, climateName, 'true', substituteClimateName, null, null, null, null, null, null) 
+    updateClimate(thermostatId, climateName, 'true', substituteClimateName, null, null, null, null, null) 
     
 }
 
@@ -1782,15 +1737,60 @@ def setClimate(thermostatId, climateName) {
     
 
 
+
+// tstatType =managementSet or registered (no spaces)
+
+def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+    def ecobeeType
+    
+    if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
+    
+        ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim() : 'registered'
+    }
+    else {
+         
+        ecobeeType = tstatType.trim()        
+    }
+    
+    if (data.thermostatCount==null) {
+    
+         getThermostatSummary(ecobeeType)
+    }
+    if (settings.trace) {
+        log.debug "iterateUpdateClimate> about to loop ${data.thermostatCount}"
+   	    sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to loop ${data.thermostatCount} thermostat(s)"
+    }    
+    for (i in 0..data.thermostatCount-1) {
+    
+        def thermostatDetails = data.revisionList[i].split(':')
+        def Id = thermostatDetails[0]
+        def thermostatName = thermostatDetails[1]
+        def connected = thermostatDetails[2]
+        def thermostatRevision = thermostatDetails[3]
+        def alertRevision = thermostatDetails[4]
+        def runtimeRevision = thermostatDetails[5]
+         
+        if (connected) {
+         
+            if (settings.trace) {
+      	        sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
+                log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
+            }    
+            updateClimate(Id, climateName, deleteClimateFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
+        }    
+    
+    }
+   
+}
+
 // thermostatId may only be 1 thermostat (not a list) 
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
 // deleteClimateFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
-// indice is the corresponding indice in the thermostatList (used for iterateUpdateClimate, 0 by default)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 
-def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateName,indice,
+def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateName,
             coolTemp,heatTemp,isOptimized,coolFan,heatFan) {
 
     Integer targetCoolTemp
@@ -1823,27 +1823,26 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     
     }
     getThermostatInfo(thermostatId)
-    indice = ((indice != null) && (indice != "")) ? indice : 0   // by default, the first row of thermostatList is used
  
-    if (data.thermostatList[indice].identifier != thermostatId) {
+    if (data.thermostatList[0].identifier != thermostatId) {
     
         if (settings.trace) {
-            log.debug  "updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"            
-            sendEvent name: "verboseTrace", value:"updateClimate>thermostatId =${thermostatId} provided is not valid vs. the indice (${indice})"
+            log.debug  "updateClimate>thermostatId =${thermostatId} provided is not valid"            
+            sendEvent name: "verboseTrace", value:"updateClimate>thermostatId =${thermostatId} provided is not valid"
         }
         return
     
     }
     if ((substituteClimateName != null) && (substituteClimateName != "")) {  // find the subsituteClimateRef for the subsitute Climate Name if not null
     
-        for (i in 0..data.thermostatList[indice].program.climates.size()-1) {
+        for (i in 0..data.thermostatList[0].program.climates.size()-1) {
 
-            if (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase()) {
-                climateRefToBeReplaced = data.thermostatList[indice].program.climates[i].climateRef
+            if (climateName.trim().toUpperCase() == data.thermostatList[0].program.climates[i].name.toUpperCase()) {
+                climateRefToBeReplaced = data.thermostatList[0].program.climates[i].climateRef
             }    
-            if (substituteClimateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase()) {
+            if (substituteClimateName.trim().toUpperCase() == data.thermostatList[0].program.climates[i].name.toUpperCase()) {
                 foundClimate = true
-                substituteClimateRef = data.thermostatList[indice].program.climates[i].climateRef
+                substituteClimateRef = data.thermostatList[0].program.climates[i].climateRef
                 if (settings.trace) {
                     log.debug  "updateClimate>found climateName ${climateName} at index ({$i}) for substitution by ${substituteClimateName}"            
                 }
@@ -1870,39 +1869,39 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
 
     bodyReq = bodyReq + ',"thermostat":{"program":{"schedule":[' 
                             
-    for (i in 0..data.thermostatList[indice].program.schedule.size()-1) {
+    for (i in 0..data.thermostatList[0].program.schedule.size()-1) {
     
         bodyReq = bodyReq + '['
         // loop thru all the schedule items to create the json structure
         // replace the climateRef with right substituteClimateRef if needed
         
-        for (j in 0..data.thermostatList[indice].program.schedule[i].size()-1) {
+        for (j in 0..data.thermostatList[0].program.schedule[i].size()-1) {
 
             if (substituteClimateRef != null) {
-                scheduleAsString = (data.thermostatList[indice].program.schedule[i][j] == climateRefToBeReplaced) ?
+                scheduleAsString = (data.thermostatList[0].program.schedule[i][j] == climateRefToBeReplaced) ?
                     '"' + substituteClimateRef + '"' :
-                    '"' + data.thermostatList[indice].program.schedule[i][j].toString() + '"'
+                    '"' + data.thermostatList[0].program.schedule[i][j].toString() + '"'
             }
             else {
             
-                scheduleAsString = '"' + data.thermostatList[indice].program.schedule[i][j].toString() + '"'
+                scheduleAsString = '"' + data.thermostatList[0].program.schedule[i][j].toString() + '"'
             
             }
         
             bodyReq = (j==0)? bodyReq  + scheduleAsString : bodyReq + ',' + scheduleAsString
         }
-        bodyReq = (i == (data.thermostatList[indice].program.schedule.size()-1)) ? bodyReq + ']': bodyReq + '],' 
+        bodyReq = (i == (data.thermostatList[0].program.schedule.size()-1)) ? bodyReq + ']': bodyReq + '],' 
         
     }
     bodyReq = bodyReq + '],"climates":[' 
     
     foundClimate= false
-    for (i in 0..data.thermostatList[indice].program.climates.size()-1) {
+    for (i in 0..data.thermostatList[0].program.climates.size()-1) {
 
-        if ((i != 0) && (i < data.thermostatList[indice].program.climates.size())) {
+        if ((i != 0) && (i < data.thermostatList[0].program.climates.size())) {
                 bodyReq = bodyReq + ','
         }
-        if ((deleteClimateFlag=='true') && (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase())) {
+        if ((deleteClimateFlag=='true') && (climateName.trim().toUpperCase() == data.thermostatList[0].program.climates[i].name.toUpperCase())) {
 
             foundClimate= true
 
@@ -1912,11 +1911,11 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
             }    
             bodyReq = bodyReq.substring(0,(bodyReq.length()-1))     // trim the last ','
         }
-        else if ((deleteClimateFlag =='false') && (climateName.trim().toUpperCase() == data.thermostatList[indice].program.climates[i].name.toUpperCase())) {
+        else if ((deleteClimateFlag =='false') && (climateName.trim().toUpperCase() == data.thermostatList[0].program.climates[i].name.toUpperCase())) {
         // update the Climate Object
             foundClimate= true
             bodyReq = bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' + 
-                data.thermostatList[indice].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp +
+                data.thermostatList[0].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp +
                 '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized + '","coolFan":"' +
                 coolFan  + '","heatFan":"' + heatFan + '"}' 
             if (settings.trace) {
@@ -1925,8 +1924,8 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
             } 
         }
         else {
-            bodyReq = bodyReq  + '{"name":"' + data.thermostatList[indice].program.climates[i].name + '","climateRef":"' +
-                     data.thermostatList[indice].program.climates[i].climateRef + '"}'
+            bodyReq = bodyReq  + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' +
+                     data.thermostatList[0].program.climates[i].climateRef + '"}'
         }
  
     }
