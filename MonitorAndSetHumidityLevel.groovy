@@ -211,7 +211,8 @@ def setHumidityLevel() {
     else {
        log.trace("setHumidity>all off, humidity level within range")
        send "MonitorHumidity>all off, humidity level within range"
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, null,['dehumidifierMode':'off','humidifierMode':'off']) 
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, null,['dehumidifierMode':'off','humidifierMode':'off',
+           'dehumidifyWithAC':'false']) 
         
     }
             
