@@ -269,8 +269,9 @@ metadata {
         }
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
             state "fanAuto", label:'', action:"thermostat.fanOn",icon: "st.thermostat.fan-auto" 
-            state "fanOn", label:'', action:"thermostat.fanOff", icon: "st.thermostat.fan-on" 
-            state "fanOff", label:'  ', action:"thermostat.fanAuto", icon: "st.thermostat.fan-off"
+            state "fanOn", label:'', action:"thermostat.fanAuto", icon: "st.thermostat.fan-on" 
+//          fanOff is not suppported            
+            state "fanOff", label:'  ', action:"thermostat.fanAuto", icon: "st.thermostat.fan-off" 
         }
  
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
@@ -441,12 +442,12 @@ def heatLevelDown(){
 
 // handle commands
 def setHeatingSetpoint(temp) {
-    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),temp, null)
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),temp,null, null)
     sendEvent(name: 'heatingSetpoint', value: temp)
 }
  
 def setCoolingSetpoint(temp) {
-    setHold(settings.thermostatId,  temp, device.currentValue("heatingSetpoint"),null) 
+    setHold(settings.thermostatId,  temp, device.currentValue("heatingSetpoint"),null,null) 
     sendEvent(name: 'coolingSetpoint', value: temp)
 }
  
@@ -481,7 +482,7 @@ def cool() {
 def setThermostatMode(mode) {
     mode = mode == 'emergency heat'? 'heat' : mode
     setHold(settings.thermostatId,device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
-       ['hvacMode':"${mode}"]) 
+        null,['hvacMode':"${mode}"]) 
     sendEvent(name: 'thermostatMode', value: mode)
 }
  
@@ -493,27 +494,27 @@ def fanAuto() {
     setThermostatFanMode('auto')
 }
  
-def fanOff() {
-    setThermostatFanMode('off')
+def fanOff() {    // fanOff is not supported, setting it to 'auto' instead.
+    setThermostatFanMode('auto')
 }
 
 
 def setFanMinOnTime(minutes) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-        ['vent':'minontime','fanMinOnTime':"${minutes}"]) 
+        device.currentValue("thermostatFanMode"),['fanMinOnTime':"${minutes}"]) 
     sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 
 def setThermostatFanMode(mode) {    
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-         ['vent':"${mode}"]) 
+         mode, null) 
     sendEvent(name: 'thermostatFanMode', value: mode)
 }
 
 def setCondensationAvoid(flag) {  // set the flag to true or false
     flag = flag == 'true'? 'true' : 'false'
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-         ['condensationAvoid':"${flag}"]) 
+        null,['condensationAvoid':"${flag}"]) 
     sendEvent(name: 'condensationAvoid', value: flag)
 }
 
@@ -529,13 +530,13 @@ def dehumidifierOff() {
  
 def setDehumidifierMode(mode) {  
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-          ['dehumidifierMode':"${mode}"]) 
+          null,['dehumidifierMode':"${mode}"]) 
     sendEvent(name: 'dehumidifierMode', value: mode)
 }
 
 def setDehumidifierLevel(level) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-          ['dehumidifierLevel':"${level}"]) 
+          null,['dehumidifierLevel':"${level}"]) 
     sendEvent(name: 'dehumidifierLevel', value: level)
 }
 
@@ -549,7 +550,7 @@ def humidifierOff() {
  
 def setHumidifierMode(mode) {    
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-          ['humidifierMode':"${mode}"]) 
+          null,['humidifierMode':"${mode}"]) 
     sendEvent(name: 'humidifierMode', value: mode)
 }
  
@@ -558,7 +559,7 @@ def setHumidifierMode(mode) {
 def setHumidifierLevel(level) {
     
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
-          ['humidity':"${level}"]) 
+          null,['humidity':"${level}"]) 
     sendEvent(name: 'humidifierLevel', value: level)
 }
 
@@ -841,6 +842,7 @@ def doRequest(uri, args, type, success) {
     try {
 
         if (settings.trace) {
+//  	        sendEvent name: "verboseTrace", value: "doRequest>token= ${data.auth.access_token}"
   	        sendEvent name: "verboseTrace", value: "doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
             log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args}"
         }
@@ -911,7 +913,7 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     }
     if ((tstatSettings != null) && (tstatSettings != "")) {
         
-        def function_clause = [type:method,params:tstatParams]
+        def function_clause= ((tstatParams != null) && (tsatParams != ""))? [type:method,params:tstatParams]:[type:method]
         def bodyWithSettings= [functions:[function_clause],selection:selection,thermostat:[settings:tstatSettings]]
         def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
         if (settings.trace) {
@@ -956,7 +958,7 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 
 
-def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]) {    
+def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode, tstatSettings=[]) {    
 
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
@@ -1001,7 +1003,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
      	            sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${tstatlist}"
                     log.debug "iterateSethold> about to call setHold for ${tstatlist}"
                 }
-                setHold(tstatlist, coolingSetPoint, heatingSetPoint, tstatSettings) 
+                setHold(tstatlist, coolingSetPoint, heatingSetPoint, fanMode, tstatSettings) 
                 tstatlist = Id
                 nTstats=1
              
@@ -1019,14 +1021,14 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, tstatSettings=[]
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 
-def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {    
+def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettings= []) {    
     Integer targetCoolTemp=null
     Integer targetHeatTemp=null
     def tstatParams=null
     
     if (settings.trace) {
-        log.debug "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${tstatSettings} for ${thermostatId}"
-        sendEvent name: "verboseTrace", value: "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${tstatSettings} for ${thermostatId}"
+        log.debug "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
+        sendEvent name: "verboseTrace", value: "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
     }    
     def scale= getTemperatureScale()
     if (scale == 'C') {
@@ -1050,14 +1052,18 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, tstatSettings= []) {
 
         }    
     
-        tstatParams = [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,   
-                       holdType:"${settings.holdType.trim()}"
-                      ]
+        tstatParams = (fanMode != "") & (fanMode!=null) ? 
+           [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,fan:fanMode,holdType:"${settings.holdType.trim()}"]:
+           [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,holdType:"${settings.holdType.trim()}"]
+
     
     }
     else {
     
-        tstatParams = [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp]
+        tstatParams =(fanMode != "") & (fanMode!=null) ?
+            [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,fan:fanMode]:
+            [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp]
+            
     }
     
     def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams, tstatSettings)
