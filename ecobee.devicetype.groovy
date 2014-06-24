@@ -271,7 +271,7 @@ metadata {
             state "fanAuto", label:'', action:"thermostat.fanOn",icon: "st.thermostat.fan-auto" 
             state "fanOn", label:'', action:"thermostat.fanAuto", icon: "st.thermostat.fan-on" 
 //          fanOff is not suppported            
-            state "fanOff", label:'  ', action:"thermostat.fanAuto", icon: "st.thermostat.fan-off" 
+//            state "fanOff", label:'  ', action:"thermostat.fanAuto", icon: "st.thermostat.fan-off" 
         }
  
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
