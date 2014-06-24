@@ -1816,8 +1816,8 @@ def setClimate(thermostatId, climateName) {
         } 
         if (!foundClimate) {
         
-            log.debug  "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostat[i].identifier}"            
-            sendEvent name: "verboseTrace", value: "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostat[i].identifier}"
+            log.debug  "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"            
+            sendEvent name: "verboseTrace", value: "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"
             return        
         }
     }
