@@ -201,7 +201,7 @@ def setHumidityLevel() {
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['humidifierMode':'auto','humidity':"${target_humidity}",'dehumidifierMode':'off',
            'condensationAvoid':'true','fanMinOnTime':"${min_fan_time}"]) 
 
-       send "MonitorHumidity>humidfy to ${target_humidity} in ${ecobeeMode} mode"
+       send "MonitorHumidity>humidify to ${target_humidity} in ${ecobeeMode} mode"
     }
     else if (outdoorHumidity > (ecobeeHumidity + min_humidity_diff)) {
        log.trace("setHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify ")
