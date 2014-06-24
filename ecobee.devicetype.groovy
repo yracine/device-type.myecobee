@@ -1720,7 +1720,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, he
 
 def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
 
-    updateClimate(thermostatId, climateName, false, null, null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
+    updateClimate(thermostatId, climateName, 'false', null, null, coolTemp, heatTemp, isOptimized, coolFan, heatFan) 
     
 }
 
@@ -1729,7 +1729,7 @@ def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, co
 
 def deleteClimate(thermostatId, climateName, substituteClimateName) {
 
-    updateClimate(thermostatId, climateName, true, substituteClimateName, null, null, null, null, null, null) 
+    updateClimate(thermostatId, climateName, 'true', substituteClimateName, null, null, null, null, null, null) 
     
 }
 
