@@ -508,7 +508,6 @@ def poll() {
     sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
     
     sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
-    sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].settings.vent)
     sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity, unit:"%")
     sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
     
@@ -554,9 +553,18 @@ def poll() {
     }
      
     sendEvent(name: 'programScheduleName', value: currentClimate.name )
-    sendEvent(name: 'programFanMode', value: currentClimate.vent)
     sendEvent(name: 'programType', value: currentClimate.type)
-
+    
+    if (data.thermostatList[0].settings.hvacMode == 'cool') {
+    
+        sendEvent(name: 'thermostatFanMode', value: currentClimate.coolFan)   // current fan mode
+        sendEvent(name: 'programFanMode', value: currentClimate.coolFan)
+    } 
+    else {
+        sendEvent(name: 'thermostatFanMode', value: currentClimate.heatFan)   // current fan mode
+        sendEvent(name: 'programFanMode', value: currentClimate.heatFan)
+    }
+    
     def scale = getTemperatureScale()
     if (scale =='C') {
         float actualTemp= fToC(data.thermostatList[0].runtime.actualTemperature)
@@ -1017,7 +1025,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettin
             if (!statusCode) {
             
                 if (settings.trace) {
-                    log.debug "setHold> fan mode= ${data.thermostatList.settings.vent}, mode=${data.thermostatList.settings.hvacMode}" 
+                    log.debug "setHold> fan mode= ${fanMode}, mode=${data.thermostatList.settings.hvacMode}" 
                     log.debug "setHold> current Temp= ${data.thermostatList[0].runtime.actualTemperature}, desiredHeat=${data.thermostatList[0].runtime.desiredHeat}"
     	            sendEvent name: "verboseTrace", value: "setHold>done for ${thermostatId}"
                 }
