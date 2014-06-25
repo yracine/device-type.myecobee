@@ -809,11 +809,17 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     }
     if (method == 'thermostatSummary') {
     
+        if (tstatType.trim().toUppercase() == 'REGISTERED') {
         
-        selection = (tstatType.trim().toUppercase() == 'REGISTERED')?
-                    [selection: [selectionType: tstatType.trim(),selectionMatch:'',includeEquipmentStatus:'true']]:
-                    [selection: [selectionType: tstatType.trim(),selectionMatch:tstatType,includeEquipmentStatus:'true']]
+            selection = [selection: [selectionType: tstatType.trim(),selectionMatch:'',includeEquipmentStatus:'true']]
+        }    
+        else {
+            // If tstatType is different than managementSet, it is assumed to be locationSet specific (ex./Toronto/Campus/BuildingA)
+            selection = (tstatType.trim().toUppercase() == 'MANAGEMENTSET')?
+                    [selection: [selectionType:'managementSet',selectionMatch:'/',includeEquipmentStatus:'true']]: // get all EMS thermostats from the root
+                    [selection: [selectionType:'managementSet',selectionMatch:tstatType.trim(),includeEquipmentStatus:'true']] //Specific to a location
                     
+        }            
                        
     }
     else if (method == 'thermostatInfo') {
