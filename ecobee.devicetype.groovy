@@ -193,8 +193,8 @@ metadata {
             state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7"
         }
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "fanAuto", label:'', action:"thermostat.fanAuto",icon: "st.thermostat.fan-auto" 
-            state "fanOn", label:'', action:"thermostat.fanOn", icon: "st.thermostat.fan-on" 
+            state "fanAuto", label:'', action:"thermostat.fanOn",icon: "st.thermostat.fan-auto" 
+            state "fanOn", label:'', action:"thermostat.fanAuto", icon: "st.thermostat.fan-on" 
 
 //          fanOff is not suppported            
 //          state "fanOff", label:'  ', action:"thermostat.fanOff", icon: "st.thermostat.fan-off" 
@@ -555,7 +555,7 @@ def poll() {
     sendEvent(name: 'programScheduleName', value: currentClimate.name )
     sendEvent(name: 'programType', value: currentClimate.type)
     
-    if (currentClimate.fan != "") {
+    if ((currentClimate.fan != null) && (currentClimate.fan != "")) {
         sendEvent(name: 'thermostatFanMode', value: currentClimate.fan)   // current fan mode
     }
     if (data.thermostatList[0].settings.hvacMode == 'cool') {
