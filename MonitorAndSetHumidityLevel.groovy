@@ -111,12 +111,10 @@ def sensorTemperatureHandler(evt) {
 
 def setHumidityLevel() {
 
-    def min_temp_in_Farenheits =givenMinTemp ?: 0        // Min temp in Farenheits for starting dehumidifier,otherwise too cold
-    def min_humidity_diff = givenHumidityDiff ?: 5       //  5% humidity differential by default
-    def min_fan_time = givenFanMinTime ?: 10           //  10 min. fan time per hour by default
-    Integer max_power = givenPowerLevel ?: 3000              //  Do not run above 3000w consumption level by default
-    
-    def target_humidity = givenHumidityLevel ?: 40  // by default,  40 is the humidity level to check for
+    def min_temp_in_Farenheits =(givenMinTemp!=null) ?givenMinTemp: 0        // Min temp in Farenheits for starting dehumidifier,otherwise too cold
+    def min_humidity_diff = (givenHumidityDiff!=null) ?givenHumidityDiff:5  //  5% humidity differential by default
+    def min_fan_time = (givenFanMinTime!=null) ?givenFanMinTime:10         //  10 min. fan time per hour by default
+    def target_humidity =(givenHumidityLevel!=null)?givenHumidityLevel:40        // by default,  40 is the humidity level to check for
     
     log.debug "setHumidity> location.mode = $location.mode"
 
