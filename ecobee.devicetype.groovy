@@ -1187,7 +1187,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
                 tstatlist = Id
                 nTstats=1
             }
-            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+            if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                 if (settings.trace) {
              
       	             sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
