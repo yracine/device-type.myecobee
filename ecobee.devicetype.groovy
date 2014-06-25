@@ -926,7 +926,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode, tstatSe
                 tstatlist = Id
                 nTstats=1
             }
-            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+            if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                 if (settings.trace) {
              
      	            sendEvent name: "verboseTrace", value: "iterateSetHold>about to call setHold for ${tstatlist}"
@@ -1069,7 +1069,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
                  tstatlist = Id
                  nTstats=1
             }
-            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+            if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                 if (settings.trace) {
              
        	             sendEvent name: "verboseTrace", value: "iterateCreateVacation>about to call createVacation for ${tstatlist}"
@@ -1279,7 +1279,7 @@ def iterateResumeProgram(tstatType) {
                 tstatlist = Id
                 nTstats=1
             }
-            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+            if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                 if (settings.trace) {
       	            sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
                     log.debug "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
@@ -1657,7 +1657,7 @@ def iterateSetClimate(tstatType, climateName) {
                 tstatlist = Id
                 nTstats=1
             }
-            if ((nTstats==MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
+            if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                 if (settings.trace) {
       	            sendEvent name: "verboseTrace", value: "iterateSetClimate> about to call setClimate for ${tstatlist}"
                     log.debug "iterateSetClimate> about to call setClimate for ${tstatlist}"
