@@ -811,7 +811,7 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     
         if (tstatType.trim().toUppercase() == 'REGISTERED') {
         
-            selection = [selection: [selectionType: tstatType.trim(),selectionMatch:'',includeEquipmentStatus:'true']]
+            selection = [selection: [selectionType:'registered',selectionMatch:'',includeEquipmentStatus:'true']]
         }    
         else {
             // If tstatType is different than managementSet, it is assumed to be locationSet specific (ex./Toronto/Campus/BuildingA)
