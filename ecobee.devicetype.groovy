@@ -82,8 +82,8 @@ preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
     	input("trace", "text", title: "trace", description: "Set it to 'true' to enable tracing (no spaces)")
-    	input("holdType", "text", title: "holdType", description: "Set it 'nextTransition' or 'indefinite' (latter by default)")
-    	input("ecobeeType", "text", title: "ecobee Tstat Type", description: "Set it to 'registered' (by default) or 'managementSet'(no spaces)")
+    	input("holdType","text", title: "holdType", description: "Set it nextTransition or indefinite (latter by default)")
+    	input("ecobeeType", "text", title: "ecobee Tstat Type", description: "Set it to registered (by default) or managementSet (no spaces)")
 	}
 metadata {
 	// Automatically generated. Make future change here.
@@ -654,7 +654,7 @@ def poll() {
     
     def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim():'registered'
     
-    if (ecobeeType.toUpperCase() != 'MANAGEMENTSET') {
+    if (ecobeeType.toUpperCase() == 'REGISTERED') {
     
         log.debug "poll> about to execute getGroups"
         sendEvent name: "verboseTrace", value: "poll> about to execute getGroups"
@@ -793,10 +793,11 @@ def doRequest(uri, args, type, success) {
 }
 
 
-// tstatType =managementSet or registered (no spaces)
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex. /Toronto/Campus/BuildingA)
 //            registered is for SMART thermostat, 
 //            may be null if not relevant for the given method
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+//    or may be a managementSet's location
 
 private def build_body_request(method, tstatType, thermostatId,  tstatParams =[], tstatSettings=[]) {
 
@@ -808,9 +809,11 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     }
     if (method == 'thermostatSummary') {
     
-       
-        selection = [selection: [selectionType: tstatType.trim(), selectionMatch:'',includeEquipmentStatus:'true']
-                    ]                                    
+        
+        selection = (tstatType.trim().toUppercase() == 'REGISTERED')?
+                    [selection: [selectionType: tstatType.trim(),selectionMatch:'',includeEquipmentStatus:'true']]:
+                    [selection: [selectionType: tstatType.trim(),selectionMatch:tstatType,includeEquipmentStatus:'true']]
+                    
                        
     }
     else if (method == 'thermostatInfo') {
@@ -880,7 +883,7 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     
 }
 
-// tstatType =managementSet or registered (no spaces)
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 
 
@@ -1025,7 +1028,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettin
 }
 
 
-// tstatType =managementSet or registered (no spaces)
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 
 
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTemp, targetStartDateTime, targetEndDateTime) {    
@@ -1144,8 +1147,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
     } 
 }
 
-// tstatType =managementSet or registered (no spaces)
-
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 
 def iterateDeleteVacation(tstatType, vacationName) {
     Integer MAX_TSTAT_BATCH=25
@@ -1237,7 +1239,7 @@ def deleteVacation(thermostatId, vacationName) {
     }    
 }
 
-// tstatType =managementSet or registered (no spaces)
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 
 def iterateResumeProgram(tstatType) {
     Integer MAX_TSTAT_BATCH=25
@@ -1353,7 +1355,7 @@ def getGroups(thermostatId) {
     
     def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim():'registered'
     
-    if (ecobeeType.toUpperCase() == 'MANAGEMENTSET') {
+    if (ecobeeType.toUpperCase() != 'REGISTERED') {
         if (settings.trace) {
             log.debug "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"
             sendEvent name: "verboseTrace", value: "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"       
@@ -1535,6 +1537,8 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
 
   
 }
+// Only valid for Smart and Antenna thermostats
+// For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 
 def deleteGroup(groupRef, groupName) {    
     String updateGroupParams
@@ -1612,7 +1616,7 @@ def deleteClimate(thermostatId, climateName, substituteClimateName) {
     
 }
 
-// tstatType =managementSet or registered (no spaces)
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // climate name is the name of the climate bet set to(ex. "Home", "Away").
 
 def iterateSetClimate(tstatType, climateName) {
@@ -1738,7 +1742,7 @@ def setClimate(thermostatId, climateName) {
 
 
 
-// tstatType =managementSet or registered (no spaces)
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
 // deleteClimateFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // subClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
@@ -2016,7 +2020,9 @@ def getThermostatInfo(thermostatId){
     
 }
 
-// tstatType =managementSet or registered (no spaces)
+// tstatType =managementSet or registered (no spaces). 
+// May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+
 def getThermostatSummary(tstatType) {  
     
    
