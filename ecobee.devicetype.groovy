@@ -556,18 +556,18 @@ def poll() {
     sendEvent(name: 'programType', value: currentClimate.type)
     
     if (currentClimate.fan != "") {
-        sendEvent(name: 'thermostatFanMode', value: currentClimate.coolFan)   // current fan mode
+        sendEvent(name: 'thermostatFanMode', value: currentClimate.fan)   // current fan mode
     }
     if (data.thermostatList[0].settings.hvacMode == 'cool') {
     
-        if ((device.currentValue("thermostatFanMode") == "") && ((currentClimate.fan== null) || (currentClimate.fan ==""))) {
+        if (device.currentValue("thermostatFanMode") == "") {
             sendEvent(name: 'thermostatFanMode', value: currentClimate.coolFan)   // current program fan mode
         }    
         sendEvent(name: 'programFanMode', value: currentClimate.coolFan)
     } 
     else {
-        if ((device.currentValue("thermostatFanMode") == '') && ((currentClimate.fan== null) || (currentClimate.fan ==""))) {
-            sendEvent(name: 'thermostatFanMode', value: currentClimate.coolFan)   // current program fan mode
+        if (device.currentValue("thermostatFanMode") == '') {
+            sendEvent(name: 'thermostatFanMode', value: currentClimate.heatFan)   // current program fan mode
         }    
         sendEvent(name: 'programFanMode', value: currentClimate.heatFan)
     }
