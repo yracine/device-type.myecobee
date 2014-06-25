@@ -1739,8 +1739,13 @@ def setClimate(thermostatId, climateName) {
 
 
 // tstatType =managementSet or registered (no spaces)
+// climate name is the name of the climate to be updated (ex. "Home", "Away").
+// deleteClimateFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
+// subClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
+// isOptimized is 'true' or 'false'
+// coolFan & heatFan's mode is 'auto' or 'on'
 
-def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, subClimateName,coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
     def ecobeeType
     
     if ((tstatType =='') || (tstatType ==null)) {  // by default, the ecobee type is 'registered'
@@ -1776,7 +1781,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, coolTemp, he
       	        sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
                 log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
             }    
-            updateClimate(Id, climateName, deleteClimateFlag, i, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
+            updateClimate(Id, climateName, deleteClimateFlag, subClimateName,coolTemp, heatTemp, isOptimized, coolFan, heatFan)
         }    
     
     }
@@ -1824,15 +1829,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     }
     getThermostatInfo(thermostatId)
  
-    if (data.thermostatList[0].identifier != thermostatId) {
-    
-        if (settings.trace) {
-            log.debug  "updateClimate>thermostatId =${thermostatId} provided is not valid"            
-            sendEvent name: "verboseTrace", value:"updateClimate>thermostatId =${thermostatId} provided is not valid"
-        }
-        return
-    
-    }
     if ((substituteClimateName != null) && (substituteClimateName != "")) {  // find the subsituteClimateRef for the subsitute Climate Name if not null
     
         for (i in 0..data.thermostatList[0].program.climates.size()-1) {
