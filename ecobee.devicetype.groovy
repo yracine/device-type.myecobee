@@ -78,6 +78,7 @@ import groovy.json.JsonBuilder
 import java.net.URLEncoder
 // for the UI
 
+
 preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
@@ -123,6 +124,7 @@ metadata {
 		attribute "weatherPop", "string"
 		attribute "weatherTempHigh", "string"
 		attribute "weatherTempLow", "string"
+		attribute "fanMinOnTime", "string"
 
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -193,13 +195,9 @@ metadata {
             state "cool", label:'${name}', action:"thermostat.heat", icon: "st.Weather.weather7"
         }
         standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false, decoration: "flat") {
-            state "fanAuto", label:'', action:"thermostat.fanOn",icon: "st.thermostat.fan-auto" 
-            state "fanOn", label:'', action:"thermostat.fanAuto", icon: "st.thermostat.fan-on" 
-
-//          fanOff is not suppported            
-//          state "fanOff", label:'  ', action:"thermostat.fanOff", icon: "st.thermostat.fan-off" 
+            state "auto", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11"
+            state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
         }
- 
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
             state "heat", label:'${currentValue}° heat', unit:"C", backgroundColor:"#ffffff"
         }
@@ -225,8 +223,11 @@ metadata {
         valueTile("equipementStatus", "device.equipementStatus", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
              state "default", label:'${currentValue}'
         }
+        valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false, decoration: "flat", width: 1, height: 1) {
+            state "default", label:'FanMin\n${currentValue}'
+        }
 
-        valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
+        valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat", width: 2, height: 1) {
              state "default", label:'${currentValue}'
         }
 
@@ -283,7 +284,7 @@ metadata {
 
         main "temperature"
         details(["name","groups","temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
-                "equipementStatus", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
+                "equipementStatus", "fanMinOnTime", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
                 "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
                 "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop","refresh",])
 
@@ -535,48 +536,104 @@ def poll() {
 
     // post program events
 
+    Integer indiceEvent=0
+    
+    for (i in 0..data.thermostatList[0].events.size()-1) {
+        if (data.thermostatList[0].events[i].running) {
+            indiceEvent=i  // save the right indice whose Event is currently running
+            exit
+        }
+    }
+
     if (settings.trace) {
          
         log.debug "poll>climates = ${data.thermostatList[0].program.climates}"
-        log.debug "poll>Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+        log.debug "poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},name=${data.thermostatList[0].events[indiceEvent].name}"
+        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
+        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},fan type=${data.thermostatList[0].events[indiceEvent].fan}"
+        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},running=${data.thermostatList[0].events[indiceEvent].running}"
+        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},indiceEvent=${indiceEvent}"
     }
-   
-    // Get the current climate object
-    def currentClimate 
     
+    def currentClimate=null 
+
+    // Get the current Climate 
     data.thermostatList[0].program.climates.each() {
     
-         if (it.climateRef== data.thermostatList[0].program.currentClimateRef){
+        if (it.climateRef== data.thermostatList[0].program.currentClimateRef){
              currentClimate = it
              exit
-         }
+        }
+    }    
+    if (((data.thermostatList[0].events[indiceEvent].type != 'vacation') &&
+        (data.thermostatList[0].events[indiceEvent].type != 'quickSave')) ||
+        (!data.thermostatList[0].events[indiceEvent].running)){
+  
+        // if there is no event running or the event type is different from vacation  or quicksave, then
+        // display the current program
+        
+        sendEvent(name: 'programScheduleName', value: currentClimate.name )
+        sendEvent(name: 'programType', value: currentClimate.type)
+    }
+    else {
+        // otherwise, display the current event
+        
+        sendEvent(name: 'programScheduleName', value: data.thermostatList[0].events[indiceEvent].name )
+        sendEvent(name: 'programType', value: data.thermostatList[0].events[indiceEvent].type)
+    
     }
      
-    sendEvent(name: 'programScheduleName', value: currentClimate.name )
-    sendEvent(name: 'programType', value: currentClimate.type)
+    if (data.thermostatList[0].events[indiceEvent].running) {
     
-    if ((currentClimate.fan != null) && (currentClimate.fan != "")) {
-        sendEvent(name: 'thermostatFanMode', value: currentClimate.fan)   // current fan mode
+        // current fan mode based on running event
+    
+        sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].events[indiceEvent].fan)   
+        // current fanMinOnTime based on first event (usually of type auto)
+   
+    } 
+    else {
+       // otherwise the fanMode is taken from the runtime object
+          
+        sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].runtime.desiredFanMode)
     }
+
+    if ((data.thermostatList[0].events[0].running) && (data.thermostatList[0].events[0].name=='auto')) {
+        //  post fanMinOnTime only when the first running event is named 'auto'
+        
+        sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].events[0].fanMinOnTime)
+    }
+    
     if (data.thermostatList[0].settings.hvacMode == 'cool') {
     
-        if (device.currentValue("thermostatFanMode") == "") {
-            sendEvent(name: 'thermostatFanMode', value: currentClimate.coolFan)   // current program fan mode
-        }    
         sendEvent(name: 'programFanMode', value: currentClimate.coolFan)
     } 
     else {
-        if (device.currentValue("thermostatFanMode") == '') {
-            sendEvent(name: 'thermostatFanMode', value: currentClimate.heatFan)   // current program fan mode
-        }    
         sendEvent(name: 'programFanMode', value: currentClimate.heatFan)
     }
     
     def scale = getTemperatureScale()
     if (scale =='C') {
         float actualTemp= fToC(data.thermostatList[0].runtime.actualTemperature)
-        float desiredCoolTemp =  fToC(data.thermostatList[0].runtime.desiredCool)
-        float desiredHeatTemp = fToC(data.thermostatList[0].runtime.desiredHeat)
+
+        float desiredCoolTemp
+        float desiredHeatTemp
+        
+        
+        if (data.thermostatList[0].events[indiceEvent].running) {
+        // post desired heat and cool setPoints based on running event
+        
+            desiredCoolTemp =  fToC(data.thermostatList[0].events[indiceEvent].coolHoldTemp)
+            desiredHeatTemp = fToC(data.thermostatList[0].events[indiceEvent].heatHoldTemp)  
+        }
+        else {
+        // else if no running events, then post according to runtime values
+        
+            desiredCoolTemp =  fToC(data.thermostatList[0].runtime.desiredCool)
+            desiredHeatTemp = fToC(data.thermostatList[0].runtime.desiredHeat)  
+        
+        }
         def actualTempFormat = String.format('%2.1f', actualTemp.round(1))
         def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp.round(1))
         def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp.round(1))
@@ -616,8 +673,20 @@ def poll() {
     
         sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature), 
             unit:"F", state: data.thermostatList[0].settings.hvacMode)
-        sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].runtime.desiredCool), unit: "F")
-        sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat), unit: "F")
+            
+        if (data.thermostatList[0].events[indiceEvent].running) {
+        // post desired heat and cool setPoints based on running event
+
+            sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].events[indiceEvent].coolHoldTemp), unit: "F")
+            sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].events[indiceEvent].heatHoldTemp), unit: "F")
+        }
+        else {
+        
+        // if no running events, then post according to runtime values
+            sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].runtime.desiredCool), unit: "F")
+            sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat), unit: "F")
+        
+        }
 
        // post weather temps
         sendEvent(name: 'weatherTemperature', value: data.thermostatList[0].weather.forecasts[0].temperature,  
@@ -846,6 +915,7 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
                                     includeProgram:'true',
                                     includeWeather:'true',
                                     includeAlerts:'true',
+                                    includeEvents:'true',
                                     includeEquipmentStatus:'true'
                                 ]
                     ]
@@ -2002,7 +2072,7 @@ def getThermostatInfo(thermostatId){
         if (!statusCode) {
             
             data.thermostatList = resp.data.thermostatList
-            def thermostatName = data.thermostatList.name  
+            def thermostatName = data.thermostatList[0].name  
             // divide the temperature by 10 before for display later.
             data.thermostatList[0].runtime.actualTemperature = data.thermostatList[0].runtime.actualTemperature /10
             data.thermostatList[0].runtime.desiredCool = data.thermostatList[0].runtime.desiredCool /10
@@ -2010,22 +2080,31 @@ def getThermostatInfo(thermostatId){
             data.thermostatList[0].weather.forecasts[0].temperature = data.thermostatList[0].weather.forecasts[0].temperature/10
             data.thermostatList[0].weather.forecasts[0].tempLow = data.thermostatList[0].weather.forecasts[0].tempLow/10
             data.thermostatList[0].weather.forecasts[0].tempHigh = data.thermostatList[0].weather.forecasts[0].tempHigh/10
+            if (data.thermostatList[0].events.size()> 0) {
             
+                for (i in 0..data.thermostatList[0].events.size()-1) {
+                    if (data.thermostatList[0].events[i].running) {
+                        // Divide the running events' temps by 10 for display later
+                        data.thermostatList[0].events[i].coolHoldTemp = data.thermostatList[0].events[i].coolHoldTemp /10
+                        data.thermostatList[0].events[i].heatHoldTemp = data.thermostatList[0].events[i].heatHoldTemp /10
+                    }
+                }    
+            }
             if (settings.trace) {
      	        log.debug "getTstatInfo> got info for ${thermostatId} name=${thermostatName}, features=${resp.data}"
             }    
-            def runtimeSettings = data.thermostatList.runtime
-            def thermostatSettings = data.thermostatList.settings
-            
+            def runtimeSettings = data.thermostatList[0].runtime
+            def thermostatSettings = data.thermostatList[0].settings
+
             if (settings.trace) {
             
     	        sendEvent name: "verboseTrace", value: "getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," + 
-                    "vent = ${thermostatSettings.vent}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "fan = ${runtimeSettings.desiredFanMode}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
 
                 log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
-                    "vent = ${thermostatSettings.vent}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "fan = ${runtimeSettings.desiredFanMode}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
                     
