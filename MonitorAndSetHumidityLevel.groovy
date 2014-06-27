@@ -133,7 +133,7 @@ def setHumidityLevel() {
     log.trace("setHumidity> evaluate:, Ecobee's humidity: ${ecobeeHumidity} vs. outdoor's humidity ${outdoorHumidity},"  +
         "coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}")
 
-    if ((ecobeeMode == 'cool') && (ecobeeHumidity > (outdoorHumidity + min_humidity_diff)) && 
+    if ((ecobeeMode == 'cool') && (ecobeeHumidity >= (outdoorHumidity + min_humidity_diff)) && 
          (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, " +
            "need to dehumidify the house and outdoor's humidity is ${outdoorHumidity}"
