@@ -590,7 +590,6 @@ def poll() {
         // current fan mode based on running event
     
         sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].events[indiceEvent].fan)   
-        // current fanMinOnTime based on first event (usually of type auto)
    
     } 
     else {
