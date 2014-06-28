@@ -894,13 +894,13 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
     }
     if (method == 'thermostatSummary') {
     
-        if (tstatType.trim().toUppercase() == 'REGISTERED') {
+        if (tstatType.trim().toUpperCase() == 'REGISTERED') {
         
             selection = [selection: [selectionType:'registered',selectionMatch:'',includeEquipmentStatus:'true']]
         }    
         else {
             // If tstatType is different than managementSet, it is assumed to be locationSet specific (ex./Toronto/Campus/BuildingA)
-            selection = (tstatType.trim().toUppercase() == 'MANAGEMENTSET')?
+            selection = (tstatType.trim().toUpperCase() == 'MANAGEMENTSET')?
                     [selection: [selectionType:'managementSet',selectionMatch:'/',includeEquipmentStatus:'true']]: // get all EMS thermostats from the root
                     [selection: [selectionType:'managementSet',selectionMatch:tstatType.trim(),includeEquipmentStatus:'true']] //Specific to a location
                     
@@ -999,8 +999,8 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode, tstatSe
     getThermostatSummary(ecobeeType)
 
     if (settings.trace) {
-        log.debug "iterateSetHold> about to loop ${data.thermostatCount} thermostat(s)"
-   	    sendEvent name: "verboseTrace", value: "iterateSetHold> about to loop ${data.thermostatCount} thermostat(s)"
+        log.debug "iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+   	    sendEvent name: "verboseTrace", value: "iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
     
@@ -1140,8 +1140,8 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
     getThermostatSummary(ecobeeType)
 
     if (settings.trace) {
-        log.debug "iterateCreateVacation> about to loop ${data.thermostatCount} thermostat(s)"
-   	    sendEvent name: "verboseTrace", value: "iterateCreateVacation> about to loop ${data.thermostatCount} thermostat(s)"
+        log.debug "iterateCreateVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+        sendEvent name: "verboseTrace", value: "iterateCreateVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
     
@@ -1257,8 +1257,8 @@ def iterateDeleteVacation(tstatType, vacationName) {
     getThermostatSummary(ecobeeType)
     
     if (settings.trace) {
-        log.debug "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
-   	    sendEvent name: "verboseTrace", value: "iterateDeleteVacation> about to loop ${data.thermostatCount} thermostat(s)"
+        log.debug "iterateDeleteVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+   	    sendEvent name: "verboseTrace", value: "iterateDeleteVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
     
@@ -1347,8 +1347,8 @@ def iterateResumeProgram(tstatType) {
     getThermostatSummary(ecobeeType)
 
     if (settings.trace) {
-        log.debug "iterateResumeProgram> about to loop ${data.thermostatCount} thermostat(s)"
-   	    sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to loop ${data.thermostatCount} thermostat(s)"
+        log.debug "iterateResumeProgram>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+   	    sendEvent name: "verboseTrace", value: "iterateResumeProgram>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
     
@@ -1526,7 +1526,7 @@ def iterateUpdateGroup(thermostatId, groupSettings=[]) {
     getGroups(thermostatId)
 
     if (settings.trace) {
-        log.debug "iterateUpdateGroup> about to loop ${data.groups.size()}"
+        log.debug "iterateUpdateGroup>about to loop ${data.groups.size()}"
    	    sendEvent name: "verboseTrace", value: "iterateUpdateGroup> about to loop ${data.groups.size()}"    
     }
     if (data.groups.size()==0) {
@@ -1721,8 +1721,8 @@ def iterateSetClimate(tstatType, climateName) {
     
     getThermostatSummary(ecobeeType)
     if (settings.trace) {
-        log.debug "iterateSetClimate> about to loop ${data.thermostatCount} thermostat(s)"
-   	    sendEvent name: "verboseTrace", value: "iterateSetClimate> about to loop ${data.thermostatCount} thermostat(s)"
+        log.debug "iterateSetClimate> ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+   	    sendEvent name: "verboseTrace", value: "iterateSetClimate>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
     
@@ -1847,8 +1847,8 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, subClimateNa
     getThermostatSummary(ecobeeType)
 
     if (settings.trace) {
-        log.debug "iterateUpdateClimate> about to loop ${data.thermostatCount}"
-   	    sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to loop ${data.thermostatCount} thermostat(s)"
+        log.debug "iterateUpdateClimate>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+   	    sendEvent name: "verboseTrace", value: "iterateUpdateClimate>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
     
