@@ -149,7 +149,7 @@ metadata {
 		command "setThermostatFanMode"
 		command "dehumidifierOff"
 		command "dehumidifierOn"
-        command "humidifierOff"
+		command "humidifierOff"
 		command "humidifierAuto"
 		command "setHumidifierLevel"
 		command "setDehumidifierLevel"
