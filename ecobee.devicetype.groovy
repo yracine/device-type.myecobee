@@ -598,11 +598,8 @@ def poll() {
         sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].runtime.desiredFanMode)
     }
 
-    if ((data.thermostatList[0].events[0].running) && (data.thermostatList[0].events[0].name=='auto')) {
-        //  post fanMinOnTime only when the first running event is named 'auto'
         
-        sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].events[0].fanMinOnTime)
-    }
+    sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].settings.fanMinOnTime)
     
     if (data.thermostatList[0].settings.hvacMode == 'cool') {
     
@@ -2098,12 +2095,12 @@ def getThermostatInfo(thermostatId){
             if (settings.trace) {
             
     	        sendEvent name: "verboseTrace", value: "getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," + 
-                    "fan = ${runtimeSettings.desiredFanMode}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
 
                 log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
-                    "fan = ${runtimeSettings.desiredFanMode}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
                     
