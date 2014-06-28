@@ -1,4 +1,4 @@
-//***
+/***
  *  My Ecobee Device
  *
  *  Author: Yves Racine
