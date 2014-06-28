@@ -87,12 +87,12 @@ def appTouch(evt) {
      
     // by default,  all flags are set to false
  
-    Boolean syncVacationFlag = (synchronizeVacation != null) ? synchronizeVacation : false      
-    Boolean syncScheduleFlag = (synchronizeSchedule != null) ? synchronizeSchedule: false    
-    Boolean syncSystemModeFlag = (synchronizeSystemMode != null) ? synchronizeSystemMode : false
-    Boolean syncAlertsFlag = (synchronizeAlerts != null) ? synchronizeAlerts : false         
-    Boolean syncQuickSaveFlag = (synchronizeQuickSave != null) ? synchronizeQuickSave : false   
-    Boolean syncUserPreferencesFlag = (synchronizeUserPreferences != null) ? synchronizeUserPreferences : false   
+    def syncVacationFlag = (synchronizeVacation != null) ? synchronizeVacation : 'false'      
+    def syncScheduleFlag = (synchronizeSchedule != null) ? synchronizeSchedule: 'false'    
+    def syncSystemModeFlag = (synchronizeSystemMode != null) ? synchronizeSystemMode : 'false'
+    def syncAlertsFlag = (synchronizeAlerts != null) ? synchronizeAlerts : 'false'         
+    def syncQuickSaveFlag = (synchronizeQuickSave != null) ? synchronizeQuickSave : 'false'   
+    def syncUserPreferencesFlag = (synchronizeUserPreferences != null) ? synchronizeUserPreferences : 'false'   
     def deleteGroupFlag = (deleteGroup != null) ? deleteGroup  : 'false'
     
     def groupSettings = [synchronizeVacation:"${syncVacationFlag}",synchronizeSchedule:"${syncScheduleFlag}",
