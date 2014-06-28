@@ -82,7 +82,7 @@ import java.net.URLEncoder
 preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
-    	input("trace", "text", title: "trace", description: "Set it to 'true' to enable tracing (no spaces)")
+    	input("trace", "text", title: "trace", description: "Set it to true to enable tracing (no spaces) or leave it empty (no tracing)")
     	input("holdType","text", title: "holdType", description: "Set it nextTransition or indefinite (latter by default)")
     	input("ecobeeType", "text", title: "ecobee Tstat Type", description: "Set it to registered (by default) or managementSet (no spaces)")
 	}
@@ -100,6 +100,7 @@ metadata {
 		attribute "coolLevelUp", "string"
 		attribute "coolLevelDown", "string"
 		attribute "verboseTrace", "string"
+		attribute "fanMinOnTime", "string"
 		attribute "humidifierMode", "string"
 		attribute "dehumidifierMode", "string"
 		attribute "humidifierLevel", "string"
@@ -124,7 +125,6 @@ metadata {
 		attribute "weatherPop", "string"
 		attribute "weatherTempHigh", "string"
 		attribute "weatherTempLow", "string"
-		attribute "fanMinOnTime", "string"
 
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -598,8 +598,11 @@ def poll() {
         sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].runtime.desiredFanMode)
     }
 
+    if ((data.thermostatList[0].events[0].running) && (data.thermostatList[0].events[0].name=='auto')) {
+        //  post fanMinOnTime only when the first running event is named 'auto'
         
-    sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].settings.fanMinOnTime)
+        sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].events[0].fanMinOnTime)
+    }
     
     if (data.thermostatList[0].settings.hvacMode == 'cool') {
     
@@ -2095,12 +2098,12 @@ def getThermostatInfo(thermostatId){
             if (settings.trace) {
             
     	        sendEvent name: "verboseTrace", value: "getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," + 
-                    "fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "fan = ${runtimeSettings.desiredFanMode}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
 
                 log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
-                    "fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+                    "fan = ${runtimeSettings.desiredFanMode}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
                     
