@@ -1,4 +1,4 @@
-/***
+//***
  *  My Ecobee Device
  *
  *  Author: Yves Racine
@@ -149,7 +149,7 @@ metadata {
 		command "setThermostatFanMode"
 		command "dehumidifierOff"
 		command "dehumidifierOn"
-		command "humidifierOff"
+        command "humidifierOff"
 		command "humidifierAuto"
 		command "setHumidifierLevel"
 		command "setDehumidifierLevel"
@@ -159,11 +159,11 @@ metadata {
 		command "createGroup"
 		command "deleteGroup"
 		command "updateClimate"
-        command "iterateUpdateClimate"
-        command "createClimate"
-        command "deleteClimate"
-        command "setClimate"
-        command "iterateSetClimate"
+		command "iterateUpdateClimate"
+		command "createClimate"
+		command "deleteClimate"
+		command "setClimate"
+		command "iterateSetClimate"
     }
 
     simulator {
