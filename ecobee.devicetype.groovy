@@ -2136,10 +2136,10 @@ def getThermostatSummary(tstatType) {
         	        sendEvent name: "verboseTrace", value: "getTstatSummary> found ${thermostatId},name=${thermostatName},connected=${connected}"
                 }
                 def equipStatusDetails = data.statusList[i].split(':')
+                String equipStatus= 'Idle'
                 if (settings.trace) {
-                    String equipStatus= 'Idle'
-                    if (equipStatusDetails.size() != 0) {
-                         equipStatus = equipStatusDetails[1] + " running"
+                    if (equipStatusDetails.size() > 0) {
+                        equipStatus = equipStatusDetails[1] + " running"
                     }     
                     log.debug "getThermostatSummary> thermostatId = ${equipStatusDetails[0]}, status= ${equipStatus}"
         	        sendEvent name: "verboseTrace", value: "getThermostatSummary> thermostatId = ${equipStatusDetails[0]},status= ${equipStatus}"
