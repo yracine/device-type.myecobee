@@ -37,7 +37,7 @@ preferences {
         input "givenHumidityDiff", "number", title: "Humidity Differential (default=5%)", required:false
     }
     section("Min. Fan Time") {
-        input "givenMinFanTime", "number", title: "Minimum fan time per hour in minutes (default=10)", required:false
+        input "givenFanMinTime", "number", title: "Minimum fan time per hour in minutes (default=10)", required:false
     }
     
     section("Choose Outdoor's humidity sensor to use for better adjustment") {
@@ -111,10 +111,10 @@ def sensorTemperatureHandler(evt) {
 
 def setHumidityLevel() {
 
-    def min_temp_in_Farenheits =(givenMinTemp!=null) ?givenMinTemp: 0        // Min temp in Farenheits for starting dehumidifier,otherwise too cold
-    def min_humidity_diff = (givenHumidityDiff!=null) ?givenHumidityDiff:5  //  5% humidity differential by default
-    def min_fan_time = (givenFanMinTime!=null) ?givenFanMinTime:10         //  10 min. fan time per hour by default
-    def target_humidity =(givenHumidityLevel!=null)?givenHumidityLevel:40        // by default,  40 is the humidity level to check for
+    def min_temp_in_Farenheits =givenMinTemp ?: 0                          // Min temp in Farenheits for starting dehumidifier,otherwise too cold
+    def min_humidity_diff = givenHumidityDiff ?:5                          //  5% humidity differential by default
+    Integer min_fan_time =  givenFanMinTime?:10                            //  10 min. fan time per hour by default
+    def target_humidity = givenHumidityLevel ?: 40                         // by default,  40 is the humidity level to check for
     
     log.debug "setHumidity> location.mode = $location.mode"
 
