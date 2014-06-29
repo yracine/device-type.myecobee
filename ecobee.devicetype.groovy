@@ -2046,7 +2046,7 @@ def getThermostatInfo(thermostatId){
     if (settings.trace) {
         log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
     }
-    def bodyReq = build_body_request('thermostatInfo', 'registered', thermostatId, null, null)
+    def bodyReq = build_body_request('thermostatInfo', null, thermostatId, null, null)
     if (settings.trace) {
         log.debug "getThermostatInfo> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
     }
