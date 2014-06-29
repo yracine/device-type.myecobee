@@ -590,22 +590,16 @@ def poll() {
         // current fan mode based on running event
     
         sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].events[indiceEvent].fan)   
+        sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].events[indiceEvent].fanMinOnTime)
    
     } 
     else {
        // otherwise the fanMode is taken from the runtime object
           
         sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].runtime.desiredFanMode)
+       // otherwise the fanMinOnTime is taken from the settings object
+        sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].settings.fanMinOnTime)
     }
-
-//    if ((data.thermostatList[0].events[0].running) && (data.thermostatList[0].events[0].name=='auto')) {
-//        //  post fanMinOnTime only when the first running event is named 'auto'
-//        
-//        sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].events[0].fanMinOnTime)
-//    }
-
-    sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].settings.fanMinOnTime)
-    
     if (data.thermostatList[0].settings.hvacMode == 'cool') {
     
         sendEvent(name: 'programFanMode', value: currentClimate.coolFan)
