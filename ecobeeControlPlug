@@ -76,7 +76,6 @@ def appTouch(evt) {
     log.debug "ecobeeControlPlug> about to take actions"
     def plugSettings = [holdType:"{$givenHoldType}"]
   
-// You may want to change to ecobee.createVacation('serial number list',....) if you own EMS thermostat(s)
 
     if (givenHoldType == "dateTime") {
     
