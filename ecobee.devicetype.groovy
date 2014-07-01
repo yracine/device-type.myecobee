@@ -4,6 +4,7 @@
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *  Date: 2014-03-31
  *  Code: https://github.com/yracine/device-type.myecobee
+ *  refer to readme file for installation instructions.
  *
  * Copyright (C) 2014 Yves Racine <yracine66@gmail.com>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this 
@@ -712,9 +713,7 @@ def api(method,  args, success = {}) {
            }    
            login()
         }
-        
     }
-    
     def args_encoded = URLEncoder.encode(args.toString(),"UTF-8")
     def methods = [
         'thermostatSummary': [uri: "${URI_ROOT}/thermostatSummary?format=json&body=${args_encoded}", type: 'get'],        
@@ -737,14 +736,11 @@ def api(method,  args, success = {}) {
   	   sendEvent name: "verboseTrace", value: "api> about to call doRequest with (unencoded) args = ${args}"
        
     }   
-
     doRequest(request.uri, args_encoded, request.type, success)
 }
  
 // Need to be authenticated in before this is called. So don't call this. Call api.
 def doRequest(uri, args, type, success) {
-    
-    
     def params = [
             uri: uri,
             headers: [
@@ -755,7 +751,6 @@ def doRequest(uri, args, type, success) {
   	        ],
             body: args
     ]
-    
     try {
 
         if (settings.trace) {
@@ -2002,15 +1997,6 @@ def getThermostatSummary(tstatType) {
             
                     log.debug "getThermostatSummary> thermostatId = ${thermostatId}, name = ${thermostatName}, connected =${connected}"
         	        sendEvent name: "verboseTrace", value: "getTstatSummary> found ${thermostatId},name=${thermostatName},connected=${connected}"
-                }
-                def equipStatusDetails = data.statusList[i].split(':')
-                String equipStatus= 'Idle'
-                if (settings.trace) {
-                    if (equipStatusDetails.size() > 0) {
-                        equipStatus = equipStatusDetails[1] + " running"
-                    }     
-                    log.debug "getThermostatSummary> thermostatId = ${equipStatusDetails[0]}, status= ${equipStatus}"
-        	        sendEvent name: "verboseTrace", value: "getThermostatSummary> thermostatId = ${equipStatusDetails[0]},status= ${equipStatus}"
                 }
 
             }
