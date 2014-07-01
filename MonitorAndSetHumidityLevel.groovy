@@ -129,10 +129,11 @@ def setHumidityLevel() {
     def outdoorHumidity = sensor.currentHumidity
     float outdoorTemp = sensor.currentTemperature
     def ecobeeMode = ecobee.currentThermostatMode
+      
     log.trace("setHumidity> evaluate:, Ecobee's humidity: ${ecobeeHumidity} vs. outdoor's humidity ${outdoorHumidity},"  +
         "coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
 
-    if ((ecobeeMode == 'cool') && (ecobeeHumidity >= outdoorHumidity) && 
+    if ((ecobeeMode == 'cool') && (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
          (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, " +
            "need to dehumidify the house and outdoor's humidity is ${outdoorHumidity}"
@@ -146,7 +147,7 @@ def setHumidityLevel() {
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }
     else if ( ((ecobeeMode == 'heat')  ||  (ecobeeMode == 'off')) && (ecobeeHumidity >= (target_humidity + min_humidity_diff)) && 
-             (ecobeeHumidity >= outdoorHumidity) && 
+             (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
              (outdoorTemp > fToC(min_temp_in_Farenheits))) {
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
            "outdoor's humidity is ${outdoorHumidity} & outdoor's temp is ${outdoorTemp},  not too cold"
@@ -160,7 +161,7 @@ def setHumidityLevel() {
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }    
     else if (((ecobeeMode == 'heat')  ||  (ecobeeMode == 'off')) && (ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
-             (ecobeeHumidity >= outdoorHumidity) && 
+             (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
              (outdoorTemp <= fToC(min_temp_in_Farenheits))) {
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
            "outdoor's humidity is ${outdoorHumidity}, but outdoor's temp is ${outdoorTemp}: too cold"
@@ -175,7 +176,7 @@ def setHumidityLevel() {
     
     }
     else if ((ecobeeMode == 'cool') && (ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
-             (outdoorHumidity > (ecobeeHumidity + min_humidity_diff))){   
+             (outdoorHumidity > ecobeeHumidity )){   
     
                           
        log.trace("setHumidity> Ecobee's humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
