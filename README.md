@@ -39,7 +39,11 @@ INSTALLATION STEPS
         see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details 
         (e) <ecobeeType> set to 'registered' (by default) or 'managementSet (no spaces)'
 
-5) To get an ecobee PIN (double authentication), create a small app with the following code and install it.
+5) To get an ecobee PIN (double authentication), create a smartapp with the following code and install it.
+
+To do so, go to  https://graph.api.smartthings.com/ide/apps and click the 'new SmartApp' button at the top-right of your screen.
+
+
 
 preferences {
     
