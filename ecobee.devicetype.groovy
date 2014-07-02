@@ -62,6 +62,7 @@ metadata {
 		attribute "programType", "string"
 		attribute "programCoolTemp", "string"
 		attribute "programHeatTemp", "string"
+		attribute "programEndTimeMsg", "string"
 		attribute "weatherDateTime", "string"
 		attribute "weatherStation", "string"
 		attribute "weatherCondition", "string"
@@ -173,10 +174,12 @@ metadata {
         valueTile("equipementStatus", "device.equipementStatus", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
              state "default", label:'${currentValue}'
         }
+        valueTile("programEndTimeMsg", "device.programEndTimeMsg", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
+             state "default", label:'${currentValue}'
+        }
         valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false, decoration: "flat", width: 1, height: 1) {
             state "default", label:'FanMin\n${currentValue}'
         }
-
         valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat", width: 2, height: 1) {
              state "default", label:'${currentValue}'
         }
@@ -232,7 +235,7 @@ metadata {
 
         main "temperature"
         details(["name","groups","temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
-                "equipementStatus", "fanMinOnTime", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
+                "equipementStatus", "programEndTimeMsg","fanMinOnTime", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
                 "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
                 "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop","refresh",])
 
@@ -479,7 +482,6 @@ def poll() {
 
     if (settings.trace) {
          
-        log.debug "poll>climates = ${data.thermostatList[0].program.climates}"
         log.debug "poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
         sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
         sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},name=${data.thermostatList[0].events[indiceEvent].name}"
@@ -499,22 +501,28 @@ def poll() {
              exit
         }
     }    
-    if (((data.thermostatList[0].events[indiceEvent].type != 'vacation') &&
-        (data.thermostatList[0].events[indiceEvent].type != 'quickSave')) ||
-        (!data.thermostatList[0].events[indiceEvent].running)){
+    if (!data.thermostatList[0].events[indiceEvent].running){
   
-        // if there is no event running or the event type is different from vacation  or quicksave, then
-        // display the current program
+        // if there is no event running, then display the current program
         
         sendEvent(name: 'programScheduleName', value: currentClimate.name )
         sendEvent(name: 'programType', value: currentClimate.type)
+        sendEvent(name: 'programEndTimeMsg', value: "No Event running")
     }
     else {
         // otherwise, display the current event
         
         sendEvent(name: 'programScheduleName', value: data.thermostatList[0].events[indiceEvent].name )
         sendEvent(name: 'programType', value: data.thermostatList[0].events[indiceEvent].type)
-    
+        if (data.thermostatList[0].events[indiceEvent].type!='quickSave') {
+        
+            sendEvent (name: 'programEndTimeMsg', value: "${data.thermostatList[0].events[indiceEvent].type}" +
+            " ends at ${data.thermostatList[0].events[indiceEvent].endDate} ${data.thermostatList[0].events[indiceEvent].endTime.substring(0,5)}")
+        }
+        else {
+            sendEvent(name: 'programEndTimeMsg', value: "Quicksave running")
+        
+        }
     }
     if (data.thermostatList[0].events[indiceEvent].running) {
     
