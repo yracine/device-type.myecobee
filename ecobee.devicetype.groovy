@@ -488,12 +488,15 @@ def poll() {
     if (settings.trace) {
          
         log.debug "poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+        
         sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
-        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},name=${data.thermostatList[0].events[indiceEvent].name}"
-        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
-        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},fan type=${data.thermostatList[0].events[indiceEvent].fan}"
-        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},running=${data.thermostatList[0].events[indiceEvent].running}"
-        sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},indiceEvent=${indiceEvent}"
+        if (foundEvent) {
+            sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},name=${data.thermostatList[0].events[indiceEvent].name}"
+            sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
+            sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},fan type=${data.thermostatList[0].events[indiceEvent].fan}"
+            sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},running=${data.thermostatList[0].events[indiceEvent].running}"
+            sendEvent name: "verboseTrace", value: "poll>thermostatId = ${settings.thermostatId},indiceEvent=${indiceEvent}"
+        }
     }
     
     def currentClimate=null 
@@ -506,8 +509,8 @@ def poll() {
              exit
         }
     }    
-    if (foundEvent && (data.thermostatList[0].events[indiceEvent].running)){
-        // Display the current event
+    if (foundEvent) {
+        // Display the current event's name, type, and message
         
         sendEvent(name: 'programScheduleName', value: data.thermostatList[0].events[indiceEvent].name )
         sendEvent(name: 'programType', value: data.thermostatList[0].events[indiceEvent].type)
@@ -527,7 +530,7 @@ def poll() {
         sendEvent(name: 'programType', value: currentClimate.type)
         sendEvent(name: 'programEndTimeMsg', value: "No Events running")
     }
-    if ((foundEvent && data.thermostatList[0].events[indiceEvent].running)) {
+    if (foundEvent){
     
         // current fan mode based on running event
     
@@ -558,7 +561,7 @@ def poll() {
         float desiredHeatTemp
         
         
-        if ((foundEvent && data.thermostatList[0].events[indiceEvent].running)) {
+        if (foundEvent) {
         // post desired heat and cool setPoints based on running event
         
             desiredCoolTemp =  fToC(data.thermostatList[0].events[indiceEvent].coolHoldTemp)
@@ -608,7 +611,7 @@ def poll() {
         sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature), 
             unit:"F", state: data.thermostatList[0].settings.hvacMode)
             
-        if ((foundEvent && data.thermostatList[0].events[indiceEvent].running)) {
+        if (foundEvent) {
         // post desired heat and cool setPoints based on running event
 
             sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].events[indiceEvent].coolHoldTemp), unit: "F")
