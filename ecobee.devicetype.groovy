@@ -507,7 +507,7 @@ def poll() {
         
         sendEvent(name: 'programScheduleName', value: currentClimate.name )
         sendEvent(name: 'programType', value: currentClimate.type)
-        sendEvent(name: 'programEndTimeMsg', value: "No Event running")
+        sendEvent(name: 'programEndTimeMsg', value: "No Events running")
     }
     else {
         // otherwise, display the current event
