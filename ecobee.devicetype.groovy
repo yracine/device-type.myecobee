@@ -27,7 +27,7 @@ import java.net.URLEncoder
 // for the UI
 
 preferences {
-    	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces")
+    	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces)")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
     	input("trace", "text", title: "trace", description: "Set it to true to enable tracing (no spaces) or leave it empty (no tracing)")
     	input("holdType","text", title: "holdType", description: "Set it nextTransition or indefinite (latter by default)")
@@ -473,11 +473,16 @@ def poll() {
     // post program events
     Integer indiceEvent=0
     
-    for (i in 0..data.thermostatList[0].events.size()-1) {
-        if (data.thermostatList[0].events[i].running) {
-            indiceEvent=i  // save the right indice whose Event is currently running
-            exit
+    Boolean foundEvent=false    
+    if (data.thermostatList[0].events.size > 0) {
+        for (i in 0..data.thermostatList[0].events.size()-1) {
+            if (data.thermostatList[0].events[i].running) {
+                indiceEvent=i  // save the right indice whose Event is currently running
+                foundEvent=true
+                exit
+            }
         }
+            
     }
 
     if (settings.trace) {
@@ -501,16 +506,8 @@ def poll() {
              exit
         }
     }    
-    if (!data.thermostatList[0].events[indiceEvent].running){
-  
-        // if there is no event running, then display the current program
-        
-        sendEvent(name: 'programScheduleName', value: currentClimate.name )
-        sendEvent(name: 'programType', value: currentClimate.type)
-        sendEvent(name: 'programEndTimeMsg', value: "No Events running")
-    }
-    else {
-        // otherwise, display the current event
+    if (foundEvent && (data.thermostatList[0].events[indiceEvent].running)){
+        // Display the current event
         
         sendEvent(name: 'programScheduleName', value: data.thermostatList[0].events[indiceEvent].name )
         sendEvent(name: 'programType', value: data.thermostatList[0].events[indiceEvent].type)
@@ -521,10 +518,16 @@ def poll() {
         }
         else {
             sendEvent(name: 'programEndTimeMsg', value: "Quicksave running")
-        
         }
     }
-    if (data.thermostatList[0].events[indiceEvent].running) {
+    else {
+        // if there is no event running, then display the current program
+        
+        sendEvent(name: 'programScheduleName', value: currentClimate.name )
+        sendEvent(name: 'programType', value: currentClimate.type)
+        sendEvent(name: 'programEndTimeMsg', value: "No Events running")
+    }
+    if ((foundEvent && data.thermostatList[0].events[indiceEvent].running)) {
     
         // current fan mode based on running event
     
@@ -555,7 +558,7 @@ def poll() {
         float desiredHeatTemp
         
         
-        if (data.thermostatList[0].events[indiceEvent].running) {
+        if ((foundEvent && data.thermostatList[0].events[indiceEvent].running)) {
         // post desired heat and cool setPoints based on running event
         
             desiredCoolTemp =  fToC(data.thermostatList[0].events[indiceEvent].coolHoldTemp)
@@ -605,7 +608,7 @@ def poll() {
         sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature), 
             unit:"F", state: data.thermostatList[0].settings.hvacMode)
             
-        if (data.thermostatList[0].events[indiceEvent].running) {
+        if ((foundEvent && data.thermostatList[0].events[indiceEvent].running)) {
         // post desired heat and cool setPoints based on running event
 
             sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].events[indiceEvent].coolHoldTemp), unit: "F")
