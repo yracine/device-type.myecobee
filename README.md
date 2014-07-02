@@ -72,4 +72,4 @@ def installed() {
 
 9) To populate the UI fields for your newly created device, please hit the 'refresh' button several times as the smartthings UI is not always responsive.  You may want to stop and restart your smartthings app if needed.
 
-10) You can also use the smarttthings apps that I've developed and adapt them according to your needs
+10) You can also use the smartapps that I've developed and adapt them according to your needs (see github)
