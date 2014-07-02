@@ -70,4 +70,6 @@ def installed() {
  
 8) Your device should now be ready to process your commands
 
-9) You can also use the smarttthings apps that I've developed and adapt them according to your needs
+9) To populate the UI fields for your newly created device, please hit the 'refresh' button several times as the smartthings UI is not always responsive.  You may want to stop and restart your smartthings app if needed.
+
+10) You can also use the smarttthings apps that I've developed and adapt them according to your needs
