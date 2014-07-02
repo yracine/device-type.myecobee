@@ -37,7 +37,7 @@ INSTALLATION STEPS
         (c) <trace> when needed, set to true to get more tracing (no spaces)
         (d) <holdType> set to nextTransition or indefinite (by default, no spaces) 
         see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details 
-        (e) <ecobeeType> set to 'registered' (by default) or 'managementSet (no spaces)'
+        (e) <ecobeeType> set to registered (by default, for SmartSI and SMART thermostats) or managementSet (EMS, no spaces)
 
 5) To get an ecobee PIN (double authentication), create a smartapp with the following code and install it.
 
