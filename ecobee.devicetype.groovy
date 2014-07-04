@@ -30,7 +30,7 @@ preferences {
     	input("thermostatId", "text", title: "Serial #", description: "The serial number of your thermostat (no spaces)")
     	input("appKey", "text", title: "App Key", description: "The application key given by Ecobee (no spaces)")
     	input("trace", "text", title: "trace", description: "Set it to true to enable tracing (no spaces) or leave it empty (no tracing)")
-    	input("holdType","text", title: "holdType", description: "Set it nextTransition or indefinite (latter by default)")
+    	input("holdType","text", title: "holdType", description: "Set it to nextTransition or indefinite (latter by default)")
     	input("ecobeeType", "text", title: "ecobee Tstat Type", description: "Set it to registered (by default) or managementSet (no spaces)")
 	}
 metadata {
@@ -430,7 +430,6 @@ def poll() {
     if (data.thermostatList.settings.hasHumidifier) {
         sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
         sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,unit:"%")
-        
     }
     if (data.thermostatList.settings.hasDehumidifier) {
         sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
@@ -596,7 +595,6 @@ def poll() {
     // post alerts
     def alerts = null
     if (data.thermostatList[0].alerts.size() > 0) {
-            
         alerts = 'Alert(s) '
         for (i in 0..data.thermostatList[0].alerts.size()-1) { 
             if (settings.trace) {
@@ -610,10 +608,9 @@ def poll() {
     alerts = (alerts != null) ? alerts + '\ngo to ecobee portal': 'No alerts'  
     sendEvent(name: 'alerts', value: alerts)
     // post group(s)
+
     def groupList = 'No groups'
-    
     // by default, the ecobeeType is registered (SMART & SMART-SI thermostats)
-    
     def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim():'registered'
     if (ecobeeType.toUpperCase() == 'REGISTERED') {
         log.debug "poll> about to execute getGroups"
@@ -834,9 +831,6 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode, tstatSe
         def Id = thermostatDetails[0]
         def thermostatName = thermostatDetails[1]
         def connected = thermostatDetails[2]
-//        def thermostatRevision = thermostatDetails[3]
-//        def alertRevision = thermostatDetails[4]
-//        def runtimeRevision = thermostatDetails[5]
         if (connected=='true') {
             if (nTstats==0) {
                 tstatlist = Id
@@ -1064,7 +1058,6 @@ def iterateDeleteVacation(tstatType, vacationName) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 def deleteVacation(thermostatId, vacationName) {
-     
     def vacationParams = [name:vacationName.trim()]
     def bodyReq = build_body_request('deleteVacation', null, thermostatId, vacationParams, null)
     if (settings.trace) {
@@ -1425,7 +1418,6 @@ def iterateSetClimate(tstatType, climateName) {
             }     
              
         }    
-    
     }
 }
 
@@ -1633,7 +1625,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
  
     }
     if (!foundClimate) {  // this is a new Climate object to create
-
         if (settings.trace) {
             log.debug   "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be created"           
             sendEvent name: "verboseTrace", value:  "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be created"
@@ -1681,7 +1672,6 @@ def controlPlug(thermostatId, plugName, plugState, plugSettings=[]) {
     bodyReq = bodyReq + ',"functions":[{"type":"controlPlug","params":{"plugName":"' + plugName + '","plugState":"' + plugState + '"'
 
     // add the plugSettings if any
-    
     if ((plugSettings != null) && (plugSettings != '')) {
         bodyReq = bodyReq + ',' + plugSet 
     }
@@ -1990,7 +1980,6 @@ def setAuthTokens(){
 }
 
 def isLoggedIn() {
-
     if (data.auth == null) {
         if (settings.trace) {
             log.debug "isLoggedIn> no data auth"
