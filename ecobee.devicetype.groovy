@@ -233,7 +233,6 @@ metadata {
                 "equipementStatus", "programEndTimeMsg","fanMinOnTime", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
                 "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
                 "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop","refresh",])
-
     }
 }
 
@@ -521,7 +520,6 @@ def poll() {
         float desiredHeatTemp
         if (foundEvent) {
         // post desired heat and cool setPoints based on running event
-        
             desiredCoolTemp =  fToC(data.thermostatList[0].events[indiceEvent].coolHoldTemp)
             desiredHeatTemp = fToC(data.thermostatList[0].events[indiceEvent].heatHoldTemp)  
         }
@@ -566,7 +564,6 @@ def poll() {
             unit:"F", state: data.thermostatList[0].settings.hvacMode)
         if (foundEvent) {
         // post desired heat and cool setPoints based on running event
-
             sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].events[indiceEvent].coolHoldTemp), unit: "F")
             sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].events[indiceEvent].heatHoldTemp), unit: "F")
         }
@@ -592,6 +589,7 @@ def poll() {
     }
     def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0)? data.thermostatList[0].equipmentStatus + ' running': 'Idle'  
     sendEvent(name: 'equipementStatus', value: equipStatus)
+
     // post alerts
     def alerts = null
     if (data.thermostatList[0].alerts.size() > 0) {
@@ -607,8 +605,8 @@ def poll() {
     }
     alerts = (alerts != null) ? alerts + '\ngo to ecobee portal': 'No alerts'  
     sendEvent(name: 'alerts', value: alerts)
-    // post group(s)
 
+    // post group(s)
     def groupList = 'No groups'
     // by default, the ecobeeType is registered (SMART & SMART-SI thermostats)
     def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim():'registered'
