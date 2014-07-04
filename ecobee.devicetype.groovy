@@ -409,7 +409,6 @@ def setHumidifierMode(mode) {
 }
  
 def setHumidifierLevel(level) {
-    
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
           null,['humidity':"${level}"]) 
     sendEvent(name: 'humidifierLevel', value: level)
@@ -635,7 +634,6 @@ def refresh() {
 }
 
 def resumeThisTstat() {
-
      resumeProgram(settings.thermostatId)
 }
 
@@ -807,7 +805,6 @@ private def build_body_request(method, tstatType, thermostatId,  tstatParams =[]
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode, tstatSettings=[]) {    
-
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
     Integer nTstats=0
@@ -1158,7 +1155,6 @@ def resumeProgram(thermostatId) {
 // Get all groups related to a thermostatId or all groups
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 def getGroups(thermostatId) {    
-
     if (settings.trace) {
         log.debug "getGroups> about to assemble bodyReq thermostatId = ${thermostatId}, settings = ${settings}..."
         sendEvent name: "verboseTrace", value: "getGroups> about to assemble bodyReq thermostatId = ${thermostatId},settings = ${settings}..."        
@@ -1229,7 +1225,6 @@ def getGroups(thermostatId) {
 // groupSettings may be a map of settings separated by ",", no spaces; 
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 def iterateUpdateGroup(thermostatId, groupSettings=[]) {
-
     if ((thermostatId == null) || (thermostatId == "")) {
         thermostatId = settings.thermostatId
     }
