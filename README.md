@@ -62,7 +62,7 @@ def installed() {
     
 }
 
-6) Click on your ecobee device again to get the 4-alphanumeric PIN  from the list ((https://graph.api.smartthings.com/device/list). It should appear immediately under the verboseTrace attribute.
+6) Click on your ecobee device again to get the 4-alphanumeric PIN  from the list (https://graph.api.smartthings.com/device/list). It should appear immediately under the verboseTrace attribute.
 
 
 7) Go to the ecobee web portal within the next 9 minutes and enter your pin number under settings/my apps
