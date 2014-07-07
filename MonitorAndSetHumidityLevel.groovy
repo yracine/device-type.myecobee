@@ -37,11 +37,15 @@ preferences {
         input "givenHumidityDiff", "number", title: "Humidity Differential (default=5%)", required:false
     }
     section("Min. Fan Time") {
-        input "givenFanMinTime", "number", title: "Minimum fan time per hour in minutes (default=10)", required:false
+        input "givenFanMinTime", "number", title: "Minimum fan time per hour in minutes (default=20)", required:false
     }
     
+    section("Choose Indoor's humidity sensor to use for better adjustment (optional, default=ecobee sensor)") {
+        input "indoorSensor", "capability.relativeHumidityMeasurement", title: "Indoor Humidity Sensor", required:false
+        
+    }	
     section("Choose Outdoor's humidity sensor to use for better adjustment") {
-        input "sensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
+        input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
         
     }	
     section("Min temperature for dehumidification (in Farenheits)") {
@@ -72,11 +76,15 @@ def updated() {
 
 def initialize() {
     
+    subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
     subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
     subscribe(ecobee, "humidity", ecobeeHumidityhandler)
     subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
-    subscribe(sensor, "humidity", sensorHumidityHandler)
+    subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
+    if ((indoorSensor != null) && (indoorSensor != "")) {
+        subscribe(indoorSensor, "humidity", indoorSensorHumHandler)
+    }    
     subscribe(sensor, "temperature", sensorTemperatureHandler)
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     log.debug "Scheduling Humidity Monitoring & Change every ${delay}  minutes"
@@ -84,6 +92,7 @@ def initialize() {
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
+
 def ecobeeHeatTempHandler(evt) {
     log.debug "ecobee's heating temp: $evt.value"
 }
@@ -101,8 +110,12 @@ def ecobeeModeHandler(evt) {
 }
 
 
-def sensorHumidityHandler(evt) {
-    log.debug "outdoor sensor's humidity level: $evt.value"
+def outdoorSensorHumHandler(evt) {
+    log.debug "outdoor Sensor's humidity level: $evt.value"
+}
+
+def indoorSensorHumHandler(evt) {
+    log.debug "indoor Sensor's humidity level: $evt.value"
 }
 
 def sensorTemperatureHandler(evt) {
@@ -113,23 +126,37 @@ def setHumidityLevel() {
 
     def min_temp_in_Farenheits =givenMinTemp ?: 0                          // Min temp in Farenheits for starting dehumidifier,otherwise too cold
     def min_humidity_diff = givenHumidityDiff ?:5                          //  5% humidity differential by default
-    Integer min_fan_time =  givenFanMinTime?:10                            //  10 min. fan time per hour by default
+    Integer min_fan_time =  givenFanMinTime?:20                            //  20 min. fan time per hour by default
     def target_humidity = givenHumidityLevel ?: 40                         // by default,  40 is the humidity level to check for
+    Integer max_power = givenPowerLevel ?:3000                             //  Do not run above 3000w consumption level by default
+    
     
     log.debug "setHumidity> location.mode = $location.mode"
 
-//  Polling of all devices
+//  Polling of ecobee to get current metrics
 
     ecobee.poll()
-
 
     def heatTemp = ecobee.currentHeatingSetpoint
     def coolTemp = ecobee.currentCoolingSetpoint
     def ecobeeHumidity = ecobee.currentHumidity
-    def outdoorHumidity = sensor.currentHumidity
-    float outdoorTemp = sensor.currentTemperature
+    def indoorHumidity=0 
+    
+    if ((indoorSensor != null) && (indoorSensor != "")) {
+        indoorHumidity = indoorSensor.currentHumidity
+    }
+    def outdoorHumidity = outdoorSensor.currentHumidity
+    float outdoorTemp = outdoorSensor.currentTemperature
     def ecobeeMode = ecobee.currentThermostatMode
-      
+    
+    
+//  If indoorSensor specified, use the indoorHumidity provided instead of ecobeeHumidity
+
+    log.trace("setHumidity>compare: Ecobee's humidity: ${ecobeeHumidity} vs. indoor's humidity ${indoorHumidity}")
+    if (((indoorSensor != null) && (indoorSensor != "")) && (indoorHumidity < ecobeeHumidity)) {
+        ecobeeHumidity = indoorHumidity
+    }
+    
     log.trace("setHumidity> evaluate:, Ecobee's humidity: ${ecobeeHumidity} vs. outdoor's humidity ${outdoorHumidity},"  +
         "coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
 
@@ -201,7 +228,7 @@ def setHumidityLevel() {
 
        send "MonitorHumidity>humidify to ${target_humidity} in ${ecobeeMode} mode"
     }
-    else if (outdoorHumidity > ecobeeHumidity) {
+    else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
        log.trace("setHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify ")
        send "MonitorHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, null,['dehumidifierMode':'off','humidifierMode':'off']) 
