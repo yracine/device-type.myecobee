@@ -170,9 +170,9 @@ private initialize() {
     subscribe(smoke_detectors, "smoke", smokeHandler)
     subscribe(smoke_detectors, "carbonMonoxide", carbonMonoxideHandler)
     subscribe(smoke_detectors, "battery", batteryHandler)
-	subscribe(locks, "lock", doorUnlockedHandler)
-	subscribe(garageMulti, "contact", garageDoorContact)
-	subscribe(alarmSwitch, "contact", alarmSwitchContact)
+    subscribe(locks, "lock", doorUnlockedHandler)
+    subscribe(garageMulti, "contact", garageDoorContact)
+    subscribe(alarmSwitch, "contact", alarmSwitchContact)
       
 }
 
@@ -228,7 +228,7 @@ private takeActions(String state) {
        if ((state == CO2_ALERT) && (garageMulti.currentContact == "closed")) {
            log.debug "garage door is closed,about to open it following CO2 alert..."  
            garageSwitch.on();								     // Open the garage door if it is closed
-   		   sendMsg("FireCO2Alarm>Opened the garage door following CO2 alert...")
+           sendMsg("FireCO2Alarm>Opened the garage door following CO2 alert...")
        }
 
     }
@@ -240,7 +240,7 @@ private takeActions(String state) {
     astroCheck()
     if (now > state.setTime) {                                
         switches?.on()
-   	    sendMsg("FireCO2Alarm>Turned on the lights at night")
+        sendMsg("FireCO2Alarm>Turned on the lights at night")
 
     }
    
