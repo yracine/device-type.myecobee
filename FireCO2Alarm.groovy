@@ -30,18 +30,18 @@ definition(
 preferences {
 
 
-	section("Select smoke detector(s)..."){
-		input "smoke_detectors", "capability.smokeDetector", title: "Which one(s)...?", multiple: true
-	}
-    section( "Low battery warning" ){
-    	input "lowBattThreshold", "number", title: "Low Batt Threshold % (default 10%)", required: false
+    section("Select smoke detector(s)..."){
+        input "smoke_detectors", "capability.smokeDetector", title: "Which one(s)...?", multiple: true
     }
-	section("Unlock the doors") {
-		input "locks", "capability.lock", multiple: true
-	}
-	section("Open this Garage Door in case of CO2...") {
-		input "garageSwitch", "capability.switch",title: "Which Garage Door Switch"
-	}
+    section( "Low battery warning" ){
+        input "lowBattThreshold", "number", title: "Low Batt Threshold % (default 10%)", required: false
+    }
+    section("Unlock the doors") {
+        input "locks", "capability.lock", multiple: true
+    }
+    section("Open this Garage Door in case of CO2...") {
+        input "garageSwitch", "capability.switch",title: "Which Garage Door Switch"
+    }
     section("Only If this Garage's Contact is closed") {  
         input "garageMulti", "capability.contactSensor",title: "Which Garage Door Contact"
     }
@@ -49,26 +49,23 @@ preferences {
         input "thermostats", "capability.thermostat", title: "Thermostats", multiple:true, required: false
     }
     section("Dismarm the alarm system if armed") {
-    	input "alarmSwitch", "capability.switch", title: "Alarm Switch"
+        input "alarmSwitch", "capability.switch", title: "Alarm Switch"
     }
     section("Flash/turn on the ligths..."){
-		input "switches", "capability.switch", title: "These lights", multiple: true
-		input "numFlashes", "number", title: "This number of times (default 20)", required: false
-	}
-	section("Time settings in milliseconds (optional)"){
-		input "givenOnFor", "number", title: "On for (default 1000)", required: false
-		input "givenOffFor", "number", title: "Off for (default 1000)", required: false
-	}
-	section("And activate the siren") {
-    	input "securityAlert", "capability.alarm", title: "Security Alert"
+        input "switches", "capability.switch", title: "These lights", multiple: true
+        input "numFlashes", "number", title: "This number of times (default 20)", required: false
     }
-	section( "Notifications" ) {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
-		input "phone", "phone", title: "Send a Text Message?", required: false
-	}
-
-
-
+    section("Time settings in milliseconds (optional)"){
+        input "givenOnFor", "number", title: "On for (default 1000)", required: false
+        input "givenOffFor", "number", title: "Off for (default 1000)", required: false
+    }
+    section("And activate the siren") {
+        input "securityAlert", "capability.alarm", title: "Security Alert"
+    }
+    section( "Notifications" ) {
+        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+        input "phone", "phone", title: "Send a Text Message?", required: false
+    }
 }
 
 
