@@ -72,22 +72,22 @@ preferences {
 
 def installed()
 {
-	initialize()
+    initialize()
 }
  
 def updated()
 {
-	unsubscribe()
-	initialize()
+    unsubscribe()
+    initialize()
 }
 
 def garageDoorContact(evt)
 {
-	log.info "garageDoorContact, $evt.name: $evt.value"
+    log.info "garageDoorContact, $evt.name: $evt.value"
 }
 
 def doorUnlockedHandler(evt) {
-	log.debug "Lock ${locks} was: ${evt.value}"
+    log.debug "Lock ${locks} was: ${evt.value}"
 
 }
 
@@ -153,7 +153,7 @@ def carbonMonoxideHandler(evt) {
 }
  
 def batteryHandler(evt) {
-	log.trace "$evt.value: $evt, $settings"
+    log.trace "$evt.value: $evt, $settings"
     String theMessage
     int battLevel = evt.integerValue
     
@@ -180,7 +180,7 @@ private initialize() {
 def alarmSwitchContact(evt)
 
 {
-	log.info "alarmSwitchContact, $evt.name: $evt.value"
+    log.info "alarmSwitchContact, $evt.name: $evt.value"
 }
 
 private takeActions(String state) {
@@ -194,37 +194,37 @@ private takeActions(String state) {
 // Proceed with the following actions when clear alert
 
     if (state == CLEAR_ALERT) {
-        securityAlert.off()										// Turned off the security alert
+        securityAlert.off()                                     // Turned off the security alert
         sendMsg("FireCO2Alarm>Set the security alert off...")
-        locks?.lock()          								    // lock the locks
+        locks?.lock()                                           // lock the locks
         sendMsg("FireCO2Alarm>Locked the doors...")
-        thermostats?.auto()			                            // Turn on all thermostats, set them to auto mode.
+        thermostats?.auto()                                     // Turn on all thermostats, set them to auto mode.
         sendMsg("FireCO2Alarm>Thermostat(s) now in auto mode")
         return
     }
    
     if ((state != TESTED_ALERT) && (state != SMOKE_ALERT) && (state != CO2_ALERT)) {
-        log.debug "Not in test mode nor smoke detected, exiting..."  
+        log.debug "Not in test mode nor smoke/CO2 detected, exiting..."  
         return
     }
    
 // Proceed with the following actions in case of SMOKE or CO2 alert
 
-    securityAlert.on()										// Turned on the security alert
+    securityAlert.on()                                       // Turned on the security alert
     sendMsg("FireCO2Alarm>Security Alert on...")
 
 
     if (alarmSwitch.currentContact == "closed") {
         log.debug "alarm system is on, about to disarm it..."  
-        alarmSwitch.on()								     // disarm the alarm system
+        alarmSwitch.on()                                    // disarm the alarm system
         sendMsg("FireCO2Alarm>Alarm system disarmed")
     }
 
-    thermostats?.off()										// Turn off all thermostats
+    thermostats?.off()                                      // Turn off all thermostats
     sendMsg("FireCO2Alarm>Thermostats are now off")
 
     if (location.mode != 'Away') {
-       locks?.unlock()          								// Unlock the locks
+       locks?.unlock()                                      // Unlock the locks
 	   sendMsg("FireCO2Alarm>Unlocked the doors...")
        if ((state == CO2_ALERT) && (garageMulti.currentContact == "closed")) {
            log.debug "garage door is closed,about to open it following CO2 alert..."  
@@ -234,10 +234,10 @@ private takeActions(String state) {
 
     }
 
-    flashLights()                                             // Flash the lights
+    flashLights()                                            // Flash the lights
     sendMsg("FireCO2Alarm>Flashed the lights...")
 
-    def now = new Date().getTime()							 // Turn the switches on at night
+    def now = new Date().getTime()                           // Turn the switches on at night
     astroCheck()
     if (now > state.setTime) {                                
         switches?.on()
@@ -252,65 +252,68 @@ private takeActions(String state) {
 def astroCheck() {
     def s = getSunriseAndSunset(zipCode: zipCode)
     
-	state.riseTime = s.sunrise.time
-	state.setTime = s.sunset.time
-	log.debug "rise: ${new Date(state.riseTime)}($state.riseTime), set: ${new Date(state.setTime)}($state.setTime)"
+    state.riseTime = s.sunrise.time
+    state.setTime = s.sunset.time
+    log.debug "rise: ${new Date(state.riseTime)}($state.riseTime), set: ${new Date(state.setTime)}($state.setTime)"
 }
 
 
+
 private flashLights() {
-	def doFlash = true
-	def onFor = givenOnFor ?: 1000
-	def offFor = givenOffFor ?: 1000
-	def numFlashes = numFlashes ?: 20
+    def doFlash = true
+    def onFor = givenOnFor ?: 1000
+    def offFor = givenOffFor ?: 1000
+    def numFlashes = numFlashes ?: 20
 
-	log.debug "LAST ACTIVATED IS: ${state.lastActivated}"
-	if (state.lastActivated) {
-		def elapsed = now() - state.lastActivated
-		def sequenceTime = (numFlashes + 1) * (onFor + offFor)
-		doFlash = elapsed > sequenceTime
-		log.debug "DO FLASH: $doFlash, ELAPSED: $elapsed, LAST ACTIVATED: ${state.lastActivated}"
-	}
+    log.debug "LAST ACTIVATED IS: ${state.lastActivated}"
+    if (state.lastActivated) {
+        def elapsed = now() - state.lastActivated
+        def sequenceTime = (numFlashes + 1) * (onFor + offFor)
+        doFlash = elapsed > sequenceTime
+        log.debug "DO FLASH: $doFlash, ELAPSED: $elapsed, LAST ACTIVATED: ${state.lastActivated}"
+    }
 
-	if (doFlash) {
-		log.debug "FLASHING $numFlashes times"
-		state.lastActivated = now()
-		log.debug "LAST ACTIVATED SET TO: ${state.lastActivated}"
-		def initialActionOn = switches.collect{it.currentSwitch != "on"}
-		def delay = 1L
-		numFlashes.times {
-			log.trace "Switch on after  $delay msec"
-			switches.eachWithIndex {s, i ->
-				if (initialActionOn[i]) {
-					s.on(delay: delay)
-				}
-				else {
-					s.off(delay:delay)
-				}
-			}
-			delay += onFor
-			log.trace "Switch off after $delay msec"
-			switches.eachWithIndex {s, i ->
-				if (initialActionOn[i]) {
-					s.off(delay: delay)
-				}
-				else {
-					s.on(delay:delay)
-				}
-			}
-			delay += offFor
-		}
-	}
+    if (doFlash) {
+        log.debug "FLASHING $numFlashes times"
+        state.lastActivated = now()
+        log.debug "LAST ACTIVATED SET TO: ${state.lastActivated}"
+        def initialActionOn = switches.collect{it.currentSwitch != "on"}
+        def delay = 1L
+        numFlashes.times {
+            log.trace "Switch on after  $delay msec"
+            switches.eachWithIndex {s, i ->
+                if (initialActionOn[i]) {
+                    s.on(delay: delay)
+                
+                }
+                else {
+                    s.off(delay:delay)
+                }
+            }
+            delay += onFor
+            log.trace "Switch off after $delay msec"
+            switches.eachWithIndex {s, i ->
+                if (initialActionOn[i]) {
+                    s.off(delay: delay)
+	    	
+	            }
+                else {
+                    s.on(delay:delay)
+                }
+            }
+            delay += offFor
+        }
+    }
 }
 
 
 private sendMsg(theMessage) {
     log.debug "Sending message: ${theMessage}"
     if (phoneNumber) {
-    	sendSms(phoneNumber, theMessage)
+        sendSms(phoneNumber, theMessage)
     }
  
-	if (sendPushMessage == "Yes") {
+    if (sendPushMessage == "Yes") {
     	sendPush(theMessage)
     }
 }
