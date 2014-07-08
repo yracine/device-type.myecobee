@@ -1,6 +1,6 @@
 /**
- *  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the alarm, unlock the doors, turn
- *  off the thermostats, etc.
+ *  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the siren, unlock the doors, turn
+ *  off the thermostats, turn off the alarm system, etc.
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Copyright 2014 Yves Racine
@@ -15,6 +15,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+
 
 // Automatically generated. Make future change here.
 definition(
