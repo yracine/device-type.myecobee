@@ -194,11 +194,11 @@ private takeActions(String state) {
 // Proceed with the following actions when clear alert
 
     if (state == CLEAR_ALERT) {
-        securityAlert.off()                                     // Turned off the security alert
+        securityAlert.off()                                 // Turned off the security alert
         sendMsg("FireCO2Alarm>Set the security alert off...")
-        locks?.lock()                                           // lock the locks
+        locks?.lock()                                       // lock the locks
         sendMsg("FireCO2Alarm>Locked the doors...")
-        thermostats?.auto()                                     // Turn on all thermostats, set them to auto mode.
+        thermostats?.auto()                                 // Turn on all thermostats, set them to auto mode.
         sendMsg("FireCO2Alarm>Thermostat(s) now in auto mode")
         return
     }
@@ -210,34 +210,34 @@ private takeActions(String state) {
    
 // Proceed with the following actions in case of SMOKE or CO2 alert
 
-    securityAlert.on()                                       // Turned on the security alert
+    securityAlert.on()                                     // Turned on the security alert
     sendMsg("FireCO2Alarm>Security Alert on...")
 
 
     if (alarmSwitch.currentContact == "closed") {
         log.debug "alarm system is on, about to disarm it..."  
-        alarmSwitch.on()                                    // disarm the alarm system
+        alarmSwitch.on()                                   // disarm the alarm system
         sendMsg("FireCO2Alarm>Alarm system disarmed")
     }
 
-    thermostats?.off()                                      // Turn off all thermostats
+    thermostats?.off()                                     // Turn off all thermostats
     sendMsg("FireCO2Alarm>Thermostats are now off")
 
     if (location.mode != 'Away') {
-       locks?.unlock()                                      // Unlock the locks
+       locks?.unlock()                                     // Unlock the locks
 	   sendMsg("FireCO2Alarm>Unlocked the doors...")
        if ((state == CO2_ALERT) && (garageMulti.currentContact == "closed")) {
            log.debug "garage door is closed,about to open it following CO2 alert..."  
-           garageSwitch.on();								     // Open the garage door if it is closed
+           garageSwitch.on()                               // Open the garage door if it is closed
            sendMsg("FireCO2Alarm>Opened the garage door following CO2 alert...")
        }
 
     }
 
-    flashLights()                                            // Flash the lights
+    flashLights()                                          // Flash the lights
     sendMsg("FireCO2Alarm>Flashed the lights...")
 
-    def now = new Date().getTime()                           // Turn the switches on at night
+    def now = new Date().getTime()                         // Turn the switches on at night
     astroCheck()
     if (now > state.setTime) {                                
         switches?.on()
