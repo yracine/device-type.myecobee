@@ -1,9 +1,9 @@
 /**
  *  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the siren, unlock the doors, turn
- *  off the thermostats, turn off the alarm system, etc.
- *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *  off the thermostat(s), turn off the alarm system, etc.
  *
  *  Copyright 2014 Yves Racine
+ *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -22,7 +22,7 @@ definition(
     name: "FireCO2Alarm",
     namespace: "",
     author: "yracine@yahoo.com",
-    description: "Turn on all the lights/thermostats in case of a fire/CO2 alarm, unlock the doors, disarm the alarm system & open the garage door ",
+    description: "Turn on all the lights/thermostat in case of a fire/CO2 alarm, unlock the doors, disarm the alarm system & open the garage door ",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
@@ -47,7 +47,7 @@ preferences {
         input "garageMulti", "capability.contactSensor",title: "Which Garage Door Contact"
     }
     section("Turn off the thermostat(s)") {
-        input "thermostats", "capability.thermostat", title: "Thermostats", multiple:true, required: false
+        input "tstat", "capability.thermostat", title: "Thermostat(s)", multiple:true, required: false
     }
     section("Dismarm the alarm system if armed") {
         input "alarmSwitch", "capability.switch", title: "Alarm Switch"
@@ -62,6 +62,9 @@ preferences {
     }
     section("And activate the siren") {
         input "securityAlert", "capability.alarm", title: "Security Alert"
+    }
+    section("Clear alarm threshold (defaults to 1 min)") {
+        input "clearAlarmThreshold", "decimal", title: "Number of minutes", required: false
     }
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
@@ -79,6 +82,22 @@ def updated()
 {
     unsubscribe()
     initialize()
+}
+
+private initialize() {
+    subscribe(smoke_detectors, "smoke", smokeHandler)
+    subscribe(smoke_detectors, "carbonMonoxide", carbonMonoxideHandler)
+    subscribe(smoke_detectors, "battery", batteryHandler)
+    subscribe(locks, "lock", doorUnlockedHandler)
+    subscribe(garageMulti, "contact", garageDoorContact)
+    subscribe(alarmSwitch, "contact", alarmSwitchContact)
+    if ((tstat != null) && (tstat != "")) {
+        subscribe(tstat, "thermostatMode", thermostatModeHandler)
+    }    
+}
+
+def thermostatModeHandler(evt) {
+    log.debug "thermostat mode: $evt.value"
 }
 
 def garageDoorContact(evt)
@@ -165,17 +184,6 @@ def batteryHandler(evt) {
     }
 }
  
-    
- 
-private initialize() {
-    subscribe(smoke_detectors, "smoke", smokeHandler)
-    subscribe(smoke_detectors, "carbonMonoxide", carbonMonoxideHandler)
-    subscribe(smoke_detectors, "battery", batteryHandler)
-    subscribe(locks, "lock", doorUnlockedHandler)
-    subscribe(garageMulti, "contact", garageDoorContact)
-    subscribe(alarmSwitch, "contact", alarmSwitchContact)
-      
-}
 
 def alarmSwitchContact(evt)
 
@@ -183,7 +191,17 @@ def alarmSwitchContact(evt)
     log.info "alarmSwitchContact, $evt.name: $evt.value"
 }
 
-private takeActions(String state) {
+def clearAlert() { 
+    securityAlert.off()                                // Turned off the security alert
+    
+    sendMsg("FireCO2Alarm>Cleared, set the security alert off...")
+     
+    tstat?.auto()
+    sendMsg("FireCO2Alarm>Cleared, thermostat(s) mode is now set to auto")
+}
+
+
+private takeActions(String alert) {
 
     def CO2_ALERT = 'detected_CO2'
     def SMOKE_ALERT = 'detected_SMOKE'
@@ -193,40 +211,39 @@ private takeActions(String state) {
 
 // Proceed with the following actions when clear alert
 
-    if (state == CLEAR_ALERT) {
-        securityAlert.off()                                 // Turned off the security alert
-        sendMsg("FireCO2Alarm>Set the security alert off...")
-        locks?.lock()                                       // lock the locks
-        sendMsg("FireCO2Alarm>Locked the doors...")
-        thermostats?.auto()                                 // Turn on all thermostats, set them to auto mode.
-        sendMsg("FireCO2Alarm>Thermostat(s) now in auto mode")
+    if (alert == CLEAR_ALERT) {
+
+        def delay = (clearAlarmThreshold ?: 1) * 60               // default is 3 minutes
+        //  Wait a certain delay before clearing the alert
+
+        sendMsg("FireCO2Alarm>Cleared, wait for ${delay} seconds...")
+        runIn ( delay, "clearAlert", [overwrite:false])
+        
         return
     }
    
-    if ((state != TESTED_ALERT) && (state != SMOKE_ALERT) && (state != CO2_ALERT)) {
+    if ((alert != TESTED_ALERT) && (alert != SMOKE_ALERT) && (alert != CO2_ALERT)) {
         log.debug "Not in test mode nor smoke/CO2 detected, exiting..."  
         return
     }
    
 // Proceed with the following actions in case of SMOKE or CO2 alert
 
+
     securityAlert.on()                                     // Turned on the security alert
     sendMsg("FireCO2Alarm>Security Alert on...")
 
-
+    alarmSwitch.poll()
     if (alarmSwitch.currentContact == "closed") {
         log.debug "alarm system is on, about to disarm it..."  
         alarmSwitch.on()                                   // disarm the alarm system
         sendMsg("FireCO2Alarm>Alarm system disarmed")
     }
-
-    thermostats?.off()                                     // Turn off all thermostats
-    sendMsg("FireCO2Alarm>Thermostats are now off")
-
+    tstat?.off()                                           // Turn off the thermostats
     if (location.mode != 'Away') {
-       locks?.unlock()                                     // Unlock the locks
+       locks?.unlock()                                     // Unlock the locks if mode is not 'Away'
 	   sendMsg("FireCO2Alarm>Unlocked the doors...")
-       if ((state == CO2_ALERT) && (garageMulti.currentContact == "closed")) {
+       if (((alert == CO2_ALERT) || (alert == TESTED_ALERT)) && (garageMulti.currentContact == "closed")) {
            log.debug "garage door is closed,about to open it following CO2 alert..."  
            garageSwitch.on()                               // Open the garage door if it is closed
            sendMsg("FireCO2Alarm>Opened the garage door following CO2 alert...")
