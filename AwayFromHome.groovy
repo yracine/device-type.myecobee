@@ -108,7 +108,7 @@ private doNothing() {
 private residentsHaveBeenQuiet() {
     
 
-    def threshold = (residentsQuietThreshold == null ? 3: residentsQuietThreshold) * 60 * 1000
+    def threshold = residentsQuietThreshold ?: 3 
     Integer delay = 60 * threshold
 
 //  Wait a certain threshold before checking if residents have been quiet
