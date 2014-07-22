@@ -76,7 +76,6 @@ def updated() {
 
 def initialize() {
     
-    subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
     subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
     subscribe(ecobee, "humidity", ecobeeHumidityhandler)
@@ -128,8 +127,7 @@ def setHumidityLevel() {
     def min_humidity_diff = givenHumidityDiff ?:5                          //  5% humidity differential by default
     Integer min_fan_time =  givenFanMinTime?:20                            //  20 min. fan time per hour by default
     def target_humidity = givenHumidityLevel ?: 40                         // by default,  40 is the humidity level to check for
-    Integer max_power = givenPowerLevel ?:3000                             //  Do not run above 3000w consumption level by default
-    
+
     
     log.debug "setHumidity> location.mode = $location.mode"
 
