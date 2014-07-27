@@ -16,6 +16,15 @@ INSTALLATION STEPS
  
 1) Connect to the ecobee portal (www.ecobee.com) and (as a developer) create an application key with an application name (such as    ecobeeTstat) and indicate the PIN method authentication (at the bottom of the window).
 
+
+For signing up as a ecobee developer, just click on the link under
+
+http://www.ecobee.com/solutions/api/
+
+It says "Want to be an ecobee developer? Sign up here".
+
+Then, after signing up, you'll see a new 'developer' tab at the ecobee portal where you can register your key.
+
 2) Create a new device type (https://graph.api.smartthings.com/ide/devices)
 
       Name: MyEcobee Device
