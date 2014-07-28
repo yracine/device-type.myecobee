@@ -212,7 +212,7 @@ def setHumidityLevel() {
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['dehumidifyWithAC':'true','dehumidifierLevel':"${target_humidity}",
            'dehumidiferMode':'off','fanMinOnTime':"${min_fan_time}"]) 
           
-       send "MonitorHumidity>dehumidifyWithAC in cooling mode"
+       send "MonitorHumidity>dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
              
     }
     else if (((ecobeeMode == 'heat')  ||  (ecobeeMode == 'off')) && (ecobeeHumidity  < (target_humidity - min_humidity_diff))) {    
@@ -242,8 +242,8 @@ def setHumidityLevel() {
              
     }
     else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
-       log.trace("setHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify ")
-       send "MonitorHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
+       log.trace("setHumidity>all off, indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify ")
+       send "MonitorHumidity>all off, indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, null,['dehumidifierMode':'off','humidifierMode':'off']) 
     }
     else {
@@ -253,7 +253,8 @@ def setHumidityLevel() {
         
     }
             
-    log.debug "End of Fcn"}
+    log.debug "End of Fcn"
+}
 
 
 private send(msg) {
