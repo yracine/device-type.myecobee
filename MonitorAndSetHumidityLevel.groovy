@@ -158,7 +158,7 @@ def setHumidityLevel() {
     log.trace("setHumidity> evaluate:, Ecobee's humidity: ${ecobeeHumidity} vs. outdoor's humidity ${outdoorHumidity},"  +
         "coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
 
-    if ((ecobeeMode == 'cool') && (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
+    if ((ecobeeMode == 'cool') && (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) && 
          (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, " +
            "need to dehumidify the house and outdoor's humidity is ${outdoorHumidity}"
@@ -201,7 +201,7 @@ def setHumidityLevel() {
     
     }
     else if ((ecobeeMode == 'cool') && (ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
-             (outdoorHumidity > ecobeeHumidity )){   
+             (outdoorHumidity > (target_humidity + min_humidity_diff))) {   
     
                           
        log.trace("setHumidity> Ecobee's humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
@@ -226,6 +226,21 @@ def setHumidityLevel() {
 
        send "MonitorHumidity>humidify to ${target_humidity} in ${ecobeeMode} mode"
     }
+    else if ((ecobeeMode == 'cool') && (outdoorTemp < indoorTemp) &&
+             (outdoorHumidity <= (ecobeeHumidity + min_humidity_diff))){   
+    
+                          
+       log.trace("setHumidity> Outdoor temp is lower in cooling mode, use the ERV to get fresh air")
+
+//     If mode is cooling and outdoor's temp is lower than inside then use ERV to get fresh air into the house
+//     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
+
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['dehumidifierLevel':"${target_humidity}",'dehumidiferMode':'on',
+           'fanMinOnTime':"${min_fan_time}"]) 
+          
+       send "MonitorHumidity>Outdoor temp is lower, getting fresh air with ERV"
+             
+    }
     else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
        log.trace("setHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify ")
        send "MonitorHumidity>all off, outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
@@ -238,8 +253,7 @@ def setHumidityLevel() {
         
     }
             
-    log.debug "End of Fcn"
-}
+    log.debug "End of Fcn"}
 
 
 private send(msg) {
