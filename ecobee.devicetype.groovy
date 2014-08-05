@@ -456,15 +456,15 @@ def poll() {
     sendEvent(name: 'hasDehumidifier', value: data.thermostatList[0].settings.hasDehumidifier)
     sendEvent(name: 'hasHrv', value: data.thermostatList[0].settings.hasHrv)
     sendEvent(name: 'hasErv', value: data.thermostatList[0].settings.hasErv)
-    if (data.thermostatList.settings.hasHumidifier=='true') {
+    if (data.thermostatList.settings.hasHumidifier) {
         sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
         sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,unit:"%")
     }
-    if (data.thermostatList.settings.hasDehumidifier=='true') {
+    if (data.thermostatList.settings.hasDehumidifier) {
         sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
         sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel, unit:"%")
     }
-    if ((data.thermostatList.settings.hasHrv=='true') || (data.thermostatList.settings.hasErv=='true')) {
+    if ((data.thermostatList.settings.hasHrv) || (data.thermostatList.settings.hasErv)) {
         sendEvent(name: 'ventilatorMinOnTime', value: data.thermostatList[0].settings.ventilatorMinOnTime)
         sendEvent(name: 'ventilatorMode', value: data.thermostatList[0].settings.vent)
     }
