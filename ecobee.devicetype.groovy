@@ -83,7 +83,7 @@ metadata {
 		attribute "hasHrv", "string"
 		attribute "ventilatorMinOnTime", "string"
 		attribute "ventilatorMode", "string"
-		
+
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
@@ -466,6 +466,7 @@ def poll() {
     }
     if ((data.thermostatList.settings.hasHrv=='true') || (data.thermostatList.settings.hasErv=='true')) {
         sendEvent(name: 'ventilatorMinOnTime', value: data.thermostatList[0].settings.ventilatorMinOnTime)
+        sendEvent(name: 'ventilatorMode', value: data.thermostatList[0].settings.vent)
     }
     // post weather events
     sendEvent(name: 'weatherStation', value: data.thermostatList[0].weather.weatherStation)
