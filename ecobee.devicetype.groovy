@@ -77,8 +77,14 @@ metadata {
 		attribute "plugName", "string"
 		attribute "plugState", "string"
 		attribute "plugSettings", "string"
+		attribute "hasHumidifier", "string"
+		attribute "hasDehumidifier", "string"
+		attribute "hasErv", "string"
+		attribute "hasHrv", "string"
+		attribute "ventilatorMinOnTime", "string"
+		attribute "ventilatorMode", "string"
 
-		command "setFanMinOnTime"
+        command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
 		command "deleteVacation"
@@ -117,6 +123,11 @@ metadata {
 		command "setClimate"
 		command "iterateSetClimate"
 		command "controlPlug"            // not tested as I don't own a smartplug
+        command "ventilatorOn"
+        command "ventilatorAuto"
+        command "ventilatorOff"    
+        command "ventilatorAuto"    
+        command "setVentilatorMinOnTime"
     }
     simulator {
         // TODO: define status and reply messages here
@@ -232,7 +243,7 @@ metadata {
         details(["name","groups","temperature", "mode", "fanMode", "heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
                 "equipementStatus", "programEndTimeMsg","fanMinOnTime", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
                 "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
-                "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop","refresh",])
+                "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop", "refresh",])
     }
 }
 
@@ -341,7 +352,6 @@ def setThermostatMode(mode) {
         null,['hvacMode':"${mode}"]) 
     sendEvent(name: 'thermostatMode', value: mode)
 }
- 
 def fanOn() {
     setThermostatFanMode('on')
 }
@@ -353,27 +363,44 @@ def fanAuto() {
 def fanOff() {    // fanOff is not supported, setting it to 'auto' instead.
     setThermostatFanMode('auto')
 }
-
-
-def setFanMinOnTime(minutes) {
-    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
-        device.currentValue("thermostatFanMode"),['fanMinOnTime':"${minutes}"]) 
-    sendEvent(name: 'fanMinOnTime', value: minutes)
-}
-
 def setThermostatFanMode(mode) {    
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
          mode, null) 
     sendEvent(name: 'thermostatFanMode', value: mode)
 }
 
+def setFanMinOnTime(minutes) {
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+        device.currentValue("thermostatFanMode"),['fanMinOnTime':"${minutes}"]) 
+    sendEvent(name: 'fanMinOnTime', value: minutes)
+}
+def ventilatorOn() {
+    setVentilatorMode('on')
+}
+def ventilatorOff() {    
+    setVentilatorMode('off')
+}
+def ventilatorAuto() {    
+    setVentilatorMode('auto')
+}
+
+def setVentilatorMinOnTime(minutes) {
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+        device.currentValue("thermostatFanMode"),['vent':"minontime", 'ventilatorMinOnTime':"${minutes}"]) 
+    sendEvent(name: 'ventilatorMinOnTime', value: minutes)
+    sendEvent(name: 'ventilatorMode', value: "minontime")
+}
+def setVentilatorMode(mode) {    
+    setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
+         device.currentValue("thermostatFanMode"), ['vent':"${mode}"]) 
+    sendEvent(name: 'ventilatorMode', value: mode)
+}
 def setCondensationAvoid(flag) {  // set the flag to true or false
     flag = flag == 'true'? 'true' : 'false'
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
         null,['condensationAvoid':"${flag}"]) 
     sendEvent(name: 'condensationAvoid', value: flag)
 }
-
 def dehumidifierOn() {
     setDehumidifierMode('on')
 }
@@ -425,13 +452,20 @@ def poll() {
     sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
     sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity, unit:"%")
     sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
-    if (data.thermostatList.settings.hasHumidifier) {
+    sendEvent(name: 'hasHumidifier', value: data.thermostatList[0].settings.hasHumidifier)
+    sendEvent(name: 'hasDehumidifier', value: data.thermostatList[0].settings.hasDehumidifier)
+    sendEvent(name: 'hasHrv', value: data.thermostatList[0].settings.hasHrv)
+    sendEvent(name: 'hasErv', value: data.thermostatList[0].settings.hasErv)
+    if (data.thermostatList.settings.hasHumidifier=='true') {
         sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
         sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,unit:"%")
     }
-    if (data.thermostatList.settings.hasDehumidifier) {
+    if (data.thermostatList.settings.hasDehumidifier=='true') {
         sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
         sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel, unit:"%")
+    }
+    if ((data.thermostatList.settings.hasHrv=='true') || (data.thermostatList.settings.hasErv=='true')) {
+        sendEvent(name: 'ventilatorMinOnTime', value: data.thermostatList[0].settings.ventilatorMinOnTime)
     }
     // post weather events
     sendEvent(name: 'weatherStation', value: data.thermostatList[0].weather.weatherStation)
@@ -875,12 +909,12 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettin
             log.debug "setHold>settings.holdType= ${settings.holdType}"
             sendEvent name: "verboseTrace", value: "setHold>settings.holdType= ${settings.holdType}"
         }    
-        tstatParams = (fanMode != "") & (fanMode!=null) ? 
+        tstatParams = ((fanMode != null) & (fanMode!="")) ? 
            [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,fan:fanMode,holdType:"${settings.holdType.trim()}"]:
            [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,holdType:"${settings.holdType.trim()}"]
     }
     else {
-        tstatParams =(fanMode != "") & (fanMode!=null) ?
+        tstatParams =((fanMode != null) & (fanMode!="")) ?
             [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp,fan:fanMode]:
             [coolHoldTemp:targetCoolTemp,heatHoldTemp:targetHeatTemp]
             
