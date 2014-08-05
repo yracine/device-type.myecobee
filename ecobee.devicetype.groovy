@@ -83,8 +83,8 @@ metadata {
 		attribute "hasHrv", "string"
 		attribute "ventilatorMinOnTime", "string"
 		attribute "ventilatorMode", "string"
-
-        command "setFanMinOnTime"
+		
+		command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
 		command "deleteVacation"
@@ -123,11 +123,11 @@ metadata {
 		command "setClimate"
 		command "iterateSetClimate"
 		command "controlPlug"            // not tested as I don't own a smartplug
-        command "ventilatorOn"
-        command "ventilatorAuto"
-        command "ventilatorOff"    
-        command "ventilatorAuto"    
-        command "setVentilatorMinOnTime"
+		command "ventilatorOn"
+		command "ventilatorAuto"
+		command "ventilatorOff"    
+		command "ventilatorAuto"    
+		command "setVentilatorMinOnTime"
     }
     simulator {
         // TODO: define status and reply messages here
