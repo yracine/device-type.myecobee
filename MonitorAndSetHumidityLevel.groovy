@@ -144,8 +144,7 @@ def setHumidityLevel() {
     Integer min_fan_time =  givenFanMinTime?:20                            //  20 min. fan time per hour by default
     Integer min_vent_time =  givenVentMinTime?:20                          //  20 min. ventilator time per hour by default
     def target_humidity = givenHumidityLevel ?: 40                         // by default,  40 is the humidity level to check for
-    Integer max_power = givenPowerLevel ?:3000                             //  Do not run above 3000w consumption level by default
-    
+
     
     log.debug "setHumidity> location.mode = $location.mode"
 
@@ -242,7 +241,7 @@ def setHumidityLevel() {
        send "MonitorHumidity>dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
              
     }
-    if (((ecobeeMode == 'cool') && (hasDehumifier)) && (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) && 
+    else if (((ecobeeMode == 'cool') && (hasDehumifier)) && (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) && 
          (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
     
     
