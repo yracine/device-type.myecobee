@@ -241,8 +241,7 @@ def setHumidityLevel() {
        send "MonitorHumidity>dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
              
     }
-    else if (((ecobeeMode == 'cool') && (hasDehumifier)) && (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) && 
-         (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
+    else if (((ecobeeMode == 'cool') && (hasDehumifier)) && (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
     
     
 //     If mode is cooling and outdoor's humidity is too high then just use dehumidifier if any available
