@@ -57,12 +57,6 @@ preferences {
         input "givenMinTemp", "number", title: "Min Temp (default=0)", required:false
     }
 
-    section("Check TED energy consumption at") {
-        input "ted", "capability.powerMeter", title: "TED5000?"
-    }
-    section("Do not run above this power consumption level (default=3000W") {
-        input "givenPowerLevel", "number", title: "power?", required:false
-    }
 
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
