@@ -134,6 +134,7 @@ metadata {
 		command "home"
 		command "night"
 		command "goSleep"
+        command "setThisTstatClimate"
     }
     simulator {
         // TODO: define status and reply messages here
@@ -446,12 +447,13 @@ def setHumidifierLevel(level) {
           null,['humidity':"${level}"]) 
     sendEvent(name: 'humidifierLevel', value: level)
 }
+
 def awake() {
-    setClimate( settings.thermostatId, "Awake" )
+    setThisTsatClimate(settings.thermostatId, "Awake")
 }
 
 def away() {
-    setClimate( settings.thermostatId, "Away" )
+    setThisTsatClimate(settings.thermostatId, "Away")
 }
 
 def present() {
@@ -459,7 +461,7 @@ def present() {
 }
 
 def home() {
-    setClimate( settings.thermostatId, "Home" )
+    setThisTsatClimate(settings.thermostatId, "Home")
 }
 
 def night() {
@@ -467,7 +469,18 @@ def night() {
 }
 
 def goSleep() {
-    setClimate( settings.thermostatId, "Sleep" )
+    setThisTsatClimate(settings.thermostatId, "Sleep")
+}
+
+def setThisTstatClimate(climate) {
+    def currentProgram = device.currentValue( "programScheduleName")
+    if (currentProgram.toUpperCase() == "AUTO") {  // get rid of overrides before applying new climate
+    	resumeThisTsat()
+    } 
+    if (currentProgram.toUpperCase() == climate.toUpperCase()) {
+        setClimate(settings.thermostatId, climate)
+
+    }
 }
 
 // parse events into attributes
