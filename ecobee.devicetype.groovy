@@ -449,11 +449,11 @@ def setHumidifierLevel(level) {
 }
 
 def awake() {
-    setThisTsatClimate(settings.thermostatId, "Awake")
+    setThisTsatClimate("Awake")
 }
 
 def away() {
-    setThisTsatClimate(settings.thermostatId, "Away")
+    setThisTsatClimate("Away")
 }
 
 def present() {
@@ -461,7 +461,7 @@ def present() {
 }
 
 def home() {
-    setThisTsatClimate(settings.thermostatId, "Home")
+    setThisTsatClimate("Home")
 }
 
 def night() {
@@ -469,15 +469,17 @@ def night() {
 }
 
 def goSleep() {
-    setThisTsatClimate(settings.thermostatId, "Sleep")
+    setThisTsatClimate("Sleep")
 }
 
 def setThisTstatClimate(climate) {
     def currentProgram = device.currentValue( "programScheduleName")
     if (currentProgram.toUpperCase() == "AUTO") {  // get rid of overrides before applying new climate
     	resumeThisTsat()
+        currentProgram = device.currentValue( "programScheduleName")
     } 
-    if (currentProgram.toUpperCase() == climate.toUpperCase()) {
+// If climate is different from current one, then change it to the given climate
+    if (currentProgram.toUpperCase() != climate.toUpperCase()) {     
         setClimate(settings.thermostatId, climate)
 
     }
