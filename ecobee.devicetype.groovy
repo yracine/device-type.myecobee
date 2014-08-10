@@ -460,8 +460,8 @@ def quickSave() {
     sendEvent(name: 'programScheduleName', value: "QuickSave")
     def desiredCoolFormat = String.format('%2.1f', quickSaveCooling.round(1))
     def desiredHeatFormat = String.format('%2.1f', quickSaveHeating.round(1))
-    sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat)
-    sendEvent(name: 'heatingSetpoint', value: desiredHeatFormat)
+    sendEvent(name: 'coolingSetpoint', desiredCoolFormat)
+    sendEvent(name: 'heatingSetpoint', desiredHeatFormat)
 }
 def setThisTstatClimate(climate) {
     def currentProgramType = device.currentValue("programType")
@@ -482,6 +482,7 @@ def setThisTstatClimate(climate) {
         setClimate(settings.thermostatId, climate)
         sendEvent(name: 'programScheduleName', value: climate)
     }
+    poll()  // to refresh the values
 }
 // parse events into attributes
 def parse(String description) {
