@@ -134,7 +134,7 @@ metadata {
 		command "home"
 		command "night"
 		command "goSleep"
-        command "setThisTstatClimate"
+		command "setThisTstatClimate"
     }
     simulator {
         // TODO: define status and reply messages here
@@ -475,7 +475,7 @@ def goSleep() {
 def setThisTstatClimate(climate) {
     def currentProgram = device.currentValue( "programScheduleName")
     if (currentProgram.toUpperCase() == "AUTO") {  // get rid of overrides before applying new climate
-    	resumeThisTsat()
+        resumeThisTsat()
         currentProgram = device.currentValue( "programScheduleName")
     } 
 // If climate is different from current one, then change it to the given climate
