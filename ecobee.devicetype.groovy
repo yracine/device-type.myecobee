@@ -127,7 +127,13 @@ metadata {
 		command "ventilatorAuto"
 		command "ventilatorOff"    
 		command "ventilatorAuto"    
-		command "setVentilatorMinOnTime"
+		command "setVentilatorMinOnTime"	
+		command "awake"
+		command "away"
+		command "present"
+		command "home"
+		command "night"
+		command "goSleep"
     }
     simulator {
         // TODO: define status and reply messages here
@@ -439,6 +445,29 @@ def setHumidifierLevel(level) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
           null,['humidity':"${level}"]) 
     sendEvent(name: 'humidifierLevel', value: level)
+}
+def awake() {
+    setClimate( settings.thermostatId, "Awake" )
+}
+
+def away() {
+    setClimate( settings.thermostatId, "Away" )
+}
+
+def present() {
+    home()
+}
+
+def home() {
+    setClimate( settings.thermostatId, "Home" )
+}
+
+def night() {
+    goSleep()
+}
+
+def goSleep() {
+    setClimate( settings.thermostatId, "Sleep" )
 }
 
 // parse events into attributes
