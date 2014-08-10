@@ -1,4 +1,4 @@
-//***
+/***
  *  My Ecobee Device
  *  Author: Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
@@ -473,7 +473,7 @@ def setThisTstatClimate(climate) {
         return
     }
     def currentProgram = device.currentValue("programScheduleName")
-    if (currentProgram.toUpperCase() == "AUTO") {  // get rid of overrides before applying new climate
+    if (currentProgram.trim().toUpperCase() == "AUTO") {  // get rid of overrides before applying new climate
     	resumeThisTsat()
         currentProgram = device.currentValue("programScheduleName")
     } 
@@ -481,8 +481,8 @@ def setThisTstatClimate(climate) {
     if (currentProgram.toUpperCase() != climate.trim().toUpperCase()) {     
         setClimate(settings.thermostatId, climate)
         sendEvent(name: 'programScheduleName', value: climate)
+        poll()  // to refresh the values
     }
-    poll()  // to refresh the values
 }
 // parse events into attributes
 def parse(String description) {
@@ -693,6 +693,7 @@ def refresh() {
 
 def resumeThisTstat() {
      resumeProgram(settings.thermostatId)
+     poll()
 }
 
 def api(method,  args, success = {}) {
@@ -2006,4 +2007,3 @@ def fToC(temp) {
 def milesToKm(distance) {
     return (distance * 1.609344)
 }
-
