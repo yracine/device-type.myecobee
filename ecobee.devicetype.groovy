@@ -118,10 +118,10 @@ metadata {
 		command "awake"
 		command "away"
 		command "present"
-        command "home"
+		command "home"
 		command "sleep"
-        command "quickSave"
-        command "setThisTstatClimate"
+		command "quickSave"
+		command "setThisTstatClimate"
     }
     simulator {
         // TODO: define status and reply messages here
