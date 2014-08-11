@@ -69,6 +69,7 @@ metadata {
 		attribute "hasHrv", "string"
 		attribute "ventilatorMinOnTime", "string"
 		attribute "ventilatorMode", "string"
+		attribute "programDisplayName", "string"
 
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -152,12 +153,13 @@ metadata {
             state "auto", label:'${name}', action:"thermostat.fanOn", icon: "st.Appliances.appliances11"
             state "on", label:'${name}', action:"thermostat.fanAuto", icon: "st.Appliances.appliances11"
         }
-        standardTile("switchProgram", "device.programScheduleName", inactiveLabel: false, decoration: "flat") {
+        standardTile("switchProgram", "device.programDisplayName", inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
             state "Home", label:'${name}', action:"sleep", icon: "st.Home.home4"
             state "Sleep", label:'${name}', action:"awake", icon: "st.Weather.weather4"
             state "Awake", label:'${name}', action:"away", icon: "st.Outdoor.outdoor20"
             state "Away", label:'${name}', action:"quickSave", icon: "st.presence.car.car"
-            state "QuickSave", label:'${name}', action:"present", icon: "st.Home.home1"
+            state "QuickSave", label:'${name}', action:"resumeThisTstat", icon: "st.Home.home1"
+            state "Custom", label:'Custom', action:"present", icon: "st.Office.office6"
         }
         valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false, decoration: "flat") { 
             state "heat", label:'${currentValue}° heat', unit:"C", backgroundColor:"#ffffff"
@@ -464,19 +466,19 @@ def quickSave() {
     sendEvent(name: 'heatingSetpoint', value: desiredHeatFormat)
 }
 def setThisTstatClimate(climate) {
-    def currentProgramType = device.currentValue("programType")
-    if (currentProgramType.toUpperCase()=='VACATION') {
+    def currentProgram = device.currentValue("programScheduleName")
+    def currentProgramType = device.currentValue("programType").trim().toUpperCase()
+    if (currentProgramType == "HOLD") {  // get rid of overrides before applying new climate
+    	resumeThisTsat()
+        currentProgram = device.currentValue("programScheduleName")
+    } 
+    if (currentProgramType =='VACATION') {
         if (settings.trace) {
             log.debug "setThisTstatClimate>thermostatId = ${settings.thermostatId},cannot do the prog switch due to vacation settings"
             sendEvent name: "verboseTrace", value: "setThisTstatClimate>thermostatId = ${settings.thermostatId},cannot do the prog switch due to vacation settings"
         }
         return
     }
-    def currentProgram = device.currentValue("programScheduleName")
-    if (currentProgram.trim().toUpperCase() == "AUTO") {  // get rid of overrides before applying new climate
-    	resumeThisTsat()
-        currentProgram = device.currentValue("programScheduleName")
-    } 
 // If climate is different from current one, then change it to the given climate
     if (currentProgram.toUpperCase() != climate.trim().toUpperCase()) {     
         setClimate(settings.thermostatId, climate)
@@ -569,6 +571,13 @@ def poll() {
         sendEvent(name: 'programType', value: currentClimate.type)
         sendEvent(name: 'programEndTimeMsg', value: "No Events running")
     }
+    def progCurrentName = device.currentValue("programScheduleName")
+    def progType = device.currentValue("programType").trim().toUpperCase()
+    if ((progCurrentName != 'Away') && (progCurrentName != 'Sleep') && (progCurrentName != 'Awake') &&
+        (progCurrentName != 'Home') && (progCurrentName != 'QuickSave')) {
+        progCurrentName = (progType == 'VACATION') ? 'Away' : 'Custom'
+    }
+    sendEvent(name: 'programDisplayName', value: progCurrentName)
     if (foundEvent){
         // current fan mode based on running event
         sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].events[indiceEvent].fan)   
@@ -1556,7 +1565,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
             }
         }    
         if (!foundClimate) {
-        
              if (settings.trace) {
                  log.debug  "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"            
                  sendEvent name: "verboseTrace", value: "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
@@ -1611,10 +1619,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
                 data.thermostatList[0].program.climates[i].climateRef + '","coolTemp":"' + targetCoolTemp +
                 '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized + '","coolFan":"' +
                 coolFan  + '","heatFan":"' + heatFan + '"}' 
-            if (settings.trace) {
-                log.debug   "updateClimate>thermostatId =${thermostatId}, deleteClimateFlag=${deleteClimateFlag},Climate ${climateName} to be updated..."           
-                sendEvent name: "verboseTrace", value:  "updateClimate>thermostatId =${thermostatId}, deleteClimateFlag=${deleteClimateFlag},Climate ${climateName} to be updated..." 
-            } 
         }
         else {
             bodyReq = bodyReq  + '{"name":"' + data.thermostatList[0].program.climates[i].name + '","climateRef":"' +
@@ -1649,7 +1653,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
             
     }
 }
-     
 // thermostatId may only be 1 thermostat (not a list) 
 // plugName is the name of the plug name to be controlled 
 // plugState is the state to be set
@@ -1927,7 +1930,6 @@ def setAuthTokens(){
             data.auth.expires_in = resp.data.expires_in
             data.auth.token_type = resp.data.token_type
             data.auth.scope = resp.data.scope
-            
             if (settings.trace) {
                 log.debug "setAuthTokens> accessToken= ${data.auth.access_token}, refreshToken=${data.auth.refresh_token}," + 
             	    "tokenType=${data.auth.token_type},scope=${data.auth.scope}"
