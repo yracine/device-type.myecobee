@@ -433,6 +433,10 @@ def away() {
     setThisTstatClimate("Away")
 }
 def present() {
+    def currentProgramType = device.currentValue("programType")
+    if (currentProgramType == "HOLD") {  // get rid of overrides before applying new climate
+    	resumeThisTsat()
+    } 
     home()
 }
 def home() {
@@ -475,10 +479,6 @@ def quickSave() {
 def setThisTstatClimate(climate) {
     def currentProgram = device.currentValue("programScheduleName")
     def currentProgramType = device.currentValue("programType").trim().toUpperCase()
-    if (currentProgramType == "HOLD") {  // get rid of overrides before applying new climate
-    	resumeThisTsat()
-        currentProgram = device.currentValue("programScheduleName")
-    } 
     if (currentProgramType =='VACATION') {
         if (settings.trace) {
             log.debug "setThisTstatClimate>thermostatId = ${settings.thermostatId},cannot do the prog switch due to vacation settings"
