@@ -162,7 +162,7 @@ metadata {
         }
         standardTile("switchProgram", "device.programDisplayName", inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
             state "Home", label:'${name}', action:"sleep", icon: "st.Home.home4"
-            state "Sleep", label:'${name}', action:"awake", icon: "st.Weather.weather4"
+            state "Sleep", label:'${name}', action:"awake", icon: "st.Bedroom.bedroom2"
             state "Awake", label:'${name}', action:"away", icon: "st.Outdoor.outdoor20"
             state "Away", label:'${name}', action:"quickSave", icon: "st.presence.car.car"
             state "QuickSave", label:'${name}', action:"resumeThisTstat", icon: "st.Home.home1"
