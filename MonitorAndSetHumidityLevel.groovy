@@ -220,7 +220,7 @@ def setHumidityLevel() {
     
     }
     else if (((ecobeeMode == 'cool') && (!hasDehumidier) && (hasHrv || hasErv)) && (ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
-             (outdoorHumidity > (target_humidity + min_humidity_diff))) {   
+             (outdoorHumidity > target_humidity)) {   
     
                           
        log.trace("setHumidity> Ecobee's humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, because outdoor's humidity is too high=${outdoorHumidity}")
@@ -259,7 +259,7 @@ def setHumidityLevel() {
        send "MonitorHumidity>humidify to ${target_humidity} in ${ecobeeMode} mode"
     }
     else if ((ecobeeMode == 'cool' && (hasErv || hasHrv)) && (outdoorTemp < indoorTemp) &&
-             (outdoorHumidity <= (ecobeeHumidity + min_humidity_diff))){   
+             (outdoorHumidity <= (target_humidity + min_humidity_diff))){   
     
                           
        log.trace("setHumidity>In cooling mode, outdoor temp is lower than inside, use the HRV/ERV to get fresh air")
@@ -274,8 +274,8 @@ def setHumidityLevel() {
              
     }
     else if ((!hasDehumifier) && (outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
-       log.trace("setHumidity>indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify ")
-       send "MonitorHumidity>indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify"
+       log.trace("setHumidity>indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify")
+       send "MonitorHumidity>indoor humidity is ${ecobeeHumidity}% and outdoor humidity ${outdoorHumidity}% is too high to dehumidify"
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, null,['vent': 'off','dehumidifierMode':'off',
            'humidifierMode':'off']) 
     }
@@ -287,6 +287,7 @@ def setHumidityLevel() {
     }
             
     log.debug "End of Fcn"
+}
 }
 
 
