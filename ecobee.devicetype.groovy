@@ -5,9 +5,16 @@
  *  Date: 2014-03-31
  *  Code: https://github.com/yracine/device-type.myecobee
  *  refer to readme file for installation instructions.
- *
- * Copyright (C) 2014 Yves Racine <yracine66@gmail.com>
- * see license information in license file
+ *  Copyright (C) 2014 Yves Racine <yracine66@gmail.com>
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in
+ *  the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ *  the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. see license information in license file
  */
 import groovy.json.JsonBuilder
 import java.net.URLEncoder
@@ -975,7 +982,6 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
             }
             if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
                 if (settings.trace) {
-             
        	             sendEvent name: "verboseTrace", value: "iterateCreateVacation>about to call createVacation for ${tstatlist}"
                      log.debug "iterateCreateVacation>about to call createVacation for ${tstatlist}"
                 }
@@ -1185,10 +1191,6 @@ def resumeProgram(thermostatId) {
 // Get all groups related to a thermostatId or all groups
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 def getGroups(thermostatId) {    
-    if (settings.trace) {
-        log.debug "getGroups> about to assemble bodyReq thermostatId = ${thermostatId}, settings = ${settings}..."
-        sendEvent name: "verboseTrace", value: "getGroups> about to assemble bodyReq thermostatId = ${thermostatId},settings = ${settings}..."        
-    }
     def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim():'registered'
     if (ecobeeType.toUpperCase() != 'REGISTERED') {
         if (settings.trace) {
@@ -1267,8 +1269,8 @@ def iterateUpdateGroup(thermostatId, groupSettings=[]) {
          def synchronizeVacation = data.groups[i].synchronizeVacation
          def synchronizeSystemMode =data.groups[i].synchronizeSystemMode
          if (settings.trace) {
-      	         sendEvent name: "verboseTrace", value: "iterateUpdateGroup> about to call updateGroup for ${groupName}"
-                 log.debug "iterateUpdateGroup> about to call updateGroup for ${groupName}, groupRef= ${groupRef}," +
+      	     sendEvent name: "verboseTrace", value: "iterateUpdateGroup> about to call updateGroup for ${groupName}"
+             log.debug "iterateUpdateGroup> about to call updateGroup for ${groupName}, groupRef= ${groupRef}," +
                      "synchronizeSystemMode=${synchronizeSystemMode}, synchronizeVacation=${synchronizeVacation}" +
                      "synchronizeSchedule=${synchronizeSchedule}"
          }    
@@ -1305,10 +1307,6 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
     }
     else {
         updateGroupParams =  '"groupName":"'  + groupName.trim() + '",' + groupSet  + ',"thermostats":["' + thermostatId + '"]'
-    }
-    if (settings.trace) {
-        log.debug "updateGroup> updateGroupParams=${updateGroupParams}"
-        sendEvent name: "verboseTrace", value: "updateGroup> updateGroupParams=${updateGroupParams}"
     }
     def bodyReq = '{"selection":{"selectionType":"registered"},"groups":[{' + updateGroupParams + '}]}'       
     if (settings.trace) {
@@ -1417,10 +1415,6 @@ def iterateSetClimate(tstatType, climateName) {
                 nTstats=1
             }
             if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){  // process a batch of maximum 25 thermostats according to API doc
-                if (settings.trace) {
-      	            sendEvent name: "verboseTrace", value: "iterateSetClimate> about to call setClimate for ${tstatlist}"
-                    log.debug "iterateSetClimate> about to call setClimate for ${tstatlist}"
-                }    
                 setClimate(tstatlist, climateName)
                 tstatlist = Id
                 nTstats=1
@@ -1458,10 +1452,6 @@ def setClimate(thermostatId, climateName) {
     /* if settings.holdType has a value, include it in the list of params
     */
     if ((settings.holdType != null) && (settings.holdType !="")) {
-        if (settings.trace) {
-            log.debug "setHold>settings.holdType= ${settings.holdType}"
-            sendEvent name: "verboseTrace", value: "setHold>settings.holdType= ${settings.holdType}"
-        }    
         bodyReq = bodyReq + '","holdType":"' + settings.holdType 
     }
     bodyReq= bodyReq +  '"}}]}' 
