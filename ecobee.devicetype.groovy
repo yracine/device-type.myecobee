@@ -474,11 +474,11 @@ def quickSave() {
     float quickSaveHeating = device.currentValue("heatingSetpoint") - quickSaveSetBack
     setHold(settings.thermostatId, quickSaveCooling, quickSaveHeating,null,null) 
     sendEvent(name: 'programScheduleName', value: "QuickSave")
+    sendEvent(name: 'programDisplayName', value: "QuickSave")
     def desiredCoolFormat = String.format('%2.1f', quickSaveCooling.round(1))
     def desiredHeatFormat = String.format('%2.1f', quickSaveHeating.round(1))
     sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat)
     sendEvent(name: 'heatingSetpoint', value: desiredHeatFormat)
-    poll() // to refresh the UI
 }
 def setThisTstatClimate(climate) {
     def currentProgram = device.currentValue("programScheduleName")
