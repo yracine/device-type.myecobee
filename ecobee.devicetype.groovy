@@ -886,7 +886,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettin
     Integer targetHeatTemp=null
     def tstatParams=null
     if (settings.trace) {
-        log.debug "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
+        sendEvent name: "verboseTrace", value: "sethold>called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
     }    
     def scale= getTemperatureScale()
     if (scale == 'C') {
