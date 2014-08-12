@@ -459,19 +459,19 @@ def quickSave() {
         }
         return
     }
-    float quickSaveSetBack 
-    float quickSaveSetForw 
+    Integer quickSaveSetBack 
+    Integer quickSaveSetForw 
     def scale = getTemperatureScale()
     if (scale == 'C') { 
-        quickSaveSetBack = fToC((data.thermostatList[0].settings.quickSaveSetBack))
-        quickSaveSetForw = fToC((data.thermostatList[0].settings.quickSaveSetForward))
+        quickSaveSetBack = fToC((data.thermostatList[0].settings.quickSaveSetBack/10))
+        quickSaveSetForw = fToC((data.thermostatList[0].settings.quickSaveSetForward/10))
     }    
     else {
-        quickSaveSetBack = (data.thermostatList[0].settings.quickSaveSetBack)
-        quickSaveSetForw = (data.thermostatList[0].settings.quickSaveSetForward)
+        quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack/10
+        quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward/10
    }
-    float quickSaveCooling = device.currentValue("coolingSetpoint") + quickSaveSetForw
-    float quickSaveHeating = device.currentValue("heatingSetpoint") - quickSaveSetBack
+    Integer quickSaveCooling = device.currentValue("coolingSetpoint") + quickSaveSetForw
+    Integer quickSaveHeating = device.currentValue("heatingSetpoint") - quickSaveSetBack
     setHold(settings.thermostatId, quickSaveCooling, quickSaveHeating,null,null) 
     sendEvent(name: 'programScheduleName', value: "QuickSave")
     sendEvent(name: 'programDisplayName', value: "QuickSave")
