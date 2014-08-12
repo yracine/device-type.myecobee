@@ -218,7 +218,13 @@ metadata {
             state "default", label:'ResumeProg',action:"resumeThisTstat", icon:"st.Office.office7",backgroundColor:"#ffffff"
         }
         // Weather Tiles
-        valueTile("weatherCondition", "device.weatherCondition", inactiveLabel: false,width: 2, height: 1, decoration: "flat") {
+        valueTile("weatherIcon", "device", inactiveLabel: false,width: 1, height: 1, decoration: "flat") {
+            state "default", label:'Weather', icon: "st.Weather.weather11"
+        }
+        valueTile("weatherDateTime", "device.weatherDateTime", inactiveLabel: false,width: 2, height: 1, decoration: "flat") {
+            state "default", label:'${currentValue}'
+        }
+        valueTile("weatherConditions", "device.weatherCondition", inactiveLabel: false,width: 2, height: 1, decoration: "flat") {
             state "default", label:'Forecast ${currentValue}'
         }
         valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel: false,width: 1, height: 1, decoration: "flat") {
@@ -250,8 +256,8 @@ metadata {
         }
         main "temperature"
         details(["name","groups","mode", "temperature", "fanMode", "switchProgram","heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown", "coolingSetpoint", "coolLevelUp", 
-                "equipementStatus", "programEndTimeMsg","fanMinOnTime", "alerts", "humidity", "programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
-                "weatherCondition", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
+                "equipementStatus", "programEndTimeMsg", "humidity", "alerts","fanMinOnTime","programScheduleName",  "programType", "programCoolTemp", "programHeatTemp",  "resProgram",
+                "weatherIcon", "weatherDateTime", "weatherConditions", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh", 
                 "weatherTempLow", "weatherPressure", "weatherWindDirection", "weatherWindSpeed", "weatherPop", "refresh",])
     }
 }
@@ -426,7 +432,6 @@ def setHumidifierLevel(level) {
     sendEvent(name: 'humidifierLevel', value: level)
 }
 def awake() {
-    createEvent(name: "programScheduleName", value: "Awake")
     setThisTstatClimate("Awake")
 }
 def away() {
@@ -454,27 +459,26 @@ def quickSave() {
         }
         return
     }
-    def scale = getTemperatureScale()
-    float quickSaveCooling 
-    float quickSaveHeating 
     float quickSaveSetBack 
     float quickSaveSetForw 
+    def scale = getTemperatureScale()
     if (scale == 'C') { 
-        quickSaveSetBack = fToC((data.thermostatList[0].settings.quickSaveSetBack.toFloat()/10))
-        quickSaveSetForw = fToC((data.thermostatList[0].settings.quickSaveSetForward.toFloat()/10))
+        quickSaveSetBack = fToC((data.thermostatList[0].settings.quickSaveSetBack))
+        quickSaveSetForw = fToC((data.thermostatList[0].settings.quickSaveSetForward))
     }    
     else {
-        quickSaveSetBack = (data.thermostatList[0].settings.quickSaveSetBack.toFloat()/10)
-        quickSaveSetForw = (data.thermostatList[0].settings.quickSaveSetForward.toFloat()/10)
-    }
-    quickSaveCooling = device.currentValue("coolingSetpoint").toFloat() + quickSaveSetForw
-    quickSaveHeating = device.currentValue("heatingSetpoint").toFloat() - quickSaveSetBack
+        quickSaveSetBack = (data.thermostatList[0].settings.quickSaveSetBack)
+        quickSaveSetForw = (data.thermostatList[0].settings.quickSaveSetForward)
+   }
+    float quickSaveCooling = device.currentValue("coolingSetpoint") + quickSaveSetForw
+    float quickSaveHeating = device.currentValue("heatingSetpoint") - quickSaveSetBack
     setHold(settings.thermostatId, quickSaveCooling, quickSaveHeating,null,null) 
     sendEvent(name: 'programScheduleName', value: "QuickSave")
     def desiredCoolFormat = String.format('%2.1f', quickSaveCooling.round(1))
     def desiredHeatFormat = String.format('%2.1f', quickSaveHeating.round(1))
     sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat)
     sendEvent(name: 'heatingSetpoint', value: desiredHeatFormat)
+    poll() // to refresh the UI
 }
 def setThisTstatClimate(climate) {
     def currentProgram = device.currentValue("programScheduleName")
@@ -522,7 +526,7 @@ def poll() {
     }
     // post weather events
     sendEvent(name: 'weatherStation', value: data.thermostatList[0].weather.weatherStation)
-    sendEvent(name: 'weatherDateTime', value: data.thermostatList[0].weather.forecasts[0].dateTime)
+    sendEvent(name: 'weatherDateTime', value: "Weather at\n ${data.thermostatList[0].weather.forecasts[0].dateTime}")
     sendEvent(name: 'weatherCondition', value: data.thermostatList[0].weather.forecasts[0].condition)
     sendEvent(name: 'weatherPressure', value: data.thermostatList[0].weather.forecasts[0].pressure, unit:"hpa")
     sendEvent(name: 'weatherRelativeHumidity', value: data.thermostatList[0].weather.forecasts[0].relativeHumidity, 
@@ -1201,9 +1205,6 @@ def getGroups(thermostatId) {
         return
     }
     def bodyReq = '{"selection":{"selectionType":"registered"}}'       
-    if (settings.trace) {
-        log.debug "getGroups> about to call api with body = ${bodyReq}..."
-    }
     api('getGroups', bodyReq) {resp->
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
