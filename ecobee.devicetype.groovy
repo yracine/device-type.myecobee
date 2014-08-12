@@ -526,7 +526,7 @@ def poll() {
     }
     // post weather events
     sendEvent(name: 'weatherStation', value: data.thermostatList[0].weather.weatherStation)
-    sendEvent(name: 'weatherDateTime', value: "Weather at\n ${data.thermostatList[0].weather.forecasts[0].dateTime}")
+    sendEvent(name: 'weatherDateTime', value: "Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime}")
     sendEvent(name: 'weatherCondition', value: data.thermostatList[0].weather.forecasts[0].condition)
     sendEvent(name: 'weatherPressure', value: data.thermostatList[0].weather.forecasts[0].pressure, unit:"hpa")
     sendEvent(name: 'weatherRelativeHumidity', value: data.thermostatList[0].weather.forecasts[0].relativeHumidity, 
