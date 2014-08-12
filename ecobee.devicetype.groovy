@@ -459,26 +459,27 @@ def quickSave() {
         }
         return
     }
-    Integer quickSaveSetBack 
-    Integer quickSaveSetForw 
+    float quickSaveSetBack, quickSaveSetForw, quickSaveHeating, quickSaveCooling 
     def scale = getTemperatureScale()
     if (scale == 'C') { 
-        quickSaveSetBack = fToC((data.thermostatList[0].settings.quickSaveSetBack/10))
-        quickSaveSetForw = fToC((data.thermostatList[0].settings.quickSaveSetForward/10))
+        quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack/2    // approximate conversion of differential to celcius
+        quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward/2
+        quickSaveCooling = fToC(data.thermostatList[0].runtime.desiredCool)
+        quickSaveHeating = fToC(data.thermostatList[0].runtime.desiredHeat)
     }    
     else {
-        quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack/10
-        quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward/10
-   }
-    Integer quickSaveCooling = device.currentValue("coolingSetpoint") + quickSaveSetForw
-    Integer quickSaveHeating = device.currentValue("heatingSetpoint") - quickSaveSetBack
+        quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack
+        quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward
+        quickSaveCooling = data.thermostatList[0].runtime.desiredCool
+        quickSaveHeating = data.thermostatList[0].runtime.desiredHeat
+    }
+    quickSaveCooling = (quickSaveCooling + quickSaveSetForw).round(0)
+    quickSaveHeating = (quickSaveHeating - quickSaveSetBack).round(0)
     setHold(settings.thermostatId, quickSaveCooling, quickSaveHeating,null,null) 
+    sendEvent(name: 'coolingSetpoint', value: quickSaveCooling.toString())
+    sendEvent(name: 'heatingSetpoint', value: quickSaveHeating.toString())
     sendEvent(name: 'programScheduleName', value: "QuickSave")
     sendEvent(name: 'programDisplayName', value: "QuickSave")
-    def desiredCoolFormat = String.format('%2.1f', quickSaveCooling.round(1))
-    def desiredHeatFormat = String.format('%2.1f', quickSaveHeating.round(1))
-    sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat)
-    sendEvent(name: 'heatingSetpoint', value: desiredHeatFormat)
 }
 def setThisTstatClimate(climate) {
     def currentProgram = device.currentValue("programScheduleName")
@@ -586,7 +587,8 @@ def poll() {
     def progType = device.currentValue("programType").trim().toUpperCase()
     if ((progCurrentName != 'Away') && (progCurrentName != 'Sleep') && (progCurrentName != 'Awake') &&
         (progCurrentName != 'Home') && (progCurrentName != 'QuickSave')) {
-        progCurrentName = (progType == 'VACATION') ? 'Away' : 'Custom'
+        progCurrentName = (progType == 'VACATION') ? 'Away' : 
+            device.currentValue("programDisplayName")=='QuickSave'? 'QuickSave': 'Custom'
     }
     sendEvent(name: 'programDisplayName', value: progCurrentName)
     if (foundEvent){
@@ -609,8 +611,7 @@ def poll() {
     def scale = getTemperatureScale()
     if (scale =='C') {
         float actualTemp= fToC(data.thermostatList[0].runtime.actualTemperature)
-        float desiredCoolTemp
-        float desiredHeatTemp
+        float desiredCoolTemp, desiredHeatTemp
         if (foundEvent) {
         // post desired heat and cool setPoints based on running event
             desiredCoolTemp =  fToC(data.thermostatList[0].events[indiceEvent].coolHoldTemp)
@@ -621,33 +622,24 @@ def poll() {
             desiredCoolTemp =  fToC(data.thermostatList[0].runtime.desiredCool)
             desiredHeatTemp = fToC(data.thermostatList[0].runtime.desiredHeat)  
         }
-        def actualTempFormat = String.format('%2.1f', actualTemp.round(1))
-        def desiredCoolFormat = String.format('%2.1f', desiredCoolTemp.round(1))
-        def desiredHeatFormat = String.format('%2.1f', desiredHeatTemp.round(1))
-        sendEvent(name: 'temperature', value: actualTempFormat, 
+        sendEvent(name: 'temperature', value: actualTemp.round(1).toString(), 
             unit:"C", state: data.thermostatList[0].settings.hvacMode)
-        sendEvent(name: 'coolingSetpoint', value: desiredCoolFormat, unit: "C")
-        sendEvent(name: 'heatingSetpoint', value:  desiredHeatFormat, unit: "C")
+        sendEvent(name: 'coolingSetpoint', value: desiredCoolTemp.round(1).toString(), unit: "C")
+        sendEvent(name: 'heatingSetpoint', value:  desiredHeatTemp.round(1).toString(), unit: "C")
         // post weather temps
         float weatherTemp =  fToC(data.thermostatList[0].weather.forecasts[0].temperature)
         float weatherTempHigh = fToC(data.thermostatList[0].weather.forecasts[0].tempHigh)
         float weatherTempLow = fToC(data.thermostatList[0].weather.forecasts[0].tempLow)
-        def weatherTempFormat = String.format('%2.1f', weatherTemp.round(1))
-        def weatherHighFormat = String.format('%2.1f', weatherTempHigh.round(1))
-        def weatherLowFormat = String.format('%2.1f', weatherTempLow.round(1))
-        sendEvent(name: 'weatherTemperature', value: weatherTempFormat, unit: "C")
-        sendEvent(name: 'weatherTempHigh', value: weatherHighFormat, unit: "C")
-        sendEvent(name: 'weatherTempLow', value: weatherLowFormat, unit: "C")
+        sendEvent(name: 'weatherTemperature', value: weatherTemp.round(1).toString(), unit: "C")
+        sendEvent(name: 'weatherTempHigh', value: weatherTempHigh.round(1).toString(), unit: "C")
+        sendEvent(name: 'weatherTempLow', value: weatherTempLow.round(1).toString(), unit: "C")
         float windSpeed = milesToKm((data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/1000))
-        String windSpeedFormat = String.format('%2.1f',windSpeed.round(1))
-        sendEvent(name: 'weatherWindSpeed', value: windSpeedFormat, unit:'kmh')
+        sendEvent(name: 'weatherWindSpeed', value: windSpeed.round(1).toString(), unit:'kmh')
         // post program temps
         float programHeatTemp= fToC((currentClimate.heatTemp/10))
         float programCoolTemp = fToC((currentClimate.coolTemp/10))
-        def programCoolFormat = String.format('%2.1f', programCoolTemp.round(1))
-        def programHeatFormat = String.format('%2.1f', programHeatTemp.round(1))
-        sendEvent(name: 'programCoolTemp', value: programCoolFormat, unit: "C")
-        sendEvent(name: 'programHeatTemp', value: programHeatFormat,  unit: "C")
+        sendEvent(name: 'programCoolTemp', value: programCoolTemp.round(1).toString(), unit: "C")
+        sendEvent(name: 'programHeatTemp', value: programHeatTemp.round(1).toString(),  unit: "C")
     }        
     else {
         sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature), 
@@ -663,12 +655,9 @@ def poll() {
             sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat), unit: "F")
         }
        // post weather temps
-        sendEvent(name: 'weatherTemperature', value: data.thermostatList[0].weather.forecasts[0].temperature,  
-            unit: "F")
-        sendEvent(name: 'weatherTempHigh', value: data.thermostatList[0].weather.forecasts[0].tempHigh,
-            unit: "F")
-        sendEvent(name: 'weatherTempLow', value: data.thermostatList[0].weather.forecasts[0].tempLow, 
-            unit: "F")
+        sendEvent(name: 'weatherTemperature', value: data.thermostatList[0].weather.forecasts[0].temperature,unit: "F")
+        sendEvent(name: 'weatherTempHigh', value: data.thermostatList[0].weather.forecasts[0].tempHigh,unit: "F")
+        sendEvent(name: 'weatherTempLow', value: data.thermostatList[0].weather.forecasts[0].tempLow,unit: "F")
         float windSpeed = data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat()/1000
         String windSpeedFormat = String.format('%2.1f',windSpeed.round(1))
         sendEvent(name: 'weatherWindSpeed', value: windSpeedFormat, unit:'mph')
@@ -706,35 +695,23 @@ def poll() {
     }
     sendEvent(name: 'groups', value: groupList)
 }
-
 def refresh() {
      poll()
 }
-
 def resumeThisTstat() {
      resumeProgram(settings.thermostatId)
      poll()
 }
-
 def api(method,  args, success = {}) {
     String URI_ROOT= "https://api.ecobee.com/1"
     if(!isLoggedIn()) {
-        if (settings.trace) {
-           log.debug "Need to login"
-        }   
         login()
     }
-    if (settings.trace) {
-       log.debug "api> logged in"
-    }   
     if (isTokenExpired()) {
         if (settings.trace) {
             log.debug "api> need to refresh tokens"
         }    
         if (!refresh_tokens()) {
-           if (settings.trace) {
-               log.debug "api> refresh_tokens failed, try login again..."
-           }    
            login()
         }
     }
@@ -873,7 +850,6 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode, tstatSe
     }
     getThermostatSummary(ecobeeType)
     if (settings.trace) {
-        log.debug "iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
    	    sendEvent name: "verboseTrace", value: "iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
@@ -911,7 +887,6 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettin
     def tstatParams=null
     if (settings.trace) {
         log.debug "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
-        sendEvent name: "verboseTrace", value: "setHold> called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
     }    
     def scale= getTemperatureScale()
     if (scale == 'C') {
@@ -942,8 +917,6 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode, tstatSettin
             def message = resp.data.status.message
             if (!statusCode) {
                 if (settings.trace) {
-                    log.debug "setHold> fan mode= ${fanMode}, mode=${data.thermostatList.settings.hvacMode}" 
-                    log.debug "setHold> current Temp= ${data.thermostatList[0].runtime.actualTemperature}, desiredHeat=${data.thermostatList[0].runtime.desiredHeat}"
     	            sendEvent name: "verboseTrace", value: "setHold>done for ${thermostatId}"
                 }
                 return
@@ -971,7 +944,6 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
     }
     getThermostatSummary(ecobeeType)
     if (settings.trace) {
-        log.debug "iterateCreateVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
         sendEvent name: "verboseTrace", value: "iterateCreateVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
@@ -1063,7 +1035,6 @@ def iterateDeleteVacation(tstatType, vacationName) {
     }
     getThermostatSummary(ecobeeType)
     if (settings.trace) {
-        log.debug "iterateDeleteVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
    	    sendEvent name: "verboseTrace", value: "iterateDeleteVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
@@ -1097,9 +1068,6 @@ def iterateDeleteVacation(tstatType, vacationName) {
 def deleteVacation(thermostatId, vacationName) {
     def vacationParams = [name:vacationName.trim()]
     def bodyReq = build_body_request('deleteVacation', null, thermostatId, vacationParams, null)
-    if (settings.trace) {
-        log.debug "deleteVacation> about to call api with body = ${bodyReq} for ${thermostatId}"
-    }    
     api('deleteVacation', bodyReq) {resp->
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
@@ -1132,7 +1100,6 @@ def iterateResumeProgram(tstatType) {
     }
     getThermostatSummary(ecobeeType)
     if (settings.trace) {
-        log.debug "iterateResumeProgram>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
    	    sendEvent name: "verboseTrace", value: "iterateResumeProgram>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }    
     for (i in 0..data.thermostatCount-1) {
@@ -1704,13 +1671,15 @@ def getThermostatInfo(thermostatId){
         if (!statusCode) {
             data.thermostatList = resp.data.thermostatList
             def thermostatName = data.thermostatList[0].name  
-            // divide the temperature by 10 before for display later.
+            // divide the temperature by 10 before for display or calculations later.
             data.thermostatList[0].runtime.actualTemperature = data.thermostatList[0].runtime.actualTemperature /10
             data.thermostatList[0].runtime.desiredCool = data.thermostatList[0].runtime.desiredCool /10
             data.thermostatList[0].runtime.desiredHeat = data.thermostatList[0].runtime.desiredHeat /10
             data.thermostatList[0].weather.forecasts[0].temperature = data.thermostatList[0].weather.forecasts[0].temperature/10
             data.thermostatList[0].weather.forecasts[0].tempLow = data.thermostatList[0].weather.forecasts[0].tempLow/10
             data.thermostatList[0].weather.forecasts[0].tempHigh = data.thermostatList[0].weather.forecasts[0].tempHigh/10
+            data.thermostatList[0].settings.quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack/10
+            data.thermostatList[0].settings.quickSaveSetForward = data.thermostatList[0].settings.quickSaveSetForward/10
             if (data.thermostatList[0].events.size()> 0) {
                 for (i in 0..data.thermostatList[0].events.size()-1) {
                     if (data.thermostatList[0].events[i].running) {
@@ -1730,7 +1699,6 @@ def getThermostatInfo(thermostatId){
                     "fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity}, desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
                     "desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
-
                 log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
                     "fan = ${runtimeSettings.desiredFanMode},fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
