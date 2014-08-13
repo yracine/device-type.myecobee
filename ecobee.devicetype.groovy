@@ -150,15 +150,16 @@ metadata {
 		}
 		valueTile("temperature", "device.temperature", width: 2, height: 2,
 			canChangeIcon: true) {
-			state("temperature", label: '${currentValue}°', unit: "C", backgroundColors: [
-				[value: 0, color: "#153591"],
-				[value: 8, color: "#1e9cbb"],
-				[value: 14, color: "#90d2a7"],
-				[value: 20, color: "#44b621"],
-				[value: 24, color: "#f1d801"],
-				[value: 29, color: "#d04e00"],
-				[value: 36, color: "#bc2323"]
-			])
+			state("temperature", label: '${currentValue}°', unit: "C", 
+            	backgroundColors: [
+					[value: 0, color: "#153591"],
+					[value: 8, color: "#1e9cbb"],
+					[value: 14, color: "#90d2a7"],
+					[value: 20, color: "#44b621"],
+					[value: 24, color: "#f1d801"],
+					[value: 29, color: "#d04e00"],
+					[value: 36, color: "#bc2323"]
+				])
 		}
 		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
@@ -174,10 +175,10 @@ metadata {
 			state "auto", label: '${name}', action: "thermostat.fanOn", 
 				icon: "st.Appliances.appliances11"
 			state "on", label: '${name}', action: "thermostat.fanAuto", 
-              	icon: "st.Appliances.appliances11"
+				icon: "st.Appliances.appliances11"
 		}
 		standardTile("switchProgram", "device.programDisplayName", 
-            inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
+			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
 			state "Home", label: '${name}', action: "sleep", 
 				icon: "st.Home.home4"
 			state "Sleep", label: '${name}', action: "awake", 
@@ -202,7 +203,7 @@ metadata {
 			backgroundColor: "#ffffff"
 		}
 		valueTile("humidity", "device.humidity", inactiveLabel: false, 
-            decoration: "flat") {
+			decoration: "flat") {
 			state "default", label: 'Humidity\n${currentValue}%', unit: "humidity"
 		}
 		standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false,
@@ -273,7 +274,7 @@ metadata {
 			state "default", label: '${currentValue}'
 		}
 		valueTile("weatherConditions", "device.weatherCondition", 
-        	inactiveLabel: false, width: 2, height: 1, decoration: "flat") {
+			inactiveLabel: false, width: 2, height: 1, decoration: "flat") {
 			state "default", label: 'Forecast ${currentValue}'
 		}
 		valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel:
@@ -584,10 +585,10 @@ def parse(String description) {
 def poll() {
 	def AWAY_PROG = 'Away'
 	def SLEEP_PROG = 'Sleep'
-    def HOME_PROG = 'Home'
-    def AWAKE_PROG = 'Awake'
-    def CUSTOM_PROG = 'Custom'
-    def QUICKSAVE = 'QuickSave'
+	def HOME_PROG = 'Home'
+	def AWAKE_PROG = 'Awake'
+	def CUSTOM_PROG = 'Custom'
+	def QUICKSAVE = 'QuickSave'
     
 	getThermostatInfo(settings.thermostatId)
 	sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
@@ -1028,9 +1029,9 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = []) {
 	Integer targetCoolTemp = null,targetHeatTemp = null
-    def tstatParams = null
+	def tstatParams = null
 	
-    if (settings.trace) {
+	if (settings.trace) {
 		log.debug
 			"sethold>called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
 		sendEvent name: "verboseTrace", value:
