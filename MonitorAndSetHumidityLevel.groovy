@@ -274,8 +274,8 @@ def setHumidityLevel() {
              
     }
     else if ((!hasDehumifier) && (outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
-       log.trace("setHumidity>indoor humidity is ${ecobeeHumidity}% and outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify")
-       send "MonitorHumidity>indoor humidity is ${ecobeeHumidity}% and outdoor humidity ${outdoorHumidity}% is too high to dehumidify"
+       log.trace("setHumidity>indoor humidity is ${ecobeeHumidity}%, but outdoor's humidity (${outdoorHumidity}%) is too high to dehumidify")
+       send "MonitorHumidity>indoor humidity is ${ecobeeHumidity}%, but outdoor humidity ${outdoorHumidity}% is too high to dehumidify"
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, null,['vent': 'off','dehumidifierMode':'off',
            'humidifierMode':'off']) 
     }
