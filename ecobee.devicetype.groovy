@@ -619,7 +619,7 @@ def poll() {
 	// post weather events
 	sendEvent(name: 'weatherStation', value: data.thermostatList[0].weather.weatherStation)
 	sendEvent(name: 'weatherDateTime', value:
-		"Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime}")
+		"Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}")
 	sendEvent(name: 'weatherCondition', value: data.thermostatList[0].weather.forecasts[0].condition)
 	sendEvent(name: 'weatherPressure', value: data.thermostatList[0].weather.forecasts[0].pressure, unit: "hpa")
 	sendEvent(name: 'weatherRelativeHumidity', value: data.thermostatList[0].weather
@@ -692,9 +692,7 @@ def poll() {
 	if ((progCurrentName != AWAY_PROG) && (progCurrentName != SLEEP_PROG) && (
 			progCurrentName != AWAKE_PROG) &&
 		(progCurrentName != HOME_PROG) && (progCurrentName != QUICKSAVE)) {
-		progCurrentName = (progType == 'VACATION') ? AWAY_PROG :
-			device.currentValue("programDisplayName") == QUICKSAVE ? QUICKSAVE :
-			CUSTOM_PROG
+		progCurrentName = (progType == 'VACATION') ? AWAY_PROG : CUSTOM_PROG
 	}
 	sendEvent(name: 'programDisplayName', value: progCurrentName)
 	if (foundEvent) {
