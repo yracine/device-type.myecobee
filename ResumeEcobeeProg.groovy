@@ -11,7 +11,7 @@
 // Automatically generated. Make future change here.
 definition(
     name: "EcobeeResumeProg",
-    namespace: "",
+    namespace: "yracine",
     author: "Yves Racine",
     description: "EcobeeResumeProg",
     category: "My Apps",
