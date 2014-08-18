@@ -11,7 +11,7 @@
 // Automatically generated. Make future change here.
 definition(
     name: "Away From Home",
-    namespace: "",
+    namespace: "yracine",
     author: "Yves Racine",
     description: "Away From Home",
     category: "My Apps",
