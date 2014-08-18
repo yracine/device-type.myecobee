@@ -15,7 +15,7 @@
  */
 definition(
     name: "ecobeeManageClimate",
-    namespace: "",
+    namespace: "yracine",
     author: "Yves Racine",
     description: "Allows a user to manage ecobee's climates",
     category: "My Apps",
