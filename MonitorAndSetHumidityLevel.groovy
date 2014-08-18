@@ -185,8 +185,8 @@ def setHumidityLevel() {
 //     Turn on the dehumidifer and HRV/ERV, the outdoor's humidity is lower or equivalent than inside
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on', ['vent':'on','dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",'humidifierMode':'off',
-           'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}"]) 
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on', ['vent':'minontime','dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",'humidifierMode':'off',
+           'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}", 'ventilatorMinOnTime': "${min_vent_time}"]) 
 
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode, using ERV/HRV and dehumdifier if available"
     }
@@ -199,8 +199,8 @@ def setHumidityLevel() {
 //     Turn on the dehumidifer and HRV/ERV, the outdoor's temp is not too cold 
 //     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
-       ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['vent':'on','dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",
-           'humidifierMode':'off','fanMinOnTime':"${min_fan_time}"]) 
+       ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['vent':'minontime','dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",
+           'humidifierMode':'off','fanMinOnTime':"${min_fan_time}", 'ventilatorMinOnTime': "${min_vent_time}"]) 
 
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }    
@@ -243,7 +243,7 @@ def setHumidityLevel() {
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on', ['vent':'off','dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",'humidifierMode':'off',
            'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}"]) 
 
-       send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode, ERV/HRV is not used b/c the outdoor humidity (${outdoorHumidity}%) is too high"
+       send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode using the dehumidifier only"
           
     
     }
@@ -258,10 +258,8 @@ def setHumidityLevel() {
 
        send "MonitorHumidity>humidify to ${target_humidity} in ${ecobeeMode} mode"
     }
-    else if ((ecobeeMode == 'cool' && (hasErv || hasHrv)) && (outdoorTemp < indoorTemp) &&
-             (outdoorHumidity <= (target_humidity + min_humidity_diff))){   
+    else if ((ecobeeMode == 'cool' && (hasErv || hasHrv)) && (outdoorTemp < indoorTemp)) {
     
-                          
        log.trace("setHumidity>In cooling mode, outdoor temp is lower than inside, use the HRV/ERV to get fresh air")
 
 //     If mode is cooling and outdoor's temp is lower than inside, then use ERV/HRV to get fresh air into the house
@@ -285,9 +283,8 @@ def setHumidityLevel() {
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, null,['vent':'off','dehumidifierMode':'off','humidifierMode':'off','dehumidifyWithAC':'false']) 
         
     }
-            
+    
     log.debug "End of Fcn"
-}
 }
 
 
