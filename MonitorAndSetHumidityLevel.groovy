@@ -15,7 +15,7 @@
 // Automatically generated. Make future change here.
 definition(
     name: "Monitor And Set Ecobee's humidity",
-    namespace: "",
+    namespace: "yracine",
     author: "Yves Racine",
     description: "Monitor And set Ecobee's humidity",
     category: "My Apps",
