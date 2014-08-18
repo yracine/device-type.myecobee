@@ -20,7 +20,7 @@
 // Automatically generated. Make future change here.
 definition(
     name: "FireCO2Alarm",
-    namespace: "",
+    namespace: "yracine",
     author: "yracine@yahoo.com",
     description: "Turn on all the lights/thermostat in case of a fire/CO2 alarm, unlock the doors, disarm the alarm system & open the garage door ",
     category: "My Apps",
