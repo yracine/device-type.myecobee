@@ -268,7 +268,7 @@ def setHumidityLevel() {
        ecobee.iterateSetHold('registered',coolTemp, heatTemp, 'on',['vent':'minontime','dehumidifierMode':'off','ventilatorFreeCooling':'true',
            'ventilatorMinOnTime': "${min_vent_time}",'fanMinOnTime':"${min_fan_time}"]) 
           
-       send "MonitorHumidity>Outdoor temp is lower than inside, getting fresh air with ERV"
+       send "MonitorHumidity>Outdoor temp is lower than inside, getting fresh air with HRV/ERV"
              
     }
     else if ((!hasDehumifier) && (outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
