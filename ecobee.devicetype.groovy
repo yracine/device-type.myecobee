@@ -1,20 +1,22 @@
 /***
  *  My Ecobee Device
- *  Author: Yves Racine
+ *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Date: 2014-03-31
+ *
  *  Code: https://github.com/yracine/device-type.myecobee
- *  refer to readme file for installation instructions.
- *  Copyright (C) 2014 Yves Racine <yracine66@gmail.com>
- *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in
- *  the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- *  the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. see license information in license file
+ *  Refer to readme file for installation instructions.
+ *
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ * 
  */
 import groovy.json.JsonBuilder
 import java.net.URLEncoder
@@ -98,6 +100,7 @@ metadata {
 		command "resumeProgram"
 		command "setAuthTokens"
 		command "setHold"
+		command "setHoldExtraParams"
 		command "heatLevelUp"
 		command "heatLevelDown"
 		command "coolLevelUp"
@@ -559,7 +562,7 @@ def quickSave() {
 	sendEvent(name: 'programDisplayName', value: "QuickSave")
 }
   
-def setThisTstatClimate(climate) {
+def setThisTstatClimate(climateName) {
 	def currentProgram = device.currentValue("programScheduleName")
 	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
 	if (currentProgramType == 'VACATION') {
@@ -571,10 +574,10 @@ def setThisTstatClimate(climate) {
 		return
 	}
 	// If climate is different from current one, then change it to the given climate
-	if (currentProgram.toUpperCase() != climate.trim().toUpperCase()) {
-		setClimate(settings.thermostatId, climate)
-		sendEvent(name: 'programScheduleName', value: climate)
-		poll() // to refresh the values
+	if (currentProgram.toUpperCase() != climateName.trim().toUpperCase()) {
+		setClimate(settings.thermostatId, climateName)
+		sendEvent(name: 'programScheduleName', value: climateName)
+		poll() // to refresh the values in the UI
 	}
 }
 // parse events into attributes
@@ -600,18 +603,18 @@ def poll() {
 	sendEvent(name: 'hasDehumidifier', value: data.thermostatList[0].settings.hasDehumidifier)
 	sendEvent(name: 'hasHrv', value: data.thermostatList[0].settings.hasHrv)
 	sendEvent(name: 'hasErv', value: data.thermostatList[0].settings.hasErv)
-	if (data.thermostatList[0].settings.hasHumidifier) {
+	if (data.thermostatList[0].settings.hasHumidifier=='true') {
 		sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
 		sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,
 			unit: "%")
 	}
-	if (data.thermostatList[0].settings.hasDehumidifier) {
+	if (data.thermostatList[0].settings.hasDehumidifier=='true') {
 		sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
 		sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel,
 			unit: "%")
 	}
-	if ((data.thermostatList[0].settings.hasHrv) || (data.thermostatList[0].settings
-		.hasErv)) {
+	if ((data.thermostatList[0].settings.hasHrv=='true') || (data.thermostatList[0].settings
+		.hasErv=='true')) {
 		sendEvent(name: 'ventilatorMinOnTime', value: data.thermostatList[0].settings
 			.ventilatorMinOnTime)
 		sendEvent(name: 'ventilatorMode', value: data.thermostatList[0].settings.vent)
@@ -634,7 +637,7 @@ def poll() {
 	Boolean foundEvent = false
 	if (data.thermostatList[0].events.size > 0) {
 		for (i in 0..data.thermostatList[0].events.size() - 1) {
-			if (data.thermostatList[0].events[i].running) {
+			if (data.thermostatList[0].events[i].running=='true') {
 				indiceEvent = i // save the right indice associated to the Event that is currently running
 				foundEvent = true
 				exit
@@ -882,7 +885,7 @@ def doRequest(uri, args, type, success) {
 			if (settings.trace) {
 //				sendEvent name: "verboseTrace", value: "doRequest>token= ${data.auth.access_token}"
 				sendEvent name: "verboseTrace", value:
-				"doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
+					"doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
 				log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args}"
 			}
 			if (type == 'post') {
@@ -904,11 +907,12 @@ def doRequest(uri, args, type, success) {
 	}
 }
 
-// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex. /Toronto/Campus/BuildingA)
-//            registered is for SMART & SMART-SI thermostats, 
-//            may be null if not relevant for the given method
+// tstatType =managementSet or registered (no spaces).  
+//		registered is for SMART & SMART-SI thermostats, 
+//		managementSet is for EMS thermostat
+//		may also be set to a specific locationSet (ex. /Toronto/Campus/BuildingA)
+//		may be set to null if not relevant for the given method
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//    or may be a managementSet's location
 private def build_body_request(method, tstatType, thermostatId, tstatParams = [],
 	tstatSettings = []) {
 	def selectionJson = null
@@ -971,15 +975,18 @@ private def build_body_request(method, tstatType, thermostatId, tstatParams = []
 }
 
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
-// settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+// settings can be anything supported by ecobee 
+//		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+// extraHoldParams may be any other sethold or events properties  
+//		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml for more details
 def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
-	tstatSettings = []) {
+	tstatSettings = [], extraHoldParams=[]) {
 	Integer MAX_TSTAT_BATCH = 25
 	def tstatlist = null
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != '') && (tstatType != null)) { 
+	if ((tstatType != null) && (tstatType != "")) { 
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -1010,13 +1017,13 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 						"iterateSetHold>about to call setHold for ${tstatlist}"
 					log.debug "iterateSethold> about to call setHold for ${tstatlist}"
 				}
-				setHold(tstatlist, coolingSetPoint, heatingSetPoint, fanMode,
-					tstatSettings)
+				setHoldExtraParams(tstatlist, coolingSetPoint, heatingSetPoint, fanMode,
+					tstatSettings, extraHoldParams)
 				tstatlist = Id
 				nTstats = 1
 			} else {
 				tstatlist = tstatlist + "," + Id
-				nTstats = nTstats + 1
+				nTstats++ 
 			}
 		}
 	}
@@ -1024,8 +1031,23 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+// This setHold function is kept for better compatibility with previous releases
 def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = []) {
+    
+    // Call the setHoldExtraParams function with null value as extraHoldParams 
+	setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
+		tstatSettings, null) 
+}
+
+// New version of setHold with access to extra setHold params when needed (ex. to set ventilator event's properties).
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+// extraHoldParams may be any other sethold or events properties  
+//		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml
+def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
+	tstatSettings = [], extraHoldParams=[]) {
+    
 	Integer targetCoolTemp = null,targetHeatTemp = null
 	def tstatParams = null
 	
@@ -1058,28 +1080,30 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
         	[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp]
 
 	}
-	def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams,
-		tstatSettings)
-	for (i in 0..1) { // try 2 times if needed
-		api('setHold', bodyReq) {resp ->
-			def statusCode = resp.data.status.code
-			def message = resp.data.status.message
-			if (!statusCode) {
-				if (settings.trace) {
-					sendEvent name: "verboseTrace", value:
-						"setHold>done for ${thermostatId}"
-				}
-				return
-			} else {
-				log.error "setHold> error=${statusCode.toString()}, message = ${message}"
+    // Add the extraHoldParams if any
+    
+    if ((extraHoldParams != null) && (extraHoldParams != "")) {
+		tstatParams = tstatParams + extraHoldParams
+    }
+	def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams, tstatSettings)
+	api('setHold', bodyReq) {resp ->
+		def statusCode = resp.data.status.code
+		def message = resp.data.status.message
+		if (!statusCode) {
+			if (settings.trace) {
 				sendEvent name: "verboseTrace", value:
-					"setHold>error ${statusCode.toString()} for ${thermostatId}"
+					"setHold>done for ${thermostatId}"
 			}
+		} else {
+			log.error "setHold> error=${statusCode.toString()}, message = ${message}"
+			sendEvent name: "verboseTrace", value:
+				"setHold>error ${statusCode.toString()} for ${thermostatId}"
 		}
 	}
 }
 
-// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+// tstatType =managementSet or registered (no spaces).  
+//	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 	targetHeatTemp, targetStartDateTime, targetEndDateTime) {
 	Integer MAX_TSTAT_BATCH = 25
@@ -1087,7 +1111,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != '') && (tstatType != null)) { 
+	if ((tstatType != null) && (tstatType != "")) { 
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -1124,7 +1148,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 				nTstats = 1
 			} else {
 				tstatlist = tstatlist + "," + Id
-				nTstats = nTstats + 1
+				nTstats++ 
 			}
 		}
 	}
@@ -1179,14 +1203,15 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	}
 }
 
-// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+// tstatType =managementSet or registered (no spaces).  
+//	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateDeleteVacation(tstatType, vacationName) {
 	Integer MAX_TSTAT_BATCH = 25
 	def tstatlist = null
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != '') && (tstatType != null)) { 
+	if ((tstatType != null) && (tstatType != "")) { 
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -1222,7 +1247,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
 				nTstats = 1
 			} else {
 				tstatlist = tstatlist + "," + Id
-				nTstats = nTstats + 1
+				nTstats++ 
 			}
 		}
 	}
@@ -1258,7 +1283,7 @@ def iterateResumeProgram(tstatType) {
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != '') && (tstatType != null)) { 
+	if ((tstatType != null) && (tstatType != "")) { 
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -1291,7 +1316,7 @@ def iterateResumeProgram(tstatType) {
 				nTstats = 1
 			} else {
 				tstatlist = tstatlist + "," + Id
-				nTstats = nTstats + 1
+				nTstats++ 
 			}
 		}
 	}
@@ -1336,7 +1361,7 @@ def resumeProgram(thermostatId) {
 // Get all groups related to a thermostatId or all groups
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 def getGroups(thermostatId) {
-  
+
 	def ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
 		settings.ecobeeType.trim() : 'registered'
     
@@ -1396,7 +1421,7 @@ def getGroups(thermostatId) {
 // Get all groups related to a thermostatId and update them with the groupSettings
 // thermostatId may only be 1 thermostat (not a list), if null or empty, then defaulted to this thermostatId (settings)
 // groupSettings may be a map of settings separated by ",", no spaces; 
-// For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
+// 	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 def iterateUpdateGroup(thermostatId, groupSettings = []) {
 
 	if ((thermostatId == null) || (thermostatId == "")) {
@@ -1437,9 +1462,9 @@ def iterateUpdateGroup(thermostatId, groupSettings = []) {
 // Only valid for Smart and Antenna thermostats
 // If groupRef is not provided, it is assumed that a group creation needs to be done
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//    if no thermostatID is provided, it is defaulted to this thermostatId (settings)
+//	if no thermostatID is provided, it is defaulted to this thermostatId (settings)
 // groupSettings could be a map of settings separated by ",", no spaces; 
-// For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
+//	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 def updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	String updateGroupParams
 	def groupSettingsJson = new JsonBuilder(groupSettings)
@@ -1556,7 +1581,7 @@ def iterateSetClimate(tstatType, climateName) {
 	Integer nTstats = 0
 	def ecobeeType
     
-	if ((tstatType != '') && (tstatType != null)) { 
+	if ((tstatType != null) && (tstatType != "")) { 
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -1586,7 +1611,7 @@ def iterateSetClimate(tstatType, climateName) {
 				nTstats = 1
 			} else {
 				tstatlist = tstatlist + "," + Id
-				nTstats = nTstats + 1
+				nTstats++ 
 			}
 		}
 	}
@@ -1652,9 +1677,10 @@ def setClimate(thermostatId, climateName) {
 
 def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 	subClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+    
 	def ecobeeType
     
-	if ((tstatType != '') && (tstatType != null)) { 
+	if ((tstatType != null) && (tstatType != "")) { 
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -1691,8 +1717,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 def updateClimate(thermostatId, climateName, deleteClimateFlag,
-		substituteClimateName,
-		coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+		substituteClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
   
 	Integer targetCoolTemp,targetHeatTemp
 	def foundClimate = false
@@ -1837,7 +1862,7 @@ def updateClimate(thermostatId, climateName, deleteClimateFlag,
 	}
 }
 
-  // thermostatId may only be 1 thermostat (not a list) 
+// thermostatId may only be 1 thermostat (not a list) 
 // plugName is the name of the plug name to be controlled 
 // plugState is the state to be set
 // plugSettings are the different settings at https://www.ecobee.com/home/developer/api/documentation/v1/functions/ControlPlug.shtml
@@ -1890,6 +1915,7 @@ def controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 def getThermostatInfo(thermostatId) {
+
 	if (settings.trace) {
 		log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
 	}
@@ -1923,7 +1949,7 @@ def getThermostatInfo(thermostatId) {
 				0].settings.quickSaveSetForward / 10
 			if (data.thermostatList[0].events.size() > 0) {
 				for (i in 0..data.thermostatList[0].events.size() - 1) {
-					if (data.thermostatList[0].events[i].running) {
+					if (data.thermostatList[0].events[i].running=='true') {
 						// Divide the running events' temps by 10 for display later
 						data.thermostatList[0].events[i].coolHoldTemp = data.thermostatList[0].events[
 							i].coolHoldTemp / 10
@@ -1959,6 +1985,7 @@ def getThermostatInfo(thermostatId) {
 // tstatType =managementSet or registered (no spaces). 
 // May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def getThermostatSummary(tstatType) {
+
 	def bodyReq = build_body_request('thermostatSummary', tstatType, null, null,
 		null)
 	if (settings.trace) {
