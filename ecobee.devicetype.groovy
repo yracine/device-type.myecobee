@@ -637,7 +637,7 @@ def poll() {
 	Boolean foundEvent = false
 	if (data.thermostatList[0].events.size > 0) {
 		for (i in 0..data.thermostatList[0].events.size() - 1) {
-			if (data.thermostatList[0].events[i].running=='true') {
+			if (data.thermostatList[0].events[i].running) {
 				indiceEvent = i // save the right indice associated to the Event that is currently running
 				foundEvent = true
 				exit
@@ -1949,7 +1949,7 @@ def getThermostatInfo(thermostatId) {
 				0].settings.quickSaveSetForward / 10
 			if (data.thermostatList[0].events.size() > 0) {
 				for (i in 0..data.thermostatList[0].events.size() - 1) {
-					if (data.thermostatList[0].events[i].running=='true') {
+					if (data.thermostatList[0].events[i].running) {
 						// Divide the running events' temps by 10 for display later
 						data.thermostatList[0].events[i].coolHoldTemp = data.thermostatList[0].events[
 							i].coolHoldTemp / 10
