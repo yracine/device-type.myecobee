@@ -1,10 +1,21 @@
 /***
- *  Away from Home with Ecobee Thermostat
- *  Turn off the lights, turn on the security alarm, and set the temps at ecobee when away from home
- * 
- *  Author: Yves Racine
+ *
+ *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Date: 2014-03-31
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ * 
+ *
+ *  Away from Home with Ecobee Thermostat
+ *  Turn off the lights, turn on the security alarm, and lower the settings at ecobee when away from home
 */
 
 
@@ -103,19 +114,21 @@ def motionEvtHandler(evt) {
 
 private doNothing() { 
     log.debug "doNothing"
+    send("AwayFromHome>Waiting a certain threshold")
 }
 
+
+
 private residentsHaveBeenQuiet() {
+
+	def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
+    Integer delay = threshold * 60 
     
-
-    def threshold = residentsQuietThreshold ?: 3 
-    Integer delay = 60 * threshold
-
 //  Wait a certain threshold before checking if residents have been quiet
     runIn (delay, "doNothing", [overwrite:false])
 
     def result = true
-    def t0 = new Date(now() - threshold)
+    def t0 = new Date(now() - (threshold * 60 *1000))
     for (sensor in motions) {
         def recentStates = sensor.statesSince("motion", t0)
         if (recentStates.find{it.value == "active"}) {
@@ -180,12 +193,12 @@ def takeActions() {
     }
     else {
     
-       // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
- 
-        ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp,null, null)// Set heating and cooling points at ecobee
+        // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
+        // Set heating and cooling points at ecobee
+        ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null,null,null)
     }
     
-    send("AwayFromHome>ecobee's temps are now lower")
+    send("AwayFromHome>ecobee's settings are now lower")
 
     def messageswitch = "AwayFromHome>Switched off all switches"
     send(messageswitch)
