@@ -112,21 +112,12 @@ def motionEvtHandler(evt) {
     }
 }
 
-private doNothing() { 
-    log.debug "doNothing"
-    send("AwayFromHome>Waiting a certain threshold")
-}
-
-
 
 private residentsHaveBeenQuiet() {
 
 	def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
     Integer delay = threshold * 60 
     
-//  Wait a certain threshold before checking if residents have been quiet
-    runIn (delay, "doNothing", [overwrite:false])
-
     def result = true
     def t0 = new Date(now() - (threshold * 60 *1000))
     for (sensor in motions) {
@@ -143,7 +134,6 @@ private residentsHaveBeenQuiet() {
 def presence(evt) {
 
     log.debug "evt.name: $evt.value"
-    ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     if (evt.value == "not present") {
         def person = getPerson(evt)
         send("AwayFromHome> ${person.displayName} not present at home")
@@ -164,7 +154,7 @@ def presence(evt) {
             
         }
         else {
-            log.debug "not everyone is away, doing nothing"
+            log.debug "Not everyone is away, doing nothing"
             send("AwayFromHome>Not everyone is away, doing nothing..")
         }
     }
@@ -176,12 +166,12 @@ def presence(evt) {
 
 
 def takeActions() {
-    send("AwayFromHome>about to take actions")
     Integer thresholdMinutes = 2		// check that the security alarm is close in a 2-minute delay
     Integer delay = 60 * thresholdMinutes
     def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
     def minCoolTemp = givenCoolTemp ?: 27  // by default, 27C is the minimum cool temp
     
+    ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     
     if ((givenClimateName != null) && (givenClimateName != "")) {
     
