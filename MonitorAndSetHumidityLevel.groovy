@@ -198,6 +198,18 @@ def setHumidityLevel() {
     log.trace("setHumidity> evaluate: Indoor Temp: ${indoorTemp} vs. outdoor Temp ${outdoorTemp}" )
     log.trace("setHumidity> hasErv=${hasErv}, hasHrv=${hasHrv},hasHumidifier=${hasHumidifier},hasDehumidifier=${hasDehumidifier}, freeCoolingFlag=${freeCoolingFlag}") 
 
+//  If indoorSensor specified, use the more precise humidity measure instead of ecobeeHumidity
+
+    log.trace("setHumidity>compare: Ecobee's humidity: ${ecobeeHumidity} vs. indoor's humidity ${indoorHumidity}")
+    if (((indoorSensor != null) && (indoorSensor != "")) && (indoorHumidity < ecobeeHumidity)) {
+        ecobeeHumidity = indoorHumidity
+    }
+    
+    log.trace("setHumidity> evaluate:, Ecobee's humidity: ${ecobeeHumidity} vs. outdoor's humidity ${outdoorHumidity},"  +
+        "coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
+    log.trace("setHumidity> evaluate: Indoor Temp: ${indoorTemp} vs. outdoor Temp ${outdoorTemp}" )
+    log.trace("setHumidity> hasErv=${hasErv}, hasHrv=${hasHrv},hasHumidifier=${hasHumidifier},hasDehumidifier=${hasDehumidifier}, freeCoolingFlag=${freeCoolingFlag}") 
+
     if ((ecobeeMode == 'cool' && (hasHrv=='true' || hasErv=='true')) && 
         (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) && 
         (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
@@ -288,7 +300,7 @@ def setHumidityLevel() {
     else if (((ecobeeMode == 'cool') && (hasDehumidifier=='true' && hasErv=='false' && hasHrv=='false')) && 
               (outdoorTemp < indoorTemp) && (freeCoolingFlag=='true') ) {
     
-//     If mode is cooling and outdoor's temp is lower than inside, then just use dehumidifier/hrv if any available
+//     If mode is cooling and outdoor's temp is lower than inside, then just use dehumidifier for better cooling if any available
 
        log.trace "MonitorHumidity>In cooling mode, outdoor temp is lower than inside, using dehumidifier for free cooling"
 
