@@ -680,7 +680,7 @@ def poll() {
 			exit
 		}
 	}
-    currentClimate = data.thermostatList[0].program.climates.subMap( [data.thermostatList[0].program.currentClimateRef] )
+    
 	if (foundEvent) {
 		// Display the current event's name, type, and message
 		sendEvent(name: 'programScheduleName', value: data.thermostatList[0].events[
