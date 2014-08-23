@@ -131,38 +131,34 @@ private residentsHaveBeenQuiet() {
     return result
 }
 
+
 def presence(evt) {
+	def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
+    Integer delay = threshold * 60 
 
     log.debug "evt.name: $evt.value"
     if (evt.value == "not present") {
         def person = getPerson(evt)
         send("AwayFromHome> ${person.displayName} not present at home")
         log.debug "checking if everyone is away  and quiet at home"
-        if (everyoneIsAway()) {
-            send("AwayFromHome>Nobody is at home now")
-
-            if (residentsHaveBeenQuiet()){
+        if (residentsHaveBeenQuiet()){
            
-                send("AwayFromHome>Quiet at home, take actions...")
-                takeActions()
-            }     
-            else {
+            if (everyoneIsAway()) {
+                send("AwayFromHome>Quiet at home...")
+                runIn(delay, "takeActions")
+            } else {
+                log.debug "Not everyone is away, doing nothing"
+                send("AwayFromHome>Not everyone is away, doing nothing..")
+            }
+        } else {
             
-                log.debug "Things are not quiet at home, doing nothing"
-                send("AwayFromHome>Things are not quiet at home...")
-            }     
-            
-        }
-        else {
-            log.debug "Not everyone is away, doing nothing"
-            send("AwayFromHome>Not everyone is away, doing nothing..")
-        }
-    }
-	else {
+            log.debug "Things are not quiet at home, doing nothing"
+            send("AwayFromHome>Things are not quiet at home...")
+        }     
+    } else {
         log.debug "Still present; doing nothing"
     }
 }
-
 
 
 def takeActions() {
@@ -170,38 +166,44 @@ def takeActions() {
     Integer delay = 60 * thresholdMinutes
     def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
     def minCoolTemp = givenCoolTemp ?: 27  // by default, 27C is the minimum cool temp
+
+//  Making sure everybody is away and no motion at home
+
+	if (everyoneIsAway() && residentsHaveBeenQuiet()) {
+        send("AwayFromHome>Nobody is at home, and it's quiet, about to take actions")
+        ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     
-    ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
-    
-    if ((givenClimateName != null) && (givenClimateName != "")) {
+        if ((givenClimateName != null) && (givenClimateName != "")) {
     
         // You may want to change to ecobee.setClimate('serial number list',...) if you own EMS thermostat(s)
 
-        ecobee.iterateSetClimate('registered',givenClimateName)// Set to the climateName
+            ecobee.iterateSetClimate('registered',givenClimateName)// Set to the climateName
     
     
-    }
-    else {
+        }
+        else {
     
-        // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
-        // Set heating and cooling points at ecobee
-        ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null,null,null)
-    }
+            // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
+            // Set heating and cooling points at ecobee
+            ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null,null,null)
+        }
     
-    send("AwayFromHome>ecobee's settings are now lower")
+        send("AwayFromHome>ecobee's settings are now lower")
 
-    def messageswitch = "AwayFromHome>Switched off all switches"
-    send(messageswitch)
-    log.info messageswitch
-    switches?.off()											 // turn off the lights		
+        def messageswitch = "AwayFromHome>Switched off all switches"
+        send(messageswitch)
+        log.info messageswitch
+        switches?.off()											 // turn off the lights		
 
-    if (alarmSwitch.currentContact == "open") {
-        log.debug "alarm is not set, arm it..."  
-        send("AwayFromHome>quiet,alarm system now activated")
-        alarmSwitch.on()								     // arm the alarm system
+        if (alarmSwitch.currentContact == "open") {
+            log.debug "alarm is not set, arm it..."  
+            send("AwayFromHome>quiet,alarm system now activated")
+            alarmSwitch.on()								     // arm the alarm system
+        }
+        runIn (delay, "checkAlarmSystem", [overwrite:false])     // check that the alarm system is armed
+
     }
-    runIn (delay, "checkAlarmSystem", [overwrite:false])     // check that the alarm system is armed
-    
+
 
 }
 
