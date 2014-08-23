@@ -986,6 +986,7 @@ private def build_body_request(method, tstatType, thermostatId, tstatParams = []
 	}
 }
 
+// iterateSetHold: iterate thru all the thermostats under a specific account and create a specific hold event
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // settings can be anything supported by ecobee 
 //		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
@@ -1118,6 +1119,7 @@ def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	}
 }
 
+// iterateCreateVacation: iterate thru all the thermostats under a specific account and create a specific vacation
 // tstatType =managementSet or registered (no spaces).  
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
@@ -1223,6 +1225,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	}
 }
 
+// iterateDeleteVacation: iterate thru all the thermostats under a specific account and delete a specific vacation
 // tstatType =managementSet or registered (no spaces).  
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateDeleteVacation(tstatType, vacationName) {
@@ -1302,6 +1305,7 @@ def deleteVacation(thermostatId, vacationName) {
 }
 
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+// iterateResumeProgram: iterate thru all the thermostats under a specific account and resume their program
 def iterateResumeProgram(tstatType) {
 	Integer MAX_TSTAT_BATCH = 25
 	def tstatlist = null
@@ -1447,6 +1451,7 @@ def getGroups(thermostatId) {
 }
 
 // Only valid for Smart and Antenna thermostats
+// iterateUpdateGroup: iterate thru all the Groups under a specific account and update their settings
 // Get all groups related to a thermostatId and update them with the groupSettings
 // thermostatId may only be 1 thermostat (not a list), if null or empty, then defaulted to this thermostatId (settings)
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
@@ -1602,7 +1607,7 @@ def deleteClimate(thermostatId, climateName, substituteClimateName) {
 	updateClimate(thermostatId, climateName, 'true', substituteClimateName, null,
 		null, null, null, null)
 }
-
+// iterateSetClimate: iterate thru all the thermostats under a specific account and set their Climate
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // climate name is the name of the climate bet set to(ex. "Home", "Away").
 def iterateSetClimate(tstatType, climateName) {
@@ -1705,13 +1710,13 @@ def setClimate(thermostatId, climateName) {
 	}
 }
 
+// iterateUpdateClimate: iterate thru all the thermostats under a specific account and update their Climate
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
 // deleteClimateFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // subClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
-
 def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 	subClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
     
