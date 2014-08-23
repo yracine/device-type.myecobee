@@ -169,15 +169,15 @@ def takeActions() {
 
 //  Making sure everybody is away and no motion at home
 
-	if (everyoneIsAway() && residentsHaveBeenQuiet()) {
+    if (everyoneIsAway() && residentsHaveBeenQuiet()) {
         send("AwayFromHome>Nobody is at home, and it's quiet, about to take actions")
         ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     
         if ((givenClimateName != null) && (givenClimateName != "")) {
     
-        // You may want to change to ecobee.setClimate('serial number list',...) if you own EMS thermostat(s)
+            // You may want to change to ecobee.setClimate('serial number list',...) if you own EMS thermostat(s)
 
-            ecobee.iterateSetClimate('registered',givenClimateName)// Set to the climateName
+                ecobee.iterateSetClimate('registered',givenClimateName)// Set to the climateName
     
     
         }
