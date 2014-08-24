@@ -1366,12 +1366,19 @@ def resumeProgram(thermostatId) {
 	}
 	// do the resumeProgram 3 times to make sure it is resumed.
 	api('resumeProgram', bodyReq) {
-		sendEvent name: "verboseTrace", value:
-			"resumeProgram> 1st done for ${thermostatId}"
+		if (settings.trace) {
+			log.debug "resumeProgram> 1st done for ${thermostatId}"
+			sendEvent name: "verboseTrace", value:
+				"resumeProgram> 1st done for ${thermostatId}"
+		}
 	}
 	api('resumeProgram', bodyReq) {
-		sendEvent name: "verboseTrace", value:
-			"resumeProgram> 2nd done for ${thermostatId}"
+		if (settings.trace) {
+			log.debug "resumeProgram> 2nd done for ${thermostatId}"
+			sendEvent name: "verboseTrace", value:
+				"resumeProgram> 2nd done for ${thermostatId}"
+		}
+	
 	}
 	api('resumeProgram', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
