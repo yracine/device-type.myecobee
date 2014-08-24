@@ -986,7 +986,7 @@ private def build_body_request(method, tstatType, thermostatId, tstatParams = []
 	}
 }
 
-// iterateSetHold: iterate thru all the thermostats under a specific account and create a specific hold event
+// iterateSetHold: iterate thru all the thermostats under a specific account and create the hold event
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // settings can be anything supported by ecobee 
 //		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
@@ -1119,7 +1119,7 @@ def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	}
 }
 
-// iterateCreateVacation: iterate thru all the thermostats under a specific account and create a specific vacation
+// iterateCreateVacation: iterate thru all the thermostats under a specific account and create the vacation
 // tstatType =managementSet or registered (no spaces).  
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
@@ -1225,7 +1225,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	}
 }
 
-// iterateDeleteVacation: iterate thru all the thermostats under a specific account and delete a specific vacation
+// iterateDeleteVacation: iterate thru all the thermostats under a specific account and delete the vacation
 // tstatType =managementSet or registered (no spaces).  
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateDeleteVacation(tstatType, vacationName) {
