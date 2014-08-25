@@ -19,8 +19,8 @@ Current FanMinOnTime (minimum fan time in minutes per hour)
 The Program's HeatingSetpoint
 The Program's CoolingSetpoint
 The name of the current Program
-A " Resume Program" icon to press if desired
 The type of Program (Program or Vacation)
+A " Resume Program" icon to press if desired
 Weather Date and time
 The current weather conditions
 The current outdoor temperature
