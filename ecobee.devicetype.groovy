@@ -2118,7 +2118,7 @@ def refresh_tokens() {
 	}
 	def successRefreshTokens = {resp ->
 		if (settings.trace) {
-				log.debug "refresh_tokens> response = ${resp.data}"
+			log.debug "refresh_tokens> response = ${resp.data}"
 		}
 		data.auth.access_token = resp.data.access_token
 		data.auth.refresh_token = resp.data.refresh_token
