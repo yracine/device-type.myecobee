@@ -287,7 +287,7 @@ metadata {
 		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
 			decoration: "flat") {
 			state "-2",			label: 'updating...',	icon: "st.unknown.unknown.unknown"
-			state "0",   			label: 'Sunny',			icon: "st.Weather.weather14"
+			state "0",			label: 'Sunny',			icon: "st.Weather.weather14"
 			state "1",			label: 'FewClouds',		icon: "st.Weather.weather15"
 			state "2",			label: 'PartlyCloudy',	icon: "st.Weather.weather15"
 			state "3",			label: 'MostlyCloudy',	icon: "st.Weather.weather15"
@@ -300,7 +300,7 @@ metadata {
 			state "10",			label: 'Snow',			icon: "st.Weather.weather6"
 			state "11",			label: 'Flurries',		icon: "st.Weather.weather6"
 			state "12",			label: 'Sleet',			icon: "st.Weather.weather6"
-			state "13", 			label: 'Blizzard',		icon: "st.Weather.weather7"
+			state "13",			label: 'Blizzard',		icon: "st.Weather.weather7"
 			state "14",			label: 'Pellets',		icon: "st.custom.wuk.sleet"
 			state "15",			label: 'ThunderStorms',	icon: "st.custom.wuk.tstorms"
 			state "16",			label: 'Windy',			icon: "st.Transportation.transportation5"
