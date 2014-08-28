@@ -396,20 +396,21 @@ def heatLevelUp() {
 	setHeatingSetpoint(nextLevel)
 }
 def heatLevelDown() {
-		int nextLevel = device.currentValue("heatingSetpoint") - 1
-		def scale = getTemperatureScale()
-		if (scale == 'C') {
-			if (nextLevel < 10) {
-				nextLevel = 10
-			}
-		} else {
-			if (nextLevel < 50) {
-				nextLevel = 50
-			}
+	int nextLevel = device.currentValue("heatingSetpoint") - 1
+	def scale = getTemperatureScale()
+	if (scale == 'C') {
+		if (nextLevel < 10) {
+			nextLevel = 10
 		}
-		setHeatingSetpoint(nextLevel)
+	} else {
+		if (nextLevel < 50) {
+			nextLevel = 50
+		}
 	}
-	// handle commands
+	setHeatingSetpoint(nextLevel)
+}
+
+// handle commands
 def setHeatingSetpoint(temp) {
 	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), temp,
 		null, null)
@@ -882,22 +883,30 @@ def api(method, args, success = {}) {
 	}
 	def args_encoded = URLEncoder.encode(args.toString(), "UTF-8")
 	def methods = [
-		'thermostatSummary': [
-      		uri:"${URI_ROOT}/thermostatSummary?format=json&body=${args_encoded}", 
-      		type:'get'],
-		'thermostatInfo': [
-          	uri:"${URI_ROOT}/thermostat?format=json&body=${args_encoded}", 
-          	type: 'get'],
-		'setHold': [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
-		'resumeProgram': [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
-		'createVacation': [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
-		'deleteVacation': [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
-		'getGroups': [uri: "${URI_ROOT}/group?format=json&body=${args_encoded}",
+		'thermostatSummary': 
+			[uri:"${URI_ROOT}/thermostatSummary?format=json&body=${args_encoded}", 
+      			type:'get'],
+		'thermostatInfo': 
+			[uri:"${URI_ROOT}/thermostat?format=json&body=${args_encoded}", 
+          		type: 'get'],
+		'setHold': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'resumeProgram': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'createVacation': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'deleteVacation': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'getGroups': 
+			[uri: "${URI_ROOT}/group?format=json&body=${args_encoded}",
 			type: 'get'],
-		'updateGroup': [uri: "${URI_ROOT}/group?format=json", type: 'post'],
-		'updateClimate': [uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
-		'controlPlug': [uri: "${URI_ROOT}/thermostat?format=json", type: 'post']
-	]
+		'updateGroup': 
+			[uri: "${URI_ROOT}/group?format=json", type: 'post'],
+		'updateClimate': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'controlPlug': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post']
+		]
 	def request = methods.getAt(method)
 	if (settings.trace) {
 		log.debug "api> about to call doRequest with (unencoded) args = ${args}"
@@ -920,18 +929,18 @@ def doRequest(uri, args, type, success) {
 		body: args
 	]
 	try {
-			if (settings.trace) {
-//				sendEvent name: "verboseTrace", value: "doRequest>token= ${data.auth.access_token}"
-				sendEvent name: "verboseTrace", value:
-					"doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
+		if (settings.trace) {
+//			sendEvent name: "verboseTrace", value: "doRequest>token= ${data.auth.access_token}"
+			sendEvent name: "verboseTrace", value:
+				"doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
 				log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args}"
-			}
-			if (type == 'post') {
-				httpPostJson(params, success)
-			} else if (type == 'get') {
-				params.body = null // parameters already in the URL request
-				httpGet(params, success)
-			}
+		}
+		if (type == 'post') {
+			httpPostJson(params, success)
+		} else if (type == 'get') {
+			params.body = null // parameters already in the URL request
+			httpGet(params, success)
+		}
 	} catch (java.net.UnknownHostException e) {
 		log.error "doRequest> Unknown host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> Unknown host"
@@ -959,17 +968,18 @@ private def build_body_request(method, tstatType, thermostatId, tstatParams = []
 	if (method == 'thermostatSummary') {
 		if (tstatType.trim().toUpperCase() == 'REGISTERED') {
 			selection = [selection: [selectionType: 'registered', selectionMatch: '',
-				includeEquipmentStatus: 'true']]
+					includeEquipmentStatus: 'true']
+				]
 		} else {
 			// If tstatType is different than managementSet, it is assumed to be locationSet specific (ex./Toronto/Campus/BuildingA)
 			selection = (tstatType.trim().toUpperCase() == 'MANAGEMENTSET') ? 
             	// get all EMS thermostats from the root
 				[selection: [selectionType: 'managementSet', selectionMatch: '/',
-						includeEquipmentStatus: 'true']
-            	] : // Or Specific to a location
+					includeEquipmentStatus: 'true']
+            			] : // Or Specific to a location
 				[selection: [selectionType: 'managementSet', selectionMatch: tstatType.trim(),
 					includeEquipmentStatus: 'true']
-            	] 
+            			] 
 		}
 	} else if (method == 'thermostatInfo') {
 		selection = [selection: [selectionType: 'thermostats',
@@ -980,7 +990,8 @@ private def build_body_request(method, tstatType, thermostatId, tstatParams = []
 			includeWeather: 'true',
 			includeAlerts: 'true',
 			includeEvents: 'true',
-			includeEquipmentStatus: 'true']
+			includeEquipmentStatus: 'true'
+			]
         ]
 	} else {
 		selection = [selectionType: 'thermostats', selectionMatch: thermostatId]
@@ -991,10 +1002,12 @@ private def build_body_request(method, tstatType, thermostatId, tstatParams = []
 	}
 	if ((tstatSettings != null) && (tstatSettings != "")) {
 		def function_clause = ((tstatParams != null) && (tsatParams != "")) ? 
-			[type:method, params: tstatParams] : [type: method]
+			[type:method, params: tstatParams
+			] : 
+			[type: method]
 		def bodyWithSettings = [functions: [function_clause], selection: selection,
-			thermostat: [settings: tstatSettings]
-		]
+				thermostat: [settings: tstatSettings]
+			]
 		def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
 		return bodyWithSettingsJson
 	} else if ((tstatParams != null) && (tsatParams != "")) {
@@ -1112,15 +1125,16 @@ def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	 */
 	if ((settings.holdType != null) && (settings.holdType != "")) {
 		tstatParams = ((fanMode != null) & (fanMode != "")) ? 
-          	[coolHoldTemp:targetCoolTemp, heatHoldTemp: targetHeatTemp, fan: fanMode, 
-             	holdType:"${settings.holdType.trim()}"] : 
-        	[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp, 
-             	holdType:"${settings.holdType.trim()}"
-		]
+          		[coolHoldTemp:targetCoolTemp, heatHoldTemp: targetHeatTemp, fan: fanMode, 
+             			holdType:"${settings.holdType.trim()}"
+             		] : 
+        		[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp, 
+             			holdType:"${settings.holdType.trim()}"
+			]
 	} else {
 		tstatParams = ((fanMode != null) & (fanMode != "")) ? 
 			[coolHoldTemp:targetCoolTemp, heatHoldTemp: targetHeatTemp, fan: fanMode] : 
-        	[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp]
+        		[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp]
 
 	}
     // Add the extraHoldParams if any
@@ -1227,7 +1241,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 		startTime: vacationStartTime,
 		endDate: vacationEndDate,
 		endTime: vacationEndTime
-	]
+		]
 	def bodyReq = build_body_request('createVacation', null, thermostatId,
 		vacationParams, null)
 
@@ -2107,12 +2121,12 @@ def refresh_tokens() {
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
-		],
+			],
 		uri: "${URI_ROOT}/token?" +
 		"grant_type=refresh_token&" +
 		"code=${data.auth.refresh_token}&" +
 		"client_id=${appKey}"
-	]
+		]
 	if (settings.trace) {
 		log.debug "refresh_tokens> uri = ${method.uri}"
 	}
@@ -2180,12 +2194,12 @@ def getEcobeePinAndAuth() {
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
-		],
+			],
 		uri: "${URI_ROOT}/authorize?" +
 		"response_type=ecobeePin&" +
 		"client_id=${appKey}&" +
 		"scope=${SCOPE}"
-	]
+		]
 	def successEcobeePin = {resp ->
 		if (settings.trace) {
 			log.debug "getEcobeePinAndAuth> response = ${resp.data}"
@@ -2236,12 +2250,12 @@ def setAuthTokens() {
 			'X-nl-protocol-version': 1,
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
-		],
+			],
 		uri: "${URI_ROOT}/token?" +
 		"grant_type=ecobeePin&" +
 		"code=${data.auth.code}&" +
 		"client_id=${appKey}"
-	]
+		]
 	if (data.auth.access_token == null) {
 		def successTokens = {resp ->
 			data.auth.access_token = resp.data.access_token
