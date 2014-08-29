@@ -722,7 +722,6 @@ def poll() {
 			exit
 		}
 	}
-    
 	if (foundEvent) {
 		// Display the current event's name, type, and message
 		sendEvent(name: 'programScheduleName', value: data.thermostatList[0].events[
@@ -975,7 +974,7 @@ def doRequest(uri, args, type, success) {
 //		may also be set to a specific locationSet (ex. /Toronto/Campus/BuildingA)
 //		may be set to null if not relevant for the given method
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-private def build_body_request(method, tstatType, thermostatId, tstatParams = [],
+private def build_body_request(method, tstatType="registered", thermostatId, tstatParams = [],
 	tstatSettings = []) {
 	def selectionJson = null
 	def selection = null
@@ -1113,15 +1112,12 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 // extraHoldParams may be any other sethold or events properties  
 //		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml
-def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
+def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = [], extraHoldParams=[]) {
     
 	Integer targetCoolTemp = null,targetHeatTemp = null
 	def tstatParams = null
 	
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 	if (settings.trace) {
 		log.debug
 			"sethold>called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
@@ -1229,7 +1225,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
+def createVacation(thermostatId=settings.thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	targetStartDateTime, targetEndDateTime) {
 	def vacationStartDate = String.format('%tY-%<tm-%<td', targetStartDateTime)
 	def vacationStartTime = String.format('%tH:%<tM:%<tS', targetStartDateTime)
@@ -1237,9 +1233,6 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	def vacationEndTime = String.format('%tH:%<tM:%<tS', targetEndDateTime)
 	Integer targetCool = null,targetHeat = null
     
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
 		targetCool = (cToF(targetCoolTemp) * 10) as Integer // need to send temperature in F multiply by 10
@@ -1258,7 +1251,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 		endTime: vacationEndTime
 		]
 	def bodyReq = build_body_request('createVacation', null, thermostatId,
-		vacationParams, null)
+		vacationParams)
 
 	if (settings.trace) {
 		log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
@@ -1333,15 +1326,11 @@ def iterateDeleteVacation(tstatType, vacationName) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def deleteVacation(thermostatId, vacationName) {
+def deleteVacation(thermostatId=settings.thermostatId, vacationName) {
   
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 	def vacationParams = [name: vacationName.trim()]
-
 	def bodyReq = build_body_request('deleteVacation', null, thermostatId,
-		vacationParams, null)
+		vacationParams)
 	api('deleteVacation', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
@@ -1408,13 +1397,9 @@ def iterateResumeProgram(tstatType) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def resumeProgram(thermostatId) {
+def resumeProgram(thermostatId=settings.thermostatId) {
   
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
-	def bodyReq = build_body_request('resumeProgram', null, thermostatId, null,
-		null)
+	def bodyReq = build_body_request('resumeProgram', null, thermostatId)
     
 	if (settings.trace) {
 		log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -1519,12 +1504,8 @@ def getGroups(thermostatId) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings may be a map of settings separated by ",", no spaces; 
 // 	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def iterateUpdateGroup(thermostatId, groupSettings = []) {
+def iterateUpdateGroup(thermostatId=settings.thermostatId, groupSettings = []) {
 
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
-  
 	getGroups(thermostatId)
 	if (settings.trace) {
 		log.debug "iterateUpdateGroup>about to loop ${data.groups.size()}"
@@ -1562,14 +1543,11 @@ def iterateUpdateGroup(thermostatId, groupSettings = []) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings could be a map of settings separated by ",", no spaces; 
 //	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
+def updateGroup(groupRef, groupName, thermostatId=settings.thermostatId, groupSettings = []) {
 	String updateGroupParams
 	def groupSettingsJson = new JsonBuilder(groupSettings)
 	def groupSet = groupSettingsJson.toString().minus('{').minus('}')
 
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 	if (settings.trace) {
 		log.debug "updateGroup> about to assemble bodyReq for groupName =${groupName}, thermostatId = ${thermostatId}, groupSettings=${groupSet}..."
 		sendEvent name: "verboseTrace", value:
@@ -1718,15 +1696,11 @@ def iterateSetClimate(tstatType, climateName) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 //	The settings.thermostatId (input) is the default one
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
-def setClimate(thermostatId, climateName) {
+def setClimate(thermostatId=settings.thermostatId, climateName) {
 	def climateRef = null
 
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 
 	getThermostatInfo(thermostatId)
-    
 	for (i in 0..data.thermostatList.size() - 1) {
 		def foundClimate = false
 		for (j in 0..data.thermostatList[i].program.climates.size() - 1) {
@@ -1821,7 +1795,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 // substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
-def updateClimate(thermostatId, climateName, deleteClimateFlag,
+def updateClimate(thermostatId=settings.thermostatId, climateName, deleteClimateFlag,
 		substituteClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
   
 	Integer targetCoolTemp,targetHeatTemp
@@ -1830,9 +1804,6 @@ def updateClimate(thermostatId, climateName, deleteClimateFlag,
 	def substituteClimateRef = null
 	def climateRefToBeReplaced = null
 
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 	if ((coolTemp != null) && (heatTemp != null)) {
 		if (settings.trace) {
 			log.debug "updateClimate>thermostatId =${thermostatId} coolTemp=${coolTemp}, heatTemp= ${heatTemp}"
@@ -1972,13 +1943,10 @@ def updateClimate(thermostatId, climateName, deleteClimateFlag,
 // plugName is the name of the plug name to be controlled 
 // plugState is the state to be set
 // plugSettings are the different settings at https://www.ecobee.com/home/developer/api/documentation/v1/functions/ControlPlug.shtml
-def controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
+def controlPlug(thermostatId=settings.thermostatId, plugName, plugState, plugSettings = []) {
 	def plugSettingsJson = new JsonBuilder(plugSettings)
 	def plugSet = plugSettingsJson.toString().minus('{').minus('}')
 
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 	if (settings.trace) {
 		log.debug "controlPlug> about to assemble bodyReq for plugName =${plugName}, thermostatId = ${thermostatId}, groupSettings=${plugSet}..."
 		sendEvent name: "verboseTrace", value:
@@ -2021,11 +1989,8 @@ def controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def getThermostatInfo(thermostatId) {
+def getThermostatInfo(thermostatId=settings.thermostatId) {
 
-	if ((thermostatId == null) || (thermostatId == "")) {
-		thermostatId = settings.thermostatId
-	}
 	if (settings.trace) {
 		log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
 	}
