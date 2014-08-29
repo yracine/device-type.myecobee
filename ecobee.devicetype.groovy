@@ -281,7 +281,7 @@ metadata {
 		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
 			state "default", label: 'ResumeProg', action: "resumeThisTstat", 
-            icon: "st.Office.office7", backgroundColor: "#ffffff"
+            		icon: "st.Office.office7", backgroundColor: "#ffffff"
 		}
 		// Weather Tiles
 		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
