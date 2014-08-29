@@ -1250,7 +1250,7 @@ def createVacation(thermostatId=settings.thermostatId, vacationName, targetCoolT
 		endTime: vacationEndTime
 		]
 	def bodyReq = build_body_request('createVacation', null, thermostatId,
-		vacationParams)
+		vacationParams,null)
 
 	if (settings.trace) {
 		log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
@@ -1329,7 +1329,7 @@ def deleteVacation(thermostatId=settings.thermostatId, vacationName) {
   
 	def vacationParams = [name: vacationName.trim()]
 	def bodyReq = build_body_request('deleteVacation', null, thermostatId,
-		vacationParams)
+		vacationParams, null)
 	api('deleteVacation', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
@@ -1398,7 +1398,7 @@ def iterateResumeProgram(tstatType) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 def resumeProgram(thermostatId=settings.thermostatId) {
   
-	def bodyReq = build_body_request('resumeProgram', null, thermostatId)
+	def bodyReq = build_body_request('resumeProgram', null, thermostatId, null, null)
     
 	if (settings.trace) {
 		log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
