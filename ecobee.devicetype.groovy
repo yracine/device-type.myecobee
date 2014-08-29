@@ -1149,7 +1149,7 @@ def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heat
 	}
     // Add the extraHoldParams if any
     
-    if ((extraHoldParams != null) && (extraHoldParams != "")) {
+    if ((extraHoldParams != null) && (extraHoldParams != [])) {
 		tstatParams = tstatParams + extraHoldParams
     }
 	def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams, tstatSettings)
