@@ -1051,7 +1051,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != null) && (tstatType != "")) { 
+	if ((tstatType != null) && (tstatType != "")) { ds
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -1152,7 +1152,7 @@ def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heat
     if ((extraHoldParams != null) && (extraHoldParams != [])) {
 		tstatParams = tstatParams + extraHoldParams
     }
-	def bodyReq = build_body_request('setHold', null, thermostatId, tstatParams, tstatSettings)
+	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams,tstatSettings)
 	api('setHold', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
@@ -1249,8 +1249,7 @@ def createVacation(thermostatId=settings.thermostatId, vacationName, targetCoolT
 		endDate: vacationEndDate,
 		endTime: vacationEndTime
 		]
-	def bodyReq = build_body_request('createVacation', null, thermostatId,
-		vacationParams)
+	def bodyReq = build_body_request('createVacation',null,thermostatId,vacationParams)
 
 	if (settings.trace) {
 		log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
@@ -1328,8 +1327,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
 def deleteVacation(thermostatId=settings.thermostatId, vacationName) {
   
 	def vacationParams = [name: vacationName.trim()]
-	def bodyReq = build_body_request('deleteVacation', null, thermostatId,
-		vacationParams)
+	def bodyReq = build_body_request('deleteVacation',null,thermostatId,vacationParams)
 	api('deleteVacation', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
@@ -1398,7 +1396,7 @@ def iterateResumeProgram(tstatType) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 def resumeProgram(thermostatId=settings.thermostatId) {
   
-	def bodyReq = build_body_request('resumeProgram', null, thermostatId)
+	def bodyReq = build_body_request('resumeProgram',null,thermostatId,null)
     
 	if (settings.trace) {
 		log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -1959,7 +1957,7 @@ def controlPlug(thermostatId=settings.thermostatId, plugName, plugState, plugSet
 		'","plugState":"' + plugState + '"'
 
 	// add the plugSettings if any
-	if ((plugSettings != null) && (plugSettings != '')) {
+	if ((plugSettings != null) && (plugSettings != [])) {
 		bodyReq = bodyReq + ',' + plugSet
 	}
 	bodyReq = bodyReq + '}}]}'
@@ -1993,8 +1991,7 @@ def getThermostatInfo(thermostatId=settings.thermostatId) {
 	if (settings.trace) {
 		log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
 	}
-	def bodyReq = build_body_request('thermostatInfo', null, thermostatId, null,
-		null)
+	def bodyReq = build_body_request('thermostatInfo',null,thermostatId,null)
 	if (settings.trace) {
 		log.debug "getThermostatInfo> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
 	}
@@ -2060,8 +2057,7 @@ def getThermostatInfo(thermostatId=settings.thermostatId) {
 // May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def getThermostatSummary(tstatType) {
 
-	def bodyReq = build_body_request('thermostatSummary', tstatType, null, null,
-		null)
+	def bodyReq = build_body_request('thermostatSummary',tstatType,null,null)
 	if (settings.trace) {
 		log.debug "getThermostatSummary> about to call api with body = ${bodyReq}"
 	}
