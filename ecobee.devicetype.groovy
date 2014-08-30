@@ -1051,7 +1051,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != null) && (tstatType != "")) { ds
+	if ((tstatType != null) && (tstatType != "")) {
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
