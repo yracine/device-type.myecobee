@@ -1956,11 +1956,22 @@ def controlPlug(thermostatId=settings.thermostatId, plugName, plugState, plugSet
 		',"functions":[{"type":"controlPlug","params":{"plugName":"' + plugName +
 		'","plugState":"' + plugState + '"'
 
+	// add the holdType (workaround till ecobee fixes the issue)
+    
+	if ((settings.holdType != null) && (settings.holdType.trim() != "")) {
+		bodyReq = bodyReq + '"holdType":"' + settings.holdType.trim() + '"'
+	}
+    else {
+    
+		bodyReq = bodyReq + '"holdType":"indefinite"'
+    
+    }
 	// add the plugSettings if any
 	if ((plugSettings != null) && (plugSettings != [])) {
 		bodyReq = bodyReq + ',' + plugSet
 	}
-	bodyReq = bodyReq + '}}]}'
+
+    bodyReq = bodyReq + '}}]}'
 	api('controlPlug', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
