@@ -1961,11 +1961,10 @@ def controlPlug(thermostatId=settings.thermostatId, plugName, plugState, plugSet
 	if ((settings.holdType != null) && (settings.holdType.trim() != "")) {
 		bodyReq = bodyReq + '"holdType":"' + settings.holdType.trim() + '"'
 	}
-    else {
+	else {
     
 		bodyReq = bodyReq + '"holdType":"indefinite"'
-    
-    }
+	}
 	// add the plugSettings if any
 	if ((plugSettings != null) && (plugSettings != [])) {
 		bodyReq = bodyReq + ',' + plugSet
