@@ -1051,11 +1051,11 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != null) && (tstatType != "")) {
+	if ((tstatType != null) && (tstatType.trim() != "")) {
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 			settings.ecobeeType.trim() : 'registered'
 	}
 	getThermostatSummary(ecobeeType)
@@ -1133,7 +1133,7 @@ def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heat
 	}
 	/* if settings.holdType has a value, include it in the list of params
 	 */
-	if ((settings.holdType != null) && (settings.holdType != "")) {
+	if ((settings.holdType != null) && (settings.holdType.trim() != "")) {
 		tstatParams = ((fanMode != null) & (fanMode != "")) ? 
           		[coolHoldTemp:targetCoolTemp, heatHoldTemp: targetHeatTemp, fan: fanMode, 
              			holdType:"${settings.holdType.trim()}"
@@ -1179,11 +1179,11 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != null) && (tstatType != "")) { 
+	if ((tstatType != null) && (tstatType.trim() != "")) {
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 			settings.ecobeeType.trim() : 'registered'
 	}
 	getThermostatSummary(ecobeeType)
@@ -1280,11 +1280,11 @@ def iterateDeleteVacation(tstatType, vacationName) {
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != null) && (tstatType != "")) { 
+	if ((tstatType != null) && (tstatType.trim() != "")) {
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 			settings.ecobeeType.trim() : 'registered'
 	}
 	getThermostatSummary(ecobeeType)
@@ -1353,11 +1353,11 @@ def iterateResumeProgram(tstatType) {
 	Integer nTstats = 0
 	def ecobeeType
 
-	if ((tstatType != null) && (tstatType != "")) { 
+	if ((tstatType != null) && (tstatType.trim() != "")) {
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 			settings.ecobeeType.trim() : 'registered'
 	}
 	getThermostatSummary(ecobeeType)
@@ -1439,7 +1439,7 @@ def resumeProgram(thermostatId=settings.thermostatId) {
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups
 def getGroups(thermostatId) {
 
-	def ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
+	def ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 		settings.ecobeeType.trim() : 'registered'
     
 	if (ecobeeType.toUpperCase() != 'REGISTERED') {
@@ -1550,7 +1550,7 @@ def updateGroup(groupRef, groupName, thermostatId=settings.thermostatId, groupSe
 		sendEvent name: "verboseTrace", value:
 			"updateGroup> about to assemble bodyReq for groupName =${groupName}, thermostatId = ${thermostatId}, groupSettings=${groupSet}"
 	}
-	if ((groupRef != null) && (groupRef != "")) {
+	if ((groupRef != null) && (groupRef.trim() != "")) {
 
 		updateGroupParams = '"groupRef":"' + groupRef.trim() + '","groupName":"' +
 			groupName.trim() +
@@ -1586,7 +1586,7 @@ def updateGroup(groupRef, groupName, thermostatId=settings.thermostatId, groupSe
 def deleteGroup(groupRef, groupName) {
 	String updateGroupParams
 
-	if ((groupRef != null) && (groupRef != "")) {
+	if ((groupRef != null) && (groupRef.trim() != "")) {
 		updateGroupParams = '"groupRef":"' + groupRef.trim() + '","groupName":"' +
 			groupName.trim() + '"'
 	} else {
@@ -1653,11 +1653,11 @@ def iterateSetClimate(tstatType, climateName) {
 	Integer nTstats = 0
 	def ecobeeType
     
-	if ((tstatType != null) && (tstatType != "")) { 
+	if ((tstatType != null) && (tstatType.trim() != "")) {
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 			settings.ecobeeType.trim() : 'registered'
 	}
 	getThermostatSummary(ecobeeType)
@@ -1722,8 +1722,8 @@ def setClimate(thermostatId=settings.thermostatId, climateName) {
 		',"functions":[{"type":"setHold","params":{"holdClimateRef":"' + climateRef
 		/* if settings.holdType has a value, include it in the list of params
 		 */
-	if ((settings.holdType != null) && (settings.holdType != "")) {
-		bodyReq = bodyReq + '","holdType":"' + settings.holdType
+	if ((settings.holdType != null) && (settings.holdType.trim() != "")) {
+		bodyReq = bodyReq + '","holdType":"' + settings.holdType.trim()
 	}
 	bodyReq = bodyReq + '"}}]}'
 	api('setHold', bodyReq) {resp ->
@@ -1755,11 +1755,11 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
     
 	def ecobeeType
     
-	if ((tstatType != null) && (tstatType != "")) { 
+	if ((tstatType != null) && (tstatType.trim() != "")) {
 		ecobeeType = tstatType.trim()
 	} else {
 		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 			settings.ecobeeType.trim() : 'registered'
 	}
 	getThermostatSummary(ecobeeType)
