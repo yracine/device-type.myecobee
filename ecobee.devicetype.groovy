@@ -1009,7 +1009,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 			]
 		def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
 		return bodyWithSettingsJson
-    } else if (method == 'setThermostatSettings') {
+	} else if (method == 'setThermostatSettings') {
 		def bodyWithSettings = [selection: selection,thermostat: [settings: tstatSettings]
 			]
 		def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
@@ -1068,8 +1068,8 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 				// process a batch of maximum 25 thermostats according to API doc
 				if (settings.trace) {
 					sendEvent name: "verboseTrace", value:
-						"iterateSetThermostatSettings>about to call setHold for ${tstatlist}"
-					log.debug "iterateSetThermostatSettings> about to call setHold for ${tstatlist}"
+						"iterateSetThermostatSettings>about to call setThermostatSettings for ${tstatlist}"
+					log.debug "iterateSetThermostatSettings> about to call setThermostatSettings for ${tstatlist}"
 				}
 				setThermostatSettings(tstatlist, tstatSettings)
 				tstatlist = Id
