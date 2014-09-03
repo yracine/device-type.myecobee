@@ -1138,6 +1138,7 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 	}
 }
 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 def setThermostatSettings(thermostatId=settings.thermostatId, tstatSettings = []) {
