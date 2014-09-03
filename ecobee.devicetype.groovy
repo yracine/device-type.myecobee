@@ -1769,7 +1769,7 @@ def iterateSetClimate(tstatType, climateName) {
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
 def setClimate(thermostatId=settings.thermostatId, climateName) {
 	def climateRef = null
-
+    def tstatParams
 
 	getThermostatInfo(thermostatId)
 	for (i in 0..data.thermostatList.size() - 1) {
@@ -1789,17 +1789,14 @@ def setClimate(thermostatId=settings.thermostatId, climateName) {
 			return
 		}
 	}
-	def bodyReq =
-		'{"selection":{"selectionType":"thermostats","selectionMatch":"' +
-		thermostatId + '"}'
-	bodyReq = bodyReq +
-		',"functions":[{"type":"setHold","params":{"holdClimateRef":"' + climateRef
-		/* if settings.holdType has a value, include it in the list of params
-		 */
-	if ((settings.holdType != null) && (settings.holdType.trim() != "")) {
-		bodyReq = bodyReq + '","holdType":"' + settings.holdType.trim()
-	}
-	bodyReq = bodyReq + '"}}]}'
+	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+    	[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
+				] :
+    	[holdClimateRef:"${climateRef}"
+				]
+
+	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams)
+
 	api('setHold', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
