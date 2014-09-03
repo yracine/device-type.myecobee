@@ -1790,10 +1790,10 @@ def setClimate(thermostatId=settings.thermostatId, climateName) {
 		}
 	}
 	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
-    	[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
-				] :
-    	[holdClimateRef:"${climateRef}"
-				]
+		[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
+			] :
+		[holdClimateRef:"${climateRef}"
+			]
 
 	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams)
 
