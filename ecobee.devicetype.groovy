@@ -1068,8 +1068,8 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 				// process a batch of maximum 25 thermostats according to API doc
 				if (settings.trace) {
 					sendEvent name: "verboseTrace", value:
-						"iterateSetHold>about to call setHold for ${tstatlist}"
-					log.debug "iterateSethold> about to call setHold for ${tstatlist}"
+						"iterateSetThermostatSettings>about to call setHold for ${tstatlist}"
+					log.debug "iterateSetThermostatSettings> about to call setHold for ${tstatlist}"
 				}
 				setThermostatSettings(tstatlist, tstatSettings)
 				tstatlist = Id
