@@ -975,11 +975,13 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
             	// get all EMS thermostats from the root
 				[selection: [selectionType: 'managementSet', selectionMatch: '/',
 					includeEquipmentStatus: 'true']
-            			] : // Or Specific to a location
+            		] : // Or Specific to a location
 				[selection: [selectionType: 'managementSet', selectionMatch: tstatType.trim(),
 					includeEquipmentStatus: 'true']
-            			] 
+					]
 		}
+		selectionJson = new JsonBuilder(selection)
+		return selectionJson
 	} else if (method == 'thermostatInfo') {
 		selection = [selection: [selectionType: 'thermostats',
 			selectionMatch: thermostatId,
@@ -991,7 +993,9 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 			includeEvents: 'true',
 			includeEquipmentStatus: 'true'
 			]
-        ]
+		]
+		selectionJson = new JsonBuilder(selection)
+		return selectionJson
 	} else {
 		selection = [selectionType: 'thermostats', selectionMatch: thermostatId]
 	}
@@ -1019,14 +1023,12 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 		def simpleBody = [functions: [function_clause], selection: selection]
 		def simpleBodyJson = new JsonBuilder(simpleBody)
 		return simpleBodyJson
-	} else if (method == 'resumeProgram') {
+	} else {
 		def function_clause = [type: method]
 		def simpleBody = [functions: [function_clause], selection: selection]
 		def simpleBodyJson = new JsonBuilder(simpleBody)
 		return simpleBodyJson
-	} else {
-		return selectionJson
-	}
+    }    
 }
 
 // iterateSetThermostatSettings: iterate thru all the thermostats under a specific account and set the desired settings
