@@ -1029,62 +1029,6 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 	}
 }
 
-// iterateSetHold: iterate thru all the thermostats under a specific account and create the hold event
-// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
-// settings can be anything supported by ecobee 
-//		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
-// extraHoldParams may be any other sethold or events properties  
-//		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml for more details
-def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
-	tstatSettings = [], extraHoldParams=[]) {
-	Integer MAX_TSTAT_BATCH = 25
-	def tstatlist = null
-	Integer nTstats = 0
-	def ecobeeType
-
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
-	getThermostatSummary(ecobeeType)
-	if (settings.trace) {
-		log.debug
-			"iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
-		sendEvent name: "verboseTrace", value:
-			"iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
-	}
-	for (i in 0..data.thermostatCount - 1) {
-		def thermostatDetails = data.revisionList[i].split(':')
-		def Id = thermostatDetails[0]
-		def thermostatName = thermostatDetails[1]
-		def connected = thermostatDetails[2]
-		if (connected == 'true') {
-			if (nTstats == 0) {
-				tstatlist = Id
-				nTstats = 1
-			}
-			if ((nTstats > MAX_TSTAT_BATCH) || (i == (data.thermostatCount - 1))) { 
-				// process a batch of maximum 25 thermostats according to API doc
-				if (settings.trace) {
-					sendEvent name: "verboseTrace", value:
-						"iterateSetHold>about to call setHold for ${tstatlist}"
-					log.debug "iterateSethold> about to call setHold for ${tstatlist}"
-				}
-				setHoldExtraParams(tstatlist, coolingSetPoint, heatingSetPoint, fanMode,
-					tstatSettings, extraHoldParams)
-				tstatlist = Id
-				nTstats = 1
-			} else {
-				tstatlist = tstatlist + "," + Id
-				nTstats++ 
-			}
-		}
-	}
-}
-
 // iterateSetThermostatSettings: iterate thru all the thermostats under a specific account and set the desired settings
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // settings can be anything supported by ecobee 
@@ -1162,6 +1106,62 @@ def setThermostatSettings(thermostatId=settings.thermostatId, tstatSettings = []
 			log.error "setThermostatSettings> error=${statusCode.toString()}, message = ${message}"
 			sendEvent name: "verboseTrace", value:
 				"setThermostatSettings>error ${statusCode.toString()} for ${thermostatId}"
+		}
+	}
+}
+
+// iterateSetHold: iterate thru all the thermostats under a specific account and create the hold event
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+// settings can be anything supported by ecobee 
+//		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+// extraHoldParams may be any other sethold or events properties  
+//		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml for more details
+def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
+	tstatSettings = [], extraHoldParams=[]) {
+	Integer MAX_TSTAT_BATCH = 25
+	def tstatlist = null
+	Integer nTstats = 0
+	def ecobeeType
+
+	if ((tstatType != null) && (tstatType.trim() != "")) {
+		ecobeeType = tstatType.trim()
+	} else {
+		// by default, the ecobee type is 'registered'
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
+			settings.ecobeeType.trim() : 'registered'
+	}
+	getThermostatSummary(ecobeeType)
+	if (settings.trace) {
+		log.debug
+			"iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+		sendEvent name: "verboseTrace", value:
+			"iterateSetHold>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+	}
+	for (i in 0..data.thermostatCount - 1) {
+		def thermostatDetails = data.revisionList[i].split(':')
+		def Id = thermostatDetails[0]
+		def thermostatName = thermostatDetails[1]
+		def connected = thermostatDetails[2]
+		if (connected == 'true') {
+			if (nTstats == 0) {
+				tstatlist = Id
+				nTstats = 1
+			}
+			if ((nTstats > MAX_TSTAT_BATCH) || (i == (data.thermostatCount - 1))) { 
+				// process a batch of maximum 25 thermostats according to API doc
+				if (settings.trace) {
+					sendEvent name: "verboseTrace", value:
+						"iterateSetHold>about to call setHold for ${tstatlist}"
+					log.debug "iterateSethold> about to call setHold for ${tstatlist}"
+				}
+				setHoldExtraParams(tstatlist, coolingSetPoint, heatingSetPoint, fanMode,
+					tstatSettings, extraHoldParams)
+				tstatlist = Id
+				nTstats = 1
+			} else {
+				tstatlist = tstatlist + "," + Id
+				nTstats++ 
+			}
 		}
 	}
 }
