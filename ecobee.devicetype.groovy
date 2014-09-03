@@ -139,6 +139,8 @@ metadata {
 		command "sleep"
 		command "quickSave"
 		command "setThisTstatClimate"
+		command "setThermostatSettings"
+		command "iterateSetThermostatSettings"
 	}
 	simulator {
 		// TODO: define status and reply messages here
@@ -456,9 +458,7 @@ def cool() {
 }
 def setThermostatMode(mode) {
 	mode = mode == 'emergency heat' ? 'heat' : mode
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		null, ['hvacMode': "${mode}"])
+	setThermostatSettings(settings.thermostatId, ['hvacMode': "${mode}"])
 	sendEvent(name: 'thermostatMode', value: mode)
 }
 def fanOn() {
@@ -477,9 +477,7 @@ def setThermostatFanMode(mode) {
 	sendEvent(name: 'thermostatFanMode', value: mode)
 }
 def setFanMinOnTime(minutes) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		device.currentValue("thermostatFanMode"), ['fanMinOnTime': "${minutes}"])
+	setThermostatSettings(settings.thermostatId, ['fanMinOnTime': "${minutes}"])
 	sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 def ventilatorOn() {
@@ -492,25 +490,19 @@ def ventilatorAuto() {
 	setVentilatorMode('auto')
 }
 def setVentilatorMinOnTime(minutes) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		device.currentValue("thermostatFanMode"), ['vent': "minontime",
+	setThermostatSettings(settings.thermostatId, ['vent': "minontime",
 			'ventilatorMinOnTime': "${minutes}"
 		])
 	sendEvent(name: 'ventilatorMinOnTime', value: minutes)
 	sendEvent(name: 'ventilatorMode', value: "minontime")
 }
 def setVentilatorMode(mode) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		device.currentValue("thermostatFanMode"), ['vent': "${mode}"])
+	setThermostatSettings(settings.thermostatId, ['vent': "${mode}"])
 	sendEvent(name: 'ventilatorMode', value: mode)
 }
 def setCondensationAvoid(flag) { // set the flag to true or false
 	flag = flag == 'true' ? 'true' : 'false'
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		null, ['condensationAvoid': "${flag}"])
+	setThermostatSettings(settings.thermostatId, ['condensationAvoid': "${flag}"])
 	sendEvent(name: 'condensationAvoid', value: flag)
 }
 def dehumidifierOn() {
@@ -520,15 +512,11 @@ def dehumidifierOff() {
 	setDehumidifierMode('off')
 }
 def setDehumidifierMode(mode) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		null, ['dehumidifierMode': "${mode}"])
+	setThermostatSettings(settings.thermostatId, ['dehumidifierMode': "${mode}"])
 	sendEvent(name: 'dehumidifierMode', value: mode)
 }
 def setDehumidifierLevel(level) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		null, ['dehumidifierLevel': "${level}"])
+	setThermostatSettings(settings.thermostatId, ['dehumidifierLevel': "${level}"])
 	sendEvent(name: 'dehumidifierLevel', value: level)
 }
 def humidifierAuto() {
@@ -538,15 +526,11 @@ def humidifierOff() {
 	setHumidifierMode('off')
 }
 def setHumidifierMode(mode) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		null, ['humidifierMode': "${mode}"])
+	setThermostatSettings(settings.thermostatId, ['humidifierMode': "${mode}"])
 	sendEvent(name: 'humidifierMode', value: mode)
 }
 def setHumidifierLevel(level) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
-		.currentValue("heatingSetpoint"),
-		null, ['humidity': "${level}"])
+	setThermostatSettings(settings.thermostatId, ['humidity': "${level}"])
 	sendEvent(name: 'humidifierLevel', value: level)
 }
 def awake() {
@@ -902,6 +886,8 @@ def api(method, args, success = {}) {
 		'thermostatInfo': 
 			[uri:"${URI_ROOT}/thermostat?format=json&body=${args_encoded}", 
           		type: 'get'],
+		'setThermostatSettings':
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
 		'setHold': 
 			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
 		'resumeProgram': 
@@ -1013,13 +999,18 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 	if (settings.trace) {
 		log.debug "build_body_request> about to build request for method = ${method} & thermostatId= ${thermostatId} with selection = ${selectionJson}"
 	}
-	if ((tstatSettings != null) && (tstatSettings != [])) {
+	if ((method != 'setThermostatSettings') && (tstatSettings != null) && (tstatSettings != [])) {
 		def function_clause = ((tstatParams != null) && (tsatParams != [])) ? 
 			[type:method, params: tstatParams
 			] : 
 			[type: method]
 		def bodyWithSettings = [functions: [function_clause], selection: selection,
 				thermostat: [settings: tstatSettings]
+			]
+		def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
+		return bodyWithSettingsJson
+    } else if (method == 'setThermostatSettings') {
+		def bodyWithSettings = [selection: selection,thermostat: [settings: tstatSettings]
 			]
 		def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
 		return bodyWithSettingsJson
@@ -1090,6 +1081,86 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 				tstatlist = tstatlist + "," + Id
 				nTstats++ 
 			}
+		}
+	}
+}
+
+// iterateSetThermostatSettings: iterate thru all the thermostats under a specific account and set the desired settings
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+// settings can be anything supported by ecobee 
+//		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+
+def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
+	Integer MAX_TSTAT_BATCH = 25
+	def tstatlist = null
+	Integer nTstats = 0
+	def ecobeeType
+
+	if ((tstatType != null) && (tstatType.trim() != "")) {
+		ecobeeType = tstatType.trim()
+	} else {
+		// by default, the ecobee type is 'registered'
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
+			settings.ecobeeType.trim() : 'registered'
+	}
+	getThermostatSummary(ecobeeType)
+	if (settings.trace) {
+		log.debug
+			"iterateSetThermostatSettings>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+		sendEvent name: "verboseTrace", value:
+			"iterateSetThermostatSettings>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
+	}
+	for (i in 0..data.thermostatCount - 1) {
+		def thermostatDetails = data.revisionList[i].split(':')
+		def Id = thermostatDetails[0]
+		def thermostatName = thermostatDetails[1]
+		def connected = thermostatDetails[2]
+		if (connected == 'true') {
+			if (nTstats == 0) {
+				tstatlist = Id
+				nTstats = 1
+			}
+			if ((nTstats > MAX_TSTAT_BATCH) || (i == (data.thermostatCount - 1))) { 
+				// process a batch of maximum 25 thermostats according to API doc
+				if (settings.trace) {
+					sendEvent name: "verboseTrace", value:
+						"iterateSetHold>about to call setHold for ${tstatlist}"
+					log.debug "iterateSethold> about to call setHold for ${tstatlist}"
+				}
+				setThermostatSettings(tstatlist, tstatSettings)
+				tstatlist = Id
+				nTstats = 1
+			} else {
+				tstatlist = tstatlist + "," + Id
+				nTstats++ 
+			}
+		}
+	}
+}
+
+//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+def setThermostatSettings(thermostatId=settings.thermostatId, tstatSettings = []) {
+    
+	if (settings.trace) {
+		log.debug
+			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
+		sendEvent name: "verboseTrace", value:
+			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
+	}
+	def bodyReq = build_body_request('setThermostatSettings',null,thermostatId,null,tstatSettings)
+	api('setThermostatSettings', bodyReq) {resp ->
+		def statusCode = resp.data.status.code
+		def message = resp.data.status.message
+		if (!statusCode) {
+			if (settings.trace) {
+				sendEvent name: "verboseTrace", value:
+					"setThermostatSettings>done for ${thermostatId}"
+			}
+		} else {
+			log.error "setThermostatSettings> error=${statusCode.toString()}, message = ${message}"
+			sendEvent name: "verboseTrace", value:
+				"setThermostatSettings>error ${statusCode.toString()} for ${thermostatId}"
 		}
 	}
 }
