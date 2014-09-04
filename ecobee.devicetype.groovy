@@ -967,18 +967,18 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 	if (method == 'thermostatSummary') {
 		if (tstatType.trim().toUpperCase() == 'REGISTERED') {
 			selection = [selection: [selectionType: 'registered', selectionMatch: '',
-					includeEquipmentStatus: 'true']
-				]
+							includeEquipmentStatus: 'true']
+						]
 		} else {
 			// If tstatType is different than managementSet, it is assumed to be locationSet specific (ex./Toronto/Campus/BuildingA)
 			selection = (tstatType.trim().toUpperCase() == 'MANAGEMENTSET') ? 
             	// get all EMS thermostats from the root
 				[selection: [selectionType: 'managementSet', selectionMatch: '/',
 					includeEquipmentStatus: 'true']
-            		] : // Or Specific to a location
+            	] : // Or Specific to a location
 				[selection: [selectionType: 'managementSet', selectionMatch: tstatType.trim(),
 					includeEquipmentStatus: 'true']
-					]
+				]
 		}
 		selectionJson = new JsonBuilder(selection)
 		return selectionJson
@@ -1218,7 +1218,7 @@ def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heat
 	} else {
 		tstatParams = ((fanMode != null) & (fanMode != "")) ? 
 			[coolHoldTemp:targetCoolTemp, heatHoldTemp: targetHeatTemp, fan: fanMode] : 
-        		[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp]
+        	[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp]
 
 	}
 	// Add the extraHoldParams if any
@@ -2031,8 +2031,7 @@ def controlPlug(thermostatId=settings.thermostatId, plugName, plugState, plugSet
     
 	if ((settings.holdType != null) && (settings.holdType.trim() != "")) {
 		bodyReq = bodyReq + '"holdType":"' + settings.holdType.trim() + '"'
-	}
-	else {
+	} else {
     
 		bodyReq = bodyReq + '"holdType":"indefinite"'
 	}
@@ -2041,7 +2040,7 @@ def controlPlug(thermostatId=settings.thermostatId, plugName, plugState, plugSet
 		bodyReq = bodyReq + ',' + plugSet
 	}
 
-    bodyReq = bodyReq + '}}]}'
+	bodyReq = bodyReq + '}}]}'
 	api('controlPlug', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
@@ -2173,7 +2172,8 @@ def getThermostatSummary(tstatType) {
 def refresh_tokens() {
 	String URI_ROOT = "https://api.ecobee.com/"
 	String appKey = settings.appKey
-	def method = [
+	def method = 
+    [
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
@@ -2182,7 +2182,7 @@ def refresh_tokens() {
 		"grant_type=refresh_token&" +
 		"code=${data.auth.refresh_token}&" +
 		"client_id=${appKey}"
-		]
+	]
 	if (settings.trace) {
 		log.debug "refresh_tokens> uri = ${method.uri}"
 	}
@@ -2246,7 +2246,8 @@ def getEcobeePinAndAuth() {
 	String SCOPE = "smartWrite,ems"
 	String URI_ROOT = "https://api.ecobee.com"
 	String appKey = settings.appKey
-	def method = [
+	def method = 
+    [
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
@@ -2255,7 +2256,7 @@ def getEcobeePinAndAuth() {
 		"response_type=ecobeePin&" +
 		"client_id=${appKey}&" +
 		"scope=${SCOPE}"
-		]
+	]
 	def successEcobeePin = {resp ->
 		if (settings.trace) {
 			log.debug "getEcobeePinAndAuth> response = ${resp.data}"
@@ -2301,7 +2302,8 @@ def getEcobeePinAndAuth() {
 def setAuthTokens() {
 	String URI_ROOT = "https://api.ecobee.com"
 	String appKey = settings.appKey
-	def method = [
+	def method = 
+    [
 		headers: [
 			'X-nl-protocol-version': 1,
 			'Content-Type': "application/json",
@@ -2311,7 +2313,7 @@ def setAuthTokens() {
 		"grant_type=ecobeePin&" +
 		"code=${data.auth.code}&" +
 		"client_id=${appKey}"
-		]
+	]
 	if (data.auth.access_token == null) {
 		def successTokens = {resp ->
 			data.auth.access_token = resp.data.access_token
