@@ -1221,11 +1221,11 @@ def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heat
         		[coolHoldTemp: targetCoolTemp, heatHoldTemp: targetHeatTemp]
 
 	}
-    // Add the extraHoldParams if any
-    
-    if ((extraHoldParams != null) && (extraHoldParams != [])) {
+	// Add the extraHoldParams if any
+    	if ((extraHoldParams != null) && (extraHoldParams != [])) {
 		tstatParams = tstatParams + extraHoldParams
-    }
+    		
+	}
 	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams,tstatSettings)
 	api('setHold', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
