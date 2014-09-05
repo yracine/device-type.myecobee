@@ -289,28 +289,28 @@ metadata {
 		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
 			decoration: "flat") {
 			state "-2",			label: 'updating...',	icon: "st.unknown.unknown.unknown"
-			state "0",			label: 'Sunny',		icon: "st.Weather.weather14"
-			state "1",			label: 'FewClouds',	icon: "st.Weather.weather15"
+			state "0",			label: 'Sunny',			icon: "st.Weather.weather14"
+			state "1",			label: 'FewClouds',		icon: "st.Weather.weather15"
 			state "2",			label: 'PartlyCloudy',	icon: "st.Weather.weather15"
 			state "3",			label: 'MostlyCloudy',	icon: "st.Weather.weather15"
-			state "4",			label: 'Overcast',	icon: "st.Weather.weather13"
-			state "5",			label: 'Drizzle',	icon: "st.Weather.weather9"
-			state "6",			label: 'Rain',		icon: "st.Weather.weather10"
+			state "4",			label: 'Overcast',		icon: "st.Weather.weather13"
+			state "5",			label: 'Drizzle',		icon: "st.Weather.weather9"
+			state "6",			label: 'Rain',			icon: "st.Weather.weather10"
 			state "7",			label: 'FreezingRain',	icon: "st.Weather.weather10"
-			state "8",			label: 'Showers',	icon: "st.Weather.weather10"
-			state "9",			label: 'Hail',		icon: "st.custom.wuk.sleet"
-			state "10",			label: 'Snow',		icon: "st.Weather.weather6"
-			state "11",			label: 'Flurries',	icon: "st.Weather.weather6"
-			state "12",			label: 'Sleet',		icon: "st.Weather.weather6"
-			state "13",			label: 'Blizzard',	icon: "st.Weather.weather7"
-			state "14",			label: 'Pellets',	icon: "st.custom.wuk.sleet"
+			state "8",			label: 'Showers',		icon: "st.Weather.weather10"
+			state "9",			label: 'Hail',			icon: "st.custom.wuk.sleet"
+			state "10",			label: 'Snow',			icon: "st.Weather.weather6"
+			state "11",			label: 'Flurries',		icon: "st.Weather.weather6"
+			state "12",			label: 'Sleet',			icon: "st.Weather.weather6"
+			state "13",			label: 'Blizzard',		icon: "st.Weather.weather7"
+			state "14",			label: 'Pellets',		icon: "st.custom.wuk.sleet"
 			state "15",			label: 'ThunderStorms',	icon: "st.custom.wuk.tstorms"
-			state "16",			label: 'Windy',		icon: "st.Transportation.transportation5"
-			state "17",			label: 'Tornado',	icon: "st.Weather.weather1"
-			state "18",			label: 'Fog',		icon: "st.Weather.weather13"
-			state "19",			label: 'Hazy',		icon: "st.Weather.weather13"
-			state "20",			label: 'Smoke',		icon: "st.Weather.weather13"
-			state "21",			label: 'Dust',		icon: "st.Weather.weather13"
+			state "16",			label: 'Windy',			icon: "st.Transportation.transportation5"
+			state "17",			label: 'Tornado',		icon: "st.Weather.weather1"
+			state "18",			label: 'Fog',			icon: "st.Weather.weather13"
+			state "19",			label: 'Hazy',			icon: "st.Weather.weather13"
+			state "20",			label: 'Smoke',			icon: "st.Weather.weather13"
+			state "21",			label: 'Dust',			icon: "st.Weather.weather13"
 		}
 		valueTile("weatherDateTime", "device.weatherDateTime", inactiveLabel: false,
 			width: 2, height: 1, decoration: "flat") {
@@ -1769,7 +1769,7 @@ def iterateSetClimate(tstatType, climateName) {
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
 def setClimate(thermostatId=settings.thermostatId, climateName) {
 	def climateRef = null
-    def tstatParams
+	def tstatParams
 
 	getThermostatInfo(thermostatId)
 	for (i in 0..data.thermostatList.size() - 1) {
@@ -2173,7 +2173,7 @@ def refresh_tokens() {
 	String URI_ROOT = "https://api.ecobee.com/"
 	String appKey = settings.appKey
 	def method = 
-    [
+	[
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
@@ -2303,7 +2303,7 @@ def setAuthTokens() {
 	String URI_ROOT = "https://api.ecobee.com"
 	String appKey = settings.appKey
 	def method = 
-    [
+	[
 		headers: [
 			'X-nl-protocol-version': 1,
 			'Content-Type': "application/json",
