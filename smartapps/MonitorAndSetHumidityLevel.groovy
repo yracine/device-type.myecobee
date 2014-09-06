@@ -205,7 +205,7 @@ def setHumidityLevel() {
            "need to dehumidify the house and outdoor's humidity is lower (${outdoorHumidity})"
                         
 //     Turn on the dehumidifer and HRV/ERV, the outdoor's humidity is lower or equivalent than inside
-//     You may want to change ecobee.iterateSetHold to ecobee.setHold('list of serial # separated by commas',...) if you own EMS thermostat(s)
+//     You may want to change ecobee.iterateSetThermostatSettings to ecobee.setThermostatSettings('list of serial # separated by commas',...) if you own EMS thermostat(s)
 
        ecobee.iterateSetThermostatSettings('registered',['dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",'humidifierMode':'off',
            'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}",'vent':'minontime','ventilatorMinOnTime': "${min_vent_time}"]) 
