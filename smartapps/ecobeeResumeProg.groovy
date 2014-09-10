@@ -1,4 +1,31 @@
-nX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+/***
+ *  Copyright 2014 Yves Racine
+ *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ * 
+ *
+ *  Resume Ecobee's Program when people arrive or there is been recent motion at home
+*/
+
+
+// Automatically generated. Make future change here.
+definition(
+    name: "EcobeeResumeProg",
+    namespace: "yracine",
+    author: "Yves Racine",
+    description: "EcobeeResumeProg",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
 )
 
 preferences {
@@ -13,7 +40,7 @@ preferences {
     section("False alarm threshold (defaults to 3 min)") {
         input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
     }
-    section("Resume Program for all ecobee thermostat(s)") {
+    section("Resume Program for this ecobee thermostat(s)") {
         input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
     }
     section( "Notifications" ) {
@@ -90,8 +117,8 @@ def presence(evt) {
 
 def takeActions() {
 
-//  You may want to change to ecobee.resumeProgram('serial number list') if you own EMS thermostat(s)                
-    ecobee.iterateResumeProgram('registered')
+
+    ecobee.ResumeProgram("")  // resume the program at selected thermostat
 
 }
 
