@@ -56,7 +56,7 @@ metadata {
 		attribute "dehumidifierLevel", "string"
 		attribute "condensationAvoid", "string"
 		attribute "groups", "string"
-		attribute "equipementStatus", "string"
+		attribute "equipmentStatus", "string"
 		attribute "alerts", "string"
 		attribute "programScheduleName", "string"
 		attribute "programFanMode", "string"
@@ -86,6 +86,7 @@ metadata {
 		attribute "ventilatorMinOnTime", "string"
 		attribute "ventilatorMode", "string"
 		attribute "programDisplayName", "string"
+        attribute "thermostatOperatingState", "string"        
 
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -141,8 +142,10 @@ metadata {
 		command "setThisTstatClimate"
 		command "setThermostatSettings"
 		command "iterateSetThermostatSettings"
-	}
-	simulator {
+        command "getThermostatOperatingState"
+        command "getEquipmentStatus"
+}        
+simulator {
 		// TODO: define status and reply messages here
 	}
 	tiles {
@@ -167,7 +170,9 @@ metadata {
 					[value: 36, color: "#bc2323"]
 				])
 		}
-//		Temperature tile in Farenheits 
+//		If one prefers Farenheits over Celcius, just comment out the temperature in Celsius 
+//		and remove the comment below to have the right color scale in Farenheits.
+//		This issue will be solved as soon as Smartthings supports dynamic tiles
 //		valueTile("temperature", "device.temperature", width: 2, height: 2) {
 //			state("temperature", label:'${currentValue}°', unit:"F",
 //			backgroundColors:[
@@ -180,8 +185,6 @@ metadata {
 //					[value: 96, color: "#bc2323"]
 //				])
 //		}
-
-
 		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
 			state "heat", label: '${name}', action: "thermostat.off", 
@@ -247,10 +250,18 @@ metadata {
 			state "coolLevelDown", label: '  ', action: "coolLevelDown", 
 			icon: "st.thermostat.thermostat-down"
 		}
-		valueTile("equipementStatus", "device.equipementStatus", inactiveLabel: false,
+		valueTile("equipStatus", "device.equipmentStatus", inactiveLabel: false,
 			decoration: "flat", width: 3, height: 1) {
 			state "default", label: '${currentValue}'
 		}
+//		One could also use thermostatOperatingState as display value for equipStatus (in line with default ecobee device's status)
+//		However, this is an interpretation of ecobee's equipmentStatus and it does not contain humidifier/dehumidifer/HRV/ERV/aux heat
+//		components' running states, just the basic thermostat states (heating, cooling, fan only).
+//		To use this tile instead of the above, just comment out the above tile, and remove comments below.
+//		valueTile("equipStatus", "device.thermostatOperatingState", inactiveLabel: false,
+//			decoration: "flat", width: 3, height: 1) {
+//			state "default", label: '${currentValue}'
+//		}
 		valueTile("programEndTimeMsg", "device.programEndTimeMsg", inactiveLabel:
 			false, decoration: "flat", width: 3, height: 1) {
 			state "default", label: '${currentValue}'
@@ -360,7 +371,7 @@ metadata {
 		details(["name", "groups", "mode", "temperature", "fanMode", "switchProgram",
 			"heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown",
 			"coolingSetpoint", "coolLevelUp",
-			"equipementStatus", "programEndTimeMsg", "humidity", "alerts",
+			"equipStatus", "programEndTimeMsg", "humidity", "alerts",
 			"fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
 			"programHeatTemp", "resProgram",
 			"weatherIcon", "weatherDateTime", "weatherConditions",
@@ -552,7 +563,6 @@ def home() {
 def sleep() {
 	setThisTstatClimate("Sleep")
 }
-  
 def quickSave() {
 	def currentProgramType = device.currentValue("programType")
 	if (currentProgramType.toUpperCase() == 'VACATION') {
@@ -771,7 +781,7 @@ def poll() {
 		sendEvent(name: 'heatingSetpoint', value: desiredHeatTemp.round(1).toString(),
 				unit: "C")
 		// post weather temps
-		float weatherTemp = fToC(data.thermostatList[0].weather.forecasts[0].temperature)
+        float weatherTemp = fToC(data.thermostatList[0].weather.forecasts[0].temperature)
 		float weatherTempHigh = fToC(data.thermostatList[0].weather.forecasts[0].tempHigh)
 		float weatherTempLow = fToC(data.thermostatList[0].weather.forecasts[0].tempLow)
 		sendEvent(name: 'weatherTemperature', value: weatherTemp.round(1).toString(),
@@ -824,9 +834,8 @@ def poll() {
 		sendEvent(name: 'programHeatTemp', value: (currentClimate.heatTemp / 10),
 			unit: "F")
 	}
-	def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0) ? data
-		.thermostatList[0].equipmentStatus + ' running' : 'Idle'
-	sendEvent(name: 'equipementStatus', value: equipStatus)
+	def equipStatus = getEquipmentStatus()
+    sendEvent(name: 'equipmentStatus', value: equipStatus)    
 	// post alerts
 	def alerts = null
 	if (data.thermostatList[0].alerts.size() > 0) {
@@ -857,7 +866,33 @@ def poll() {
 		}
 	}
 	sendEvent(name: 'groups', value: groupList)
+    // Added posting of basic thermostat Status
+ 	def currentOpState = getThermostatOperatingState()
+	sendEvent(name: 'thermostatOperatingState', value: currentOpState)
+
 }
+// Get the EquipmentStatus including all components (HVAC, fan, dehumidifier/humidifier,HRV/ERV, aux heat)
+// To be called after a poll() or refresh() to have the latest status
+def getEquipmentStatus() {
+
+	def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0) ? data
+		.thermostatList[0].equipmentStatus + ' running' : 'Idle'
+    return equipStatus
+}
+// Get the basic thermostat status (heating,cooling,fan only)
+// To be called after a poll() or refresh() to have the latest status
+
+def getThermostatOperatingState() {
+
+	def equipStatus = device.currentValue("equipmentStatus").toUpperCase()
+    
+	def currentOpState = equipStatus.contains('HEAT')? 'heating' : (equipStatus.contains('COOL')? 'cooling' : 'idle')
+	if ((currentOpState == 'idle') && device.currentValue("thermostatFanMode").toUpperCase().contains('ON') ) {
+		currentOpState = 'fan only' 
+    }  
+    return currentOpState
+}
+
 def refresh() {
 	poll()
 }
@@ -2405,3 +2440,4 @@ def fToC(temp) {
 def milesToKm(distance) {
 	return (distance * 1.609344)
 }
+
