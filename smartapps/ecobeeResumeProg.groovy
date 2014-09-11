@@ -118,7 +118,7 @@ def presence(evt) {
 def takeActions() {
 
 
-    ecobee.ResumeProgram("")  // resume the program at selected thermostat
+    ecobee.resumeProgram()  // resume the program at selected thermostat
 
 }
 
