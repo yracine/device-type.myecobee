@@ -40,7 +40,7 @@ preferences {
     section("False alarm threshold (defaults to 3 min)") {
         input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
     }
-    section("Resume Program for this ecobee thermostat(s)") {
+    section("Resume Program for the ecobee thermostat(s)") {
         input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
     }
     section( "Notifications" ) {
@@ -117,8 +117,8 @@ def presence(evt) {
 
 def takeActions() {
 
-
-    ecobee.resumeProgram()  // resume the program at selected thermostat
+//  For EMS thermostats, please replace registered by managementSet
+    ecobee.iterateResumeProgram('registered') 
 
 }
 
