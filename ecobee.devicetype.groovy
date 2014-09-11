@@ -86,7 +86,7 @@ metadata {
 		attribute "ventilatorMinOnTime", "string"
 		attribute "ventilatorMode", "string"
 		attribute "programDisplayName", "string"
-        attribute "thermostatOperatingState", "string"        
+		attribute "thermostatOperatingState", "string"        
 
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -142,8 +142,8 @@ metadata {
 		command "setThisTstatClimate"
 		command "setThermostatSettings"
 		command "iterateSetThermostatSettings"
-        command "getThermostatOperatingState"
-        command "getEquipmentStatus"
+		command "getThermostatOperatingState"
+		command "getEquipmentStatus"
 }        
 simulator {
 		// TODO: define status and reply messages here
@@ -698,7 +698,7 @@ def poll() {
 				"poll>thermostatId = ${settings.thermostatId},event's fan mode=${data.thermostatList[0].events[indiceEvent].fan}"
 			sendEvent name: "verboseTrace", value:
 				"poll>thermostatId = ${settings.thermostatId},event's fanMinOnTime=${data.thermostatList[0].events[indiceEvent].fanMinOnTime}"
-//          vent settings are not currently supported (as of June 2014 API release)
+//			vent settings are not currently supported (as of June 2014 API release)
 //			sendEvent name: "verboseTrace", value:
 //				"poll>thermostatId = ${settings.thermostatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
 //			sendEvent name: "verboseTrace", value:
@@ -781,7 +781,7 @@ def poll() {
 		sendEvent(name: 'heatingSetpoint', value: desiredHeatTemp.round(1).toString(),
 				unit: "C")
 		// post weather temps
-        float weatherTemp = fToC(data.thermostatList[0].weather.forecasts[0].temperature)
+		float weatherTemp = fToC(data.thermostatList[0].weather.forecasts[0].temperature)
 		float weatherTempHigh = fToC(data.thermostatList[0].weather.forecasts[0].tempHigh)
 		float weatherTempLow = fToC(data.thermostatList[0].weather.forecasts[0].tempLow)
 		sendEvent(name: 'weatherTemperature', value: weatherTemp.round(1).toString(),
@@ -835,7 +835,7 @@ def poll() {
 			unit: "F")
 	}
 	def equipStatus = getEquipmentStatus()
-    sendEvent(name: 'equipmentStatus', value: equipStatus)    
+	sendEvent(name: 'equipmentStatus', value: equipStatus)    
 	// post alerts
 	def alerts = null
 	if (data.thermostatList[0].alerts.size() > 0) {
@@ -866,7 +866,7 @@ def poll() {
 		}
 	}
 	sendEvent(name: 'groups', value: groupList)
-    // Added posting of basic thermostat Status
+	// Added posting of basic thermostat Status
  	def currentOpState = getThermostatOperatingState()
 	sendEvent(name: 'thermostatOperatingState', value: currentOpState)
 
@@ -874,14 +874,12 @@ def poll() {
 // Get the EquipmentStatus including all components (HVAC, fan, dehumidifier/humidifier,HRV/ERV, aux heat)
 // To be called after a poll() or refresh() to have the latest status
 def getEquipmentStatus() {
-
 	def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0) ? data
 		.thermostatList[0].equipmentStatus + ' running' : 'Idle'
-    return equipStatus
+	return equipStatus
 }
 // Get the basic thermostat status (heating,cooling,fan only)
 // To be called after a poll() or refresh() to have the latest status
-
 def getThermostatOperatingState() {
 
 	def equipStatus = device.currentValue("equipmentStatus").toUpperCase()
@@ -889,8 +887,8 @@ def getThermostatOperatingState() {
 	def currentOpState = equipStatus.contains('HEAT')? 'heating' : (equipStatus.contains('COOL')? 'cooling' : 'idle')
 	if ((currentOpState == 'idle') && device.currentValue("thermostatFanMode").toUpperCase().contains('ON') ) {
 		currentOpState = 'fan only' 
-    }  
-    return currentOpState
+	}  
+	return currentOpState
 }
 
 def refresh() {
