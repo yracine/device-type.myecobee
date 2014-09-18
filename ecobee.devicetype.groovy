@@ -211,9 +211,9 @@ simulator {
 				icon: "st.Outdoor.outdoor20"
 			state "Away", label: '${name}', action: "quickSave", 
 				icon: "st.presence.car.car"
-			state "QuickSave", label: '${name}', action: "resumeThisTstat", 
+			state "QuickSave", label: '${name}', action: "present", 
 				icon: "st.Home.home1"
-			state "Custom", label: 'Custom', action: "present", 
+			state "Custom", label: 'Custom', action: "resumeThisTstat", 
 				icon: "st.Office.office6"
 		}
 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false,
@@ -895,7 +895,7 @@ def refresh() {
 	poll()
 }
 def resumeThisTstat() {
-	resumeProgram(settings.thermostatId)
+	resumeProgram() 
 	poll()
 }
 def api(method, args, success = {}) {
@@ -1543,7 +1543,7 @@ def resumeProgram(thermostatId=settings.thermostatId) {
 
 // Only valid for Smart and Antenna thermostats
 // Get all groups related to a thermostatId or all groups
-// thermostatId may only be 1 thermostat (not a list) or null (for all groups
+// thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 def getGroups(thermostatId) {
 
 	def ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
@@ -2438,4 +2438,3 @@ def fToC(temp) {
 def milesToKm(distance) {
 	return (distance * 1.609344)
 }
-
