@@ -42,7 +42,7 @@ preferences {
         input "switches", "capability.switch", title: "Switch", multiple: true, required: optional
     }
     section("And activate the alarm system") {
-        input "alarmSwitch", "capability.switch", title: "Alarm Switch"
+        input "alarmSwitch", "capability.contactSensor", title: "Alarm Switch"
     }
     section("Set the ecobee thermostat(s)") {
         input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
@@ -136,7 +136,7 @@ def presence(evt) {
 	def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
     Integer delay = threshold * 60 
 
-    log.debug "evt.name: $evt.value"
+    log.debug "$evt.name: $evt.value"
     if (evt.value == "not present") {
         def person = getPerson(evt)
         send("AwayFromHome> ${person.displayName} not present at home")
