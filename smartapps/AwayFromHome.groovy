@@ -57,6 +57,10 @@ preferences {
     section("Or set the ecobee to this Climate Name (ex. Away)") {
         input "givenClimateName", "text", title: "Climate Name", required: false
     }
+
+    section("Arm this(ese) camera(s)") {
+        input "cameras",  "capability.imageCapture", title: "Cameras", multiple: true, required: optional
+    }
  
     section("Trigger these actions when home has been quiet for (default 3 minutes)") {
         input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
@@ -166,7 +170,8 @@ def takeActions() {
     Integer delay = 60 * thresholdMinutes
     def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
     def minCoolTemp = givenCoolTemp ?: 27  // by default, 27C is the minimum cool temp
-
+    def msg
+    
 //  Making sure everybody is away and no motion at home
 
     if (everyoneIsAway() && residentsHaveBeenQuiet()) {
@@ -188,18 +193,27 @@ def takeActions() {
             ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null,null,null)
         }
     
-        send("AwayFromHome>ecobee's settings are now lower")
+        msg = "AwayFromHome>ecobee's settings are now lower"
+        send(msg)
+        log.info msg
 
-        def messageswitch = "AwayFromHome>Switched off all switches"
-        send(messageswitch)
-        log.info messageswitch
         switches?.off()											 // turn off the lights		
+        msg = "AwayFromHome>Switched off all switches"
+        send(msg)
+        log.info msg
 
         if (alarmSwitch.currentContact == "open") {
             log.debug "alarm is not set, arm it..."  
             send("AwayFromHome>quiet,alarm system now activated")
             alarmSwitch.on()								     // arm the alarm system
         }
+
+        msg = "AwayFromHome>cameras are now armed"
+        send(msg)
+        cameras?.alarmOn()									     // arm the cameras
+        log.info msg
+
+
         runIn (delay, "checkAlarmSystem", [overwrite:false])     // check that the alarm system is armed
 
     }
