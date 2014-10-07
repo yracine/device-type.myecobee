@@ -36,7 +36,7 @@ preferences {
 }
 metadata {
 	// Automatically generated. Make future change here.
-	definition(name: "My Ecobee Device", author: "Yves Racine") {
+	definition(name: "My Ecobee Device", author: "Yves Racine",  namespace: "yracine") {
 		capability "Relative Humidity Measurement"
 		capability "Temperature Measurement"
 		capability "Polling"
@@ -698,11 +698,10 @@ def poll() {
 				"poll>thermostatId = ${settings.thermostatId},event's fan mode=${data.thermostatList[0].events[indiceEvent].fan}"
 			sendEvent name: "verboseTrace", value:
 				"poll>thermostatId = ${settings.thermostatId},event's fanMinOnTime=${data.thermostatList[0].events[indiceEvent].fanMinOnTime}"
-//			vent settings are not currently supported (as of June 2014 API release)
-//			sendEvent name: "verboseTrace", value:
-//				"poll>thermostatId = ${settings.thermostatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
-//			sendEvent name: "verboseTrace", value:
-//				"poll>thermostatId = ${settings.thermostatId},event's ventilatorMinOnTime=${data.thermostatList[0].events[indiceEvent].ventilatorMinOnTime}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${settings.thermostatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${settings.thermostatId},event's ventilatorMinOnTime=${data.thermostatList[0].events[indiceEvent].ventilatorMinOnTime}"
 			sendEvent name: "verboseTrace", value:
 				"poll>thermostatId = ${settings.thermostatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
 		}
@@ -2438,3 +2437,4 @@ def fToC(temp) {
 def milesToKm(distance) {
 	return (distance * 1.609344)
 }
+
