@@ -80,7 +80,7 @@ def motionEvtHandler(evt) {
 }
 
 private residentsHaveJustBeenActive() {
-	def threshold = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? (falseAlarmThreshold * 60 * 1000) as Long : 3 * 60 * 1000L
+    def threshold = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? (falseAlarmThreshold * 60 * 1000) as Long : 3 * 60 * 1000L
     def result = true
     def t0 = new Date(now() - threshold)
     for (sensor in motions) {
