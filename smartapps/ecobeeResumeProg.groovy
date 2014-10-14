@@ -34,7 +34,7 @@ preferences {
 	    input "people", "capability.presenceSensor", multiple: true
     }
     section("Or there is motion at home on these sensors") {
-        input "motions", "capability.motionSensor", title: "Where?",  multiple: true
+        input "motions", "capability.motionSensor", title: "Where?",  multiple: true, required: false
     }
 
     section("False alarm threshold (defaults to 3 min)") {
