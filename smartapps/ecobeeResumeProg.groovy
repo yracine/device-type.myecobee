@@ -33,10 +33,12 @@ preferences {
     section("When one of these people arrive at home") {
 	    input "people", "capability.presenceSensor", multiple: true
     }
+	section("Or when the mode change to this mode") {
+		input "newMode", "mode", title: "Mode?"
+	}
     section("Or there is motion at home on these sensors") {
         input "motions", "capability.motionSensor", title: "Where?",  multiple: true, required: false
     }
-
     section("False alarm threshold (defaults to 3 min)") {
         input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
     }
@@ -100,18 +102,32 @@ def presence(evt) {
 	def threshold = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? (falseAlarmThreshold * 60 * 1000) as Long : 3 * 60 * 1000L
     def message=null
     
-    def t0 = new Date(now() - threshold)
-    if (evt.value == "present") {
+	if (location.mode == newMode) {
+        def t0 = new Date(now() - threshold)
+        if (evt.value == "present") {
 		
-        def person = getPerson(evt)
-        def recentNotPresent = person.statesSince("presence", t0).find{it.value == "not present"}
-        if (!recentNotPresent) {
-            message = "EcobeeResumeProg> ${person.displayName} finally arrived,do it.."
-            log.info message
-            send(message)
-            takeActions()
+            def person = getPerson(evt)
+            if (person != null) {
+                def recentNotPresent = person.statesSince("presence", t0).find{it.value == "not present"}
+                if (!recentNotPresent) {
+                    message = "EcobeeResumeProg> ${person.displayName} just arrived,take actions.."
+                    log.info message
+                    send(message)
+                    takeActions()
+                }    
+            }    
+            else {
+                message = "EcobeeResumeProg> Somebody just arrived,take actions.."
+                log.info message
+                send(message)
+                takeActions()
+                
+            }
         }
     }
+	else {
+		log.debug "mode is the same, not evaluating"
+	}
         
 }
 
