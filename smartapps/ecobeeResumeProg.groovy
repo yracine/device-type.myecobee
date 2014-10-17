@@ -33,9 +33,9 @@ preferences {
     section("When one of these people arrive at home") {
 	    input "people", "capability.presenceSensor", multiple: true
     }
-	section("Or when the mode change to this mode") {
-		input "newMode", "mode", title: "Mode?"
-	}
+    section("Or when the mode change to this mode") {
+        input "newMode", "mode", title: "Mode?",required: false
+    }
     section("Or there is motion at home on these sensors") {
         input "motions", "capability.motionSensor", title: "Where?",  multiple: true, required: false
     }
@@ -102,7 +102,7 @@ def presence(evt) {
 	def threshold = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? (falseAlarmThreshold * 60 * 1000) as Long : 3 * 60 * 1000L
     def message=null
     
-	if (location.mode == newMode) {
+	if ((location.mode == newMode) || (newMode == null) || (newMode.trim() == '')) {
         def t0 = new Date(now() - threshold)
         if (evt.value == "present") {
 		
@@ -125,9 +125,9 @@ def presence(evt) {
             }
         }
     }
-	else {
-		log.debug "mode is the same, not evaluating"
-	}
+    else {
+        log.debug "mode is not the same, not evaluating"
+    }
         
 }
 
