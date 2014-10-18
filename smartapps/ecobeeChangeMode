@@ -63,7 +63,7 @@ def changeMode(evt) {
         send(message)
     }
     else {
-        message = "ecobeeChangeMode>Setting the thermostat(s) to Home.."
+        message = "ecobeeChangeMode>Resuming the thermostat(s) following Home mode change.."
         log.info message
         thermostats?.resumeThisTstat()
         send(message)
