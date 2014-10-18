@@ -1,0 +1,84 @@
+/**
+ *  ecobeeChangeMode
+ *
+ *  Copyright 2014 Yves Racine
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ * Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)
+ * If you need to set it for both Away and Home modes, you'd need to save them as 2 distinct apps
+ * Don't forget to set the app to run only for the target mode.
+ */
+definition(
+    name: "ecobeeChangeMode",
+    namespace: "yracine",
+    author: "Yves Racine",
+    description: "Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)",
+    category: "",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+
+
+preferences {
+    section("Change mode to...") {
+        input "newMode", "mode", metadata:[values:["Away", "Home"]]
+    }
+
+    section("Change these thermostats modes...") {
+        input "thermostats", "capability.thermostat", multiple: true
+    }
+    
+    section( "Notifications" ) {
+        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+        input "phone", "phone", title: "Send a Text Message?", required: false
+    }
+    
+}
+
+def installed() {
+    subscribe(location, changeMode)
+    subscribe(app, changeMode)
+}
+
+def updated() {
+    unsubscribe()
+    subscribe(location, changeMode)
+    subscribe(app, changeMode)
+}
+
+def changeMode(evt) {
+    def message
+    
+    if (newMode == "Away") {
+        message = "ecobeeChangeMode>Setting the thermostat(s) to Away.."
+        log.info message
+        thermostats?.away()
+        send(message)
+    }
+    else {
+        message = "ecobeeChangeMode>Setting the thermostat(s) to Home.."
+        log.info message
+        thermostats?.resumeThisTstat()
+        send(message)
+    }
+}
+
+private send(msg) {
+    if ( sendPushMessage != "No" ) {
+        log.debug( "sending push message" )
+        sendPush( msg )	
+    }
+    if ( phone ) {
+        log.debug( "sending text message" )
+        sendSms( phone, msg )
+    }
+
+    log.debug msg
+}
