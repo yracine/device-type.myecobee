@@ -1577,17 +1577,20 @@ def getGroups(thermostatId) {
 				def groupData = null
 				if (data.groups.thermostats.size() > 0) {
 					for (i in 0..data.groups.size() - 1) {
-						for (j in 0..data.groups.thermostats.size() - 1) {
+						def foundInGroup=false
+						for (j in 0..data.groups[i].thermostats.size() - 1) {
 							if (data.groups[i].thermostats[j] == thermostatId) {
 								if (settings.trace) {
 									log.debug "getGroups>found group ${data.groups[i]} for thermostatId= ${thermostatId}"
 									sendEvent name: "verboseTrace", value:
 										"getGroups>found group ${data.groups[i]} for thermostatId= ${thermostatId}"
+								
+									foundInGroup=true
 								}
-							} else {
-								data.groups[i] = ' ' // Not the right group for this thermostat, set it to blanks
-
 							}
+						}
+						if (!foundInGroup)  {
+							data.groups[i] = ' ' // Not the right group for this thermostat, set it to blanks
 						}
 					}
 				}
