@@ -15,7 +15,6 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
- *
  * 
  */
 import groovy.json.JsonBuilder
@@ -255,7 +254,7 @@ simulator {
 			state "default", label: '${currentValue}'
 		}
 //		One could also use thermostatOperatingState as display value for equipStatus (in line with default ecobee device's status)
-//		However, this is an interpretation of ecobee's equipmentStatus and it does not contain humidifier/dehumidifer/HRV/ERV/aux heat
+//		However, it does not contain humidifier/dehumidifer/HRV/ERV/aux heat
 //		components' running states, just the basic thermostat states (heating, cooling, fan only).
 //		To use this tile instead of the above, just comment out the above tile, and remove comments below.
 //		valueTile("equipStatus", "device.thermostatOperatingState", inactiveLabel: false,
@@ -502,8 +501,7 @@ def ventilatorAuto() {
 }
 def setVentilatorMinOnTime(minutes) {
 	setThermostatSettings(settings.thermostatId, ['vent': "minontime",
-			'ventilatorMinOnTime': "${minutes}"
-		])
+			'ventilatorMinOnTime': "${minutes}"])
 	sendEvent(name: 'ventilatorMinOnTime', value: minutes)
 	sendEvent(name: 'ventilatorMode', value: "minontime")
 }
@@ -667,7 +665,7 @@ def poll() {
 		.forecasts[0].windDirection + " Winds")
 	sendEvent(name: 'weatherPop', value: data.thermostatList[0].weather.forecasts[
 			0].pop, unit: "%")
-		// post program events
+	// post program events
 	Integer indiceEvent = 0
 	Boolean foundEvent = false
 	if (data.thermostatList[0].events.size > 0) {
@@ -855,12 +853,16 @@ def poll() {
 	if (ecobeeType.toUpperCase() == 'REGISTERED') {
 		// get Groups associated to this thermostatId
 		getGroups(settings.thermostatId)
-			// post group names associated to this thermostatId
+		// post group names associated to this thermostatId
 		if (data.groups.size() > 0) {
 			groupList = 'Group(s) '
+			def j=0
 			for (i in 0..data.groups.size() - 1) {
-				groupList = (i > 0) ? ' \n' + groupList + data.groups[i].groupName :
-					groupList + data.groups[i].groupName
+				if (data.groups[i].groupName != '') {
+					groupList = (j > 0) ? ' \n' + groupList + data.groups[i].groupName :
+						groupList + data.groups[i].groupName
+					j++    
+				}        
 			}
 		}
 	}
@@ -1574,21 +1576,22 @@ def getGroups(thermostatId) {
 				return
 			}
 			if ((thermostatId != null) && (thermostatId != "")) {
-				def groupData = null
 				if (data.groups.thermostats.size() > 0) {
 					for (i in 0..data.groups.size() - 1) {
-						for (j in 0..data.groups.thermostats.size() - 1) {
+						def foundTstat = false
+						for (j in 0..data.groups[i].thermostats.size() - 1) {
 							if (data.groups[i].thermostats[j] == thermostatId) {
 								if (settings.trace) {
 									log.debug "getGroups>found group ${data.groups[i]} for thermostatId= ${thermostatId}"
 									sendEvent name: "verboseTrace", value:
 										"getGroups>found group ${data.groups[i]} for thermostatId= ${thermostatId}"
 								}
-							} else {
-								data.groups[i] = ' ' // Not the right group for this thermostat, set it to blanks
-
+								foundTstat=true
 							}
-						}
+						}   
+						if (!foundTstat) {
+							data.groups[i].groupName = '' // Not the right group for this thermostat, set it to blanks
+						}    
 					}
 				}
 			}
@@ -2437,4 +2440,3 @@ def fToC(temp) {
 def milesToKm(distance) {
 	return (distance * 1.609344)
 }
-
