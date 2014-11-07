@@ -31,7 +31,7 @@ preferences {
 	input("holdType", "text", title: "holdType", description:
 		"Set it to nextTransition or indefinite (latter by default)")
 	input("ecobeeType", "text", title: "ecobee Tstat Type", description:
-		"Set it to registered (by default) or managementSet (no spaces)")
+		"Set 																						it to registered (by default) or managementSet (no spaces)")
 }
 metadata {
 	// Automatically generated. Make future change here.
@@ -823,8 +823,7 @@ def poll() {
 			0].tempLow, unit: "F")
 		float windSpeed = data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat() /
 			1000
-		String windSpeedFormat = String.format('%2.1f', windSpeed.round(1))
-		sendEvent(name: 'weatherWindSpeed', value: windSpeedFormat, unit: 'mph')
+		sendEvent(name: 'weatherWindSpeed', value: windSpeed.round(1).toString(), unit: 'mph')
 		// post program temps
 		sendEvent(name: 'programCoolTemp', value: (currentClimate.coolTemp / 10),
 			unit: "F")
@@ -891,7 +890,6 @@ def getThermostatOperatingState() {
 	}  
 	return currentOpState
 }
-
 def refresh() {
 	poll()
 }
@@ -899,8 +897,8 @@ def resumeThisTstat() {
 	resumeProgram() 
 	poll()
 }
-def api(method, args, success = {}) {
-	String URI_ROOT = "https://api.ecobee.com/1"
+private def api(method, args, success = {}) {
+	String URI_ROOT = "${get_URI_ROOT()}/1"
 	if (!isLoggedIn()) {
 		login()
 	}
@@ -950,7 +948,7 @@ def api(method, args, success = {}) {
 }
 
 // Need to be authenticated in before this is called. So don't call this. Call api.
-def doRequest(uri, args, type, success) {
+private def doRequest(uri, args, type, success) {
 	def params = [
 		uri: uri,
 		headers: [
@@ -1069,20 +1067,12 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // settings can be anything supported by ecobee 
 //		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
-
 def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
-	Integer MAX_TSTAT_BATCH = 25
+	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-	def ecobeeType
 
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
+	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
 		log.debug
@@ -1154,18 +1144,11 @@ def setThermostatSettings(thermostatId=settings.thermostatId, tstatSettings = []
 //		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml for more details
 def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = [], extraHoldParams=[]) {
-	Integer MAX_TSTAT_BATCH = 25
+	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-	def ecobeeType
 
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
+	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
 		log.debug
@@ -1282,18 +1265,11 @@ def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heat
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 	targetHeatTemp, targetStartDateTime, targetEndDateTime) {
-	Integer MAX_TSTAT_BATCH = 25
+	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-	def ecobeeType
 
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
+	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
 		log.debug
@@ -1358,7 +1334,6 @@ def createVacation(thermostatId=settings.thermostatId, vacationName, targetCoolT
 		endTime: vacationEndTime
 		]
 	def bodyReq = build_body_request('createVacation',null,thermostatId,vacationParams)
-
 	if (settings.trace) {
 		log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
 	}
@@ -1383,18 +1358,11 @@ def createVacation(thermostatId=settings.thermostatId, vacationName, targetCoolT
 // tstatType =managementSet or registered (no spaces).  
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 def iterateDeleteVacation(tstatType, vacationName) {
-	Integer MAX_TSTAT_BATCH = 25
+	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-	def ecobeeType
 
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
+	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
 		log.debug
@@ -1456,18 +1424,11 @@ def deleteVacation(thermostatId=settings.thermostatId, vacationName) {
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // iterateResumeProgram: iterate thru all the thermostats under a specific account and resume their program
 def iterateResumeProgram(tstatType) {
-	Integer MAX_TSTAT_BATCH = 25
+	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-	def ecobeeType
 
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
+	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
 		sendEvent name: "verboseTrace", value:
@@ -1505,7 +1466,6 @@ def iterateResumeProgram(tstatType) {
 def resumeProgram(thermostatId=settings.thermostatId) {
   
 	def bodyReq = build_body_request('resumeProgram',null,thermostatId,null)
-    
 	if (settings.trace) {
 		log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
 	}
@@ -1547,9 +1507,7 @@ def resumeProgram(thermostatId=settings.thermostatId) {
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 def getGroups(thermostatId) {
 
-	def ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-		settings.ecobeeType.trim() : 'registered'
-    
+	def ecobeeType = determine_ecobee_type_or_location(null)
 	if (ecobeeType.toUpperCase() != 'REGISTERED') {
 		if (settings.trace) {
 			log.debug "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"
@@ -1760,15 +1718,8 @@ def iterateSetClimate(tstatType, climateName) {
 	Integer MAX_TSTAT_BATCH = 25
 	def tstatlist = null
 	Integer nTstats = 0
-	def ecobeeType
-    
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
+
+	def ecobeeType = determine_ecobee_type(tsatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
 		log.debug "iterateSetClimate> ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
@@ -1829,9 +1780,7 @@ def setClimate(thermostatId=settings.thermostatId, climateName) {
 			] :
 		[holdClimateRef:"${climateRef}"
 			]
-
 	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams)
-
 	api('setHold', bodyReq) {resp ->
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
@@ -1859,15 +1808,7 @@ def setClimate(thermostatId=settings.thermostatId, climateName) {
 def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 	subClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
     
-	def ecobeeType
-    
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
+	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
 		log.debug "iterateUpdateClimate>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
@@ -2204,19 +2145,17 @@ def getThermostatSummary(tstatType) {
 		}
 	}
 }
-def refresh_tokens() {
-	String URI_ROOT = "https://api.ecobee.com/"
-	String appKey = settings.appKey
+private def refresh_tokens() {
 	def method = 
 	[
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
 			],
-		uri: "${URI_ROOT}/token?" +
+		uri: "${get_URI_ROOT()}/token?" +
 		"grant_type=refresh_token&" +
 		"code=${data.auth.refresh_token}&" +
-		"client_id=${appKey}"
+		"client_id=${get_appKey()}"
 	]
 	if (settings.trace) {
 		log.debug "refresh_tokens> uri = ${method.uri}"
@@ -2264,7 +2203,7 @@ def refresh_tokens() {
 	}
 	return true
 }
-def login() {
+private def login() {
 	if (settings.trace) {
 		log.debug "login> about to call setAuthTokens"
 	}
@@ -2279,17 +2218,15 @@ def login() {
 
 def getEcobeePinAndAuth() {
 	String SCOPE = "smartWrite,ems"
-	String URI_ROOT = "https://api.ecobee.com"
-	String appKey = settings.appKey
 	def method = 
     [
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
 			],
-		uri: "${URI_ROOT}/authorize?" +
+		uri: "${get_URI_ROOT()}/authorize?" +
 		"response_type=ecobeePin&" +
-		"client_id=${appKey}&" +
+		"client_id=${get_appKey()}&" +
 		"scope=${SCOPE}"
 	]
 	def successEcobeePin = {resp ->
@@ -2335,8 +2272,6 @@ def getEcobeePinAndAuth() {
 }
 
 def setAuthTokens() {
-	String URI_ROOT = "https://api.ecobee.com"
-	String appKey = settings.appKey
 	def method = 
 	[
 		headers: [
@@ -2344,10 +2279,10 @@ def setAuthTokens() {
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
 			],
-		uri: "${URI_ROOT}/token?" +
+		uri: "${get_URI_ROOT()}/token?" +
 		"grant_type=ecobeePin&" +
 		"code=${data.auth.code}&" +
-		"client_id=${appKey}"
+		"client_id=${get_appKey()}"
 	]
 	if (data.auth.access_token == null) {
 		def successTokens = {resp ->
@@ -2399,7 +2334,7 @@ def setAuthTokens() {
 		}
 	}
 }
-def isLoggedIn() {
+private def isLoggedIn() {
 	if (data.auth == null) {
 		if (settings.trace) {
 			log.debug "isLoggedIn> no data auth"
@@ -2415,7 +2350,7 @@ def isLoggedIn() {
 	}
 	return true
 }
-def isTokenExpired() {
+private def isTokenExpired() {
 	def now = new Date().getTime();
 	if (settings.trace) {
 		log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time now: ${now}"
@@ -2439,4 +2374,30 @@ def fToC(temp) {
 }
 def milesToKm(distance) {
 	return (distance * 1.609344)
+}
+private def get_URI_ROOT() {
+	return "https://api.ecobee.com"
+}
+// Maximum tstat batch size (25 thermostats max may be processed in batch)
+private def get_MAX_TSTAT_BATCH() {
+	return 25
+}
+// Determine ecobee type from tstatType or settings
+// tstatType =managementSet or registered (no spaces). 
+//	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+private def determine_ecobee_type_or_location(tstatType) {
+	def ecobeeType
+    
+	if ((tstatType != null) && (tstatType.trim() != "")) {
+		ecobeeType = tstatType.trim()
+	} else {
+		// by default, the ecobee type is 'registered'
+		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
+			settings.ecobeeType.trim() : 'registered'
+	}
+    return ecobeeType
+}
+// Get the appKey for authentication
+private def get_appKey() {
+	return settings.appKey
 }
