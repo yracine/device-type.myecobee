@@ -31,7 +31,7 @@ preferences {
 	input("holdType", "text", title: "holdType", description:
 		"Set it to nextTransition or indefinite (latter by default)")
 	input("ecobeeType", "text", title: "ecobee Tstat Type", description:
-		"Set 																						it to registered (by default) or managementSet (no spaces)")
+		"Set it to registered (by default) or managementSet (no spaces)")
 }
 metadata {
 	// Automatically generated. Make future change here.
