@@ -1,7 +1,4 @@
 /**
- *  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the siren, unlock the doors, turn
- *  off the thermostat(s), turn off the alarm system, etc.
- *
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
@@ -13,6 +10,9 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
+ *
+ *  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the siren, unlock the doors, turn
+ *  off the thermostat(s), turn off the alarm system, etc.
  *
  */
 
@@ -38,7 +38,7 @@ preferences {
         input "lowBattThreshold", "number", title: "Low Batt Threshold % (default 10%)", required: false
     }
     section("Unlock the doors") {
-        input "locks", "capability.lock", multiple: true
+        input "locks", "capability.lock", multiple: true,required: false
     }
     section("Open this Garage Door in case of CO2...") {
         input "garageSwitch", "capability.switch",title: "Which Garage Door Switch"
@@ -50,7 +50,7 @@ preferences {
         input "tstat", "capability.thermostat", title: "Thermostat(s)", multiple:true, required: false
     }
     section("Dismarm the alarm system if armed") {
-        input "alarmSwitch", "capability.switch", title: "Alarm Switch"
+        input "alarmSwitch", "capability.contactSensor", title: "Alarm Systen"
     }
     section("Flash/turn on the ligths..."){
         input "switches", "capability.switch", title: "These lights", multiple: true
@@ -233,10 +233,9 @@ private takeActions(String alert) {
     securityAlert.on()                                     // Turned on the security alert
     sendMsg("FireCO2Alarm>Security Alert on...")
 
-    alarmSwitch.poll()
     if (alarmSwitch.currentContact == "closed") {
         log.debug "alarm system is on, about to disarm it..."  
-        alarmSwitch.on()                                   // disarm the alarm system
+        alarmSwitch.off()                                  // disarm the alarm system
         sendMsg("FireCO2Alarm>Alarm system disarmed")
     }
     tstat?.off()                                           // Turn off the thermostats
