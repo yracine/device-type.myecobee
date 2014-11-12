@@ -119,7 +119,7 @@ def outdoorTempHandler(evt) {
 def monitorAdjustTemp() {
 
     float temp_diff = givenTempDiff ?:5                                    // 5°F temp differential is applied by default
-	def scale = getTemperatureScale()
+    def scale = getTemperatureScale()
     def more_heat_threshold = givenMoreHeatThreshold ?: 0                  // by default, 0°F is the outdoor temp's threshold for more heating
     def more_cool_threshold = givenMoreCoolThreshold ?: 85                 // by default, 85°F is the outdoor temp's threshold for more cooling
     def less_heat_threshold = givenLessHeatThreshold ?: 50                 // by default, 50°F is the outdoor temp's threshold for less heating
