@@ -133,7 +133,7 @@ def monitorAdjustTemp() {
     ecobee.poll()
 
     def currentProgramType = ecobee.currentProgramType
-	if (currentProgramType.toUpperCase() == "HOLD") {  // don't make any further adustments 
+    if (currentProgramType.toUpperCase() == "HOLD") {  // don't make any further adustments 
         log.trace("monitorAndSetEcobeeTemp>Hold set, no more adjustments")
         return
     }
@@ -147,7 +147,7 @@ def monitorAdjustTemp() {
     def ecobeeMode = ecobee.currentThermostatMode
     
     
-	if (scale == 'C') {
+    if (scale == 'C') {
         temp_diff = (temp_diff /2).round(1)
         outdoorTemp = cToF(outdoorTemp)                 // convert to Farenheits for comparison purposes
     }
