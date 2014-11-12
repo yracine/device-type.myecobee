@@ -34,7 +34,7 @@ preferences {
     section("For more cooling, outdoor temp's threshold (default= 85°F)") {
         input "givenMoreCoolThreshold", "number", title: "Outdoor temp's threshold in °F for more cooling", required:false
     }
-    section("For more cooling, outdoor humidity's threshold (default= 65%)") {
+    section("For more cooling/heating, outdoor humidity's threshold (default= 65%)") {
         input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling", required:false
     }
     section("For less heating, outdoor temp's threshold (default= 50°F)") {
@@ -156,7 +156,7 @@ def monitorAdjustTemp() {
             
             if ((outdoorTemp >= more_cool_threshold) || (outdoorHumidity >= humidity_threshold)) {
                 log.trace("monitorAndSetEcobeeTemp>evaluate: more Cooling Threshold= ${more_cool_threshold} vs. outdoor Temp ${outdoorTemp}")
-                log.trace("monitorAndSetEcobeeTemp>evaluate: more Cooling Threshold= ${humidity_threshold} vs. outdoor Humidity ${outdoorHumidity")
+                log.trace("monitorAndSetEcobeeTemp>evaluate: more Cooling Threshold= ${humidity_threshold} vs. outdoor Humidity ${outdoorHumidity}")
                 float target_cool_temp = (coolTemp-temp_diff).round(1)
                 ecobee.iterateSetHold('registered', target_cool_temp, heatTemp, 'on', null, null)
                 send("monitorAndSetEcobeeTemp>cooling setPoint=${target_cool_temp}° now, outdoor temp >= ${more_cool_threshold}°F") 
@@ -169,8 +169,9 @@ def monitorAdjustTemp() {
             }
    
         } else if (ecobeeMode == 'heat'){
-            if (outdoorTemp <= more_heat_threshold) {
+            if ((outdoorTemp <= more_heat_threshold) || (outdoorHumidity >= humidity_threshold)) {
                 log.trace("monitorAndSetEcobeeTemp>evaluate: more Heating Threshold ${more_heat_threshold}° vs. outdoor Temp ${outdoorTemp}°F")
+                log.trace("monitorAndSetEcobeeTemp>evaluate: more Cooling Threshold= ${humidity_threshold} vs. outdoor Humidity ${outdoorHumidity}")
             
                 float target_heat_temp = (heatTemp+temp_diff).round(1)
                 ecobee.iterateSetHold('registered', coolTemp, target_heat_temp, null, null, null)
