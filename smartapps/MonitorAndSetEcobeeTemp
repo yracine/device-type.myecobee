@@ -1,5 +1,4 @@
 /**
-/**
  *  Monitor And Set Ecobee Temp
  *
  *  Copyright 2014 Yves Racine
@@ -123,8 +122,8 @@ def monitorAdjustTemp() {
 	def scale = getTemperatureScale()
     def more_heat_threshold = givenMoreHeatThreshold ?: 0                  // by default, 0°F is the outdoor temp's threshold for more heating
     def more_cool_threshold = givenMoreCoolThreshold ?: 85                 // by default, 85°F is the outdoor temp's threshold for more cooling
-    def less_heat_threshold = givenLessHeatThreshold ?: 50                 // by default, 0°F is the outdoor temp's threshold for more heating
-    def less_cool_threshold = givenLessCoolThreshold ?: 75                 // by default, 85°F is the outdoor temp's threshold for more cooling
+    def less_heat_threshold = givenLessHeatThreshold ?: 50                 // by default, 50°F is the outdoor temp's threshold for less heating
+    def less_cool_threshold = givenLessCoolThreshold ?: 75                 // by default, 75°F is the outdoor temp's threshold for less cooling
     def humidity_threshold = givenHumThreshold ?: 65                       // by default, 65% is the outdoor Humidity's threshold for more cooling
     
     
