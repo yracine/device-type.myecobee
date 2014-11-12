@@ -1,0 +1,198 @@
+/**
+ *  Monitor And Set Ecobee Temp
+ *
+ *  Copyright 2014 Yves Racine
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+definition(
+    name: "Monitor And Set Ecobee Temp",
+    namespace: "yracine",
+    author: "Yves Racine",
+    description: "Monitor And Set Ecobee Temperature according to outdoor temperature and humidity.",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
+    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+
+preferences {
+
+    section("Monitor ourdoor temp & set this ecobee thermostat's setpoints") {
+        input "ecobee", "capability.thermostat", title: "Ecobee?"
+    }	  
+    section("For more heating, outdoor temp's threshold (default= 0°F)") {
+        input "givenHeatThreshold", "number", title: "Outdoor temp's threshold in °F for more heating", required:false
+    }
+    section("For more cooling, outdoor temp's threshold (default= 85°F)") {
+        input "givenCoolThreshold", "number", title: "Outdoor temp's threshold in °F for more cooling", required:false
+    }
+    section("For more cooling, outdoor humidity's threshold (default= 65%)") {
+        input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling", required:false
+    }
+    section("At which interval in minutes (default =59 min.)?"){
+        input "givenInterval", "number", required: false
+    }
+    section("Temp differential for adjustments in Farenheits") {
+        input "givenTempDiff", "number", title: "Temperature adjustment (default= +/- 5°F)", required:false
+    }
+    section("Choose Outdoor Temperature & Humidity sensor to be used for monitoring") {
+        input "outdoorSensor", "capability.temperatureMeasurement", title: "Outdoor Temperature Sensor"
+        
+    }	
+    section( "Notifications" ) {
+        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
+        input "phoneNumber", "phone", title: "Send a text message?", required: false
+    }
+    
+
+}
+
+
+
+def installed() {
+    initialize()
+}
+
+def updated() {
+    // we have had an update
+    // remove everything and reinstall
+    unschedule()
+    unsubscribe()
+    initialize()
+}
+
+def initialize() {
+    
+    subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
+    subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
+    subscribe(ecobee, "humidity", ecobeeHumidityHandler)
+    subscribe(ecobee, "temperature", ecobeeTempHandler)
+    subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
+    subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
+    subscribe(outdoorSensor, "temperature", outdoorTempHandler)
+    Integer delay =givenInterval ?: 59   // By default, do it every hour
+    log.debug "Scheduling Outdoor temp Monitoring and adjustment every ${delay}  minutes"
+    
+    schedule("0 0/${delay} * * * ?", monitorAdjustTemp)    // monitor & set indoor temp according to delay specified
+
+}
+def ecobeeHeatTempHandler(evt) {
+    log.debug "ecobee's heating temp: $evt.value"
+}
+
+def ecobeeCoolTempHandler(evt) {
+    log.debug "ecobee's cooling temp: $evt.value"
+}
+
+def ecobeeHumidityHandler(evt) {
+    log.debug "ecobee's humidity level: $evt.value"
+}
+
+def ecobeeTempHandler(evt) {
+    log.debug "ecobee's temperature level: $evt.value"
+}
+
+def ecobeeModeHandler(evt) {
+    log.debug "ecobee's mode: $evt.value"
+}
+def outdoorSensorHumHandler(evt) {
+    log.debug "outdoor Sensor's humidity level: $evt.value"
+}
+def outdoorTempHandler(evt) {
+    log.debug "Outdoor temperature is: $evt.value"
+}
+
+def monitorAdjustTemp() {
+
+    float temp_diff = givenTempDiff ?:5                                    // 5°F temp differential is applied by default
+	def scale = getTemperatureScale()
+    def heat_threshold = givenHeatThreshold ?: 0                           // by default, 0°F is the outdoor temp's threshold for more heating
+    def cool_threshold = givenCoolThreshold ?: 85                          // by default, 85°F is the outdoor temp's threshold for more cooling
+    def humidity_threshold = givenHumThreshold ?: 65                       // by default, 65% is the outdoor Humidity's threshold for more cooling
+    
+    
+    log.debug "monitorAndSetEcobeeTemp> location.mode = $location.mode"
+
+//  Polling of the latest values at the thermostat
+    ecobee.poll()
+
+    def currentProgramType = ecobee.currentProgramType
+	if (currentProgramType.toUpperCase() == "HOLD") {  // don't make any further adustments 
+        log.trace("monitorAndSetEcobeeTemp>Hold set, no more adjustments")
+        return
+    }
+    
+    def heatTemp = ecobee.currentHeatingSetpoint
+    def coolTemp = ecobee.currentCoolingSetpoint
+    def ecobeeTemp = ecobee.currentTemperature
+
+    def outdoorHumidity = outdoorSensor.currentHumidity
+    def outdoorTemp = outdoorSensor.currentTemperature
+    def ecobeeMode = ecobee.currentThermostatMode
+    
+    
+	if (scale == 'C') {
+        temp_diff = (temp_diff /2).round(1)
+        outdoorTemp = cToF(outdoorTemp)                 // convert to Farenheits for comparison purposes
+    }
+    if (location.mode != 'Away') {
+        if (ecobeeMode == 'cool') {
+            
+            log.trace("monitorAndSetEcobeeTemp>evaluate: givenCoolThreshold ${cool_threshold} vs. outdoor Temp ${outdoorTemp}")
+            if ((outdoorTemp >= cool_threshold) || (outdoorHumidity >= humidity_threshold)) {
+                float target_cool_temp = (coolTemp-temp_diff).round(1)
+                ecobee.iterateSetHold('registered', target_cool_temp, heatTemp, 'on', null, null)
+                send("monitorAndSetEcobeeTemp>cooling setPoint=${target_cool_temp}° now, outdoor temp >= ${cool_threshold}°F") 
+            }
+   
+        } else if (ecobeeMode == 'heat'){
+            log.trace("monitorAndSetEcobeeTemp>evaluate: givenHeatThreshold ${heat_threshold}° vs. outdoor Temp ${outdoorTemp}°F")
+            if (outdoorTemp <= heat_threshold) {
+            
+                float target_heat_temp = (heatTemp+temp_diff).round(1)
+                ecobee.iterateSetHold('registered', coolTemp, target_heat_temp, null, null, null)
+                send("monitorAndSetEcobeeTemp>heating setPoint= ${target_heat_temp}° now, outdoor temp <= ${heat_threshold}°F") 
+            }
+        }
+    }
+            
+    log.debug "End of Fcn"
+}
+
+
+private send(msg) {
+    if ( sendPushMessage != "No" ) {
+        log.debug( "sending push message" )
+        sendPush( msg )
+       
+    }
+
+    if ( phoneNumber ) {
+        log.debug( "sending text message" )
+        sendSms( phoneNumber, msg )
+    }
+
+    log.debug msg
+}
+
+
+// catchall
+def event(evt) {
+     log.debug "value: $evt.value, event: $evt, settings: $settings, handlerName: ${evt.handlerName}"
+}
+
+def cToF(temp) {
+    return (temp * 1.8 + 32)
+}
+ 
+def fToC(temp) {
+    return (temp - 32) / 1.8
+}
