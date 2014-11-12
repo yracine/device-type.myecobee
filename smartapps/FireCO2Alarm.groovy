@@ -50,7 +50,7 @@ preferences {
         input "tstat", "capability.thermostat", title: "Thermostat(s)", multiple:true, required: false
     }
     section("Dismarm the alarm system if armed") {
-        input "alarmSwitch", "capability.contactSensor", title: "Alarm Systen"
+        input "alarmSwitch", "capability.contactSensor", title: "Alarm System"
     }
     section("Flash/turn on the ligths..."){
         input "switches", "capability.switch", title: "These lights", multiple: true
