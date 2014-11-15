@@ -1097,7 +1097,7 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 						"iterateSetThermostatSettings>about to call setThermostatSettings for ${tstatlist}"
 					log.debug "iterateSetThermostatSettings> about to call setThermostatSettings for ${tstatlist}"
 				}
-				setThermostatSettings(tstatlist, tstatSettings)
+				setThermostatSettings(tstatlist,tstatSettings)
 				tstatlist = Id
 				nTstats = 1
 			} else {
@@ -1111,8 +1111,9 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
-def setThermostatSettings(thermostatId=settings.thermostatId, tstatSettings = []) {
+def setThermostatSettings(thermostatId,tstatSettings = []) {
     
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	if (settings.trace) {
 		log.debug
 			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
@@ -1202,12 +1203,12 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 // extraHoldParams may be any other sethold or events properties  
 //		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml
-def setHoldExtraParams(thermostatId=settings.thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
+def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = [], extraHoldParams=[]) {
     
 	Integer targetCoolTemp = null,targetHeatTemp = null
 	def tstatParams = null
-	
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	if (settings.trace) {
 		log.debug
 			"sethold>called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
@@ -1308,14 +1309,15 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def createVacation(thermostatId=settings.thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
+def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	targetStartDateTime, targetEndDateTime) {
+    
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	def vacationStartDate = String.format('%tY-%<tm-%<td', targetStartDateTime)
 	def vacationStartTime = String.format('%tH:%<tM:%<tS', targetStartDateTime)
 	def vacationEndDate = String.format('%tY-%<tm-%<td', targetEndDateTime)
 	def vacationEndTime = String.format('%tH:%<tM:%<tS', targetEndDateTime)
 	Integer targetCool = null,targetHeat = null
-    
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
 		targetCool = (cToF(targetCoolTemp) * 10) as Integer // need to send temperature in F multiply by 10
@@ -1361,7 +1363,6 @@ def iterateDeleteVacation(tstatType, vacationName) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
@@ -1400,8 +1401,9 @@ def iterateDeleteVacation(tstatType, vacationName) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def deleteVacation(thermostatId=settings.thermostatId, vacationName) {
+def deleteVacation(thermostatId, vacationName) {
   
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	def vacationParams = [name: vacationName.trim()]
 	def bodyReq = build_body_request('deleteVacation',null,thermostatId,vacationParams)
 	api('deleteVacation', bodyReq) {resp ->
@@ -1465,6 +1467,7 @@ def iterateResumeProgram(tstatType) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 def resumeProgram(thermostatId=settings.thermostatId) {
   
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	def bodyReq = build_body_request('resumeProgram',null,thermostatId,null)
 	if (settings.trace) {
 		log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -1505,7 +1508,7 @@ def resumeProgram(thermostatId=settings.thermostatId) {
 // Only valid for Smart and Antenna thermostats
 // Get all groups related to a thermostatId or all groups
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
-def getGroups(thermostatId) {
+def getGroups(thermostatId=settings.thermostatId) {
 
 	def ecobeeType = determine_ecobee_type_or_location(null)
 	if (ecobeeType.toUpperCase() != 'REGISTERED') {
@@ -1568,8 +1571,9 @@ def getGroups(thermostatId) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings may be a map of settings separated by ",", no spaces; 
 // 	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def iterateUpdateGroup(thermostatId=settings.thermostatId, groupSettings = []) {
+def iterateUpdateGroup(thermostatId, groupSettings = []) {
 
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	getGroups(thermostatId)
 	if (settings.trace) {
 		log.debug "iterateUpdateGroup>about to loop ${data.groups.size()}"
@@ -1607,11 +1611,12 @@ def iterateUpdateGroup(thermostatId=settings.thermostatId, groupSettings = []) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings could be a map of settings separated by ",", no spaces; 
 //	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def updateGroup(groupRef, groupName, thermostatId=settings.thermostatId, groupSettings = []) {
+def updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	String updateGroupParams
 	def groupSettingsJson = new JsonBuilder(groupSettings)
 	def groupSet = groupSettingsJson.toString().minus('{').minus('}')
 
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	if (settings.trace) {
 		log.debug "updateGroup> about to assemble bodyReq for groupName =${groupName}, thermostatId = ${thermostatId}, groupSettings=${groupSet}..."
 		sendEvent name: "verboseTrace", value:
@@ -1701,6 +1706,7 @@ def createGroup(groupName, thermostatId, groupSettings = []) {
 // coolFan & heatFan's mode is 'auto' or 'on'
 def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized,
 	coolFan, heatFan) {
+    
 	updateClimate(thermostatId, climateName, 'false', null, coolTemp, heatTemp,
 		isOptimized, coolFan, heatFan)
 }
@@ -1753,10 +1759,11 @@ def iterateSetClimate(tstatType, climateName) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 //	The settings.thermostatId (input) is the default one
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
-def setClimate(thermostatId=settings.thermostatId, climateName) {
+def setClimate(thermostatId, climateName) {
 	def climateRef = null
 	def tstatParams
 
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	getThermostatInfo(thermostatId)
 	for (i in 0..data.thermostatList.size() - 1) {
 		def foundClimate = false
@@ -1839,7 +1846,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 // substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
-def updateClimate(thermostatId=settings.thermostatId, climateName, deleteClimateFlag,
+def updateClimate(thermostatId, climateName, deleteClimateFlag,
 		substituteClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
   
 	Integer targetCoolTemp,targetHeatTemp
@@ -1848,6 +1855,7 @@ def updateClimate(thermostatId=settings.thermostatId, climateName, deleteClimate
 	def substituteClimateRef = null
 	def climateRefToBeReplaced = null
 
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	if ((coolTemp != null) && (heatTemp != null)) {
 		if (settings.trace) {
 			log.debug "updateClimate>thermostatId =${thermostatId} coolTemp=${coolTemp}, heatTemp= ${heatTemp}"
@@ -1987,10 +1995,11 @@ def updateClimate(thermostatId=settings.thermostatId, climateName, deleteClimate
 // plugName is the name of the plug name to be controlled 
 // plugState is the state to be set
 // plugSettings are the different settings at https://www.ecobee.com/home/developer/api/documentation/v1/functions/ControlPlug.shtml
-def controlPlug(thermostatId=settings.thermostatId, plugName, plugState, plugSettings = []) {
+def controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 	def plugSettingsJson = new JsonBuilder(plugSettings)
 	def plugSet = plugSettingsJson.toString().minus('{').minus('}')
 
+	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
 	if (settings.trace) {
 		log.debug "controlPlug> about to assemble bodyReq for plugName =${plugName}, thermostatId = ${thermostatId}, groupSettings=${plugSet}..."
 		sendEvent name: "verboseTrace", value:
@@ -2395,9 +2404,9 @@ private def determine_ecobee_type_or_location(tstatType) {
 		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
 			settings.ecobeeType.trim() : 'registered'
 	}
-    return ecobeeType
+	return ecobeeType
 }
 // Get the appKey for authentication
 private def get_appKey() {
 	return settings.appKey
-}
+}    
