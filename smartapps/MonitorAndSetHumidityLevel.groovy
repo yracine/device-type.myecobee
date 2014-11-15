@@ -198,7 +198,7 @@ def setHumidityLevel() {
     log.trace("setHumidity> evaluate: Indoor Temp: ${indoorTemp} vs. outdoor Temp ${outdoorTemp}" )
     log.trace("setHumidity> hasErv=${hasErv}, hasHrv=${hasHrv},hasHumidifier=${hasHumidifier},hasDehumidifier=${hasDehumidifier}, freeCoolingFlag=${freeCoolingFlag}") 
 
-    if ((ecobeeMode == 'cool' && (hasHrv=='true' || hasErv=='true')) && 
+   if ((ecobeeMode == 'cool' && (hasHrv=='true' || hasErv=='true')) && 
         (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) && 
         (ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, " +
@@ -212,10 +212,10 @@ def setHumidityLevel() {
 
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode, using ERV/HRV and dehumidifier if available"
     }
-    else if (((ecobeeMode == 'heat') || (ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true')) && 
+    else if (((ecobeeMode == 'heat') || (ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true' || hasDehumidifier=='true')) && 
              (ecobeeHumidity >= (target_humidity + min_humidity_diff)) && 
              (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
-             (outdoorTemp > fToC(min_temp_in_Farenheits))) {
+             (outdoorTemp > min_temp_in_Farenheits)) {
              
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
            "outdoor's humidity is lower (${outdoorHumidity}) & outdoor's temp is ${outdoorTemp},  not too cold"
@@ -227,10 +227,10 @@ def setHumidityLevel() {
 
        send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
     }    
-    else if (((ecobeeMode == 'heat') ||(ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true')) && 
+    else if (((ecobeeMode == 'heat') ||(ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true' || hasDehumidifier=='true')) && 
              (ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
              (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
-             (outdoorTemp <= fToC(min_temp_in_Farenheits))) {
+             (outdoorTemp <= min_temp_in_Farenheits)) {
 
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
            "outdoor's humidity is lower (${outdoorHumidity}), but outdoor's temp is ${outdoorTemp}; too cold"
@@ -312,7 +312,7 @@ def setHumidityLevel() {
        send "MonitorHumidity>Outdoor temp is lower than inside, using the HRV/ERV for more efficient cooling"
              
     }
-    else if ((hasDehumidifier=='false') && (outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
+    else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
     
 //     If indoor humidity is greater than target, but outdoor humidity is way higher than indoor humidity, 
 //     just wait for the next cycle & do nothing for now.
