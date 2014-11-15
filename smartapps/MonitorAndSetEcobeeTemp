@@ -30,19 +30,19 @@ preferences {
     section("Monitor ourdoor temp & set the ecobee thermostat(s) setpoints") {
         input "ecobee", "capability.thermostat", title: "Ecobee?", multiple: true
     }	  
-    section("For more heating, outdoor temp's threshold (default= 10°F)") {
+    section("For more heating, outdoor temp's threshold (default <= 10°F)") {
         input "givenMoreHeatThreshold", "number", title: "Outdoor temp's threshold in °F for more heating", required:false
     }
-    section("For more cooling, outdoor temp's threshold (default= 85°F)") {
+    section("For more cooling, outdoor temp's threshold (default >= 85°F)") {
         input "givenMoreCoolThreshold", "number", title: "Outdoor temp's threshold in °F for more cooling", required:false
     }
     section("For more cooling/heating, outdoor humidity's threshold (default= 65%)") {
         input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling/heating", required:false
     }
-    section("For less heating, outdoor temp's threshold (default= 50°F)") {
+    section("For less heating, outdoor temp's threshold (default >= 50°F)") {
         input "givenLessHeatThreshold", "number", title: "Outdoor temp's threshold in °F for less heating", required:false
     }
-    section("For less cooling, outdoor temp's threshold (default= 75°F)") {
+    section("For less cooling, outdoor temp's threshold (default <= 75°F)") {
         input "givenLessCoolThreshold", "number", title: "Outdoor temp's threshold in °F for less cooling", required:false
     }
     section("At which interval in minutes (default =59 min.)?"){
