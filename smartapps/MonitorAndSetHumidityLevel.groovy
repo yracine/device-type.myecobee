@@ -69,14 +69,6 @@ preferences {
     section("Use free cooling using HRV/ERV/Dehumidifier (By default=false)") {
         input "freeCooling", "Boolean", title: "Free Cooling?",metadata:[values:["true", "false"]], required:false
     }
-
-    section("Check TED energy consumption at") {
-        input "ted", "capability.powerMeter", title: "TED5000?"
-    }
-    section("Do not run above this power consumption level (default=3000W") {
-        input "givenPowerLevel", "number", title: "power?", required:false
-    }
-
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
         input "phoneNumber", "phone", title: "Send a text message?", required: false
@@ -101,7 +93,6 @@ def updated() {
 
 def initialize() {
     
-    subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
     subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
     subscribe(ecobee, "humidity", ecobeeHumidityHandler)
@@ -120,10 +111,6 @@ def initialize() {
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
-def tedPowerHandler(evt) {
-    log.debug "ted power: $evt.value"
-}
-
 def ecobeeHeatTempHandler(evt) {
     log.debug "ecobee's heating temp: $evt.value"
 }
@@ -170,18 +157,13 @@ def setHumidityLevel() {
     def target_humidity = givenHumidityLevel ?: 40                         // by default,  40 is the humidity level to check for
     def freeCoolingFlag = (freeCooling != null) ? freeCooling: 'false'     // Free cooling using the Hrv/Erv/dehumidifier
 
-    Integer max_power = givenPowerLevel ?:3000                             // Do not run above 3000w consumption level by default
-    
-    
+
     log.debug "setHumidity> location.mode = $location.mode"
 
 //  Polling of all devices
 
     ecobee.poll()
-    ted.poll()    
 
-    Integer powerConsumed = ted.currentPower.toInteger()
-    
     def heatTemp = ecobee.currentHeatingSetpoint
     def coolTemp = ecobee.currentCoolingSetpoint
     def ecobeeHumidity = ecobee.currentHumidity
@@ -206,18 +188,6 @@ def setHumidityLevel() {
         outdoorTemp = cToF(outdoorTemp)  // for comparison later
     } 
     def ecobeeMode = ecobee.currentThermostatMode
-    
-    if (powerConsumed > max_power){
-
-//  peak of energy consumption, turn off all devices
-
-       send "MonitorHumidity>all off,power is too high=${ted.currentPower}"
-       ecobee.setThermostatSettings("",['vent':'off','dehumidifierMode':'off','humidifierMode':'off','dehumidifyWithAC':'false',
-           'desiredFanMode':'auto'])  
-       return
-           
-
-    }
     
 //  If indoorSensor specified, use the more precise humidity measure instead of ecobeeHumidity
 
