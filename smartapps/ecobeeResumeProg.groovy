@@ -19,7 +19,7 @@
 
 // Automatically generated. Make future change here.
 definition(
-    name: "EcobeeResumeProg",
+    name: "ecobeeResumeProg",
     namespace: "yracine",
     author: "Yves Racine",
     description: "EcobeeResumeProg",
