@@ -15,7 +15,7 @@
  *
  */
 definition(
-    name: "EcobeeManageGroup",
+    name: "ecobeeManageGroup",
     namespace: "yracine",
     author: "Yves Racine",
     description: "Allows a user to create,update, and delete an ecobee group",
