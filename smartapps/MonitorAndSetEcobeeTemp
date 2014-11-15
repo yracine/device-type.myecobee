@@ -36,7 +36,7 @@ preferences {
     section("For more cooling, outdoor temp's threshold (default >= 85°F)") {
         input "givenMoreCoolThreshold", "number", title: "Outdoor temp's threshold in °F for more cooling", required:false
     }
-    section("For more cooling/heating, outdoor humidity's threshold (default= 65%)") {
+    section("For more cooling/heating, outdoor humidity's threshold (default>= 65%)") {
         input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling/heating", required:false
     }
     section("For less heating, outdoor temp's threshold (default >= 50°F)") {
