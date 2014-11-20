@@ -59,6 +59,9 @@ preferences {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
         input "phoneNumber", "phone", title: "Send a text message?", required: false
     }
+	section("Detailed Notifications") {
+        input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
+	}
     
 
 }
@@ -84,6 +87,7 @@ def initialize() {
     subscribe(ecobee, "humidity", ecobeeHumidityHandler)
     subscribe(ecobee, "temperature", ecobeeTempHandler)
     subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
+    subscribe(ecobee, "programType", ecobeeProgramTypeHandler)
     subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
     subscribe(outdoorSensor, "temperature", outdoorTempHandler)
     Integer delay =givenInterval ?: 59   // By default, do it every hour
@@ -111,6 +115,9 @@ def ecobeeTempHandler(evt) {
 def ecobeeModeHandler(evt) {
     log.debug "ecobee's mode: $evt.value"
 }
+def ecobeeProgramTypeHandler(evt) {
+    log.debug "ecobee's program type: $evt.value"
+}
 def outdoorSensorHumHandler(evt) {
     log.debug "outdoor Sensor's humidity level: $evt.value"
 }
@@ -134,7 +141,7 @@ def monitorAdjustTemp() {
     ecobee.poll()
 
     def currentProgramType = ecobee.currentProgramType
-    if (currentProgramType.toUpperCase() == "HOLD") {  // don't make any further adustments 
+    if (currentProgramType?.toUpperCase() == "HOLD") {  // don't make any further adustments 
         log.trace("monitorAndSetEcobeeTemp>Hold set, no more adjustments")
         return
     }
@@ -161,14 +168,18 @@ def monitorAdjustTemp() {
             if ((outdoorTemp >= more_cool_threshold) || (outdoorHumidity >= humidity_threshold)) {
                 targetTstatTemp = (coolTemp-temp_diff).round(1)
                 ecobee.setCoolingSetpoint(targetTstatTemp)
-                send("monitorAndSetEcobeeTemp>cooling setPoint is now ${targetTstatTemp.toString()}°, outdoor temp >= ${more_cool_threshold}°F") 
+                if (detailedNotif == 'true') {
+                    send("monitorAndSetEcobeeTemp>cooling setPoint is now ${targetTstatTemp.toString()}°, outdoor temp >= ${more_cool_threshold}°F")
+                }
             }
         }    
         log.trace("monitorAndSetEcobeeTemp>evaluate: less Cooling Threshold= ${less_cool_threshold} vs. outdoor Temp ${outdoorTemp}")
         if (outdoorTemp <= less_cool_threshold) {
             targetTstatTemp = (coolTemp+temp_diff).round(1)
             ecobee.setCoolingSetpoint(targetTstatTemp)
-            send("monitorAndSetEcobeeTemp>cooling setPoint is now ${targetTstatTemp.toString()}°, outdoor temp <= ${less_cool_threshold}°F") 
+            if (detailedNotif == 'true') {
+                send("monitorAndSetEcobeeTemp>cooling setPoint is now ${targetTstatTemp.toString()}°, outdoor temp <= ${less_cool_threshold}°F") 
+            }
    
         }         
     } else if (ecobeeMode == 'heat') {
@@ -178,14 +189,18 @@ def monitorAdjustTemp() {
             if ((outdoorTemp <= more_heat_threshold) || (outdoorHumidity >= humidity_threshold)) {
                 targetTstatTemp = (heatTemp+temp_diff).round(1)
                 ecobee.setHeatingSetpoint(targetTstatTemp)
-                send("monitorAndSetEcobeeTemp>heating setPoint is now ${targetTstatTemp.toString()}°, outdoor temp <= ${more_heat_threshold}°F") 
+                if (detailedNotif == 'true') {
+                    send("monitorAndSetEcobeeTemp>heating setPoint is now ${targetTstatTemp.toString()}°, outdoor temp <= ${more_heat_threshold}°F") 
+                }
             }
         }    
         log.trace("monitorAndSetEcobeeTemp>evaluate: less Heating Threshold ${less_heat_threshold}° vs. outdoor Temp ${outdoorTemp}°F")
         if (outdoorTemp >= less_heat_threshold) {
             targetTstatTemp = (heatTemp-temp_diff).round(1)
             ecobee.setHeatingSetpoint(targetTstatTemp)
-            send("monitorAndSetEcobeeTemp>heating setPoint is now ${targetTstatTemp.toString()}°, outdoor temp >= ${less_heat_threshold}°F") 
+            if (detailedNotif == 'true') {
+                send("monitorAndSetEcobeeTemp>heating setPoint is now ${targetTstatTemp.toString()}°, outdoor temp >= ${less_heat_threshold}°F") 
+            }
         }
     }
             
