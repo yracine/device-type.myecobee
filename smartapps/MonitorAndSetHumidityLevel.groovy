@@ -161,8 +161,6 @@ def setHumidityLevel() {
     def target_humidity = givenHumidityLevel ?: 40                         // by default,  40 is the humidity level to check for
     def freeCoolingFlag = (freeCooling != null) ? freeCooling: 'false'     // Free cooling using the Hrv/Erv/dehumidifier
 
-    Integer max_power = givenPowerLevel ?:3000                             // Do not run above 3000w consumption level by default
-    
     
     log.debug "setHumidity> location.mode = $location.mode"
 
