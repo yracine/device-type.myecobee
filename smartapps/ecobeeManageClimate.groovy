@@ -39,11 +39,11 @@ preferences {
     section("Substitute Climate name in schedule (used for delete)") {
         input "subClimateName", "text", title: "Climate Name", required: false
     }
-    section("Cool Temp, default = 27C") {
-        input "givenCoolTemp", "number", title: "Cool Temp", required: false
+    section("Cool Temp, default = 75°F/23°C)") {
+        input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
     }        
-    section("Heat Temp, default=14C") {
-        input "givenHeatTemp", "number", title: "Heat Temp", required: false
+    section("Heat Temp, default=72°F/21°C)") {
+        input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
     }        
     section("isOptimized (default=false)") {
         input "isOptimizedFlag", "Boolean", title: "isOptimized?",metadata:[values:["true", "false"]], required: false
@@ -81,8 +81,16 @@ def updated() {
 }
 
 def appTouch(evt) {
-    def heatTemp = (givenHeatTemp != null)? givenHeatTemp: 14  // by default, 14C is the heat temp
-    def coolTemp = (givenCoolTemp != null)? givenCoolTemp: 27  // by default, 27C is the cool temp
+
+    def heatTemp,coolTemp 
+    if (scale == 'C') {
+        heatTemp = givenHeatTemp ?: 21  // by default, 21°C is the heat temp
+        coolTemp = givenCoolTemp ?: 23  // by default, 23°C is the cool temp
+    } else {
+        heatTemp = givenHeatTemp ?: 72  // by default, 72°F is the heat temp
+        coolTemp = givenCoolTemp ?: 75  // by default, 75°F is the cool temp
+    }
+
     def isOptimized = (isOptimizedFlag != null) ? isOptimizedFlag: false  // by default, isOptimized flag is false
     def coolFanMode = givenCoolFanMode ?: 'auto'  // By default, fanMode is auto
     def heatFanMode = givenHeatFanMode ?: 'auto'  // By default, fanMode is auto
