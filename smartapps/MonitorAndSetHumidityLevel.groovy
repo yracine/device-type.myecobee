@@ -63,8 +63,8 @@ preferences {
         input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
         
     }	
-    section("Min temperature for dehumidification (in Farenheits)") {
-        input "givenMinTemp", "number", title: "Min Temp (default=0°F)", required:false
+    section("Min temperature for dehumidification (in Farenheits/Celcius)") {
+        input "givenMinTemp", "decimal", title: "Min Temp (default=0°F/-10°C)", required:false
     }
     section("Use free cooling using HRV/ERV/Dehumidifier (By default=false)") {
         input "freeCooling", "Boolean", title: "Free Cooling?",metadata:[values:["true", "false"]], required:false
@@ -96,6 +96,7 @@ def updated() {
 
 def initialize() {
     
+    subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
     subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
     subscribe(ecobee, "humidity", ecobeeHumidityHandler)
@@ -113,6 +114,9 @@ def initialize() {
     
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
+}
+def tedPowerHandler(evt) {
+    log.debug "ted power: $evt.value"
 }
 
 def ecobeeHeatTempHandler(evt) {
@@ -154,14 +158,20 @@ def outdoorTempHandler(evt) {
 
 def setHumidityLevel() {
 
-    def min_temp_in_Farenheits =givenMinTemp ?: 0                          // Min temp in Farenheits for using HRV/ERV,otherwise too cold
     def min_humidity_diff = givenHumidityDiff ?:5                          //  5% humidity differential by default
     Integer min_fan_time =  givenFanMinTime?:20                            //  20 min. fan time per hour by default
     Integer min_vent_time =  givenVentMinTime?:20                          //  20 min. ventilator time per hour by default
     def target_humidity = givenHumidityLevel ?: 40                         // by default,  40 is the humidity level to check for
     def freeCoolingFlag = (freeCooling != null) ? freeCooling: 'false'     // Free cooling using the Hrv/Erv/dehumidifier
+    def min_temp                                                           // Min temp in Farenheits for using HRV/ERV,otherwise too cold
 
-    
+    def scale = getTemperatureScale()
+    if (scale == 'C') {
+        min_temp =givenMinTemp ?: -10                                      // Min. temp in Celcius for using HRV/ERV,otherwise too cold
+    } else {
+        min_temp =givenMinTemp ?: 0                                        // Min temp in Farenheits for using HRV/ERV,otherwise too cold
+    }
+
     log.debug "setHumidity> location.mode = $location.mode"
 
 //  Polling of ecobee
@@ -186,11 +196,6 @@ def setHumidityLevel() {
     
     def outdoorHumidity = outdoorSensor.currentHumidity
     def outdoorTemp = outdoorSensor.currentTemperature
-	def scale = getTemperatureScale()
-	if (scale == 'C') {
-
-        outdoorTemp = cToF(outdoorTemp)  // for comparison later
-    } 
     def ecobeeMode = ecobee.currentThermostatMode
     
 //  If indoorSensor specified, use the more precise humidity measure instead of ecobeeHumidity
@@ -217,14 +222,14 @@ def setHumidityLevel() {
            'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}",'vent':'minontime','ventilatorMinOnTime': "${min_vent_time}"]) 
 
        if (detailedNotif == 'true') {
-           send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode, using ERV/HRV and dehumidifier if available"
+           send "MonitorHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode, using ERV/HRV and dehumidifier if available"
        }
                  
     }
     else if (((ecobeeMode == 'heat') || (ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true' || hasDehumidifier=='true')) && 
              (ecobeeHumidity >= (target_humidity + min_humidity_diff)) && 
              (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
-             (outdoorTemp > min_temp_in_Farenheits)) {
+             (outdoorTemp > min_temp)) {
              
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
            "outdoor's humidity is lower (${outdoorHumidity}) & outdoor's temp is ${outdoorTemp},  not too cold"
@@ -235,13 +240,13 @@ def setHumidityLevel() {
             'humidifierMode':'off','fanMinOnTime':"${min_fan_time}",'vent':'minontime','ventilatorMinOnTime': "${min_vent_time}"]) 
 
        if (detailedNotif == 'true') {
-           send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode"
+           send "MonitorHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode"
        }    
     }    
     else if (((ecobeeMode == 'heat') ||(ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true' || hasDehumidifier=='true')) && 
              (ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
              (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
-             (outdoorTemp <= min_temp_in_Farenheits)) {
+             (outdoorTemp <= min_temp)) {
 
        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
            "outdoor's humidity is lower (${outdoorHumidity}), but outdoor's temp is ${outdoorTemp}; too cold"
@@ -253,7 +258,7 @@ def setHumidityLevel() {
            'humidifierMode':'off','vent':'off'])
     
        if (detailedNotif == 'true') {
-           send "MonitorHumidity>Too cold (${outdoorTemp}) to dehumidify to ${target_humidity}"
+           send "MonitorHumidity>Too cold (${outdoorTemp}°) to dehumidify to ${target_humidity}"
        }    
     }
     else if ((((ecobeeMode == 'heat' ||  ecobeeMode == 'off') && hasHumidifier=='true')) && 
@@ -299,7 +304,7 @@ def setHumidityLevel() {
            'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}",'vent':'off'])
 
        if (detailedNotif == 'true') {
-           send "MonitorHumidity>dehumidify to ${target_humidity} in ${ecobeeMode} mode using the dehumidifier only"
+           send "MonitorHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode using the dehumidifier only"
        }    
           
     
