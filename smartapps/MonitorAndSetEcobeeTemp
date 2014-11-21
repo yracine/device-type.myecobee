@@ -135,7 +135,7 @@ def monitorAdjustTemp() {
     def scale = getTemperatureScale()
     if (scale == 'C') {
         temp_diff = givenTempDiff ?:2                                      // 2°C temp differential is applied by default
-        more_heat_threshold = givenMoreHeatThreshold ?: 0                  // by default, 0°C is the outdoor temp's threshold for more heating
+        more_heat_threshold = givenMoreHeatThreshold ?: -5                 // by default, -5°C is the outdoor temp's threshold for more heating
         more_cool_threshold = givenMoreCoolThreshold ?: 30                 // by default, 30°C is the outdoor temp's threshold for more cooling
         less_heat_threshold = givenLessHeatThreshold ?: 10                 // by default, 10°C is the outdoor temp's threshold for less heating
         less_cool_threshold = givenLessCoolThreshold ?: 22                 // by default, 22°C is the outdoor temp's threshold for less cooling
