@@ -32,22 +32,20 @@ definition(
 
 preferences {
     
-    section("For this Ecobee thermostat") {
+    section("For the Ecobee thermostat(s)") {
         input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
     }
-    
     section("Create this Vacation Name") { 
         input "vacationName", "text", title: "Vacation Name"
     }
     section("Or delete the vacation (By default=false)") {
         input "deleteVacation", "Boolean", title: "delete?",metadata:[values:["true", "false"]], required:false
     }
-    
-    section("Cool Temp for vacation, default = 27C") {
-        input "givenCoolTemp", "number", title: "Cool Temp", required: false
+    section("Cool Temp for vacation, default = 80°F/27°C") {
+        input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
     }        
-    section("Heat Temp for vacation, default=14C") {
-        input "givenHeatTemp", "number", title: "Heat Temp", required: false
+    section("Heat Temp for vacation, default= 60°F/14°C") {
+        input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
     }        
     section("Start date for the vacation, format = DD-MM-YYYY") {
         input "givenStartDate", "text", title: "Beginning Date"
@@ -86,8 +84,15 @@ def updated() {
 
 def appTouch(evt) {
     log.debug "ecobeeManageVacation> about to take actions"
-    def minHeatTemp = givenHeatTemp ?: 14  // by default, 14C is the minimum heat temp
-    def minCoolTemp = givenCoolTemp ?: 27  // by default, 27C is the minimum cool temp
+    def minHeatTemp,minCoolTemp 
+    def scale = getTemperatureScale()
+    if (scale == 'C') {
+        minHeatTemp = givenHeatTemp ?: 14  // by default, 14°C is the minimum heat temp
+        minCoolTemp = givenCoolTemp ?: 27  // by default, 27°C is the minimum cool temp
+    } else {
+        minHeatTemp = givenHeatTemp ?: 60  // by default, 60°F is the minimum heat temp
+        minCoolTemp = givenCoolTemp ?: 80  // by default, 80°F is the minimum cool temp
+    }
     def vacationStartDateTime=null
     String dateTime=null
     
@@ -100,12 +105,10 @@ def appTouch(evt) {
     def vacationEndDateTime = new Date().parse('d-M-yyyy H:m', dateTime)
 
     if (deleteVacation == 'false') {
-   
-
         // You may want to change to ecobee.createVacation('serial number list',....) if you own EMS thermostat(s)
 
         log.debug( "About to call iterateCreateVacation for ${vacationName}" )
-        ecobee.iterateCreateVacation('registered', vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime, 
+        ecobee.iterateCreateVacation('registered',vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime, 
             vacationEndDateTime)
         send("ecobeeManageVacation> vacationName ${vacationName} created")
     }
