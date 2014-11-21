@@ -33,7 +33,7 @@ preferences {
     section("When one of these people arrive at home") {
 	    input "people", "capability.presenceSensor", multiple: true
     }
-    section("Or when the mode change to this mode (optinal)") {
+    section("Or when the mode change to this mode (optional)") {
         input "newMode", "mode", title: "Mode?",required: false
     }
     section("Or there is motion at home on these sensors (optional)") {
