@@ -64,11 +64,14 @@ preferences {
         
     }	
     section("Min temperature for dehumidification (in Farenheits/Celcius)") {
-        input "givenMinTemp", "decimal", title: "Min Temp (default=0°F/-10°C)", required:false
+        input "givenMinTemp", "decimal", title: "Min Temp (default=10°F/-15°C)", required:false
     }
     section("Use free cooling using HRV/ERV/Dehumidifier (By default=false)") {
         input "freeCooling", "Boolean", title: "Free Cooling?",metadata:[values:["true", "false"]], required:false
     }
+    section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
+        input "powerSwitch", "capability.switch", required: false
+    }    
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
         input "phoneNumber", "phone", title: "Send a text message?", required: false
@@ -76,7 +79,7 @@ preferences {
 	section("Detailed Notifications") {
         input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
 	}
-    
+
 
 }
 
@@ -96,17 +99,22 @@ def updated() {
 
 def initialize() {
     
+    subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
     subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
     subscribe(ecobee, "humidity", ecobeeHumidityHandler)
     subscribe(ecobee, "temperature", ecobeeTempHandler)
     subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
     subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
-    if ((indoorSensor != null) && (indoorSensor != "")) {
+    if (indoorSensor != null) {
         subscribe(indoorSensor, "humidity", indoorSensorHumHandler)
         subscribe(indoorSensor, "temperature", indoorTempHandler)
         
     }    
+    if (powerSwitch != null) {
+        subscribe(powerSwitch, "switch.off", offHandler)
+        subscribe(powerSwitch, "switch.on", onHandler)
+    }
     subscribe(outdoorSensor, "temperature", outdoorTempHandler)
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     log.debug "Scheduling Humidity Monitoring & Change every ${delay}  minutes"
@@ -114,7 +122,6 @@ def initialize() {
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
-
 def ecobeeHeatTempHandler(evt) {
     log.debug "ecobee's heating temp: $evt.value"
 }
@@ -152,8 +159,25 @@ def outdoorTempHandler(evt) {
     log.debug "outdoor temperature is: $evt.value"
 }
 
+def offHandler(evt) {
+    log.debug "$evt.name: $evt.value"
+}
+
+def onHandler(evt) {
+    log.debug "$evt.name: $evt.value"
+    monitorAdjustTemp()
+}
+
+
+
 def setHumidityLevel() {
 
+    if (powerSwitch?.currentSwitch == "off") {
+       if (detailedNotif == 'true') {
+           send("MonitorHumidity>Virtual master switch ${powerSwitch.name} is off, processing on hold...")
+       }
+       return
+    }
     def min_humidity_diff = givenHumidityDiff ?:5                          //  5% humidity differential by default
     Integer min_fan_time =  givenFanMinTime?:20                            //  20 min. fan time per hour by default
     Integer min_vent_time =  givenVentMinTime?:20                          //  20 min. ventilator time per hour by default
@@ -163,19 +187,16 @@ def setHumidityLevel() {
 
     def scale = getTemperatureScale()
     if (scale == 'C') {
-        min_temp =givenMinTemp ?: -10                                      // Min. temp in Celcius for using HRV/ERV,otherwise too cold
+        min_temp =(givenMinTemp!=null) ? givenMinTemp : -15                // Min. temp in Celcius for using HRV/ERV,otherwise too cold
     } else {
     
-        min_temp =givenMinTemp ?: 0                                        // Min temp in Farenheits for using HRV/ERV,otherwise too cold
+        min_temp =(givenMinTemp!=null) ? givenMinTemp : 10                 // Min temp in Farenheits for using HRV/ERV,otherwise too cold
     }
-    Integer max_power = givenPowerLevel ?:3000                             // Do not run above 3000w consumption level by default
-    
-    
     log.debug "setHumidity> location.mode = $location.mode"
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     log.debug "Scheduling Humidity Monitoring & Change every ${delay}  minutes"
 
-//  Polling of ecobee
+//  Polling of all devices
 
     ecobee.poll()
 
@@ -199,7 +220,6 @@ def setHumidityLevel() {
     def outdoorTemp = outdoorSensor.currentTemperature
     String ecobeeMode = ecobee.currentThermostatMode
     log.debug "setHumidity> ecobee Mode = $ecobeeMode"
-    
 //  If indoorSensor specified, use the more precise humidity measure instead of ecobeeHumidity
 
     log.trace("setHumidity>compare: Ecobee's humidity: ${ecobeeHumidity} vs. indoor's humidity ${indoorHumidity}")
