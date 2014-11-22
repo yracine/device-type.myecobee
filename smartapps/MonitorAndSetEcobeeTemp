@@ -42,7 +42,7 @@ preferences {
     section("For less cooling in hot season, outdoor temp's threshold (default <= 75°F/22°C)") {
         input "givenLessCoolThreshold", "decimal", title: "Outdoor temp's threshold for less cooling", required:false
     }
-    section("For more cooling/heating, outdoor humidity's threshold (default >= 65%)") {
+    section("For more cooling/heating, outdoor humidity's threshold (default >= 85%)") {
         input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling/heating", required:false
     }
     section("At which interval in minutes (default =59 min.)?"){
@@ -55,6 +55,9 @@ preferences {
         input "outdoorSensor", "capability.temperatureMeasurement", title: "Outdoor Temperature Sensor"
         
     }	
+    section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
+        input "powerSwitch", "capability.switch", required: false
+    }    
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
         input "phoneNumber", "phone", title: "Send a text message?", required: false
@@ -89,6 +92,10 @@ def initialize() {
     subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
     subscribe(outdoorSensor, "temperature", outdoorTempHandler)
     subscribe(ecobee, "programType", ecobeeProgramTypeHandler)
+    if (powerSwitch != null) {
+        subscribe(powerSwitch, "switch.off", offHandler)
+        subscribe(powerSwitch, "switch.on", onHandler)
+    }
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     log.debug "Scheduling Outdoor temp Monitoring and adjustment every ${delay}  minutes"
     
@@ -128,27 +135,67 @@ def outdoorTempHandler(evt) {
 def ecobeeProgramTypeHandler(evt) {
     log.debug "ecobee's program type: $evt.value"
 }
+def offHandler(evt) {
+    log.debug "$evt.name: $evt.value"
+}
+
+def onHandler(evt) {
+    log.debug "$evt.name: $evt.value"
+    monitorAdjustTemp()
+}
 
 def monitorAdjustTemp() {
 
+
+    if (powerSwitch?.currentSwitch == "off") {
+       if (detailedNotif == 'true') {
+           send("MonitorEcobeeTemp>Virtual master switch ${powerSwitch.name} is off, processing on hold...")
+       }
+       return
+    }
+
+    if (detailedNotif == 'true') {
+        Integer delay =givenInterval ?: 59   // By default, do it every hour
+        send("MonitorEcobeeTemp>monitoring every ${delay} minute(s)")
+    }
+
+//  Polling of the latest values at the thermostat
+    ecobee.poll()
+
+    String currentProgType = ecobee.currentProgramType[0]
+    log.trace("MonitorEcobeeTemp> program Type= ${currentProgType}")
+    if (currentProgType.contains("hold")) {  // don't make any further adustments 
+        log.trace("MonitorEcobeeTemp>about to call check_if_hold_justified....")
+        if (detailedNotif == 'true') {
+            send("MonitorEcobeeTemp>Hold set, checking if still justified")
+        }
+        check_if_justified_hold()
+    }
+    else if (!currentProgType.contains("vacation")) {  // don't make adjustment if on vacation mode
+        log.trace("MonitorEcobeeTemp>about to call check_if_needs_hold....")
+        check_if_needs_hold()
+    }
+}
+
+private def check_if_needs_hold() {
     float temp_diff                   
-    def humidity_threshold = givenHumThreshold ?: 65                       // by default, 65% is the outdoor Humidity's threshold for more cooling
-    def more_heat_threshold,more_cool_threshold  
-    def less_heat_threshold,less_cool_threshold 
+    def humidity_threshold = givenHumThreshold ?: 85                       // by default, 85% is the outdoor Humidity's threshold for more cooling
+    float more_heat_threshold,more_cool_threshold  
+    float less_heat_threshold,less_cool_threshold 
     
     def scale = getTemperatureScale()
     if (scale == 'C') {
         temp_diff = givenTempDiff ?:2                                       // 2°C temp differential is applied by default
-        more_heat_threshold = givenMoreHeatThreshold ?: -15                 // by default, -15°C is the outdoor temp's threshold for more heating
-        more_cool_threshold = givenMoreCoolThreshold ?: 30                  // by default, 30°C is the outdoor temp's threshold for more cooling
-        less_heat_threshold = givenLessHeatThreshold ?: 10                  // by default, 10°C is the outdoor temp's threshold for less heating
-        less_cool_threshold = givenLessCoolThreshold ?: 22                  // by default, 22°C is the outdoor temp's threshold for less cooling
+        more_heat_threshold = (givenMoreHeatThreshold!=null)? givenMoreHeatThreshold : -15  // by default, -15°C is the outdoor temp's threshold for more heating
+        more_cool_threshold = (givenMoreCoolThreshold!=null)? givenMoreCoolThreshold : 30   // by default, 30°C is the outdoor temp's threshold for more cooling
+        less_heat_threshold = (givenLessHeatThreshold!=null)? givenLessHeatThreshold : 10   // by default, 10°C is the outdoor temp's threshold for less heating
+        less_cool_threshold = (givenLessCoolThreshold!=null)? givenLessCoolThreshold : 22   // by default, 22°C is the outdoor temp's threshold for less cooling
  
     } else {
-        more_heat_threshold = givenMoreHeatThreshold ?: 10                  // by default, 10°F is the outdoor temp's threshold for more heating
-        more_cool_threshold = givenMoreCoolThreshold ?: 85                  // by default, 85°F is the outdoor temp's threshold for more cooling
-        less_heat_threshold = givenLessHeatThreshold ?: 50                  // by default, 50°F is the outdoor temp's threshold for less heating
-        less_cool_threshold = givenLessCoolThreshold ?: 75                  // by default, 75°F is the outdoor temp's threshold for less cooling
+        more_heat_threshold = (givenMoreHeatThreshold!=null)?givenMoreHeatThreshold : 10    // by default, 10°F is the outdoor temp's threshold for more heating
+        more_cool_threshold = (givenMoreCoolThreshold!=null)?givenMoreCoolThreshold : 85    // by default, 85°F is the outdoor temp's threshold for more cooling
+        less_heat_threshold = (givenLessHeatThreshold!=null)?givenLessHeatThreshold : 50    // by default, 50°F is the outdoor temp's threshold for less heating
+        less_cool_threshold = (givenLessCoolThreshold!=null)?givenLessCoolThreshold : 75    // by default, 75°F is the outdoor temp's threshold for less cooling
     }
     
     log.debug "MonitorEcobeeTemp> location.mode = $location.mode"
@@ -157,73 +204,62 @@ def monitorAdjustTemp() {
     log.debug "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
     log.debug "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
     log.debug "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
-
-//  Polling of the latest values at the thermostat
-    ecobee.poll()
-
-    String currentProgType = ecobee.currentProgramType[0]
-    log.trace("MonitorEcobeeTemp> program Type= ${currentProgType}")
-    if (currentProgType.contains("hold")) {  // don't make any further adustments 
-        log.trace("MonitorEcobeeTemp>Hold already set, no more adjustments")
-        if (detailedNotif == 'true') {
-            send("MonitorEcobeeTemp>Hold set, no more adjustments")
-        }
-        return
-    }
-    
-    if (detailedNotif == 'true') {
-        Integer delay =givenInterval ?: 59   // By default, do it every hour
-        send("MonitorEcobeeTemp>monitor every ${delay} minute(s)")
-    }
-    
-    def heatTemp = ecobee.currentHeatingSetpoint[0]
-    def coolTemp = ecobee.currentCoolingSetpoint[0]
+    float heatTemp = ecobee.currentHeatingSetpoint[0].toFloat()
+    float coolTemp = ecobee.currentCoolingSetpoint[0].toFloat()
     def ecobeeHumidity = ecobee.currentHumidity[0]
 
     def outdoorHumidity = outdoorSensor.currentHumidity
-    def outdoorTemp = outdoorSensor.currentTemperature
+    float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
     String ecobeeMode = ecobee.currentThermostatMode[0]
     log.debug "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
     log.debug "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
     float targetTstatTemp 
         
     if (ecobeeMode == 'cool') {
-            
+                    
         if (location.mode != 'Away') {   // increase cooling settings only if mode != away
-            log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThreshold= ${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}")
-            log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThresholdHum= ${humidity_threshold} vs. outdoorHum ${outdoorHumidity}%")
+            log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThreshold= ${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
+            log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
             if (detailedNotif == 'true') {
                 send("MonitorEcobeeTemp>eval:  moreCoolThreshold=${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-                send("MonitorEcobeeTemp>eval:  moreCoolThresholdHum= ${humidity_threshold} vs. outdoorHum ${outdoorHumidity}%")
+                send("MonitorEcobeeTemp>eval:  moreCoolThresholdHum=${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
             }
-            if ((outdoorTemp >= more_cool_threshold) || (outdoorHumidity >= humidity_threshold)) {
-                targetTstatTemp = (coolTemp.toFloat()-temp_diff.toFloat()).round(1)
+            if (outdoorTemp >= more_cool_threshold) {
+                targetTstatTemp = (coolTemp - temp_diff).round(1)
                 ecobee.setCoolingSetpoint(targetTstatTemp)
-                send("MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp.toString()}°,outdooTemp>= ${more_cool_threshold}°")
+                send("MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp.toString()}°,outdooTemp >=${more_cool_threshold}°")
+            } else if (outdoorHumidity >= humidity_threshold) {
+                targetTstatTemp = (coolTemp - temp_diff).round(1)
+                ecobee.setCoolingSetpoint(targetTstatTemp)
+                send("MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp.toString()}°,outdoorHum >=${humidity_threshold}°")
             }
         }    
-        log.trace("MonitorEcobeeTemp>evaluate: lessCoolThreshold= ${less_cool_threshold} vs.outdoorTemp ${outdoorTemp}")
+        log.trace("MonitorEcobeeTemp>evaluate: lessCoolThreshold= ${less_cool_threshold} vs.outdoorTemp ${outdoorTemp}°")
         if (detailedNotif == 'true') {
             send("MonitorEcobeeTemp>evaluate: lessCoolThreshold= ${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
         }
         if (outdoorTemp <= less_cool_threshold) {
-            targetTstatTemp = (coolTemp.toFloat()+temp_diff.toFloat()).round(1)
+            targetTstatTemp = (coolTemp + temp_diff).round(1)
             ecobee.setCoolingSetpoint(targetTstatTemp)
-            send("Monitor&SetEcobeeTemp>cooling setPoint now=${targetTstatTemp.toString()}°,outdoor temp<= ${less_cool_threshold}°") 
+            send("Monitor&SetEcobeeTemp>cooling setPoint now=${targetTstatTemp.toString()}°,outdoor temp <=${less_cool_threshold}°") 
    
         }         
     } else if (ecobeeMode == 'heat') {
         if (location.mode != 'Away') {   // increase heating settings only if mode != away
             log.trace("MonitorEcobeeTemp>eval: moreHeatingThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-            log.trace("MonitorEcobeeTemp>eval: moreHeatingThresholdHum= ${humidity_threshold} vs.outdoorHumidity ${outdoorHumidity}")
+            log.trace("MonitorEcobeeTemp>eval: moreHeatingThresholdHum= ${humidity_threshold}% vs.outdoorHumidity ${outdoorHumidity}%")
             if (detailedNotif == 'true') {
                 send("MonitorEcobeeTemp>eval:  moreHeatThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-                send("MonitorEcobeeTemp>eval:  moreHeatThresholdHumidty= ${humidity_threshold} vs.outdoorHum ${outdoorHumidity}")
+                send("MonitorEcobeeTemp>eval:  moreHeatThresholdHumidty=${humidity_threshold}% vs.outdoorHum ${outdoorHumidity}%")
             }
-            if ((outdoorTemp <= more_heat_threshold) || (outdoorHumidity >= humidity_threshold)) {
-            targetTstatTemp = (heatTemp.toFloat()+temp_diff.toFloat()).round(1)
+            if (outdoorTemp <= more_heat_threshold) {
+                targetTstatTemp = (heatTemp + temp_diff).round(1)
                 ecobee.setHeatingSetpoint(targetTstatTemp)
-                send("MonitorEcobeeTemp>heating setPoint now= ${targetTstatTemp.toString()}°,outdoor temp<= ${more_heat_threshold}°") 
+                send("MonitorEcobeeTemp>heating setPoint now= ${targetTstatTemp.toString()}°,outdoorTemp <=${more_heat_threshold}°") 
+            } else if (outdoorHumidity >= humidity_threshold) {
+                targetTstatTemp = (heatTemp + temp_diff).round(1)
+                ecobee.setHeatingSetpoint(targetTstatTemp)
+                send("MonitorEcobeeTemp>heating setPoint now= ${targetTstatTemp.toString()}°,outdoorHum >=${humidity_threshold}%") 
             }
         }    
         log.trace("MonitorEcobeeTemp>eval:lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
@@ -231,13 +267,89 @@ def monitorAdjustTemp() {
             send("MonitorEcobeeTemp>eval:  lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
         }
         if (outdoorTemp >= less_heat_threshold) {
-            targetTstatTemp = (heatTemp.toFloat()-temp_diff.toFloat()).round(1)
+            targetTstatTemp = (heatTemp - temp_diff).round(1)
             ecobee.setHeatingSetpoint(targetTstatTemp)
             send("MonitorEcobeeTemp>heating setPoint now=${targetTstatTemp.toString()}°,outdoor temp>= ${less_heat_threshold}°") 
         }
     }
             
-    log.debug "End of Fcn"
+    log.debug "End of Fcn check_if_needs_hold"
+}
+
+private def check_if_justified_hold() {
+    def humidity_threshold = givenHumThreshold ?: 85                       // by default, 85% is the outdoor Humidity's threshold for more cooling
+    float more_heat_threshold,more_cool_threshold  
+    float less_heat_threshold,less_cool_threshold 
+    
+    def scale = getTemperatureScale()
+    if (scale == 'C') {
+        more_heat_threshold = (givenMoreHeatThreshold!=null)? givenMoreHeatThreshold : -15  // by default, -15°C is the outdoor temp's threshold for more heating
+        more_cool_threshold = (givenMoreCoolThreshold!=null)? givenMoreCoolThreshold : 30   // by default, 30°C is the outdoor temp's threshold for more cooling
+        less_heat_threshold = (givenLessHeatThreshold!=null)? givenLessHeatThreshold : 10   // by default, 10°C is the outdoor temp's threshold for less heating
+        less_cool_threshold = (givenLessCoolThreshold!=null)? givenLessCoolThreshold : 22   // by default, 22°C is the outdoor temp's threshold for less cooling
+ 
+    } else {
+        more_heat_threshold = (givenMoreHeatThreshold!=null)?givenMoreHeatThreshold : 10    // by default, 10°F is the outdoor temp's threshold for more heating
+        more_cool_threshold = (givenMoreCoolThreshold!=null)?givenMoreCoolThreshold : 85    // by default, 85°F is the outdoor temp's threshold for more cooling
+        less_heat_threshold = (givenLessHeatThreshold!=null)?givenLessHeatThreshold : 50    // by default, 50°F is the outdoor temp's threshold for less heating
+        less_cool_threshold = (givenLessCoolThreshold!=null)?givenLessCoolThreshold : 75    // by default, 75°F is the outdoor temp's threshold for less cooling
+    }
+    log.debug "MonitorEcobeeTemp> location.mode = $location.mode"
+    log.debug "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
+    log.debug "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
+    log.debug "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
+    log.debug "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
+    def heatTemp = ecobee.currentHeatingSetpoint[0]
+    def coolTemp = ecobee.currentCoolingSetpoint[0]
+    def ecobeeHumidity = ecobee.currentHumidity[0]
+
+    def outdoorHumidity = outdoorSensor.currentHumidity
+    float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
+    String ecobeeMode = ecobee.currentThermostatMode[0]
+    log.debug "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
+    log.debug "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
+    
+    if (ecobeeMode == 'cool') {
+                    
+        log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
+        log.trace("MonitorEcobeeTemp>evaluate: lessCoolThreshold= ${less_cool_threshold} vs.outdoorTemp ${outdoorTemp}°")
+        if (detailedNotif == 'true') {
+            send("MonitorEcobeeTemp>eval:  moreCoolThreshold=${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+            send("MonitorEcobeeTemp>evaluate: lessCoolThreshold=${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+        }
+        if (outdoorTemp > more_cool_threshold) {
+            ecobee.resumeThisTsat()
+            send("MonitorEcobeeTemp>resuming program,outdoorTemp <=${more_cool_threshold}°")
+        } else if (outdoorTemp < less_cool_threshold) {
+            ecobee.resumeThisTsat()
+            send("MonitorEcobeeTemp>resuming program,outdoorTemp >=${more_less_threshold}°")
+        }         
+        else {
+            if (detailedNotif == 'true') {
+                send("MonitorEcobeeTemp>Hold justified, cooling setPoint=${coolTemp}°")
+            }
+        }
+    } else if (ecobeeMode == 'heat') {
+        log.trace("MonitorEcobeeTemp>eval: moreHeatingThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+        log.trace("MonitorEcobeeTemp>eval:lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+        if (detailedNotif == 'true') {
+            send("MonitorEcobeeTemp>eval:  moreHeatThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+            send("MonitorEcobeeTemp>eval:  lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+        }
+        if (outdoorTemp  > more_heat_threshold) {
+            ecobee.resumeThisTstat()
+            send("MonitorEcobeeTemp>resuming program,outdoorTemp <${more_heat_threshold}°")
+        } else if (outdoorTemp > less_heat_threshold) {
+            ecobee.resumeThisTstat()
+            send("MonitorEcobeeTemp>resuming program,outdoorTemp >${less_heat_threshold}°")
+        }
+        else {
+            if (detailedNotif == 'true') {
+                send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
+            }    
+        }
+    }
+    log.debug "End of Fcn check_if_hold_justified"
 }
 
 
