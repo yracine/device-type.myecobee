@@ -221,7 +221,7 @@ private def check_if_needs_hold() {
             log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
             if (detailedNotif == 'true') {
                 send("MonitorEcobeeTemp>eval:  moreCoolThreshold=${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-                send("MonitorEcobeeTemp>eval:  moreCoolThresholdHum=${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
+                send("MonitorEcobeeTemp>eval:  moreCoolThresholdHumidty=${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
             }
             if (outdoorTemp >= more_cool_threshold) {
                 targetTstatTemp = (coolTemp - temp_diff).round(1)
