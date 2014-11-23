@@ -311,38 +311,46 @@ private def check_if_justified_hold() {
     if (ecobeeMode == 'cool') {
                     
         log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
+        log.trace("MonitorEcobeeTemp>evaluate: moreCoolingThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
         log.trace("MonitorEcobeeTemp>evaluate: lessCoolThreshold= ${less_cool_threshold} vs.outdoorTemp ${outdoorTemp}°")
         if (detailedNotif == 'true') {
             send("MonitorEcobeeTemp>eval:  moreCoolThreshold=${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-            send("MonitorEcobeeTemp>evaluate: lessCoolThreshold=${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+            send("MonitorEcobeeTemp>eval:  lessCoolThreshold=${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+            send("MonitorEcobeeTemp>eval:  moreCoolThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
         }
-        if (outdoorTemp > more_cool_threshold) {
+        if ((outdoorTemp > more_cool_threshold) && (outdoorHumidity < humidity_threshold)) {
             ecobee.resumeThisTsat()
             send("MonitorEcobeeTemp>resuming program,outdoorTemp <=${more_cool_threshold}°")
-        } else if (outdoorTemp < less_cool_threshold) {
+        } else if ((outdoorTemp < less_cool_threshold)  && (outdoorHumidity < humidity_threshold)) {
             ecobee.resumeThisTsat()
             send("MonitorEcobeeTemp>resuming program,outdoorTemp >=${more_less_threshold}°")
-        }         
-        else {
+        } else if (outdoorHumidity < humidity_threshold) {
+            ecobee.resumeThisTstat()
+            send("MonitorEcobeeTemp>resuming program,outdoorHumidity <${humidity_threshold}%")
+        } else {
             if (detailedNotif == 'true') {
                 send("MonitorEcobeeTemp>Hold justified, cooling setPoint=${coolTemp}°")
             }
         }
     } else if (ecobeeMode == 'heat') {
         log.trace("MonitorEcobeeTemp>eval: moreHeatingThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+        log.trace("MonitorEcobeeTemp>evaluate: moreHeatingThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
         log.trace("MonitorEcobeeTemp>eval:lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
         if (detailedNotif == 'true') {
-            send("MonitorEcobeeTemp>eval:  moreHeatThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-            send("MonitorEcobeeTemp>eval:  lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+            send("MonitorEcobeeTemp>eval: moreHeatThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+            send("MonitorEcobeeTemp>eval: lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+            send("MonitorEcobeeTemp>eval: moreHeatThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
         }
-        if (outdoorTemp  > more_heat_threshold) {
+        if ((outdoorTemp  > more_heat_threshold)  && (outdoorHumidity < humidity_threshold)) {
             ecobee.resumeThisTstat()
             send("MonitorEcobeeTemp>resuming program,outdoorTemp <${more_heat_threshold}°")
-        } else if (outdoorTemp > less_heat_threshold) {
+        } else if ((outdoorTemp > less_heat_threshold) && (outdoorHumidity < humidity_threshold)) {
             ecobee.resumeThisTstat()
             send("MonitorEcobeeTemp>resuming program,outdoorTemp >${less_heat_threshold}°")
-        }
-        else {
+        } else if (outdoorHumidity < humidity_threshold) {
+            ecobee.resumeThisTstat()
+            send("MonitorEcobeeTemp>resuming program,outdoorHumidity <${humidity_threshold}%")
+        } else {
             if (detailedNotif == 'true') {
                 send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
             }    
