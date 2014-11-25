@@ -217,7 +217,7 @@ private def check_if_needs_hold() {
 	log.debug "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
 	float heatTemp = ecobee.currentProgramHeatTemp[0].toFloat() // This is the heat temp associated to the current program
 	float coolTemp = ecobee.currentProgramCoolTemp[0].toFloat() // This is the cool temp associated to the current program
-	float ecobeeHumidity = ecobee.currentHumidity[0]
+	Integer ecobeeHumidity = ecobee.currentHumidity[0]
 
 	Integer outdoorHumidity = outdoorSensor.currentHumidity
 	float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
