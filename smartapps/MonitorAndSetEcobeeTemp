@@ -277,8 +277,18 @@ private def check_if_needs_hold() {
 		send("MonitorEcobeeTemp>Climate now set to Home instead of Away, motion detected")
         
 		 /* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentProgramHeatTemp[0].toFloat() // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentProgramCoolTemp[0].toFloat() // This is the cool temp associated to the current program
+		heatTemp = ecobee.currentHeatingSetPoint[0].toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetPoint[0].toFloat() // This is the cool temp associated to the current program
+        
+	}
+	if ((currentProgName.toUpperCase()=='HOME') && (residentsHaveBeenQuiet())) {
+                
+		ecobee.setClimate("", "Away")            
+		send("MonitorEcobeeTemp>Climate now set to Away instead of Home,no motion detected")
+        
+		 /* Get latest heat and cool setting points after climate adjustment */
+		heatTemp = ecobee.currentHeatingSetPoint[0].toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetPoint[0].toFloat() // This is the cool temp associated to the current program
         
 	}
 	if (ecobeeMode == 'cool') {
@@ -418,8 +428,19 @@ private def check_if_justified_hold() {
 		send("MonitorEcobeeTemp>resuming Away program, no motion detected")
         
         /* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentProgramHeatTemp[0].toFloat() // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentProgramCoolTemp[0].toFloat() // This is the cool temp associated to the current program
+		heatTemp = ecobee.currentHeatingSetPoint[0].toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetPoint[0].toFloat() // This is the cool temp associated to the current program
+        
+	}
+	if ((currentProgName.toUpperCase()=='HOME') && (!residentsHaveBeenQuiet())) {
+                
+		log.trace("MonitorEcobeeTemp>residents have not been  quiet,resume climate to Home")
+		ecobee.resumeThisTstat()
+		send("MonitorEcobeeTemp>resuming Home program, motion detected")
+        
+        /* Get latest heat and cool setting points after climate adjustment */
+		heatTemp = ecobee.currentHeatingSetPoint[0].toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetPoint[0].toFloat() // This is the cool temp associated to the current program
         
 	}
 	if (ecobeeMode == 'cool') {
