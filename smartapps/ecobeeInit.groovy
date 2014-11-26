@@ -124,13 +124,10 @@ def getEcobeeThermostats()
 
 		if(resp.status == 200)
 		{
-            int i =0
 			resp.data.thermostatList.each { stat ->
-				def dni = [ app.id, stat.name, i++, stat.identifier ].join('.')
+				def dni = [ app.id, stat.name, stat.identifier ].join('.')
 				stats[dni] = getThermostatDisplayName(stat)
-				dni = [ app.id, stat.name, i++, stat.identifier ].join('.')
-				stats[dni] = getThermostatDisplayName(stat)
-                
+
 			}
 		}
 		else
@@ -212,7 +209,7 @@ def initialize() {
             def labelName = 'My ecobee ' + "${name}"
 			log.debug "About to create child device with id $dni, thermostatId = $thermostatId, name=  ${name}"
 			d = addChildDevice(getChildNamespace(), getChildName(), dni, null,
-            	[label: "${labelName}", completedSetup: true])
+				[label: "${labelName}", completedSetup: true])
 			d.initialSetup( getSmartThingsClientId(), atomicState,thermostatId )  // initial setup 
 			log.debug "created ${d.displayName} with id $dni"
 		}
