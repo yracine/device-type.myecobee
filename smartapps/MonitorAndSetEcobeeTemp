@@ -392,7 +392,7 @@ private def check_if_justified_hold() {
         if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 			(outdoorHumidity < humidity_threshold)) {
 			ecobee.resumeThisTstat()
-			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° < outdoorTemp < ${more_heat_threshold}°")
+			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° > outdoorTemp > ${more_heat_threshold}°")
 		} else {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
