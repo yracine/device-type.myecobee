@@ -443,11 +443,13 @@ def heatLevelDown() {
 
 // handle commands
 def setHeatingSetpoint(temp) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), temp,
+	def thermostatId= determine_tstat_id("") 	    
+	setHold(thermostatId, device.currentValue("coolingSetpoint"), temp,
 		null, null)
 	sendEvent(name: 'heatingSetpoint', value: temp)
 }
 def setCoolingSetpoint(temp) {
+	def thermostatId= determine_tstat_id("") 	    
 	setHold(settings.thermostatId, temp, device.currentValue("heatingSetpoint"),
 		null, null)
 	sendEvent(name: 'coolingSetpoint', value: temp)
@@ -472,7 +474,8 @@ def cool() {
 }
 def setThermostatMode(mode) {
 	mode = mode == 'emergency heat' ? 'heat' : mode
-	setThermostatSettings(settings.thermostatId, ['hvacMode': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['hvacMode': "${mode}"])
 	sendEvent(name: 'thermostatMode', value: mode)
 }
 def fanOn() {
@@ -485,7 +488,8 @@ def fanOff() { // fanOff is not supported, setting it to 'auto' instead.
 	setThermostatFanMode('auto')
 }
 def setThermostatFanMode(mode) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
+	def thermostatId= determine_tstat_id("") 	    
+	setHold(thermostatId, device.currentValue("coolingSetpoint"), device
 		.currentValue("heatingSetpoint"),
 		mode, null)
 	sendEvent(name: 'thermostatFanMode', value: mode)
@@ -504,18 +508,21 @@ def ventilatorAuto() {
 	setVentilatorMode('auto')
 }
 def setVentilatorMinOnTime(minutes) {
-	setThermostatSettings(settings.thermostatId, ['vent': "minontime",
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['vent': "minontime",
 			'ventilatorMinOnTime': "${minutes}"])
 	sendEvent(name: 'ventilatorMinOnTime', value: minutes)
 	sendEvent(name: 'ventilatorMode', value: "minontime")
 }
 def setVentilatorMode(mode) {
-	setThermostatSettings(settings.thermostatId, ['vent': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['vent': "${mode}"])
 	sendEvent(name: 'ventilatorMode', value: mode)
 }
 def setCondensationAvoid(flag) { // set the flag to true or false
 	flag = flag == 'true' ? 'true' : 'false'
-	setThermostatSettings(settings.thermostatId, ['condensationAvoid': "${flag}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['condensationAvoid': "${flag}"])
 	sendEvent(name: 'condensationAvoid', value: flag)
 }
 def dehumidifierOn() {
@@ -525,11 +532,13 @@ def dehumidifierOff() {
 	setDehumidifierMode('off')
 }
 def setDehumidifierMode(mode) {
-	setThermostatSettings(settings.thermostatId, ['dehumidifierMode': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['dehumidifierMode': "${mode}"])
 	sendEvent(name: 'dehumidifierMode', value: mode)
 }
 def setDehumidifierLevel(level) {
-	setThermostatSettings(settings.thermostatId, ['dehumidifierLevel': "${level}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['dehumidifierLevel': "${level}"])
 	sendEvent(name: 'dehumidifierLevel', value: level)
 }
 def humidifierAuto() {
@@ -539,11 +548,13 @@ def humidifierOff() {
 	setHumidifierMode('off')
 }
 def setHumidifierMode(mode) {
-	setThermostatSettings(settings.thermostatId, ['humidifierMode': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['humidifierMode': "${mode}"])
 	sendEvent(name: 'humidifierMode', value: mode)
 }
 def setHumidifierLevel(level) {
-	setThermostatSettings(settings.thermostatId, ['humidity': "${level}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['humidity': "${level}"])
 	sendEvent(name: 'humidifierLevel', value: level)
 }
 def awake() {
@@ -566,12 +577,13 @@ def sleep() {
 	setThisTstatClimate("Sleep")
 }
 def quickSave() {
+	def thermostatId= determine_tstat_id("") 	    
 	def currentProgramType = device.currentValue("programType")
 	if (currentProgramType.toUpperCase() == 'VACATION') {
 		if (settings.trace) {
-			log.debug "quickSave>thermostatId = ${settings.thermostatId},cannot do quickSave due to vacation settings"
+			log.debug "quickSave>thermostatId = ${thermostatId},cannot do quickSave due to vacation settings"
 			sendEvent name: "verboseTrace", value:
-				"quickSave>thermostatId = ${settings.thermostatId},cannot do quickSave switch due to vacation settings"
+				"quickSave>thermostatId = ${thermostatId},cannot do quickSave switch due to vacation settings"
 		}
 		return
 	}
@@ -590,7 +602,7 @@ def quickSave() {
 	}
 	quickSaveCooling = (quickSaveCooling + quickSaveSetForw).round(0)
 	quickSaveHeating = (quickSaveHeating - quickSaveSetBack).round(0)
-	setHold(settings.thermostatId, quickSaveCooling, quickSaveHeating, null, null)
+	setHold(thermostatId, quickSaveCooling, quickSaveHeating, null, null)
 	sendEvent(name: 'coolingSetpoint', value: quickSaveCooling.toString())
 	sendEvent(name: 'heatingSetpoint', value: quickSaveHeating.toString())
 	sendEvent(name: 'programScheduleName', value: "QuickSave")
@@ -598,6 +610,7 @@ def quickSave() {
 }
   
 def setThisTstatClimate(climateName) {
+	def thermostatId= determine_tstat_id("") 	    
 	def currentProgram = device.currentValue("programScheduleName")
 	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
 	if (currentProgramType == 'VACATION') {
@@ -610,7 +623,7 @@ def setThisTstatClimate(climateName) {
 	}
 	// If climate is different from current one, then change it to the given climate
 	if (currentProgram.toUpperCase() != climateName.trim().toUpperCase()) {
-		setClimate(settings.thermostatId, climateName)
+		setClimate(thermostatId, climateName)
 		sendEvent(name: 'programScheduleName', value: climateName)
 		poll() // to refresh the values in the UI
 	}
@@ -629,14 +642,9 @@ def poll() {
 	def QUICKSAVE = 'QuickSave'
 	def tstatId,ecobeeType
     
-	if (settings.thermostatId == null || settings.thermostatId == "") {
-		settings.appKey = data.auth.appKey
-		settings.thermostatId = data.auth.thermostatId
-		tstatId=data.auth.thermostatId
-        ecobeeType=data.auth.ecobeeType
-	} else tstatId= determine_tstat_id("") 	    
+	def thermostatId= determine_tstat_id("") 	    
 	
-	getThermostatInfo(tstatId)
+	getThermostatInfo(thermostatId)
 	sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
 	sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
 	sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity,
@@ -690,30 +698,30 @@ def poll() {
 		}
 	}
 	if (settings.trace) {
-		log.debug "poll>thermostatId = ${tstatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+		log.debug "poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
 		sendEvent name: "verboseTrace", value:
-			"poll>thermostatId = ${tstatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+			"poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
 		if (foundEvent) {
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},indiceEvent=${indiceEvent}"
+				"poll>thermostatId = ${thermostatId},indiceEvent=${indiceEvent}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event name=${data.thermostatList[0].events[indiceEvent].name}"
+				"poll>thermostatId = ${thermostatId},event name=${data.thermostatList[0].events[indiceEvent].name}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
+				"poll>thermostatId = ${thermostatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event's coolHoldTemp=${data.thermostatList[0].events[indiceEvent].coolHoldTemp}"
+				"poll>thermostatId = ${thermostatId},event's coolHoldTemp=${data.thermostatList[0].events[indiceEvent].coolHoldTemp}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event's heatHoldTemp=${data.thermostatList[0].events[indiceEvent].heatHoldTemp}"
+				"poll>thermostatId = ${thermostatId},event's heatHoldTemp=${data.thermostatList[0].events[indiceEvent].heatHoldTemp}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event's fan mode=${data.thermostatList[0].events[indiceEvent].fan}"
+				"poll>thermostatId = ${thermostatId},event's fan mode=${data.thermostatList[0].events[indiceEvent].fan}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event's fanMinOnTime=${data.thermostatList[0].events[indiceEvent].fanMinOnTime}"
+				"poll>thermostatId = ${thermostatId},event's fanMinOnTime=${data.thermostatList[0].events[indiceEvent].fanMinOnTime}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
+				"poll>thermostatId = ${thermostatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event's ventilatorMinOnTime=${data.thermostatList[0].events[indiceEvent].ventilatorMinOnTime}"
+				"poll>thermostatId = ${thermostatId},event's ventilatorMinOnTime=${data.thermostatList[0].events[indiceEvent].ventilatorMinOnTime}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${tstatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
+				"poll>thermostatId = ${thermostatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
 		}
 	}
 	def currentClimate = null
@@ -862,7 +870,7 @@ def poll() {
 	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
 	if (ecobeeType.toUpperCase() == 'REGISTERED') {
 		// get Groups associated to this thermostatId
-		getGroups(tstatId)
+		getGroups(thermostatId)
 		// post group names associated to this thermostatId
 		if (data.groups.size() > 0) {
 			groupList = 'Group(s) '
@@ -905,8 +913,8 @@ def refresh() {
 	poll()
 }
 def resumeThisTstat() {
-	def tstatId = determine_tstat_id("")
-	resumeProgram(tstatId) 
+	def thermostatId= determine_tstat_id("") 	    
+	resumeProgram(thermostatId) 
 	poll()
 }
 private def api(method, args, success = {}) {
@@ -1125,7 +1133,7 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 def setThermostatSettings(thermostatId,tstatSettings = []) {
     
-	thermostatId = determine_tstat_id(thermostatId)
+	thermostatId= determine_tstat_id(thermostatId) 	    
 	if (settings.trace) {
 		log.debug
 			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
@@ -1375,6 +1383,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
+    
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
@@ -1524,7 +1533,7 @@ def getGroups(thermostatId) {
 
 	thermostatId = determine_tstat_id(thermostatId)
 	def ecobeeType = determine_ecobee_type_or_location("")
-    log.debug "getGroups>ecobee Type = $ecobeeType for thermostatId = $thermostatId"
+	log.debug "getGroups>ecobee Type = $ecobeeType for thermostatId = $thermostatId"
 	if (ecobeeType.toUpperCase() != 'REGISTERED') {
 		if (settings.trace) {
 			log.debug "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"
@@ -2419,7 +2428,7 @@ private def get_MAX_TSTAT_BATCH() {
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 private def determine_ecobee_type_or_location(tstatType) {
 	def ecobeeType
-    def modelNumber = getModelNumber()
+	def modelNumber = getModelNumber()
     
 	if (settings.trace) {
 		log.debug "determine_ecobee_type>begin ecobeeType = ${tstatType}, modelNumber=${modelNumber}"
@@ -2428,10 +2437,11 @@ private def determine_ecobee_type_or_location(tstatType) {
 		ecobeeType = tstatType.trim()
 	} else if ((settings?.ecobeeType != null) && (settings?.ecobeeType != "")) {
 		ecobeeType = settings.ecobeeType.trim()
-    } else if (modelNumber.contains("Ems")) {
+		
+	} else if (modelNumber.contains("Ems")) {
     
 		ecobeeType = 'managementSet'
-        settings.ecobeeType='managementSet'
+		settings.ecobeeType='managementSet'
     
 	} else {
 		// by default, the ecobee type is 'registered'
@@ -2456,6 +2466,16 @@ def determine_tstat_id(tstat_id) {
 	}
 	else if ((settings.thermostatId != null) && (settings.thermostatId  != "")) {
 		tstatId = settings.thermostatId.trim()
+		if (settings.trace) {
+			log.debug "determine_tstat_id> tstatId = ${settings.thermostatId}"
+			sendEvent name: "verboseTrace", value:
+				"determine_tstat_id>settings.thermostatId = ${settings.thermostatId}"
+		}
+	}
+	else if ((settings.thermostatId == null) || (settings.thermostatId  == "")) {
+		settings.appKey = data.auth.appKey
+		settings.thermostatId = data.auth.thermostatId
+		tstatId=data.auth.thermostatId
 		if (settings.trace) {
 			log.debug "determine_tstat_id> tstatId = ${settings.thermostatId}"
 			sendEvent name: "verboseTrace", value:
@@ -2490,8 +2510,8 @@ def initialSetup(device_client_id, auth_data, device_tstat_id) {
 	log.debug "initialSetup> device_client_id = ${device_client_id}"
 
 	settings.trace='true'
-    settings.appKey= device_client_id
-    settings.thermostatId = device_tstat_id
+	settings.appKey= device_client_id
+	settings.thermostatId = device_tstat_id
 	log.debug "initialSetup> settings = $settings"
 
 	data?.auth = settings    
@@ -2503,7 +2523,7 @@ def initialSetup(device_client_id, auth_data, device_tstat_id) {
 	log.debug "initialSetup>end"
 
 	getThermostatInfo(thermostatId)
-    def ecobeeType=determine_ecobee_type_or_location("")
+	def ecobeeType=determine_ecobee_type_or_location("")
 	data?.auth.ecobeeType = ecobeeType
 }
 
