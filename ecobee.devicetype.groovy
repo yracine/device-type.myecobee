@@ -86,9 +86,6 @@ metadata {
 		attribute "ventilatorMode", "string"
 		attribute "programDisplayName", "string"
 		attribute "thermostatOperatingState", "string"        
-		attribute "device_tstat_id", "string"
-		attribute "device_client_id", "string"
-		attribute "device_tstat_type", "string"
         
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -2468,8 +2465,6 @@ def determine_tstat_id(tstat_id) {
 		tstatId = settings.thermostatId.trim()
 		if (settings.trace) {
 			log.debug "determine_tstat_id> tstatId = ${settings.thermostatId}"
-			sendEvent name: "verboseTrace", value:
-				"determine_tstat_id>settings.thermostatId = ${settings.thermostatId}"
 		}
 	}
 	else if ((settings.thermostatId == null) || (settings.thermostatId  == "")) {
@@ -2477,9 +2472,7 @@ def determine_tstat_id(tstat_id) {
 		settings.thermostatId = data.auth.thermostatId
 		tstatId=data.auth.thermostatId
 		if (settings.trace) {
-			log.debug "determine_tstat_id> tstatId = ${settings.thermostatId}"
-			sendEvent name: "verboseTrace", value:
-				"determine_tstat_id>settings.thermostatId = ${settings.thermostatId}"
+			log.debug "determine_tstat_id> tstatId from data= ${data.auth.thermostatId}"
 		}
 	}
 	if (settings.trace) {
@@ -2491,12 +2484,7 @@ def determine_tstat_id(tstat_id) {
 
 // Get the appKey for authentication
 private def get_appKey() {
-	if ((settings.appKey != null) && (settings.appKey != "")) {
-		return settings.appKey
-    }
-	else {
-    	return device_client_id
-    }
+	return settings.appKey
 }    
 
 
@@ -2515,22 +2503,21 @@ def initialSetup(device_client_id, auth_data, device_tstat_id) {
 	log.debug "initialSetup> settings = $settings"
 
 	data?.auth = settings    
-	data?.auth.access_token = auth_data.accessToken
-	data?.auth.refresh_token = auth_data.refreshToken
-	data?.auth.expires_in = auth_data.expiresIn
-	data?.auth.token_type = auth_data.tokenType
+	data.auth.access_token = auth_data.accessToken
+	data.auth.refresh_token = auth_data.refreshToken
+	data.auth.expires_in = auth_data.expiresIn
+	data.auth.token_type = auth_data.tokenType
 	log.debug "initialSetup> data_auth = $data.auth"
 	log.debug "initialSetup>end"
 
 	getThermostatInfo(thermostatId)
 	def ecobeeType=determine_ecobee_type_or_location("")
-	data?.auth.ecobeeType = ecobeeType
+	data.auth.ecobeeType = ecobeeType
 }
 
 def toQueryString(Map m)
 {
 	return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
 }
-
 
 
