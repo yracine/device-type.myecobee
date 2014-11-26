@@ -247,27 +247,32 @@ private def check_if_needs_hold() {
 	}
 
 	String currentProgName = ecobee.currentProgramScheduleName[0]
-	log.debug "MonitorEcobeeTemp> location.mode = $location.mode"
-	log.debug "MonitorEcobeeTemp> temp_diff = $temp_diff"
-	log.debug "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
-	log.debug "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
-	log.debug "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
-	log.debug "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
-	log.debug "MonitorEcobeeTemp> currentProgName = $currentProgName"
 	float heatTemp = ecobee.currentProgramHeatTemp[0].toFloat() // This is the heat temp associated to the current program
 	float coolTemp = ecobee.currentProgramCoolTemp[0].toFloat() // This is the cool temp associated to the current program
 	Integer ecobeeHumidity = ecobee.currentHumidity[0]
+	float ecobeeTemp = ecobee.currentTemperature[0].toFloat()
 
 	Integer outdoorHumidity = outdoorSensor.currentHumidity
 	float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
 	String ecobeeMode = ecobee.currentThermostatMode[0]
-	log.debug "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
-	log.debug "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
+	log.trace "MonitorEcobeeTemp> location.mode = $location.mode"
+	log.trace "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
+	log.trace "MonitorEcobeeTemp> currentProgName = $currentProgName"
+	log.trace "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
+	log.trace "MonitorEcobeeTemp> temp_diff = $temp_diff"
+	log.trace "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
+	log.trace "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
+	log.trace "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
+	log.trace "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
+	log.trace "MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}"
 	float targetTstatTemp
 
+	if (detailedNotif == 'true') {
+		log.trace("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}")
+		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}")
+	}
 	if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
                 
-		log.trace("MonitorEcobeeTemp>residents have not been quiet,set Home climate")
 		ecobee.setClimate("", "Home")            
 		send("MonitorEcobeeTemp>Climate now set to Home instead of Away, motion detected")
         
@@ -382,27 +387,33 @@ private def check_if_justified_hold() {
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
 	String currentProgName = ecobee.currentProgramScheduleName[0]
-	log.debug "MonitorEcobeeTemp> location.mode = $location.mode"
-	log.debug "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
-	log.debug "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
-	log.debug "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
-	log.debug "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
 	float heatTemp = ecobee.currentHeatingSetpoint[0].toFloat()
 	float coolTemp = ecobee.currentCoolingSetpoint[0].toFloat()
 	float programHeatTemp = ecobee.currentProgramHeatTemp[0].toFloat()
 	float programCoolTemp = ecobee.currentProgramCoolTemp[0].toFloat()
 	Integer ecobeeHumidity = ecobee.currentHumidity[0]
+	float ecobeeTemp = ecobee.currentTemperature[0].toFloat()
 
 	Integer outdoorHumidity = outdoorSensor.currentHumidity
 	float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
 	String ecobeeMode = ecobee.currentThermostatMode[0]
-	log.debug "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
-	log.debug "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
-	log.debug "MonitorEcobeeTemp> currentProgName = $currentProgName"
+	log.trace "MonitorEcobeeTemp> location.mode = $location.mode"
+	log.trace "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
+	log.trace "MonitorEcobeeTemp> currentProgName = $currentProgName"
+	log.trace "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
+	log.trace "MonitorEcobeeTemp> temp_diff = $temp_diff"
+	log.trace "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
+	log.trace "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
+	log.trace "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
+	log.trace "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
+	log.trace "MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}"
 
+	if (detailedNotif == 'true') {
+		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}")
+	}
 	if ((currentProgName.toUpperCase()=='AWAY') && (residentsHaveBeenQuiet())) {
                 
-		log.trace("MonitorEcobeeTemp>residents have been quiet,set climate to Away")
+		log.trace("MonitorEcobeeTemp>residents have been quiet,resume climate to Away")
 		ecobee.resumeThisTstat()
 		send("MonitorEcobeeTemp>resuming Away program, no motion detected")
         
