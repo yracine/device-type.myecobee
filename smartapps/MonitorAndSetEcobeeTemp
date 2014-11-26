@@ -27,8 +27,8 @@ definition(
 
 preferences {
 
-	section("Monitor outdoor temp & set the ecobee thermostat(s) setpoints") {
-		input "ecobee", "capability.thermostat", title: "Ecobee?", multiple: true
+	section("Monitor outdoor temp & set the ecobee thermostat setpoints") {
+		input "ecobee", "capability.thermostat", title: "Ecobee?"
 	}
 	section("For more heating in cold season, outdoor temp's threshold (default <= 10°F/-15°C)") {
 		input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
