@@ -56,6 +56,12 @@ preferences {
 		input "outdoorSensor", "capability.temperatureMeasurement", title: "Outdoor Temperature Sensor"
 
 	}
+	section("Choose indoor motion sensors for climate settings [Away, Home] (optional)") {
+        	input "motions", "capability.motionSensor", title: "Where?",  multiple: true, required: false
+    	}
+	section("Trigger the climate update when home has been quiet for (default=15 minutes)") {
+        	input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
+	}
 	section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
 		input "powerSwitch", "capability.switch", required: false
 	}
@@ -86,6 +92,9 @@ def updated() {
 }
 def initialize() {
 
+    if (motions) {
+        subscribe(motions, "motion", motionEvtHandler)
+    }
 	subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
 	subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
 	subscribe(ecobee, "humidity", ecobeeHumidityHandler)
@@ -96,7 +105,7 @@ def initialize() {
 	subscribe(ecobee, "programType", ecobeeProgramTypeHandler)
 	subscribe(ecobee, "programCoolTemp", ecobeeProgramCoolHandler)
 	subscribe(ecobee, "programHeatTemp", ecobeeProgramHeatHandler)
-	if (powerSwitch != null) {
+	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler)
 		subscribe(powerSwitch, "switch.on", onHandler)
 	}
@@ -105,6 +114,34 @@ def initialize() {
 
 	schedule("0 0/${delay} * * * ?", monitorAdjustTemp) // monitor & set indoor temp according to delay specified
 
+}
+
+
+def motionEvtHandler(evt) {
+ 	if (evt.value == "active") {
+        	state.lastIntroductionMotion = now()
+        	log.debug "Motion at home..."
+    	}
+}
+
+
+
+private residentsHaveBeenQuiet() {
+
+	def threshold = residentsQuietThreshold ?: 15   // By default, the delay is 15 minutes
+	Integer delay = threshold * 60 
+    
+    	def result = true
+    	def t0 = new Date(now() - (threshold * 60 *1000))
+    	for (sensor in motions) {
+        	def recentStates = sensor.statesSince("motion", t0)
+        	if (recentStates.find{it.value == "active"}) {
+			result = false
+			break
+        	}
+    	}
+    	log.debug "residentsHaveBeenQuiet: $result"
+    	return result
 }
 
 def ecobeeHeatTempHandler(evt) {
@@ -175,13 +212,13 @@ def monitorAdjustTemp() {
 
 	String currentProgType = ecobee.currentProgramType[0]
 	log.trace("MonitorEcobeeTemp> program Type= ${currentProgType}")
-	if (currentProgType.contains("hold")) { // don't make any further adustments 
+	if (currentProgType.contains("hold")) { 						// don't make any further adustments 
 		log.trace("MonitorEcobeeTemp>about to call check_if_hold_justified....")
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>Hold set, checking if still justified")
 		}
 		check_if_justified_hold()
-	} else if (!currentProgType.contains("vacation")) { // don't make adjustment if on vacation mode
+	} else if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
 		log.trace("MonitorEcobeeTemp>about to call check_if_needs_hold....")
 		check_if_needs_hold()
 	}
@@ -209,12 +246,14 @@ private def check_if_needs_hold() {
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
 
+	String currentProgName = ecobee.currentProgramScheduleName[0]
 	log.debug "MonitorEcobeeTemp> location.mode = $location.mode"
 	log.debug "MonitorEcobeeTemp> temp_diff = $temp_diff"
 	log.debug "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
 	log.debug "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
 	log.debug "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
 	log.debug "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
+	log.debug "MonitorEcobeeTemp> currentProgName = $currentProgName"
 	float heatTemp = ecobee.currentProgramHeatTemp[0].toFloat() // This is the heat temp associated to the current program
 	float coolTemp = ecobee.currentProgramCoolTemp[0].toFloat() // This is the cool temp associated to the current program
 	Integer ecobeeHumidity = ecobee.currentHumidity[0]
@@ -226,9 +265,20 @@ private def check_if_needs_hold() {
 	log.debug "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
 	float targetTstatTemp
 
+	if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
+                
+		log.trace("MonitorEcobeeTemp>residents have not been quiet,set Home climate")
+		ecobee.setClimate("", "Home")            
+		send("MonitorEcobeeTemp>Climate now set to Home instead of Away, motion detected")
+        
+		 /* Get latest heat and cool setting points after climate adjustment */
+		heatTemp = ecobee.currentProgramHeatTemp[0].toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentProgramCoolTemp[0].toFloat() // This is the cool temp associated to the current program
+        
+	}
 	if (ecobeeMode == 'cool') {
 
-		if (location.mode.toUpperCase() != 'AWAY') { // increase heating settings only if mode != Away
+		if (location.mode.toUpperCase() != 'AWAY') { // increase cooling settings only if mode != Away
 			log.trace(
 				"MonitorEcobeeTemp>evaluate: moreCoolThreshold= ${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
 			log.trace(
@@ -331,6 +381,7 @@ private def check_if_justified_hold() {
 		less_heat_threshold = (givenLessHeatThreshold != null) ? givenLessHeatThreshold : 50 // by default, 50°F is the outdoor temp's threshold for less heating
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
+	String currentProgName = ecobee.currentProgramScheduleName[0]
 	log.debug "MonitorEcobeeTemp> location.mode = $location.mode"
 	log.debug "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
 	log.debug "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
@@ -347,7 +398,19 @@ private def check_if_justified_hold() {
 	String ecobeeMode = ecobee.currentThermostatMode[0]
 	log.debug "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
 	log.debug "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
+	log.debug "MonitorEcobeeTemp> currentProgName = $currentProgName"
 
+	if ((currentProgName.toUpperCase()=='AWAY') && (residentsHaveBeenQuiet())) {
+                
+		log.trace("MonitorEcobeeTemp>residents have been quiet,set climate to Away")
+		ecobee.resumeThisTstat()
+		send("MonitorEcobeeTemp>resuming Away program, no motion detected")
+        
+        /* Get latest heat and cool setting points after climate adjustment */
+		heatTemp = ecobee.currentProgramHeatTemp[0].toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentProgramCoolTemp[0].toFloat() // This is the cool temp associated to the current program
+        
+	}
 	if (ecobeeMode == 'cool') {
 
 		log.trace("MonitorEcobeeTemp>evaluate: moreCoolThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
@@ -360,7 +423,7 @@ private def check_if_justified_hold() {
 			send("MonitorEcobeeTemp>eval:  moreCoolThresholdHumidity= ${humidity_threshold}% vs. outdoorHumidity ${outdoorHumidity}%")
 		}
 		if ((outdoorTemp > less_cool_threshold) && (outdoorTemp < more_cool_threshold) &&
-        	(outdoorHumidity < humidity_threshold)) {
+        		(outdoorHumidity < humidity_threshold)) {
 			ecobee.resumeThisTsat()
 			send("MonitorEcobeeTemp>resuming program, ${less_cool_threshold}° < outdoorTemp <${more_cool_threshold}°")
 		} else {
@@ -389,7 +452,7 @@ private def check_if_justified_hold() {
 			send("MonitorEcobeeTemp>eval: lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
 			send("MonitorEcobeeTemp>eval: moreHeatThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
 		}
-        if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
+        	if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 			(outdoorHumidity < humidity_threshold)) {
 			ecobee.resumeThisTstat()
 			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° > outdoorTemp > ${more_heat_threshold}°")
