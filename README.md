@@ -19,9 +19,8 @@ INSTALLATION STEPS
 
 For signing up as a ecobee developer, just click on the link under
 
-http://www.ecobee.com/solutions/api/
+https://www.ecobee.com/home/developer/loginDeveloper.jsp
 
-It says "Want to be an ecobee developer? Sign up here".
 
 Then, after signing up, you'll see a new 'developer' tab at the ecobee portal where you can register your key.
 
