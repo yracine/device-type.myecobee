@@ -297,10 +297,10 @@ private def check_if_needs_hold() {
  		state.programSetTime = now()
  		state.programSetTimestamp = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
  		state.programHoldSet = 'Home'
-		log.debug "MonitorEcobeeTemp>Program now set to Home at ${programSetTimestamp}, motion detected"
+		log.debug "MonitorEcobeeTemp>Program now set to Home at ${state.programSetTimestamp}, motion detected"
 		 /* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentHeatingSetPoint.toFloat() // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentCoolingSetPoint.toFloat() // This is the cool temp associated to the current program
+		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
 	} else if ((currentProgName.toUpperCase()=='HOME') && (residentsHaveBeenQuiet())) {
                 
@@ -309,11 +309,11 @@ private def check_if_needs_hold() {
  		state.programSetTime = now()
  		state.programSetTimestamp = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
  		state.programHoldSet = 'Away'
-		log.debug "MonitorEcobeeTemp>Program now set to Away at: ${programSetTimestamp}, motion detected"
+		log.debug "MonitorEcobeeTemp>Program now set to Away at: ${state.programSetTimestamp}, motion detected"
         
 		 /* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentHeatingSetPoint.toFloat() // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentCoolingSetPoint.toFloat() // This is the cool temp associated to the current program
+		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
 	} else {
  		state.programSetTime = null
@@ -321,6 +321,7 @@ private def check_if_needs_hold() {
  		state.programHoldSet = ""
     
     }
+	log.trace "MonitorEcobeeTemp>state=${state}"
 	if (ecobeeMode == 'cool') {
 
 		if (location.mode.toUpperCase() != 'AWAY') { // increase cooling settings only if mode != Away
@@ -448,33 +449,46 @@ private def check_if_justified_hold() {
 	log.trace "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
 	log.trace "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
 	log.trace "MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}"
+	log.trace "MonitorEcobeeTemp>state=${state}"
 
 	if (detailedNotif == 'true') {
 		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}")
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
                 
-		log.trace("MonitorEcobeeTemp>it's not been quiet since ${state.programHoldTimestamp},resume program")
+		log.trace("MonitorEcobeeTemp>it's not been quiet since ${programSetTimestamp},resume program")
 		ecobee.resumeThisTstat()
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
         
         /* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentHeatingSetPoint // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentCoolingSetPoint // This is the cool temp associated to the current program
+		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
-	} else if (state?.programHoldSet == 'Away') return // hold justified, no more adjustments
+	} else if (state?.programHoldSet == 'Away') {
+		log.trace("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
+		send("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
+    		return // hold justified, no more adjustments
     
+	}    
 	if ((state?.programHoldSet == 'Home') && (residentsHaveBeenQuiet())) {
                 
-		log.trace("MonitorEcobeeTemp>it's been quiet since ${state.programHoldTimestamp},resume program")
+		log.trace("MonitorEcobeeTemp>it's been quiet since ${state.programSetTimestamp},resume program")
 		ecobee.resumeThisTstat()
 		send("MonitorEcobeeTemp>resumed program, no motion detected")
         
         /* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentHeatingSetPoint // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentCoolingSetPoint // This is the cool temp associated to the current program
+		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
+		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
-	} else if (state?.programHoldSet == 'Home') return // hold justified, no more adjustments
+	} else if (state?.programHoldSet == 'Home') { 
+    
+		log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
+		if (detailedNotif == 'true') {
+			send("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
+		}
+    		return // hold justified, no more adjustments
+        
+ 	}    
 	if (ecobeeMode == 'cool') {
 
 		log.trace("MonitorEcobeeTemp>evaluate: moreCoolThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
@@ -519,7 +533,7 @@ private def check_if_justified_hold() {
         	if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 			(outdoorHumidity < humidity_threshold)) {
 			ecobee.resumeThisTstat()
-			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° > outdoorTemp > ${more_heat_threshold}°")
+			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° < outdoorTemp > ${more_heat_threshold}°")
 		} else {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
