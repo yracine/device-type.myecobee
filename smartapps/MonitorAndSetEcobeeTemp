@@ -276,18 +276,18 @@ private def check_if_needs_hold() {
 	log.trace "MonitorEcobeeTemp> location.mode = $location.mode"
 	log.trace "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
 	log.trace "MonitorEcobeeTemp> currentProgName = $currentProgName"
-	log.trace "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
-	log.trace "MonitorEcobeeTemp> temp_diff = $temp_diff"
-	log.trace "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
-	log.trace "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
-	log.trace "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
-	log.trace "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
-	log.trace "MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}"
-	float targetTstatTemp
+	log.trace "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp°"
+	log.trace "MonitorEcobeeTemp> temp_diff = $temp_diff°"
+	log.trace "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold°"
+	log.trace "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold°"
+	log.trace "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold°"
+	log.trace "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold°"
+	log.trace "MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°"
+	log.trace "MonitorEcobeeTemp>state=${state}"
+    float targetTstatTemp
 
 	if (detailedNotif == 'true') {
-		log.trace("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}")
-		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}")
+		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°")
 	}
 	if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
                 
@@ -325,7 +325,7 @@ private def check_if_needs_hold() {
 
 		if (location.mode.toUpperCase() != 'AWAY') { // increase cooling settings only if mode != Away
 			log.trace(
-				"MonitorEcobeeTemp>evaluate: moreCoolThreshold= ${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
+				"MonitorEcobeeTemp>evaluate: moreCoolThreshold= ${more_cool_threshold}° vs. outdoorTemp ${outdoorTemp}°")
 			log.trace(
 				"MonitorEcobeeTemp>evaluate: moreCoolThresholdHumidity= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
 			if (detailedNotif == 'true') {
@@ -441,17 +441,17 @@ private def check_if_justified_hold() {
 	log.trace "MonitorEcobeeTemp> location.mode = $location.mode"
 	log.trace "MonitorEcobeeTemp> ecobee Mode = $ecobeeMode"
 	log.trace "MonitorEcobeeTemp> currentProgName = $currentProgName"
-	log.trace "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp"
-	log.trace "MonitorEcobeeTemp> temp_diff = $temp_diff"
-	log.trace "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold"
-	log.trace "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold"
-	log.trace "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold"
-	log.trace "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold"
-	log.trace "MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}"
+	log.trace "MonitorEcobeeTemp> outdoorTemp = $outdoorTemp°"
+	log.trace "MonitorEcobeeTemp> temp_diff = $temp_diff°"
+	log.trace "MonitorEcobeeTemp> moreHeatThreshold = $more_heat_threshold°"
+	log.trace "MonitorEcobeeTemp> moreHCoolThreshold = $more_cool_threshold°"
+	log.trace "MonitorEcobeeTemp> lessHeatThreshold = $less_heat_threshold°"
+	log.trace "MonitorEcobeeTemp> lessCoolThreshold = $less_cool_threshold°"
+	log.trace "MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°"
 	log.trace "MonitorEcobeeTemp>state=${state}"
 
 	if (detailedNotif == 'true') {
-		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}")
+		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°")
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
                 
