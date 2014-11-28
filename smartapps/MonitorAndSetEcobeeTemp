@@ -97,7 +97,7 @@ def initialize() {
  	state.programHoldSet = ""
 	log.debug("initialize state=$state")
 	if (motions) {
-        	subscribe(motions, "motion", motionEvtHandler)
+		subscribe(motions, "motion", motionEvtHandler)
 	}
 	subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
 	subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
@@ -133,7 +133,6 @@ def motionEvtHandler(evt) {
 private residentsHaveBeenQuiet() {
 
 	def threshold = residentsQuietThreshold ?: 15   // By default, the delay is 15 minutes
-	Integer delay = threshold * 60 
     
     	def result = true
     	def t0 = new Date(now() - (threshold * 60 *1000))
@@ -467,7 +466,7 @@ private def check_if_justified_hold() {
 	} else if (state?.programHoldSet == 'Away') {
 		log.trace("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
 		send("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
-    		return // hold justified, no more adjustments
+ 		return // hold justified, no more adjustments
     
 	}    
 	if ((state?.programHoldSet == 'Home') && (residentsHaveBeenQuiet())) {
@@ -486,7 +485,7 @@ private def check_if_justified_hold() {
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
 		}
-    		return // hold justified, no more adjustments
+		return // hold justified, no more adjustments
         
  	}    
 	if (ecobeeMode == 'cool') {
