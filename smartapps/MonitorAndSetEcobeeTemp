@@ -96,9 +96,9 @@ def initialize() {
  	state.programSetTimestamp = ""
  	state.programHoldSet = ""
 	log.debug("initialize state=$state")
-    if (motions) {
-        subscribe(motions, "motion", motionEvtHandler)
-    }
+	if (motions) {
+        	subscribe(motions, "motion", motionEvtHandler)
+	}
 	subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
 	subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
 	subscribe(ecobee, "humidity", ecobeeHumidityHandler)
