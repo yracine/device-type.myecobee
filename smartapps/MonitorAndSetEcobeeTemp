@@ -92,9 +92,7 @@ def updated() {
 }
 def initialize() {
 
- 	state.programSetTime = null
- 	state.programSetTimestamp = ""
- 	state.programHoldSet = ""
+ 	reset_state_values()
 	log.debug("initialize state=$state")
 	if (motions) {
 		subscribe(motions, "motion", motionEvtHandler)
@@ -127,8 +125,7 @@ def motionEvtHandler(evt) {
         	log.debug "Motion at home..."
 		if (state?.programHoldSet == 'Away')  {
 			check_if_hold_justified()
-            
-    	}
+		}
 	}        
 }
 
@@ -137,24 +134,22 @@ def motionEvtHandler(evt) {
 private residentsHaveBeenQuiet() {
 
 	def threshold = residentsQuietThreshold ?: 15   // By default, the delay is 15 minutes
-    
     	def result = true
     	def t0 = new Date(now() - (threshold * 60 *1000))
     	for (sensor in motions) {
         	def recentStates = sensor.statesSince("motion", t0)
         	if (recentStates.find{it.value == "active"}) {
-				result = false
-				break
-			}	
+			result = false
+			break
+		}	
             
-		}
+	}
     	log.debug "residentsHaveBeenQuiet: $result"
     	return result
 }
 
 
 private isProgramScheduleSet(climateName, threshold) {
-
 	def result = false
     	def t0 = new Date(now() - (threshold * 60 *1000))
 	def recentStates = ecobee.statesSince("programScheduleName", t0)
@@ -214,8 +209,6 @@ def onHandler(evt) {
 }
 
 def monitorAdjustTemp() {
-
-
 	if (powerSwitch?.currentSwitch == "off") {
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>Virtual master switch ${powerSwitch.name} is off, processing on hold...")
@@ -247,9 +240,9 @@ def monitorAdjustTemp() {
 
 private def reset_state_values() {
 
- 		state.programSetTime = null
- 		state.programSetTimestamp = ""
- 		state.programHoldSet = ""
+ 	state.programSetTime = null
+ 	state.programSetTimestamp = ""
+ 	state.programHoldSet = ""
 }
 
 private def check_if_hold_needed() {
@@ -324,7 +317,7 @@ private def check_if_hold_needed() {
 		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
-    }
+	}
 	log.trace "MonitorEcobeeTemp>state=${state}"
 	if (ecobeeMode == 'cool') {
 
@@ -459,7 +452,6 @@ private def check_if_hold_justified() {
 		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°")
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
-                
 		log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program")
 		ecobee.resumeThisTstat()
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
@@ -475,17 +467,15 @@ private def check_if_hold_justified() {
     
 	}    
 	if ((state?.programHoldSet == 'Home') && (residentsHaveBeenQuiet())) {
-                
 		log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program")
 		ecobee.resumeThisTstat()
 		send("MonitorEcobeeTemp>resumed program, no motion detected")
         
-        /* Get latest heat and cool setting points after climate adjustment */
+        	/* Get latest heat and cool setting points after climate adjustment */
 		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
-        reset_state_values()
+		reset_state_values()
 	} else if (state?.programHoldSet == 'Home') { 
-    
 		log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
@@ -494,7 +484,6 @@ private def check_if_hold_justified() {
         
  	}    
 	if (ecobeeMode == 'cool') {
-
 		log.trace("check_if_hold_justified>evaluate: moreCoolThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
 		log.trace(
 			"check_if_hold_justified>evaluate: moreCoolThresholdHumidity= ${humidity_threshold}% vs. outdoorHumidity ${outdoorHumidity}%")
