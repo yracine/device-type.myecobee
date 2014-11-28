@@ -125,7 +125,16 @@ def motionEvtHandler(evt) {
  	if (evt.value == "active") {
         	state.lastIntroductionMotion = now()
         	log.debug "Motion at home..."
-    	}
+		if (state?.programHoldSet == 'Away')  {
+			if (detailedNotif == 'true') {
+				log.debug "'Away' hold to be resumed, motion detected since ${state.programSetTimestamp}"
+				send("MonitorEcobeeTemp>Program now set to Home, motion detected")
+			}
+			ecobee.resumeThisTstat()
+			check_if_needs_hold()
+            
+    		}
+	}        
 }
 
 
@@ -139,8 +148,8 @@ private residentsHaveBeenQuiet() {
     	for (sensor in motions) {
         	def recentStates = sensor.statesSince("motion", t0)
         	if (recentStates.find{it.value == "active"}) {
-			result = false
-			break
+				result = false
+				break
 			}	
             
 		}
@@ -455,7 +464,7 @@ private def check_if_justified_hold() {
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
                 
-		log.trace("MonitorEcobeeTemp>it's not been quiet since ${programSetTimestamp},resume program")
+		log.trace("MonitorEcobeeTemp>it's not been quiet since ${state.programSetTimestamp},resume program")
 		ecobee.resumeThisTstat()
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
         
