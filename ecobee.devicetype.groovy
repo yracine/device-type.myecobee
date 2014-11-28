@@ -143,7 +143,8 @@ metadata {
 		command "iterateSetThermostatSettings"
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
-        
+		command "refreshChildToken"        
+		command "refreshParentToken"
 }        
 simulator {
 		// TODO: define status and reply messages here
@@ -2229,9 +2230,10 @@ private def refresh_tokens() {
 		return false
 	}
 	// determine token's expire time
-	def now = new Date().getTime();
-	def authexptime = new Date((now + (data.auth.expires_in * 60 * 1000))).getTime()
+	def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
 	data.auth.authexptime = authexptime
+// If this thermostat was created by initialSetup, go and refresh all other children
+//	refreshParentToken()
 	if (settings.trace) {
 
 		log.debug "refresh_tokens> expires in ${data.auth.expires_in} minutes"
@@ -2241,6 +2243,24 @@ private def refresh_tokens() {
 	}
 	return true
 }
+def refreshChildToken(auth) {
+	log.debug "refreshChildToken>token expires in ${auth.expires_in} minutes"
+
+	data.auth.access_token = auth.authToken
+	data.auth.refresh_token = auth.refreshToken
+	data.auth.expires_in = auth.expiresIn
+	data.auth.token_type = auth.tokenType
+	data.auth.scope = auth.scope
+	data.auth.authexptime = auth.authexptime
+	log.debug "refreshChildToken>done"
+}
+
+def refreshParentToken() {
+	log.debug "refreshParentToken>begin data.auth = ${data.auth}"
+	parent.setAuthToken(data.auth)
+	log.debug "refreshParentToken>end"
+}
+
 private def login() {
 	if (settings.trace) {
 		log.debug "login> about to call setAuthTokens"
@@ -2361,8 +2381,7 @@ def setAuthTokens() {
 			return
 		}
 		// determine token's expire time
-		def now = new Date().getTime();
-		def authexptime = new Date((now + (data.auth.expires_in * 60 * 1000))).getTime()
+		def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
 		data.auth.authexptime = authexptime
 		if (settings.trace) {
 			log.debug "setAuthTokens> expires in ${data.auth.expires_in} minutes"
@@ -2392,6 +2411,7 @@ private def isTokenExpired() {
 	def now = new Date().getTime();
 	if (settings.trace) {
 		log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time now: ${now}"
+		log.debug "isTokenExpired> auth: ${data.auth}"
 	}
 	if (data.auth.authexptime > now) {
 		if (settings.trace) {
@@ -2487,8 +2507,6 @@ private def get_appKey() {
 	return settings.appKey
 }    
 
-
-
 def initialSetup(device_client_id, auth_data, device_tstat_id) {
 
 
@@ -2503,10 +2521,11 @@ def initialSetup(device_client_id, auth_data, device_tstat_id) {
 	log.debug "initialSetup> settings = $settings"
 
 	data?.auth = settings    
-	data.auth.access_token = auth_data.accessToken
+	data.auth.access_token = auth_data.authToken
 	data.auth.refresh_token = auth_data.refreshToken
 	data.auth.expires_in = auth_data.expiresIn
 	data.auth.token_type = auth_data.tokenType
+	data.auth.authexptime= auth_data?.authexptime
 	log.debug "initialSetup> data_auth = $data.auth"
 	log.debug "initialSetup>end"
 
