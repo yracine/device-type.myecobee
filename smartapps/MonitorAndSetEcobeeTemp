@@ -126,11 +126,11 @@ def motionEvtHandler(evt) {
         	state.lastIntroductionMotion = now()
         	log.debug "Motion at home..."
 		if (state?.programHoldSet == 'Away')  {
+			ecobee.resumeThisTstat()
 			if (detailedNotif == 'true') {
 				log.debug "'Away' hold to be resumed, motion detected since ${state.programSetTimestamp}"
-				send("MonitorEcobeeTemp>Program now set to Home, motion detected")
+				send("MonitorEcobeeTemp>program now resumed, motion detected")
 			}
-			ecobee.resumeThisTstat()
 			check_if_needs_hold()
             
     		}
@@ -160,15 +160,14 @@ private residentsHaveBeenQuiet() {
 
 private isProgramScheduleSet(climateName, threshold) {
 
-    def result = false
-    def t0 = new Date(now() - (threshold * 60 *1000))
+	def result = false
+    	def t0 = new Date(now() - (threshold * 60 *1000))
 	def recentStates = ecobee.statesSince("programScheduleName", t0)
 	if (recentStates.find{it.value == climateName}) {
 		result = true
-    }
-	        
-    log.debug "isProgramScheduleSet: $result"
-    return result
+    	}
+	log.debug "isProgramScheduleSet: $result"
+    	return result
 }
 
 def ecobeeHeatTempHandler(evt) {
