@@ -156,23 +156,41 @@ def getEcobeeThermostats() {
 }
 
 
-def setAuthToken(auth_data) {
+def setParentAuthTokens(auth_data) {
 
-	log.debug "setAuthToken= $auth_data"
-	atomicState.refreshToken = auth_data.refresh_token
-    atomicState.authToken = auth_data.access_token
-	atomicState.expiresIn=auth_data.expires_in
-	atomicState.tokenType = auth_data.token_type
+	sendPush("setParentAuthTokens>begin auth_data: $auth_data")
+	atomicState.refreshToken = auth_data?.refresh_token
+    atomicState.authToken = auth_data?.access_token
+	atomicState.expiresIn=auth_data?.expires_in
+	atomicState.tokenType = auth_data?.token_type
     atomicState.authexptime= auth_data?.authexptime
-	log.debug "atomicState= $atomicState"
-
+	sendPush("setParentAuthTokens>begin atomicState: $atomicState")
+	refreshOtherChildAuthTokens()
+	sendPush("setParentAuthTokens>end")
 }
 
-def refreshChildAuthtokens() {
-	def children= getChildDevices().findAll { !thermostats.contains(it.deviceNetworkId) }
+def refreshOtherChildAuthTokens() {
 
-	log.debug "refreshing ${children.size()} thermostats"
-	children.each { it.refreshChildToken(atomicState) }
+	sendPush("refreshOtherChildAuthTokens>begin updating children with $atomicState")
+	def children= getChildDevices()
+
+	sendPush("refreshOtherChildAuthtokens> refreshing ${children.size()} thermostats")
+	children.each { 
+		sendPush("refreshOtherChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
+    	it.refreshChildTokens(atomicState) 
+	}
+}
+
+def refreshThisChildAuthTokens(child) {
+
+	sendPush("refreshThisChildAuthTokens>begin child id: $child.device.deviceNetworkId, updating it with $atomicState")
+	def children = getChildDevices().find { thermostats.contains(child.device.deviceNetworkId)}
+	sendPush("refreshThisChildAuthtokens> refreshing ${children.size()} thermostats")
+	children.each { 
+		sendPush("refreshThisChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
+    	it.refreshChildTokens(atomicState)
+	}
+	sendPush("refreshThisChildAuthTokens>end")
 }
 
 
@@ -210,7 +228,7 @@ def updated() {
 }
 
 def initialize() {
-	// TODO: subscribe to attributes, devices, locations, etc.
+    
 	log.debug "initialize"
     int i =0
 	def devices = thermostats.collect { dni ->
@@ -229,11 +247,7 @@ def initialize() {
 			log.debug "About to create child device with id $dni, thermostatId = $thermostatId, name=  ${name}"
 			d = addChildDevice(getChildNamespace(), getChildName(), dni, null,
 				[label: "${labelName}"]) // , completedSetup: true
-			d.initialSetup( getSmartThingsClientId(), atomicState, thermostatId ) 	// initial setup 
-/*
-			d.refreshParentToken()
-*/            
-			log.debug "New atomicState $atomicState"
+			d.initialSetup( getSmartThingsClientId(), atomicState, thermostatId ) 	// initial setup of the Child Device
 			log.debug "created ${d.displayName} with id $dni"
 		}
 		else
@@ -260,6 +274,27 @@ def initialize() {
 
 	log.debug "deleting ${delete.size()} thermostats"
 	delete.each { deleteChildDevice(it.deviceNetworkId) }
+
+	pollHandler()
+
+    
+    // set up internal poll timer
+	def pollTimer = 20
+
+	log.trace "setting poll to ${pollTimer}"
+    schedule("0 0/${pollTimer.toInteger()} * * * ?", pollHandler)
+}
+
+
+def pollHandler() {
+	log.trace "pollHandler>begin"
+	def devices = thermostats.collect { dni ->
+		def d = getChildDevice(dni)
+		log.debug "pollHandler>Looping thru thermostats, found id $dni, about to poll"
+		d.poll()
+        
+    }
+	log.trace "pollHandler>end"
 }
 
 
@@ -280,7 +315,7 @@ def oauthInitUrl() {
 	return "https://api.ecobee.com/authorize?" + toQueryString(oauthParams)
 }
 
-def buildRedirectUrl() {
+	def buildRedirectUrl() {
 	log.debug "buildRedirectUrl"
 	return serverUrl + "/api/token/${atomicState.accessToken}/smartapps/installations/${app.id}/swapToken"
 }
@@ -447,7 +482,7 @@ private refreshAuthToken() {
 					atomicState.tokenType = jsonMap.token_type
 					def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
 					atomicState.authexptime = authexptime
-
+					refreshChildAuthTokens()
 					debugEvent ("Refresh Token = ${atomicState.refreshToken}", true)
 					debugEvent ("OAUTH Token = ${atomicState.authToken}", true)
 
@@ -483,7 +518,7 @@ def getChildNamespace() { "yracine" }
 def getChildName() { "My Ecobee Device" }
 
 def getServerUrl() { return "https://graph.api.smartthings.com" }
-def getSmartThingsClientId() { "yourAppKeyHere!!" }
+def getSmartThingsClientId() { "your Smartthings AppKey here!" }
 def debugEvent(message, displayEvent) {
 
 	def results = [
