@@ -1,7 +1,4 @@
-device-type.myecobee
-Ecobee-Smartthings integration
-
-/***
+device-type.myecobee           Ecobee-Smartthings integration
 
 My Ecobee Device:  Custom ecobee device to enable more smart thermostat's capabilities within Smartthings 
 
@@ -15,6 +12,7 @@ Code: https://github.com/yracine/device-type.myecobee
 
 
 
+=====================
 INSTALLATION STEPS
 =====================
 
@@ -69,8 +67,21 @@ If needed, see "how to setup ecobee" video (but use My ecobee Init instead of th
 
 http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
+    
+***********************************************************
+5) Your device should now be ready to process your commands
+***********************************************************
+
+**************************************************************
+6) To populate the UI fields for your newly created device, 
+**************************************************************
+
+Hit the 'refresh' button several times as the smartthings UI is not always responsive. 
+You may want to stop and restart your smartthings app if needed.
+
+
 *************************************************************
-5) Update device's preferences (optional, input parameters)
+7) Update device's preferences (optional, input parameters)
 *************************************************************
 Go to https://graph.api.smartthings.com/device/list
 
@@ -85,18 +96,6 @@ You only need to edit the following parameters
     (b) <holdType> set to nextTransition or indefinite (by default, no spaces) 
     see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml 
     for more details 
-    
-***********************************************************
-6) Your device should now be ready to process your commands
-***********************************************************
-
-**************************************************************
-7) To populate the UI fields for your newly created device, 
-**************************************************************
-
-Hit the 'refresh' button several times as the smartthings UI is not always responsive. 
-You may want to stop and restart your smartthings app if needed.
-
 
 ********************************
 8) Smartapps available
