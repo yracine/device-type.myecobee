@@ -143,8 +143,7 @@ metadata {
 		command "iterateSetThermostatSettings"
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
-		command "refreshChildToken"        
-		command "refreshParentToken"
+		command "refreshChildTokens"        
 }        
 simulator {
 		// TODO: define status and reply messages here
@@ -2232,10 +2231,11 @@ private def refresh_tokens() {
 	// determine token's expire time
 	def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
 	data.auth.authexptime = authexptime
-// If this thermostat was created by initialSetup, go and refresh all other children
-//	refreshParentToken()
+// If this thermostat was created by initialSetup, go and refresh the parent and all other children
+	if (data.auth.thermostatId) {		// Created by initalSetup, need to refresh Parent tokens and other children
+		refreshParentTokens()
+	}        
 	if (settings.trace) {
-
 		log.debug "refresh_tokens> expires in ${data.auth.expires_in} minutes"
 		log.debug "refresh_tokens> data_auth.expires_in in time = ${authexptime}"
 		sendEvent name: "verboseTrace", value:
@@ -2243,29 +2243,47 @@ private def refresh_tokens() {
 	}
 	return true
 }
-def refreshChildToken(auth) {
-	log.debug "refreshChildToken>token expires in ${auth.expires_in} minutes"
-
+def refreshChildTokens(auth) {
+	if (settings.trace) {
+		log.debug "refreshChildTokens>begin token auth= $auth"
+	}
 	data.auth.access_token = auth.authToken
 	data.auth.refresh_token = auth.refreshToken
 	data.auth.expires_in = auth.expiresIn
 	data.auth.token_type = auth.tokenType
 	data.auth.scope = auth.scope
 	data.auth.authexptime = auth.authexptime
-	log.debug "refreshChildToken>done"
+	if (settings.trace) {
+		log.debug "refreshChildTokens>end data.auth=$data.auth"
+	}
 }
 
-def refreshParentToken() {
-	log.debug "refreshParentToken>begin data.auth = ${data.auth}"
-	parent.setAuthToken(data.auth)
-	log.debug "refreshParentToken>end"
+private def refreshParentTokens() {
+	if (settings.trace) {
+		log.debug "refreshParentTokens>begin data.auth = ${data.auth}"
+	}
+	if (settings.trace) {
+		log.debug "refreshParentTokens>auth=$auth, about to call parent.setParentAuthTokens"
+	}         
+	parent.setParentAuthTokens(data.auth)
+	if (settings.trace) {
+		log.debug "refreshParentTokens>end"
+	}         
 }
 
 private def login() {
 	if (settings.trace) {
 		log.debug "login> about to call setAuthTokens"
 	}
-	setAuthTokens()
+	if (data?.auth?.thermostatId) {
+    	// Created by initalSetup
+		if (settings.trace) {
+			log.debug "login> about to call refreshThisChildAuthTokens"
+		}
+		parent.refreshThisChildAuthTokens(this)
+	} else { 
+		setAuthTokens()
+	}    
 	if (!isLoggedIn) {
 		if (settings.trace) {
 			log.debug "login> no access_token..., failed"
@@ -2463,7 +2481,7 @@ private def determine_ecobee_type_or_location(tstatType) {
 	} else {
 		// by default, the ecobee type is 'registered'
 		ecobeeType = 'registered'
-        settings.ecobeeType='registered'
+		settings.ecobeeType='registered'
 	}
 	if (settings.trace) {
 		log.debug "determine_ecobee_type>end ecobeeType = ${ecobeeType}"
