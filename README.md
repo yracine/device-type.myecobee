@@ -59,9 +59,11 @@ At https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 *************************************************
 
 
-****************************************************************************
-4) Go through the authentication process and connect Smartthings with Ecobee
-****************************************************************************
+***********************************************************************************
+4) Go through the authentication process and connect Smartthings with Ecobee portal
+***********************************************************************************
+
+You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
 
 If needed, see "how to setup ecobee" video (but use My ecobee Init instead of the Smarttings labs script)
 
