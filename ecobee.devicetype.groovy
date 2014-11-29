@@ -159,32 +159,32 @@ simulator {
 		}
 		valueTile("temperature", "device.temperature", width: 2, height: 2,
 			canChangeIcon: true) {
-			state("temperature", label: '${currentValue}°', unit: "C", 
-            		backgroundColors: [
-					[value: 0, color: "#153591"],
-					[value: 8, color: "#1e9cbb"],
-					[value: 14, color: "#90d2a7"],
-					[value: 20, color: "#44b621"],
-					[value: 24, color: "#f1d801"],
-					[value: 29, color: "#d04e00"],
-					[value: 36, color: "#bc2323"]
-				])
-		}
-//		If one prefers Farenheits over Celcius, just comment out the temperature in Celsius 
-//		and remove the comment below to have the right color scale in Farenheits.
+//		If one prefers Celcius over Farenheits, just comment out the temperature in Farenheits 
+//		and remove the comment below to have the right color scale in Celcius.
 //		This issue will be solved as soon as Smartthings supports dynamic tiles
 //		valueTile("temperature", "device.temperature", width: 2, height: 2) {
-//			state("temperature", label:'${currentValue}°', unit:"F",
-//			backgroundColors:[
-//					[value: 31, color: "#153591"],
-//					[value: 44, color: "#1e9cbb"],
-//					[value: 59, color: "#90d2a7"],
-//					[value: 74, color: "#44b621"],
-//					[value: 84, color: "#f1d801"],
-//					[value: 95, color: "#d04e00"],
-//					[value: 96, color: "#bc2323"]
+//			state("temperature", label: '${currentValue}°', unit: "C", 
+//            		backgroundColors: [
+//					[value: 0, color: "#153591"],
+//					[value: 8, color: "#1e9cbb"],
+//					[value: 14, color: "#90d2a7"],
+//					[value: 20, color: "#44b621"],
+//					[value: 24, color: "#f1d801"],
+//					[value: 29, color: "#d04e00"],
+//					[value: 36, color: "#bc2323"]
 //				])
 //		}
+			state("temperature", label:'${currentValue}°', unit:"F",
+			backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				])
+		}
 		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
 			state "heat", label: '${name}', action: "thermostat.off", 
