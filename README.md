@@ -89,10 +89,11 @@ Hit the 'refresh' button several times as the smartthings UI is not always respo
 You may want to stop and restart your smartthings app if needed.
 
 
-Optional (Smartapps available)
+********************************
+8) Smartapps available
+********************************
 
-
-8) You can also use some of my smartapps that I've developed and adapt them according to your needs
+You can also use some of my smartapps that I've developed and adapt them according to your needs
 
 https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
