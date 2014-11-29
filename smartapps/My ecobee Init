@@ -122,7 +122,7 @@ def getEcobeeThermostats() {
 
 		if(resp.status == 200)
 		{
-        	int i=0
+        		int i=0
 			resp.data.thermostatList.each { stat ->
 				def dni = [ app.id, stat.name, i++,stat.identifier ].join('.')
 				stats[dni] = getThermostatDisplayName(stat)
@@ -160,10 +160,10 @@ def setParentAuthTokens(auth_data) {
 
 	sendPush("setParentAuthTokens>begin auth_data: $auth_data")
 	atomicState.refreshToken = auth_data?.refresh_token
-    atomicState.authToken = auth_data?.access_token
+	atomicState.authToken = auth_data?.access_token
 	atomicState.expiresIn=auth_data?.expires_in
 	atomicState.tokenType = auth_data?.token_type
-    atomicState.authexptime= auth_data?.authexptime
+	atomicState.authexptime= auth_data?.authexptime
 	sendPush("setParentAuthTokens>begin atomicState: $atomicState")
 	refreshOtherChildAuthTokens()
 	sendPush("setParentAuthTokens>end")
@@ -188,7 +188,7 @@ def refreshThisChildAuthTokens(child) {
 	sendPush("refreshThisChildAuthtokens> refreshing ${children.size()} thermostats")
 	children.each { 
 		sendPush("refreshThisChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
-    	it.refreshChildTokens(atomicState)
+    		it.refreshChildTokens(atomicState)
 	}
 	sendPush("refreshThisChildAuthTokens>end")
 }
@@ -230,7 +230,7 @@ def updated() {
 def initialize() {
     
 	log.debug "initialize"
-    int i =0
+    	int i =0
 	def devices = thermostats.collect { dni ->
 
 		def d = getChildDevice(dni)
@@ -239,11 +239,11 @@ def initialize() {
 		if(!d)
 		{
 			log.debug "atomicState (i=$i) $atomicState "
-            def tstat_info  = dni.tokenize('.')
+			def tstat_info  = dni.tokenize('.')
 			def thermostatId = tstat_info.last()
-            def name = tstat_info[1]
-            i++
-            def labelName = 'My ecobee ' + "${name}${i} "
+            		def name = tstat_info[1]
+            		i++
+            		def labelName = 'My ecobee ' + "${name}${i} "
 			log.debug "About to create child device with id $dni, thermostatId = $thermostatId, name=  ${name}"
 			d = addChildDevice(getChildNamespace(), getChildName(), dni, null,
 				[label: "${labelName}"]) // , completedSetup: true
@@ -278,11 +278,11 @@ def initialize() {
 	pollHandler()
 
     
-    // set up internal poll timer
+    	// set up internal poll timer
 	def pollTimer = 20
 
 	log.trace "setting poll to ${pollTimer}"
-    schedule("0 0/${pollTimer.toInteger()} * * * ?", pollHandler)
+    	schedule("0 0/${pollTimer.toInteger()} * * * ?", pollHandler)
 }
 
 
@@ -292,8 +292,7 @@ def pollHandler() {
 		def d = getChildDevice(dni)
 		log.debug "pollHandler>Looping thru thermostats, found id $dni, about to poll"
 		d.poll()
-        
-    }
+        }
 	log.trace "pollHandler>end"
 }
 
@@ -349,7 +348,7 @@ def swapToken() {
 	debugEvent ("swapped token for $jsonMap", true)
 
 	atomicState.refreshToken = jsonMap.refresh_token
-    atomicState.authToken = jsonMap.access_token
+	atomicState.authToken = jsonMap.access_token
 	atomicState.expiresIn=jsonMap.expires_in
 	atomicState.tokenType = jsonMap.token_type
 	def authexptime = new Date((now() + (atomicState.expiresIn * 60 * 1000))).getTime()
