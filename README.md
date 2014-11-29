@@ -4,7 +4,7 @@ device-type.myecobee
 Ecobee-Smartthings integration
 
 /***
- *  My Ecobee Device
+ *  My Ecobee Device: custom ecobee device to enable more smart thermostat's capabilities within Smartthings
  *
  *  Author: Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
@@ -14,71 +14,78 @@ Ecobee-Smartthings integration
 INSTALLATION STEPS
 ==================
  
-1) Connect to the ecobee portal (www.ecobee.com) and (as a developer) create an application key with an application name (such as    ecobeeTstat) and indicate the PIN method authentication (at the bottom of the window).
 
+1) Create a new device type (My Ecobee Device)
 
-For signing up as a ecobee developer, just click on the link under
+Go to https://graph.api.smartthings.com/ide/devices
 
-http://www.ecobee.com/solutions/api/
+	Name: My Ecobee Device
+	Author: Yves Racine
+	Copy and paste the code from ecobee.devicetype.groovy
 
-It says "Want to be an ecobee developer? Sign up here".
+2) Create a new smartapp (My ecobee Init) 
 
-Then, after signing up, you'll see a new 'developer' tab at the ecobee portal where you can register your key.
-
-2) Create a new device type (https://graph.api.smartthings.com/ide/devices)
-
-      Name: MyEcobee Device
-      Author: Yves Racine
-      copy and paste the code from ecobee.devicetype.groovy
-3) Create a new device (https://graph.api.smartthings.com/device/list)
-
-      Name: Your Choice
-      Device Network Id: Your Choice
-      Type: My Ecobee Device (should be the last option)
-      Location: Choose the correct location
-      Hub/Group: (optional) leave blank or set it up to your liking
+Go to https://graph.api.smartthings.com/ide/apps
  
-4) Update device's preferences
+	Name: My ecobee Init
+	Description: My ecobee Init
+	Categoy: My Apps
+	Enable Oauth in Smartapp
+	Click on Create at the bottom of the page
+	Copy and paste the code from My ecobee Init
+	https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
+3) Use SmartSetup (+) from your phone or table within the smarttings app, 
+	scroll right to to My Apps, execute My ecobee Init
 
-        (a) <appKey> provided at the ecobee web portal in step 1 (no spaces)
-        (b) <serial number> of your ecobee thermostat (no spaces)
-        (c) <trace> when needed, set to true to get more tracing (no spaces)
-        (d) <holdType> set to nextTransition or indefinite (by default, no spaces) 
+4) Go through the authentication process as the stock Smartthings ecobee device
+
+See ecobee video at 
+http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs/
+
+5) Update device's preferences (optional)
+	
+        (a) <trace> when needed, set to true to get more tracing (no spaces)
+        (b) <holdType> set to nextTransition or indefinite (by default, no spaces) 
         see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml for more details 
-        (e) <ecobeeType> set to registered (by default, for SmartSI and SMART thermostats) or managementSet (EMS, no spaces)
 
-5) To get an ecobee PIN (double authentication), create a smartapp with the following code and install it.
+6) Your device should now be ready to process your commands
 
-To do so, go to  https://graph.api.smartthings.com/ide/apps and click the 'new SmartApp' button at the top-right of your screen.
-
+7) To populate the UI fields for your newly created device, please hit the 'refresh' button several times as the smartthings UI is not always responsive.  You may want to stop and restart your smartthings app if needed.
 
 
-preferences {
-    
-	section("Initialize this ecobee thermostat") {
-		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
-	}
-            
-}
+********************************************************************************************************************
+Optional (Smartapps available)
+
+8) You can also use some of my smartapps that I've developed and adapt them according to your needs 
+
+https://github.com/yracine/device-type.myecobee/tree/master/smartapps
+
+Amongst others:
+
+a) Monitor And Set Ecobee Temp
+
+In brief, the smartapp allows automatic adjustments of the cooling/heating setpoints according to outdoor conditions. This is particularly useful in the Winter/Summer where outdoor temperature and humidity can vary throughout the day.
+
+You can enable/disable the smartapp with a button on/off tile (ex.virtual switch).
+
+The smartapp can use a outdoor sensor or a virtual weather station, such as
+
+https://github.com/yracine/device-type.weatherstation8 
+
+to get the oudoor temperature and humidity.
 
 
 
-def installed() {
-   
-    log.debug "installed> calling getEcobeePinAuth... "
-    ecobee.getEcobeePinAndAuth()
-    
-}
+b) Monitor And Set Ecobee Humidity
 
-6) Click on your ecobee device again to get the 4-alphanumeric PIN  from the List Events under https://graph.api.smartthings.com/device/list. It should appear immediately under the verboseTrace attribute.
+Monitor humidity level indoor vs. outdoor at a regular intervals (in minutes) and 
+set the humidifier/dehumidifier/HRV/ERV  to a target humidity level. 
 
+c) ecobeeChangeMode
 
-7) Go to the ecobee web portal within the next 9 minutes and enter your pin number under settings/my apps
+Change your ecobee climate (Away,Home) according to your hello home mode.
 
- 
-8) Your device should now be ready to process your commands
+d) AwayFromHome and ecobeeResumeProg
 
-9) To populate the UI fields for your newly created device, please hit the 'refresh' button several times as the smartthings UI is not always responsive.  You may want to stop and restart your smartthings app if needed.
-
-10) You can also use the smartapps that I've developed and adapt them according to your needs (see smartapps folder)
+Use presence sensors to set a target climate or heatin/cooling setpoints based on your presence/absence.
