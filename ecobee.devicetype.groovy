@@ -86,7 +86,7 @@ metadata {
 		attribute "ventilatorMode", "string"
 		attribute "programDisplayName", "string"
 		attribute "thermostatOperatingState", "string"        
-
+        
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
@@ -143,6 +143,7 @@ metadata {
 		command "iterateSetThermostatSettings"
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
+		command "refreshChildTokens"        
 }        
 simulator {
 		// TODO: define status and reply messages here
@@ -158,32 +159,32 @@ simulator {
 		}
 		valueTile("temperature", "device.temperature", width: 2, height: 2,
 			canChangeIcon: true) {
-			state("temperature", label: '${currentValue}°', unit: "C", 
-            		backgroundColors: [
-					[value: 0, color: "#153591"],
-					[value: 8, color: "#1e9cbb"],
-					[value: 14, color: "#90d2a7"],
-					[value: 20, color: "#44b621"],
-					[value: 24, color: "#f1d801"],
-					[value: 29, color: "#d04e00"],
-					[value: 36, color: "#bc2323"]
-				])
-		}
-//		If one prefers Farenheits over Celcius, just comment out the temperature in Celsius 
-//		and remove the comment below to have the right color scale in Farenheits.
+//		If one prefers Celcius over Farenheits, just comment out the temperature in Farenheits 
+//		and remove the comment below to have the right color scale in Celcius.
 //		This issue will be solved as soon as Smartthings supports dynamic tiles
 //		valueTile("temperature", "device.temperature", width: 2, height: 2) {
-//			state("temperature", label:'${currentValue}°', unit:"F",
-//			backgroundColors:[
-//					[value: 31, color: "#153591"],
-//					[value: 44, color: "#1e9cbb"],
-//					[value: 59, color: "#90d2a7"],
-//					[value: 74, color: "#44b621"],
-//					[value: 84, color: "#f1d801"],
-//					[value: 95, color: "#d04e00"],
-//					[value: 96, color: "#bc2323"]
+//			state("temperature", label: '${currentValue}°', unit: "C", 
+//            		backgroundColors: [
+//					[value: 0, color: "#153591"],
+//					[value: 8, color: "#1e9cbb"],
+//					[value: 14, color: "#90d2a7"],
+//					[value: 20, color: "#44b621"],
+//					[value: 24, color: "#f1d801"],
+//					[value: 29, color: "#d04e00"],
+//					[value: 36, color: "#bc2323"]
 //				])
 //		}
+			state("temperature", label:'${currentValue}°', unit:"F",
+			backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				])
+		}
 		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
 			state "heat", label: '${name}', action: "thermostat.off", 
@@ -439,11 +440,13 @@ def heatLevelDown() {
 
 // handle commands
 def setHeatingSetpoint(temp) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), temp,
+	def thermostatId= determine_tstat_id("") 	    
+	setHold(thermostatId, device.currentValue("coolingSetpoint"), temp,
 		null, null)
 	sendEvent(name: 'heatingSetpoint', value: temp)
 }
 def setCoolingSetpoint(temp) {
+	def thermostatId= determine_tstat_id("") 	    
 	setHold(settings.thermostatId, temp, device.currentValue("heatingSetpoint"),
 		null, null)
 	sendEvent(name: 'coolingSetpoint', value: temp)
@@ -468,7 +471,8 @@ def cool() {
 }
 def setThermostatMode(mode) {
 	mode = mode == 'emergency heat' ? 'heat' : mode
-	setThermostatSettings(settings.thermostatId, ['hvacMode': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['hvacMode': "${mode}"])
 	sendEvent(name: 'thermostatMode', value: mode)
 }
 def fanOn() {
@@ -481,7 +485,8 @@ def fanOff() { // fanOff is not supported, setting it to 'auto' instead.
 	setThermostatFanMode('auto')
 }
 def setThermostatFanMode(mode) {
-	setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device
+	def thermostatId= determine_tstat_id("") 	    
+	setHold(thermostatId, device.currentValue("coolingSetpoint"), device
 		.currentValue("heatingSetpoint"),
 		mode, null)
 	sendEvent(name: 'thermostatFanMode', value: mode)
@@ -500,18 +505,21 @@ def ventilatorAuto() {
 	setVentilatorMode('auto')
 }
 def setVentilatorMinOnTime(minutes) {
-	setThermostatSettings(settings.thermostatId, ['vent': "minontime",
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['vent': "minontime",
 			'ventilatorMinOnTime': "${minutes}"])
 	sendEvent(name: 'ventilatorMinOnTime', value: minutes)
 	sendEvent(name: 'ventilatorMode', value: "minontime")
 }
 def setVentilatorMode(mode) {
-	setThermostatSettings(settings.thermostatId, ['vent': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['vent': "${mode}"])
 	sendEvent(name: 'ventilatorMode', value: mode)
 }
 def setCondensationAvoid(flag) { // set the flag to true or false
 	flag = flag == 'true' ? 'true' : 'false'
-	setThermostatSettings(settings.thermostatId, ['condensationAvoid': "${flag}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['condensationAvoid': "${flag}"])
 	sendEvent(name: 'condensationAvoid', value: flag)
 }
 def dehumidifierOn() {
@@ -521,11 +529,13 @@ def dehumidifierOff() {
 	setDehumidifierMode('off')
 }
 def setDehumidifierMode(mode) {
-	setThermostatSettings(settings.thermostatId, ['dehumidifierMode': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['dehumidifierMode': "${mode}"])
 	sendEvent(name: 'dehumidifierMode', value: mode)
 }
 def setDehumidifierLevel(level) {
-	setThermostatSettings(settings.thermostatId, ['dehumidifierLevel': "${level}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['dehumidifierLevel': "${level}"])
 	sendEvent(name: 'dehumidifierLevel', value: level)
 }
 def humidifierAuto() {
@@ -535,11 +545,13 @@ def humidifierOff() {
 	setHumidifierMode('off')
 }
 def setHumidifierMode(mode) {
-	setThermostatSettings(settings.thermostatId, ['humidifierMode': "${mode}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['humidifierMode': "${mode}"])
 	sendEvent(name: 'humidifierMode', value: mode)
 }
 def setHumidifierLevel(level) {
-	setThermostatSettings(settings.thermostatId, ['humidity': "${level}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['humidity': "${level}"])
 	sendEvent(name: 'humidifierLevel', value: level)
 }
 def awake() {
@@ -562,12 +574,13 @@ def sleep() {
 	setThisTstatClimate("Sleep")
 }
 def quickSave() {
+	def thermostatId= determine_tstat_id("") 	    
 	def currentProgramType = device.currentValue("programType")
 	if (currentProgramType.toUpperCase() == 'VACATION') {
 		if (settings.trace) {
-			log.debug "quickSave>thermostatId = ${settings.thermostatId},cannot do quickSave due to vacation settings"
+			log.debug "quickSave>thermostatId = ${thermostatId},cannot do quickSave due to vacation settings"
 			sendEvent name: "verboseTrace", value:
-				"quickSave>thermostatId = ${settings.thermostatId},cannot do quickSave switch due to vacation settings"
+				"quickSave>thermostatId = ${thermostatId},cannot do quickSave switch due to vacation settings"
 		}
 		return
 	}
@@ -586,7 +599,7 @@ def quickSave() {
 	}
 	quickSaveCooling = (quickSaveCooling + quickSaveSetForw).round(0)
 	quickSaveHeating = (quickSaveHeating - quickSaveSetBack).round(0)
-	setHold(settings.thermostatId, quickSaveCooling, quickSaveHeating, null, null)
+	setHold(thermostatId, quickSaveCooling, quickSaveHeating, null, null)
 	sendEvent(name: 'coolingSetpoint', value: quickSaveCooling.toString())
 	sendEvent(name: 'heatingSetpoint', value: quickSaveHeating.toString())
 	sendEvent(name: 'programScheduleName', value: "QuickSave")
@@ -594,6 +607,7 @@ def quickSave() {
 }
   
 def setThisTstatClimate(climateName) {
+	def thermostatId= determine_tstat_id("") 	    
 	def currentProgram = device.currentValue("programScheduleName")
 	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
 	if (currentProgramType == 'VACATION') {
@@ -606,7 +620,7 @@ def setThisTstatClimate(climateName) {
 	}
 	// If climate is different from current one, then change it to the given climate
 	if (currentProgram.toUpperCase() != climateName.trim().toUpperCase()) {
-		setClimate(settings.thermostatId, climateName)
+		setClimate(thermostatId, climateName)
 		sendEvent(name: 'programScheduleName', value: climateName)
 		poll() // to refresh the values in the UI
 	}
@@ -623,8 +637,11 @@ def poll() {
 	def AWAKE_PROG = 'Awake'
 	def CUSTOM_PROG = 'Custom'
 	def QUICKSAVE = 'QuickSave'
-
-	getThermostatInfo(settings.thermostatId)
+	def tstatId,ecobeeType
+    
+	def thermostatId= determine_tstat_id("") 	    
+	
+	getThermostatInfo(thermostatId)
 	sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
 	sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
 	sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity,
@@ -678,30 +695,30 @@ def poll() {
 		}
 	}
 	if (settings.trace) {
-		log.debug "poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+		log.debug "poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
 		sendEvent name: "verboseTrace", value:
-			"poll>thermostatId = ${settings.thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+			"poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
 		if (foundEvent) {
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},indiceEvent=${indiceEvent}"
+				"poll>thermostatId = ${thermostatId},indiceEvent=${indiceEvent}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event name=${data.thermostatList[0].events[indiceEvent].name}"
+				"poll>thermostatId = ${thermostatId},event name=${data.thermostatList[0].events[indiceEvent].name}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
+				"poll>thermostatId = ${thermostatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event's coolHoldTemp=${data.thermostatList[0].events[indiceEvent].coolHoldTemp}"
+				"poll>thermostatId = ${thermostatId},event's coolHoldTemp=${data.thermostatList[0].events[indiceEvent].coolHoldTemp}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event's heatHoldTemp=${data.thermostatList[0].events[indiceEvent].heatHoldTemp}"
+				"poll>thermostatId = ${thermostatId},event's heatHoldTemp=${data.thermostatList[0].events[indiceEvent].heatHoldTemp}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event's fan mode=${data.thermostatList[0].events[indiceEvent].fan}"
+				"poll>thermostatId = ${thermostatId},event's fan mode=${data.thermostatList[0].events[indiceEvent].fan}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event's fanMinOnTime=${data.thermostatList[0].events[indiceEvent].fanMinOnTime}"
+				"poll>thermostatId = ${thermostatId},event's fanMinOnTime=${data.thermostatList[0].events[indiceEvent].fanMinOnTime}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
+				"poll>thermostatId = ${thermostatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event's ventilatorMinOnTime=${data.thermostatList[0].events[indiceEvent].ventilatorMinOnTime}"
+				"poll>thermostatId = ${thermostatId},event's ventilatorMinOnTime=${data.thermostatList[0].events[indiceEvent].ventilatorMinOnTime}"
 			sendEvent name: "verboseTrace", value:
-				"poll>thermostatId = ${settings.thermostatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
+				"poll>thermostatId = ${thermostatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
 		}
 	}
 	def currentClimate = null
@@ -847,11 +864,10 @@ def poll() {
 	// post group(s)
 	def groupList = 'No groups'
 	// by default, the ecobeeType is registered (SMART & SMART-SI thermostats)
-	def ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ?
-		settings.ecobeeType.trim() : 'registered'
+	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
 	if (ecobeeType.toUpperCase() == 'REGISTERED') {
 		// get Groups associated to this thermostatId
-		getGroups(settings.thermostatId)
+		getGroups(thermostatId)
 		// post group names associated to this thermostatId
 		if (data.groups.size() > 0) {
 			groupList = 'Group(s) '
@@ -894,7 +910,8 @@ def refresh() {
 	poll()
 }
 def resumeThisTstat() {
-	resumeProgram() 
+	def thermostatId= determine_tstat_id("") 	    
+	resumeProgram(thermostatId) 
 	poll()
 }
 private def api(method, args, success = {}) {
@@ -1113,7 +1130,7 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 def setThermostatSettings(thermostatId,tstatSettings = []) {
     
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId= determine_tstat_id(thermostatId) 	    
 	if (settings.trace) {
 		log.debug
 			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
@@ -1208,7 +1225,7 @@ def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
     
 	Integer targetCoolTemp = null,targetHeatTemp = null
 	def tstatParams = null
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	if (settings.trace) {
 		log.debug
 			"sethold>called with values ${coolingSetPoint}, ${heatingSetPoint}, ${fanMode}, ${tstatSettings} for ${thermostatId}"
@@ -1312,7 +1329,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	targetStartDateTime, targetEndDateTime) {
     
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	def vacationStartDate = String.format('%tY-%<tm-%<td', targetStartDateTime)
 	def vacationStartTime = String.format('%tH:%<tM:%<tS', targetStartDateTime)
 	def vacationEndDate = String.format('%tY-%<tm-%<td', targetEndDateTime)
@@ -1363,6 +1380,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
+    
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
@@ -1403,7 +1421,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 def deleteVacation(thermostatId, vacationName) {
   
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	def vacationParams = [name: vacationName.trim()]
 	def bodyReq = build_body_request('deleteVacation',null,thermostatId,vacationParams)
 	api('deleteVacation', bodyReq) {resp ->
@@ -1467,7 +1485,7 @@ def iterateResumeProgram(tstatType) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 def resumeProgram(thermostatId=settings.thermostatId) {
   
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	def bodyReq = build_body_request('resumeProgram',null,thermostatId,null)
 	if (settings.trace) {
 		log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -1508,9 +1526,11 @@ def resumeProgram(thermostatId=settings.thermostatId) {
 // Only valid for Smart and Antenna thermostats
 // Get all groups related to a thermostatId or all groups
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
-def getGroups(thermostatId=settings.thermostatId) {
+def getGroups(thermostatId) {
 
-	def ecobeeType = determine_ecobee_type_or_location(null)
+	thermostatId = determine_tstat_id(thermostatId)
+	def ecobeeType = determine_ecobee_type_or_location("")
+	log.debug "getGroups>ecobee Type = $ecobeeType for thermostatId = $thermostatId"
 	if (ecobeeType.toUpperCase() != 'REGISTERED') {
 		if (settings.trace) {
 			log.debug "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"
@@ -1573,7 +1593,7 @@ def getGroups(thermostatId=settings.thermostatId) {
 // 	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 def iterateUpdateGroup(thermostatId, groupSettings = []) {
 
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	getGroups(thermostatId)
 	if (settings.trace) {
 		log.debug "iterateUpdateGroup>about to loop ${data.groups.size()}"
@@ -1616,7 +1636,7 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	def groupSettingsJson = new JsonBuilder(groupSettings)
 	def groupSet = groupSettingsJson.toString().minus('{').minus('}')
 
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	if (settings.trace) {
 		log.debug "updateGroup> about to assemble bodyReq for groupName =${groupName}, thermostatId = ${thermostatId}, groupSettings=${groupSet}..."
 		sendEvent name: "verboseTrace", value:
@@ -1763,7 +1783,7 @@ def setClimate(thermostatId, climateName) {
 	def climateRef = null
 	def tstatParams
 
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	getThermostatInfo(thermostatId)
 	for (i in 0..data.thermostatList.size() - 1) {
 		def foundClimate = false
@@ -1999,7 +2019,7 @@ def controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 	def plugSettingsJson = new JsonBuilder(plugSettings)
 	def plugSet = plugSettingsJson.toString().minus('{').minus('}')
 
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	if (settings.trace) {
 		log.debug "controlPlug> about to assemble bodyReq for plugName =${plugName}, thermostatId = ${thermostatId}, groupSettings=${plugSet}..."
 		sendEvent name: "verboseTrace", value:
@@ -2154,6 +2174,15 @@ def getThermostatSummary(tstatType) {
 		}
 	}
 }
+/* Return thermostat's current Model Number */
+def getModelNumber() {
+
+	if (settings.trace) {
+		log.debug "getModelNumber>thermostatId=${data.thermostatList[0]?.identifier}," +
+        	"modelNumber=${data.thermostatList[0]?.modelNumber}"
+	}
+	return ((data.thermostatList[0].identifier)? data.thermostatList[0].modelNumber: "")
+}
 private def refresh_tokens() {
 	def method = 
 	[
@@ -2200,11 +2229,13 @@ private def refresh_tokens() {
 		return false
 	}
 	// determine token's expire time
-	def now = new Date().getTime();
-	def authexptime = new Date((now + (data.auth.expires_in * 60 * 1000))).getTime()
+	def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
 	data.auth.authexptime = authexptime
+// If this thermostat was created by initialSetup, go and refresh the parent and all other children
+	if (data.auth.thermostatId) {		// Created by initalSetup, need to refresh Parent tokens and other children
+		refreshParentTokens()
+	}        
 	if (settings.trace) {
-
 		log.debug "refresh_tokens> expires in ${data.auth.expires_in} minutes"
 		log.debug "refresh_tokens> data_auth.expires_in in time = ${authexptime}"
 		sendEvent name: "verboseTrace", value:
@@ -2212,11 +2243,47 @@ private def refresh_tokens() {
 	}
 	return true
 }
+def refreshChildTokens(auth) {
+	if (settings.trace) {
+		log.debug "refreshChildTokens>begin token auth= $auth"
+	}
+	data.auth.access_token = auth.authToken
+	data.auth.refresh_token = auth.refreshToken
+	data.auth.expires_in = auth.expiresIn
+	data.auth.token_type = auth.tokenType
+	data.auth.scope = auth.scope
+	data.auth.authexptime = auth.authexptime
+	if (settings.trace) {
+		log.debug "refreshChildTokens>end data.auth=$data.auth"
+	}
+}
+
+private def refreshParentTokens() {
+	if (settings.trace) {
+		log.debug "refreshParentTokens>begin data.auth = ${data.auth}"
+	}
+	if (settings.trace) {
+		log.debug "refreshParentTokens>auth=$auth, about to call parent.setParentAuthTokens"
+	}         
+	parent.setParentAuthTokens(data.auth)
+	if (settings.trace) {
+		log.debug "refreshParentTokens>end"
+	}         
+}
+
 private def login() {
 	if (settings.trace) {
 		log.debug "login> about to call setAuthTokens"
 	}
-	setAuthTokens()
+	if (data?.auth?.thermostatId) {
+    	// Created by initalSetup
+		if (settings.trace) {
+			log.debug "login> about to call refreshThisChildAuthTokens"
+		}
+		parent.refreshThisChildAuthTokens(this)
+	} else { 
+		setAuthTokens()
+	}    
 	if (!isLoggedIn) {
 		if (settings.trace) {
 			log.debug "login> no access_token..., failed"
@@ -2332,8 +2399,7 @@ def setAuthTokens() {
 			return
 		}
 		// determine token's expire time
-		def now = new Date().getTime();
-		def authexptime = new Date((now + (data.auth.expires_in * 60 * 1000))).getTime()
+		def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
 		data.auth.authexptime = authexptime
 		if (settings.trace) {
 			log.debug "setAuthTokens> expires in ${data.auth.expires_in} minutes"
@@ -2363,6 +2429,7 @@ private def isTokenExpired() {
 	def now = new Date().getTime();
 	if (settings.trace) {
 		log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time now: ${now}"
+		log.debug "isTokenExpired> auth: ${data.auth}"
 	}
 	if (data.auth.authexptime > now) {
 		if (settings.trace) {
@@ -2375,6 +2442,106 @@ private def isTokenExpired() {
 	}
 	return true
 }
+
+// Determine ecobee type from tstatType or settings
+// tstatType =managementSet or registered (no spaces). 
+//	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+private def determine_ecobee_type_or_location(tstatType) {
+	def ecobeeType
+	def modelNumber = getModelNumber()
+    
+	if (settings.trace) {
+		log.debug "determine_ecobee_type>begin ecobeeType = ${tstatType}, modelNumber=${modelNumber}"
+	}
+	if ((tstatType != null) && (tstatType != "")) {
+		ecobeeType = tstatType.trim()
+	} else if ((settings?.ecobeeType != null) && (settings?.ecobeeType != "")) {
+		ecobeeType = settings.ecobeeType.trim()
+		
+	} else if (modelNumber.contains("Ems")) {
+    
+		ecobeeType = 'managementSet'
+		settings.ecobeeType='managementSet'
+    
+	} else {
+		// by default, the ecobee type is 'registered'
+		ecobeeType = 'registered'
+		settings.ecobeeType='registered'
+	}
+	if (settings.trace) {
+		log.debug "determine_ecobee_type>end ecobeeType = ${ecobeeType}"
+	}
+	return ecobeeType
+}
+
+// Determine id from settings or initalSetup
+def determine_tstat_id(tstat_id) {
+	def tstatId
+    
+	if (settings.trace) {
+		log.debug "determine_tstat_id>begin tstatId = ${tstatId}"
+	}
+	if ((tstat_id != null) && (tstat_id != "")) {
+		tstatId = tstat_id.trim()
+	}
+	else if ((settings.thermostatId != null) && (settings.thermostatId  != "")) {
+		tstatId = settings.thermostatId.trim()
+		if (settings.trace) {
+			log.debug "determine_tstat_id> tstatId = ${settings.thermostatId}"
+		}
+	}
+	else if ((settings.thermostatId == null) || (settings.thermostatId  == "")) {
+		settings.appKey = data.auth.appKey
+		settings.thermostatId = data.auth.thermostatId
+		tstatId=data.auth.thermostatId
+		if (settings.trace) {
+			log.debug "determine_tstat_id> tstatId from data= ${data.auth.thermostatId}"
+		}
+	}
+	if (settings.trace) {
+		log.debug "determine_tstat_id>end tstatId = ${tstatId}"
+	}
+    
+	return tstatId
+}
+
+// Get the appKey for authentication
+private def get_appKey() {
+	return settings.appKey
+}    
+
+// Called by My ecobee Init for initial creation of a child Device
+def initialSetup(device_client_id, auth_data, device_tstat_id) {
+	if (settings.trace) {
+		log.debug "initialSetup>begin"
+		log.debug "initialSetup> device_tstat_Id = ${device_tstat_id}"
+		log.debug "initialSetup> device_client_id = ${device_client_id}"
+	}	
+	settings.trace='true'
+	settings.appKey= device_client_id
+	settings.thermostatId = device_tstat_id
+
+	data?.auth = settings    
+	data.auth.access_token = auth_data.authToken
+	data.auth.refresh_token = auth_data.refreshToken
+	data.auth.expires_in = auth_data.expiresIn
+	data.auth.token_type = auth_data.tokenType
+	data.auth.authexptime= auth_data?.authexptime
+	if (settings.trace) {
+		log.debug "initialSetup> settings = $settings"
+		log.debug "initialSetup> data_auth = $data.auth"
+		log.debug "initialSetup>end"
+	}
+	getThermostatInfo(thermostatId)
+	def ecobeeType=determine_ecobee_type_or_location("")
+	data.auth.ecobeeType = ecobeeType
+}
+
+def toQueryString(Map m)
+{
+	return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
+}
+
 def cToF(temp) {
 	return (temp * 1.8 + 32)
 }
@@ -2391,22 +2558,3 @@ private def get_URI_ROOT() {
 private def get_MAX_TSTAT_BATCH() {
 	return 25
 }
-// Determine ecobee type from tstatType or settings
-// tstatType =managementSet or registered (no spaces). 
-//	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
-private def determine_ecobee_type_or_location(tstatType) {
-	def ecobeeType
-    
-	if ((tstatType != null) && (tstatType.trim() != "")) {
-		ecobeeType = tstatType.trim()
-	} else {
-		// by default, the ecobee type is 'registered'
-		ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType.trim() != "")) ?
-			settings.ecobeeType.trim() : 'registered'
-	}
-	return ecobeeType
-}
-// Get the appKey for authentication
-private def get_appKey() {
-	return settings.appKey
-}    
