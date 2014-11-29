@@ -72,6 +72,10 @@ http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthing
 *************************************************
 5) Update device's preferences (optional, input parameters)
 *************************************************
+Go to https://graph.api.smartthings.com/device/list
+Click on the My ecobee device that you just created
+Click on Preferences (edit)
+YOu only need to edit the following parameters
 
     (a) <trace> when needed, set to true to get more tracing (no spaces)
     (b) <holdType> set to nextTransition or indefinite (by default, no spaces) 
