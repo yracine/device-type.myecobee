@@ -61,12 +61,13 @@ At https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 *************************************************
 
 
-*************************************************
-4) Go through the authentication process 
-*************************************************
+****************************************************************************
+4) Go through the authentication process and connect Smartthings with Ecobee
+****************************************************************************
 
+If needed, see "how to setup ecobee" video (but use My ecobee Init instead of the Smarttings labs script)
 
-See ecobee video at http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
+http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
 *************************************************
 5) Update device's preferences (optional, input parameters)
