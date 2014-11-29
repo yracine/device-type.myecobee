@@ -2442,22 +2442,7 @@ private def isTokenExpired() {
 	}
 	return true
 }
-def cToF(temp) {
-	return (temp * 1.8 + 32)
-}
-def fToC(temp) {
-	return (temp - 32) / 1.8
-}
-def milesToKm(distance) {
-	return (distance * 1.609344)
-}
-private def get_URI_ROOT() {
-	return "https://api.ecobee.com"
-}
-// Maximum tstat batch size (25 thermostats max may be processed in batch)
-private def get_MAX_TSTAT_BATCH() {
-	return 25
-}
+
 // Determine ecobee type from tstatType or settings
 // tstatType =managementSet or registered (no spaces). 
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
@@ -2525,18 +2510,16 @@ private def get_appKey() {
 	return settings.appKey
 }    
 
+// Called by My ecobee Init for initial creation of a child Device
 def initialSetup(device_client_id, auth_data, device_tstat_id) {
-
-
-	log.debug "initialSetup>begin"
-
-	log.debug "initialSetup> device_tstat_Id = ${device_tstat_id}"
-	log.debug "initialSetup> device_client_id = ${device_client_id}"
-
+	if (settings.trace) {
+		log.debug "initialSetup>begin"
+		log.debug "initialSetup> device_tstat_Id = ${device_tstat_id}"
+		log.debug "initialSetup> device_client_id = ${device_client_id}"
+	}	
 	settings.trace='true'
 	settings.appKey= device_client_id
 	settings.thermostatId = device_tstat_id
-	log.debug "initialSetup> settings = $settings"
 
 	data?.auth = settings    
 	data.auth.access_token = auth_data.authToken
@@ -2544,9 +2527,11 @@ def initialSetup(device_client_id, auth_data, device_tstat_id) {
 	data.auth.expires_in = auth_data.expiresIn
 	data.auth.token_type = auth_data.tokenType
 	data.auth.authexptime= auth_data?.authexptime
-	log.debug "initialSetup> data_auth = $data.auth"
-	log.debug "initialSetup>end"
-
+	if (settings.trace) {
+		log.debug "initialSetup> settings = $settings"
+		log.debug "initialSetup> data_auth = $data.auth"
+		log.debug "initialSetup>end"
+	}
 	getThermostatInfo(thermostatId)
 	def ecobeeType=determine_ecobee_type_or_location("")
 	data.auth.ecobeeType = ecobeeType
@@ -2557,4 +2542,19 @@ def toQueryString(Map m)
 	return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
 }
 
-
+def cToF(temp) {
+	return (temp * 1.8 + 32)
+}
+def fToC(temp) {
+	return (temp - 32) / 1.8
+}
+def milesToKm(distance) {
+	return (distance * 1.609344)
+}
+private def get_URI_ROOT() {
+	return "https://api.ecobee.com"
+}
+// Maximum tstat batch size (25 thermostats max may be processed in batch)
+private def get_MAX_TSTAT_BATCH() {
+	return 25
+}
