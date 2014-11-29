@@ -1,6 +1,14 @@
 /**
  *	My ecobee Init (Service Manager)
  *
+ *	Author: scott
+ *	Date: 2013-08-07
+ *
+ *  Last Modification:
+ *      JLH - 01-23-2014 - Update for Correct SmartApp URL Format
+ *      JLH - 02-15-2014 - Fuller use of ecobee API
+ *		Y.Racine Nov 2014 - Simplified the Service Manager as possible to reduce tight coupling with 
+ *							its child device types (device handlers) for better performance and reliability.
  */
 definition(
     name: "My ecobee Init",
@@ -65,7 +73,7 @@ def authPage() {
 
 		return dynamicPage(name: "auth", title: "Login", nextPage:null, uninstall:uninstallAllowed) {
 			section(){
-				paragraph "Tap below to log in to the ecobee service and authorize SmartThings access. Be sure to scroll down on page 2 and press the 'Allow' button."
+				paragraph "Tap below to log in to the ecobee portal and authorize SmartThings access. Be sure to scroll down on page 2 and press the 'Allow' button."
 				href url:redirectUrl, style:"embedded", required:true, title:"ecobee", description:description
 			}
 		}
@@ -105,7 +113,7 @@ def ecobeeDeviceList() {
 def getEcobeeThermostats() {
 	log.debug "getting device list"
 
-	def requestBody = '{"selection":{"selectionType":"registered","selectionMatch":"","includeRuntime":true}}'
+	def requestBody = '{"selection":{"selectionType":"registered","selectionMatch":""}}'
 
 	def deviceListParams = [
 		uri: "https://api.ecobee.com",
@@ -122,13 +130,16 @@ def getEcobeeThermostats() {
 
 		if(resp.status == 200)
 		{
-        		int i=0
+/*        
+        	int i=0    // Used to simulate many thermostats
+*/
 			resp.data.thermostatList.each { stat ->
-				def dni = [ app.id, stat.name, i++,stat.identifier ].join('.')
+				def dni = [ app.id, stat.name, stat.identifier ].join('.')
 				stats[dni] = getThermostatDisplayName(stat)
-				dni = [ app.id, stat.name, i,stat.identifier ].join('.')
+/*
+				dni = [ app.id, stat.name, i,stat.identifier ].join('.')    // Used to simulate many thermostats     
 				stats[dni] = getThermostatDisplayName(stat)
-
+*/
 			}
 		}
 		else
@@ -141,7 +152,6 @@ def getEcobeeThermostats() {
 				log.debug "Storing the failed action to try later"
 				data.action = "getEcobeeThermostats"
 				log.debug "Refreshing your auth_token!"
-				refreshAuthToken()
 			}
 			else
 			{
@@ -155,42 +165,67 @@ def getEcobeeThermostats() {
 	return stats
 }
 
-
 def setParentAuthTokens(auth_data) {
-
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 	sendPush("setParentAuthTokens>begin auth_data: $auth_data")
+*/
+
 	atomicState.refreshToken = auth_data?.refresh_token
 	atomicState.authToken = auth_data?.access_token
 	atomicState.expiresIn=auth_data?.expires_in
 	atomicState.tokenType = auth_data?.token_type
 	atomicState.authexptime= auth_data?.authexptime
-	sendPush("setParentAuthTokens>begin atomicState: $atomicState")
-	refreshOtherChildAuthTokens()
-	sendPush("setParentAuthTokens>end")
+	refreshAllChildAuthTokens()
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
+	sendPush("setParentAuthTokens>New atomicState: $atomicState")
+*/
 }
 
-def refreshOtherChildAuthTokens() {
+def refreshAllChildAuthTokens() {
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
+	sendPush("refreshAllChildAuthTokens>begin updating children with $atomicState")
+*/
 
-	sendPush("refreshOtherChildAuthTokens>begin updating children with $atomicState")
 	def children= getChildDevices()
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
+	sendPush("refreshAllChildAuthtokens> refreshing ${children.size()} thermostats")
+*/
 
-	sendPush("refreshOtherChildAuthtokens> refreshing ${children.size()} thermostats")
 	children.each { 
-		sendPush("refreshOtherChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
+		sendPush("refreshAllChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
+*/
     	it.refreshChildTokens(atomicState) 
 	}
 }
 
 def refreshThisChildAuthTokens(child) {
-
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 	sendPush("refreshThisChildAuthTokens>begin child id: $child.device.deviceNetworkId, updating it with $atomicState")
-	def children = getChildDevices().find { thermostats.contains(child.device.deviceNetworkId)}
+*/
+
+	def children = getChildDevices().findAll {thermostats.contains(child.device.deviceNetworkId)}
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 	sendPush("refreshThisChildAuthtokens> refreshing ${children.size()} thermostats")
+*/
 	children.each { 
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 		sendPush("refreshThisChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
+*/
     		it.refreshChildTokens(atomicState)
 	}
+/*
+	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 	sendPush("refreshThisChildAuthTokens>end")
+*/
 }
 
 
@@ -241,12 +276,15 @@ def initialize() {
 			log.debug "atomicState (i=$i) $atomicState "
 			def tstat_info  = dni.tokenize('.')
 			def thermostatId = tstat_info.last()
-            		def name = tstat_info[1]
-            		i++
-            		def labelName = 'My ecobee ' + "${name}${i} "
+ 			def name = tstat_info[1]
+/*            
+			i++		// Used to simulate many thermostats
+			def labelName = 'My ecobee ' + "${name}_${i}"
+*/                    
+			def labelName = 'My ecobee ' + "${name}"
 			log.debug "About to create child device with id $dni, thermostatId = $thermostatId, name=  ${name}"
 			d = addChildDevice(getChildNamespace(), getChildName(), dni, null,
-				[label: "${labelName}"]) // , completedSetup: true
+				[label: "${labelName}"]) 
 			d.initialSetup( getSmartThingsClientId(), atomicState, thermostatId ) 	// initial setup of the Child Device
 			log.debug "created ${d.displayName} with id $dni"
 		}
@@ -282,9 +320,8 @@ def initialize() {
 	def pollTimer = 20
 
 	log.trace "setting poll to ${pollTimer}"
-    	schedule("0 0/${pollTimer.toInteger()} * * * ?", pollHandler)
+	schedule("0 0/${pollTimer.toInteger()} * * * ?", pollHandler)
 }
-
 
 def pollHandler() {
 	log.trace "pollHandler>begin"
@@ -292,7 +329,7 @@ def pollHandler() {
 		def d = getChildDevice(dni)
 		log.debug "pollHandler>Looping thru thermostats, found id $dni, about to poll"
 		d.poll()
-        }
+	}
 	log.trace "pollHandler>end"
 }
 
@@ -439,85 +476,14 @@ def toQueryString(Map m) {
 	return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
 }
 
-private refreshAuthToken() {
-	log.debug "refreshing auth token"
-	debugEvent("refreshing OAUTH token", true)
-
-	def stcid = getSmartThingsClientId()
-
-	def refreshParams = [
-		method: 'POST',
-		uri: "https://api.ecobee.com",
-		path: "/token",
-		query: [grant_type:'refresh_token', code:"${atomicState.refreshToken}", client_id:stcid],
-
-	]
-
-	log.debug refreshParams
-
-	//changed to httpPost
-	try{
-		def jsonMap
-		httpPost(refreshParams) { resp ->
-
-			if(resp.status == 200)
-			{
-				log.debug "Token refreshed...calling saved RestAction now!"
-
-				debugEvent("Token refreshed ... calling saved RestAction now!", true)
-
-				log.debug resp
-
-				jsonMap = resp.data
-
-				if (resp.data) {
-
-					log.debug resp.data
-					debugEvent ("Response = ${resp.data}", true)
-
-					atomicState.refreshToken = resp?.data?.refresh_token
-					atomicState.authToken = resp?.data?.access_token
-					atomicState.expiresIn=jsonMap.expires_in
-					atomicState.tokenType = jsonMap.token_type
-					def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
-					atomicState.authexptime = authexptime
-					refreshChildAuthTokens()
-					debugEvent ("Refresh Token = ${atomicState.refreshToken}", true)
-					debugEvent ("OAUTH Token = ${atomicState.authToken}", true)
-
-					if (data?.action && data?.action != "") {
-						log.debug data.action
-
-						"{data.action}"()
-
-						//remove saved action
-						data.action = ""
-					}
-
-				}
-				data.action = ""
-			}
-			else
-			{
-				log.debug "refresh failed ${resp.status} : ${resp.status.code}"
-			}
-		}
-
-		// atomicState.refreshToken = jsonMap.refresh_token
-		// atomicState.authToken = jsonMap.access_token
-	}
-	catch(Exception e)
-	{
-		log.debug "caught exception refreshing auth token: " + e
-	}
-}
-
-
 def getChildNamespace() { "yracine" }
 def getChildName() { "My Ecobee Device" }
 
 def getServerUrl() { return "https://graph.api.smartthings.com" }
-def getSmartThingsClientId() { "your Smartthings AppKey here!" }
+
+def getSmartThingsClientId() { "qqwy6qo0c2lhTZGytelkQ5o8vlHgRsrO" }
+
+
 def debugEvent(message, displayEvent) {
 
 	def results = [
@@ -528,3 +494,4 @@ def debugEvent(message, displayEvent) {
 	log.debug "Generating AppDebug Event: ${results}"
 	sendEvent (results)
 }
+
