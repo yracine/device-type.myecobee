@@ -16,6 +16,8 @@ Code: https://github.com/yracine/device-type.myecobee
 
 
 INSTALLATION STEPS
+=====================
+
 1) Create a new device type (My Ecobee Device)
 
 
