@@ -28,6 +28,7 @@ Name: My Ecobee Device
 Author: Yves Racine
 
 Copy and paste the code from ecobee.devicetype.groovy
+under https://github.com/yracine/device-type.myecobee
 
 
 *************************************************
@@ -55,15 +56,18 @@ At https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
 
 *************************************************
-3) Use SmartSetup (+) from your phone or table within the smarttings app, scroll right to to My Apps, execute My ecobee Init
+3) Use SmartSetup and execute My ecobee Init
 *************************************************
-
+Click on '+' at the bottom of the main screen from your phone or table 
+within the smarttings app, scroll right to to My Apps, execute My ecobee Init
 
 ***********************************************************************************
-4) Go through the authentication process and connect Smartthings with Ecobee portal
+4) connect Smartthings with Ecobee portal
 ***********************************************************************************
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
+
+Go through the authentication process using My ecobee Init.
 
 If needed, watch "how to setup ecobee" video (but use My ecobee Init instead of the Smarttings labs script) as
 the authentication process is similar.
