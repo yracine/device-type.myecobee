@@ -76,7 +76,7 @@ http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthing
 ***********************************************************
 
 **************************************************************
-6) To populate the UI fields for your newly created device, 
+6) To populate the UI fields for your newly created device
 **************************************************************
 
 Hit the 'refresh' button several times as the smartthings UI is not always responsive. 
@@ -101,7 +101,7 @@ You only need to edit the following parameters
     for more details 
 
 ********************************
-8) Smartapps available
+8) Some of the Smartapps available
 ********************************
 
 You can also use some of my smartapps that I've developed and adapt them according to your needs
