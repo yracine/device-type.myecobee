@@ -74,15 +74,15 @@ the authentication process is similar.
 
 http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
-After being connected, click 'Next' and select your ecobee thermostat(s) that you want to control 
-from Smartthings (SMART, SMART-SI, ecobee3, EMS).
+After being connected, click 'Next' and select your ecobee thermostat(s) (SMART, SMART-SI, ecobee3, EMS) 
+that you want to control from Smartthings.
 
 ***********************************************************
 5) Your device(s) should now be ready to process your commands
 ***********************************************************
 
 **************************************************************
-6) To populate the UI fields for your newly created device
+6) To populate the UI fields for your newly created device(s)
 **************************************************************
 
 Hit the 'refresh' button several times as the smartthings UI is not always responsive. 
@@ -106,9 +106,9 @@ You only need to edit the following parameters
     see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml 
     for more details 
 
-********************************
+***********************************
 8) Some of the Smartapps available
-********************************
+***********************************
 
 You can also use some of my smartapps that I've developed and adapt them according to your needs
 
