@@ -62,7 +62,7 @@ From your phone or tablet, within the smarttings app and on the main screen,
 click on '+' at the bottom, scroll right to to My Apps, execute My ecobee Init
 
 ***********************************************************************************
-4) connect Smartthings with Ecobee portal
+4) Connect Smartthings to the Ecobee portal
 ***********************************************************************************
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
@@ -74,9 +74,10 @@ the authentication process is similar.
 
 http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
-    
+After being connected, select all your ecobee thermostat(s) that you want to expose to Smartthings.
+
 ***********************************************************
-5) Your device should now be ready to process your commands
+5) Your device(s) should now be ready to process your commands
 ***********************************************************
 
 **************************************************************
