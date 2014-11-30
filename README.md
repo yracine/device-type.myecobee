@@ -58,8 +58,8 @@ At https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 *************************************************
 3) Use SmartSetup and execute My ecobee Init
 *************************************************
-Click on '+' at the bottom of the main screen from your phone or table 
-within the smarttings app, scroll right to to My Apps, execute My ecobee Init
+From your phone or tablet, within the smarttings app and on the main screen, 
+click on '+' at the bottom, scroll right to to My Apps, execute My ecobee Init
 
 ***********************************************************************************
 4) connect Smartthings with Ecobee portal
