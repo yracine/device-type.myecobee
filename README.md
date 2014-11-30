@@ -74,7 +74,8 @@ the authentication process is similar.
 
 http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
-After being connected, select all your ecobee thermostat(s) that you want to expose to Smartthings.
+After being connected, click 'Next' and select your ecobee thermostat(s) that you want to control 
+from Smartthings (SMART, SMART-SI, ecobee3, EMS).
 
 ***********************************************************
 5) Your device(s) should now be ready to process your commands
