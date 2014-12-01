@@ -563,7 +563,7 @@ def away() {
 def present() {
 	def currentProgramType = device.currentValue("programType")
 	if (currentProgramType == "HOLD") { // get rid of overrides before applying new climate
-		resumeThisTsat()
+		resumeThisTstat()
 	}
 	home()
 }
