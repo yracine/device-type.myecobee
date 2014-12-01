@@ -44,7 +44,7 @@ preferences {
         input "alarmSwitch", "capability.contactSensor", title: "Alarm Switch"
     }
     section("Set the ecobee thermostat(s)") {
-        input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+        input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple:true
     }
     section("Heating set Point for ecobee, default = 60°F/14°C") {
         input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
@@ -123,7 +123,7 @@ def motionEvtHandler(evt) {
 
 private residentsHaveBeenQuiet() {
 
-	def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
+    def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
     Integer delay = threshold * 60 
     
     def result = true
@@ -141,7 +141,7 @@ private residentsHaveBeenQuiet() {
 
 
 def presence(evt) {
-	def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
+    def threshold = residentsQuietThreshold ?: 3   // By default, the delay is 3 minutes
     Integer delay = threshold * 60 
 
     log.debug "$evt.name: $evt.value"
@@ -204,15 +204,12 @@ def takeActions() {
         ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
     
         if ((givenClimateName != null) && (givenClimateName != "")) {
-    
-            // You may want to change to ecobee.setClimate('serial number list',...) if you own EMS thermostat(s)
-                ecobee.iterateSetClimate('registered',givenClimateName)// Set to the climateName
+                ecobee.setClimate('',givenClimateName)// Set to the climateName
         }
         else {
     
-            // You may want to change to ecobee.setHold('serial number list',...) if you own EMS thermostat(s)
             // Set heating and cooling points at ecobee
-            ecobee.iterateSetHold('registered',minCoolTemp, minHeatTemp, null,null,null)
+            ecobee.setHold('',minCoolTemp, minHeatTemp, null,null,null)
         }
     
         msg = "AwayFromHome>ecobee's settings are now lower"
