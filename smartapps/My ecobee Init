@@ -7,7 +7,7 @@
  *  Last Modification:
  *      JLH - 01-23-2014 - Update for Correct SmartApp URL Format
  *      JLH - 02-15-2014 - Fuller use of ecobee API
- *		Y.Racine Nov 2014 - Simplified the Service Manager as possible to reduce tight coupling with 
+ *		Y.Racine Nov 2014 - Simplified the Service Manager as much as possible to reduce tight coupling with 
  *							its child device types (device handlers) for better performance and reliability.
  */
 definition(
@@ -494,3 +494,4 @@ def debugEvent(message, displayEvent) {
 	log.debug "Generating AppDebug Event: ${results}"
 	sendEvent (results)
 }
+
