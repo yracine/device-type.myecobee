@@ -12,11 +12,9 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- * Change the mode manually (by pressing the smartapp's play button under My Apps) and automatically at the ecobee thermostat(s)
- * If you need to set it for both Away and Home modes, you'd need to save them as 2 distinct smartapp instances
- * (i.e.,use the "Assign a name" input parameter).
- *
- * Don't forget to set the app to run only for the target mode ( the "Set for Specific Mode(s)" input parameter).
+ * Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)
+ * If you need to set it for both Away and Home modes, you'd need to save them as 2 distinct apps
+ * Don't forget to set the app to run only for the target mode.
  */
 definition(
     name: "ecobeeChangeMode",
@@ -65,9 +63,9 @@ def changeMode(evt) {
         send(message)
     }
     else {
-        message = "ecobeeChangeMode>Resuming the thermostat(s) following Home mode change.."
+        message = "ecobeeChangeMode>Setting the thermostat(s) to Home.."
         log.info message
-        thermostats?.resumeThisTstat()
+        thermostats?.present()   // could also be thermostats?.setClimate("", 'yourClimate')
         send(message)
     }
 }
