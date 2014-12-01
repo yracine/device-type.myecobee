@@ -2512,12 +2512,12 @@ private def get_appKey() {
 
 // Called by My ecobee Init for initial creation of a child Device
 def initialSetup(device_client_id, auth_data, device_tstat_id) {
+	settings.trace='true'
 	if (settings.trace) {
 		log.debug "initialSetup>begin"
 		log.debug "initialSetup> device_tstat_Id = ${device_tstat_id}"
 		log.debug "initialSetup> device_client_id = ${device_client_id}"
 	}	
-	settings.trace='true'
 	settings.appKey= device_client_id
 	settings.thermostatId = device_tstat_id
 
