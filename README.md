@@ -50,8 +50,10 @@ under https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 e) Hit the create button at the bottom
 
 f) Make sure that enable OAuth in Smartapp is active 
-Go to app settings (top right corner), Click on Oauth and enable OAuth in Smartapp
 
+* Goto app settings (top right corner), 
+* Click on Oauth (middle of the page), and enable OAuth in Smart app
+* Hit "Update" at the bottom
 
 *************************************************
 3) Use SmartSetup and execute My ecobee Init
