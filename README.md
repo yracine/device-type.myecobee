@@ -102,9 +102,9 @@ You only need to edit the following parameters
     see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml 
     for more details 
 
-***********************************
-8) Use some of the Smartapps available
-***********************************
+************************************************
+8) Use some of the Smartapps available (optional)
+*************************************************
 
 You can also use some of my smartapps that I've developed and adapt them according to your needs
 
