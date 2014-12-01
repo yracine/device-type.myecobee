@@ -209,7 +209,7 @@ def takeActions() {
         else {
     
             // Set heating and cooling points at ecobee
-            ecobee.setHold('',minCoolTemp, minHeatTemp, null,null,null)
+            ecobee.setHold('',minCoolTemp, minHeatTemp, null,null)
         }
     
         msg = "AwayFromHome>ecobee's settings are now lower"
