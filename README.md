@@ -22,11 +22,16 @@ INSTALLATION STEPS
 
 
 a) Go to https://graph.api.smartthings.com/ide/devices
+
 b) Hit the "+New SmartDevice" at the top right corner
+
 c) Hit the "From Code" tab on the left corner
+
 d) Copy and paste the code from ecobee.devicetype.groovy
 under https://github.com/yracine/device-type.myecobee
+
 e) Hit the create button at the bottom
+
 
 
 *************************************************
@@ -34,11 +39,16 @@ e) Hit the create button at the bottom
 *************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/apps
+
 b) Hit the "+New SmartApp" at the top right corner
+
 c) Hit the "From Code" tab on the left corner
+
 d) Copy and paste the code from My ecobee Init
 under https://github.com/yracine/device-type.myecobee/tree/master/smartapps
+
 e) Hit the create button at the bottom
+
 
 
 *************************************************
