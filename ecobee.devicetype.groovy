@@ -1875,7 +1875,7 @@ def updateClimate(thermostatId, climateName, deleteClimateFlag,
 	def substituteClimateRef = null
 	def climateRefToBeReplaced = null
 
-	thermostatId = (thermostatId != null && thermostatId != "")? thermostatId : settings.thermostatId.trim()
+	thermostatId = determine_tstat_id(thermostatId)
 	if ((coolTemp != null) && (heatTemp != null)) {
 		if (settings.trace) {
 			log.debug "updateClimate>thermostatId =${thermostatId} coolTemp=${coolTemp}, heatTemp= ${heatTemp}"
