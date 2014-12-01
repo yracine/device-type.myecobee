@@ -21,38 +21,24 @@ INSTALLATION STEPS
 *************************************************
 
 
-Go to https://graph.api.smartthings.com/ide/devices
-
-Name: My Ecobee Device
-
-Author: Yves Racine
-
-Copy and paste the code from ecobee.devicetype.groovy
+a) Go to https://graph.api.smartthings.com/ide/devices
+b) Hit the "+New SmartDevice" at the top right corner
+c) Hit the "From Code" tab on the left corner
+d) Copy and paste the code from ecobee.devicetype.groovy
 under https://github.com/yracine/device-type.myecobee
+e) Hit the create button at the bottom
 
 
 *************************************************
 2) Create a new smartapp (My ecobee Init)
 *************************************************
 
-Go to https://graph.api.smartthings.com/ide/apps
-
-
-Name:           My ecobee Init
-
-Description:    My ecobee Init
-
-Categoy:        My Apps
-
-Enable Oauth in Smartapp
-
-Click on Create at the bottom of the page
-
-
-Copy and paste the code from My ecobee Init
-
-At https://github.com/yracine/device-type.myecobee/tree/master/smartapps
-
+a) Go to https://graph.api.smartthings.com/ide/apps
+b) Hit the "+New SmartApp" at the top right corner
+c) Hit the "From Code" tab on the left corner
+d) Copy and paste the code from My ecobee Init
+under https://github.com/yracine/device-type.myecobee/tree/master/smartapps
+e) Hit the create button at the bottom
 
 
 *************************************************
@@ -107,7 +93,7 @@ You only need to edit the following parameters
     for more details 
 
 ***********************************
-8) Some of the Smartapps available
+8) Use some of the Smartapps available
 ***********************************
 
 You can also use some of my smartapps that I've developed and adapt them according to your needs
