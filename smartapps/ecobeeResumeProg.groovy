@@ -42,8 +42,8 @@ preferences {
     section("False alarm threshold (defaults = 3 min)") {
         input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
     }
-    section("Resume Program at these ecobee thermostat(s)") {
-        input "ecobee", "capability.thermostat", title: "Ecobee Thermostat", multiple:true
+    section("Resume Program at the ecobee thermostat(s)") {
+        input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple:true
     }
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
