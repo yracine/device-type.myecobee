@@ -136,7 +136,7 @@ to get the oudoor temperature and humidity.
 b) Monitor And Set Ecobee Humidity
 ***********************************
 
-Monitor humidity level indoor vs. outdoor at a regular intervals (in minutes) and set the humidifier/dehumidifier/HRV/ERV to a target humidity level.
+Monitor humidity level indoor vs. outdoor at regular intervals (in minutes) and set the humidifier/dehumidifier/HRV/ERV to a target humidity level.
 
 *******************
 c) ecobeeChangeMode
@@ -147,3 +147,10 @@ Change your ecobee climate (Away,Home) according to your hello home mode.
 d) AwayFromHome and ecobeeResumeProg
 *************************************
 Use presence sensors to set a target climate or heatin/cooling setpoints based on your presence/absence.
+
+*************************************
+e) ecobeeSetClimate
+*************************************
+This smartapp allows a ST user to set the ecobee thermostat(s) to a given climate (Away,Home,Awake,Sleep, other custom programs) at a given day&time.
+
+And many others...
