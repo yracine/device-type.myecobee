@@ -296,8 +296,8 @@ private def check_if_hold_needed() {
 	float targetTstatTemp
 
 	if (detailedNotif == 'true') {
-		send("MonitorEcobeeTemp>needs Hold? currentProgName=${currentProgName},indoorTemp=${ecobeeTemp}°,progHeatSetPoint=${programHeatTemp}°,progCoolSetPoint=${programCoolTemp}°")
-		send("MonitorEcobeeTemp>needs Hold? currentProgName=${currentProgName},indoorTemp=${ecobeeTemp}°,heatingSetPoint=${heatTemp}°,coolingSetPoint=${coolTemp}°")
+		send("MonitorEcobeeTemp>needs Hold? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,progHeatSetPoint ${programHeatTemp}°,progCoolSetPoint ${programCoolTemp}°")
+		send("MonitorEcobeeTemp>needs Hold? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,heatingSetPoint ${heatTemp}°,coolingSetPoint ${coolTemp}°")
 	}
 	if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
                 
@@ -334,18 +334,18 @@ private def check_if_hold_needed() {
 			log.trace(
 				"check_if_hold_needed>evaluate: moreCoolThresholdHumidity= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
 			if (detailedNotif == 'true') {
-				send("MonitorEcobeeTemp>eval:  moreCoolThreshold=${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-				send("MonitorEcobeeTemp>eval:  moreCoolThresholdHumidty=${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
+				send("MonitorEcobeeTemp>eval:  moreCoolThreshold ${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+				send("MonitorEcobeeTemp>eval:  moreCoolThresholdHumidty ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
 			}
 			if (outdoorTemp >= more_cool_threshold) {
 				targetTstatTemp = (programCoolTemp - temp_diff).round(1)
 				ecobee.setCoolingSetpoint(targetTstatTemp)
-				send("MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp.toString()}°,outdooTemp >=${more_cool_threshold}°")
+				send("MonitorEcobeeTemp>cooling setPoint now =${targetTstatTemp.toString()}°,outdooTemp >=${more_cool_threshold}°")
 			} else if (outdoorHumidity >= humidity_threshold) {
 				float median_temp = (less_cool_threshold + more_cool_threshold / 2).round(1) // Increase cooling settings based on median temp
 				if (detailedNotif == 'true') {
 					String medianTempFormat = String.format('%2.1f', median_temp)
-					send("MonitorEcobeeTemp>eval: cool median temp=${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
+					send("MonitorEcobeeTemp>eval: cool median temp ${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
 				}
 				if (outdoorTemp > median_temp) { // Only increase cooling settings when outdoorTemp < median_temp
 					targetTstatTemp = (programCoolTemp - temp_diff).round(1)
@@ -357,7 +357,7 @@ private def check_if_hold_needed() {
 		}
 		log.trace("check_if_hold_needed>evaluate: lessCoolThreshold= ${less_cool_threshold} vs.outdoorTemp ${outdoorTemp}°")
 		if (detailedNotif == 'true') {
-			send("MonitorEcobeeTemp>evaluate: lessCoolThreshold= ${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+			send("MonitorEcobeeTemp>evaluate: lessCoolThreshold ${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
 		}
 		if (outdoorTemp <= less_cool_threshold) {
 			targetTstatTemp = (programCoolTemp + temp_diff).round(1)
@@ -386,7 +386,7 @@ private def check_if_hold_needed() {
 				float median_temp = (less_heat_threshold + more_heat_threshold / 2).round(1) // Increase heating settings based on median temp
 				if (detailedNotif == 'true') {
 					String medianTempFormat = String.format('%2.1f', median_temp)
-					send("MonitorEcobeeTemp>eval: heat median temp=${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
+					send("MonitorEcobeeTemp>eval: heat median temp ${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
 				}
 				if (outdoorTemp < median_temp) { // Only increase heating settings when outdoorTemp < median_temp
 					targetTstatTemp = (programHeatTemp + temp_diff).round(1)
@@ -397,7 +397,7 @@ private def check_if_hold_needed() {
 		}
 		log.trace("MonitorEcobeeTemp>eval:lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
 		if (detailedNotif == 'true') {
-			send("MonitorEcobeeTemp>eval:  lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+			send("MonitorEcobeeTemp>eval:  lessHeatThreshold ${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
 		}
 		if (outdoorTemp >= less_heat_threshold) {
 			targetTstatTemp = (programHeatTemp - temp_diff).round(1)
@@ -459,8 +459,8 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified>state=${state}"
 
 	if (detailedNotif == 'true') {
-		send("MonitorEcobeeTemp>Hold justified? currentProgName=${currentProgName},indoorTemp=${ecobeeTemp}°,progHeatSetPoint=${programHeatTemp}°,progCoolSetPoint=${programCoolTemp}°")
-		send("MonitorEcobeeTemp>Hold justified? currentProgName=${currentProgName},indoorTemp=${ecobeeTemp}°,heatingSetPoint=${heatTemp}°,coolingSetPoint=${coolTemp}°")
+		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,progHeatSetPoint ${programHeatTemp}°,progCoolSetPoint ${programCoolTemp}°")
+		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,heatingSetPoint ${heatTemp}°,coolingSetPoint ${coolTemp}°")
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
 		log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program")
@@ -500,9 +500,9 @@ private def check_if_hold_justified() {
 			"check_if_hold_justified>evaluate: moreCoolThresholdHumidity= ${humidity_threshold}% vs. outdoorHumidity ${outdoorHumidity}%")
 		log.trace("check_if_hold_justified>evaluate: lessCoolThreshold= ${less_cool_threshold} vs.outdoorTemp ${outdoorTemp}°")
 		if (detailedNotif == 'true') {
-			send("MonitorEcobeeTemp>eval:  moreCoolThreshold=${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-			send("MonitorEcobeeTemp>eval:  lessCoolThreshold=${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-			send("MonitorEcobeeTemp>eval:  moreCoolThresholdHumidity= ${humidity_threshold}% vs. outdoorHumidity ${outdoorHumidity}%")
+			send("MonitorEcobeeTemp>eval:  moreCoolThreshold ${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+			send("MonitorEcobeeTemp>eval:  lessCoolThreshold ${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+			send("MonitorEcobeeTemp>eval:  moreCoolThresholdHumidity ${humidity_threshold}% vs. outdoorHumidity ${outdoorHumidity}%")
 		}
 		if ((outdoorTemp > less_cool_threshold) && (outdoorTemp < more_cool_threshold) &&
         		(outdoorHumidity < humidity_threshold)) {
@@ -515,7 +515,7 @@ private def check_if_hold_justified() {
 			float actual_temp_diff = (programCoolTemp - coolTemp).round(1)
 			actual_temp_diff = (actual_temp_diff > 0) ? actual_temp_diff : (actual_temp_diff * -1)
 			if (detailedNotif == 'true') {
-				send("MonitorEcobeeTemp>eval: actual_temp_diff=${actual_temp_diff.toString()}° vs.temp_diff ${temp_diff}°")
+				send("MonitorEcobeeTemp>eval: actual_temp_diff ${actual_temp_diff.toString()}° vs.temp_diff ${temp_diff}°")
 			}
 			if (actual_temp_diff > temp_diff) {
 				if (detailedNotif == 'true') {
@@ -531,8 +531,8 @@ private def check_if_hold_justified() {
 		log.trace("MonitorEcobeeTemp>eval:lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>eval: moreHeatThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-			send("MonitorEcobeeTemp>eval: lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
-			send("MonitorEcobeeTemp>eval: moreHeatThresholdHum= ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
+			send("MonitorEcobeeTemp>eval: lessHeatThreshold ${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+			send("MonitorEcobeeTemp>eval: moreHeatThresholdHum ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
 		}
         if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 			(outdoorHumidity < humidity_threshold)) {
@@ -545,7 +545,7 @@ private def check_if_hold_justified() {
 			float actual_temp_diff = (heatTemp - programHeatTemp).round(1)
 			actual_temp_diff = (actual_temp_diff > 0) ? actual_temp_diff : (actual_temp_diff * -1)
 			if (detailedNotif == 'true') {
-				send("MonitorEcobeeTemp>eval: actualTempDiff=${actual_temp_diff.toString()}° vs.givenTempDiff ${temp_diff}°")
+				send("MonitorEcobeeTemp>eval: actualTempDiff ${actual_temp_diff.toString()}° vs.givenTempDiff ${temp_diff}°")
 			}
 			if (actual_temp_diff > temp_diff) {
 				if (detailedNotif == 'true') {
