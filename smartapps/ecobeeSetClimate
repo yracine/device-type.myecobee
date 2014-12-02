@@ -103,7 +103,7 @@ def temperatureHandler(evt) {
 
 
 def setClimate() {
-	def climateName= (givenClimateName ?: 'Home').capitalize()
+    def climateName= (givenClimateName ?: 'Home').capitalize()
 
 	
     def doChange = IsRightDayForChange()
@@ -111,7 +111,7 @@ def setClimate() {
     // If we have hit the condition to schedule this then lets do it
 
     if (doChange == true) {
-        log.debug "setTheTemp, location.mode = $location.mode, newMode = $newMode, location.modes = $location.modes"
+        log.debug "setClimate, location.mode = $location.mode, newMode = $newMode, location.modes = $location.modes"
 	
     	ecobee.setClimate("", climateName)
         send("ecobeeSetClimate>set ecobee thermostat(s) to ${climateName} program as requested")
