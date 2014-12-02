@@ -122,7 +122,7 @@ Amongst others:
 a) Monitor And Set Ecobee Temp
 ********************************
 
-In brief, the smartapp allows automatic adjustments of the cooling/heating setpoints according to outdoor conditions. This is particularly useful in the Winter/Summer where outdoor temperature and humidity can vary throughout the day.
+In brief, the smartapp allows automatic adjustments of the cooling/heating setpoints according to outdoor conditions. This is particularly useful in Winter/Summer where outdoor temperature and humidity can vary throughout the day.
 
 You can enable/disable the smartapp with a button on/off tile (ex.virtual switch).
 
