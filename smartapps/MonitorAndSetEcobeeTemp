@@ -290,7 +290,7 @@ private def check_if_hold_needed() {
 	float targetTstatTemp
 
 	if (detailedNotif == 'true') {
-		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°")
+		send("MonitorEcobeeTemp>currentProgName=${currentProgName},indoorTemp=${ecobeeTemp}°,progHeatSetPoint=${heatTemp}°,progCoolSetPoint=${coolTemp}°")
 	}
 	if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
                 
@@ -445,15 +445,14 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified> moreHCoolThreshold = $more_cool_threshold°"
 	log.trace "check_if_hold_justified> lessHeatThreshold = $less_heat_threshold°"
 	log.trace "check_if_hold_justified> lessCoolThreshold = $less_cool_threshold°"
-	log.trace "check_if_hold_justified>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°"
 	log.trace "check_if_hold_justified>state=${state}"
 
 	if (detailedNotif == 'true') {
-		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoor Temp=${ecobeeTemp}°")
+		send("MonitorEcobeeTemp>currentProgName=${currentProgName}, indoorTemp=${ecobeeTemp}°,heatingSetPoint=${heatTemp}°,coolingSetPoint=${coolTemp}°")
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
 		log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program")
-		ecobee.resumeProgram("")
+		ecobee.resumeProgram()
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
         
         /* Get latest heat and cool setting points after climate adjustment */
@@ -468,7 +467,7 @@ private def check_if_hold_justified() {
 	}    
 	if ((state?.programHoldSet == 'Home') && (residentsHaveBeenQuiet())) {
 		log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program")
-		ecobee.resumeProgram("")
+		ecobee.resumeProgram()
 		send("MonitorEcobeeTemp>resumed program, no motion detected")
         
         	/* Get latest heat and cool setting points after climate adjustment */
@@ -496,7 +495,7 @@ private def check_if_hold_justified() {
 		if ((outdoorTemp > less_cool_threshold) && (outdoorTemp < more_cool_threshold) &&
         		(outdoorHumidity < humidity_threshold)) {
 			send("MonitorEcobeeTemp>resuming program, ${less_cool_threshold}° < outdoorTemp <${more_cool_threshold}°")
-			ecobee.resumeProgram("")
+			ecobee.resumeProgram()
 		} else {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, cooling setPoint=${coolTemp}°")
@@ -508,7 +507,7 @@ private def check_if_hold_justified() {
 			}
 			if (actual_temp_diff > temp_diff) {
 				if (detailedNotif == 'true') {
-					send("MonitorEcobeeTemp>Hold differential too big ${actual_temp_diff.toString()}, needs adjustment")
+					send("MonitorEcobeeTemp>Hold differential too big (${actual_temp_diff.toString()}), needs adjustment")
 				}
 				check_if_hold_needed() // call it to adjust cool temp
 			}
@@ -526,7 +525,7 @@ private def check_if_hold_justified() {
         if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 			(outdoorHumidity < humidity_threshold)) {
 			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° < outdoorTemp > ${more_heat_threshold}°")
-			ecobee.resumeProgram("")
+			ecobee.resumeProgram()
 		} else {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
