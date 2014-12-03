@@ -27,39 +27,39 @@ definition(
 
 
 preferences {
-    section("When Smartthings's hello home mode change to...") {
-        input "newMode", "mode", metadata:[values:["Away", "Home"]]
-    }
+	section("When Smartthings's hello home mode change to...") {
+		input "newMode", "mode", metadata:[values:["Away", "Home"]]
+	}
 
-    section("Change the following thermostat(s)...") {
-        input "thermostats", "capability.thermostat", title:"Which thermostat(s)", multiple: true
-    }
-    section("to this thermostat's program... (ex. Away, Home, Awake, Sleep, any Custom)") {
-        input "givenClimate", "string", title: "Climate?"
-    }
+	section("Change the following thermostat(s)...") {
+		input "thermostats", "capability.thermostat", title:"Which thermostat(s)", multiple: true
+	}
+	section("to this thermostat's program... (ex. Away, Home, Awake, Sleep, any Custom)") {
+		input "givenClimate", "string", title: "Climate?"
+	}
     
     section( "Notifications" ) {
-        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
-        input "phone", "phone", title: "Send a Text Message?", required: false
-    }
+		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+		input "phone", "phone", title: "Send a Text Message?", required: false
+	}
     
 }
 
 def installed() {
-    subscribe(location, changeMode)
-    subscribe(app, changeMode)
+	subscribe(location, changeMode)
+	subscribe(app, changeMode)
 }
 
 def updated() {
-    unsubscribe()
-    subscribe(location, changeMode)
-    subscribe(app, changeMode)
+	unsubscribe()
+	subscribe(location, changeMode)
+	subscribe(app, changeMode)
 }
 
 def changeMode(evt) {
     def message
     
-    log.info message	
+   log.info message	
     message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
     send(message)
     if (newMode == "Away") {
