@@ -1530,7 +1530,9 @@ def getGroups(thermostatId) {
 
 	thermostatId = determine_tstat_id(thermostatId)
 	def ecobeeType = determine_ecobee_type_or_location("")
-	log.debug "getGroups>ecobee Type = $ecobeeType for thermostatId = $thermostatId"
+	if (settings.trace) {
+		log.debug "getGroups>ecobee Type = $ecobeeType for thermostatId = $thermostatId"
+	}
 	if (ecobeeType.toUpperCase() != 'REGISTERED') {
 		if (settings.trace) {
 			log.debug "getGroups>managementSet is not a valid settings.ecobeeType for getGroups"
