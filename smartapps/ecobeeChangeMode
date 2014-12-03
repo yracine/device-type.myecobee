@@ -64,14 +64,14 @@ def changeMode(evt) {
     send(message)
     if (newMode == "Away") {
         if (givenClimate.trim().toUpperCase() == 'AWAY') {
-        		thermostats?.away()
+        	thermostats?.away()
                 
         } else thermostats?.setClimate("", givenClimate) 
 
     }
     else {
         if (givenClimate.trim().toUpperCase() == 'HOME') {
-        		thermostats?.present()
+            thermostats?.present()
                 
         } else thermostats?.setClimate("", givenClimate) 
     }
