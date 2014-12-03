@@ -27,12 +27,15 @@ definition(
 
 
 preferences {
-    section("Change mode to...") {
+    section("When Smartthings's hello home mode change to...") {
         input "newMode", "mode", metadata:[values:["Away", "Home"]]
     }
 
-    section("Change these thermostats modes...") {
-        input "thermostats", "capability.thermostat", multiple: true
+    section("Change the following thermostat(s)...") {
+        input "thermostats", "capability.thermostat", title:"Which thermostat(s)", multiple: true
+    }
+    section("to this thermostat's program... (ex. Away, Home, Awake, Sleep, any Custom)") {
+        input "givenClimate", "string", title: "Climate?"
     }
     
     section( "Notifications" ) {
@@ -56,17 +59,21 @@ def updated() {
 def changeMode(evt) {
     def message
     
+    log.info message	
+    message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
+    send(message)
     if (newMode == "Away") {
-        message = "ecobeeChangeMode>Setting the thermostat(s) to Away.."
-        log.info message
-        thermostats?.away()
-        send(message)
+        if (givenClimate.trim().toUpperCase() == 'AWAY') {
+        		thermostats?.away()
+                
+        } else thermostats?.setClimate("", givenClimate) 
+
     }
     else {
-        message = "ecobeeChangeMode>Setting the thermostat(s) to Home.."
-        log.info message
-        thermostats?.present()   // could also be thermostats?.setClimate("", 'yourClimate')
-        send(message)
+        if (givenClimate.trim().toUpperCase() == 'HOME') {
+        		thermostats?.present()
+                
+        } else thermostats?.setClimate("", givenClimate) 
     }
 }
 
