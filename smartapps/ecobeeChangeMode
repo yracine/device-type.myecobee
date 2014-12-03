@@ -27,7 +27,7 @@ definition(
 
 
 preferences {
-	section("When Smartthings's hello home mode change to...") {
+	section("When Smartthings's hello home mode change to ['Away', 'Home']") {
 		input "newMode", "mode", metadata:[values:["Away", "Home"]]
 	}
 
