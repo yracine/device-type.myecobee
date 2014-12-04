@@ -384,7 +384,7 @@ simulator {
 		])
 	}
 }
-def coolLevelUp() {
+void coolLevelUp() {
 	int nextLevel = device.currentValue("coolingSetpoint") + 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
@@ -398,7 +398,7 @@ def coolLevelUp() {
 	}
 	setCoolingSetpoint(nextLevel)
 }
-def coolLevelDown() {
+void coolLevelDown() {
 	int nextLevel = device.currentValue("coolingSetpoint") - 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
@@ -412,7 +412,7 @@ def coolLevelDown() {
 	}
 	setCoolingSetpoint(nextLevel)
 }
-def heatLevelUp() {
+void heatLevelUp() {
 	int nextLevel = device.currentValue("heatingSetpoint") + 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
@@ -426,7 +426,7 @@ def heatLevelUp() {
 	}
 	setHeatingSetpoint(nextLevel)
 }
-def heatLevelDown() {
+void heatLevelDown() {
 	int nextLevel = device.currentValue("heatingSetpoint") - 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
@@ -442,141 +442,141 @@ def heatLevelDown() {
 }
 
 // handle commands
-def setHeatingSetpoint(temp) {
+void setHeatingSetpoint(temp) {
 	def thermostatId= determine_tstat_id("") 	    
 	setHold(thermostatId, device.currentValue("coolingSetpoint"), temp,
 		null, null)
 	sendEvent(name: 'heatingSetpoint', value: temp)
 }
-def setCoolingSetpoint(temp) {
+void setCoolingSetpoint(temp) {
 	def thermostatId= determine_tstat_id("") 	    
 	setHold(settings.thermostatId, temp, device.currentValue("heatingSetpoint"),
 		null, null)
 	sendEvent(name: 'coolingSetpoint', value: temp)
 }
-def off() {
+void off() {
 	setThermostatMode('off')
 }
-def auto() {
+void auto() {
 	setThermostatMode('auto')
 }
-def heat() {
+void heat() {
 	setThermostatMode('heat')
 }
-def emergencyHeat() {
+void emergencyHeat() {
 	setThermostatMode('heat')
 }
-def auxHeatOnly() {
+void auxHeatOnly() {
 	setThermostatMode('auxHeatOnly')
 }
-def cool() {
+void cool() {
 	setThermostatMode('cool')
 }
-def setThermostatMode(mode) {
+void setThermostatMode(mode) {
 	mode = mode == 'emergency heat' ? 'heat' : mode
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['hvacMode': "${mode}"])
 	sendEvent(name: 'thermostatMode', value: mode)
 }
-def fanOn() {
+void fanOn() {
 	setThermostatFanMode('on')
 }
-def fanAuto() {
+void fanAuto() {
 	setThermostatFanMode('auto')
 }
-def fanOff() { // fanOff is not supported, setting it to 'auto' instead.
+void fanOff() { // fanOff is not supported, setting it to 'auto' instead.
 	setThermostatFanMode('auto')
 }
-def setThermostatFanMode(mode) {
+void setThermostatFanMode(mode) {
 	def thermostatId= determine_tstat_id("") 	    
 	setHold(thermostatId, device.currentValue("coolingSetpoint"), device
 		.currentValue("heatingSetpoint"),
 		mode, null)
 	sendEvent(name: 'thermostatFanMode', value: mode)
 }
-def setFanMinOnTime(minutes) {
+void setFanMinOnTime(minutes) {
 	setThermostatSettings(settings.thermostatId, ['fanMinOnTime': "${minutes}"])
 	sendEvent(name: 'fanMinOnTime', value: minutes)
 }
-def ventilatorOn() {
+void ventilatorOn() {
 	setVentilatorMode('on')
 }
-def ventilatorOff() {
+void ventilatorOff() {
 	setVentilatorMode('off')
 }
-def ventilatorAuto() {
+void ventilatorAuto() {
 	setVentilatorMode('auto')
 }
-def setVentilatorMinOnTime(minutes) {
+void setVentilatorMinOnTime(minutes) {
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['vent': "minontime",
 			'ventilatorMinOnTime': "${minutes}"])
 	sendEvent(name: 'ventilatorMinOnTime', value: minutes)
 	sendEvent(name: 'ventilatorMode', value: "minontime")
 }
-def setVentilatorMode(mode) {
+void setVentilatorMode(mode) {
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['vent': "${mode}"])
 	sendEvent(name: 'ventilatorMode', value: mode)
 }
-def setCondensationAvoid(flag) { // set the flag to true or false
+void setCondensationAvoid(flag) { // set the flag to true or false
 	flag = flag == 'true' ? 'true' : 'false'
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['condensationAvoid': "${flag}"])
 	sendEvent(name: 'condensationAvoid', value: flag)
 }
-def dehumidifierOn() {
+void dehumidifierOn() {
 	setDehumidifierMode('on')
 }
-def dehumidifierOff() {
+void dehumidifierOff() {
 	setDehumidifierMode('off')
 }
-def setDehumidifierMode(mode) {
+void setDehumidifierMode(mode) {
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['dehumidifierMode': "${mode}"])
 	sendEvent(name: 'dehumidifierMode', value: mode)
 }
-def setDehumidifierLevel(level) {
+void setDehumidifierLevel(level) {
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['dehumidifierLevel': "${level}"])
 	sendEvent(name: 'dehumidifierLevel', value: level)
 }
-def humidifierAuto() {
+void humidifierAuto() {
 	setHumidifierMode('auto')
 }
-def humidifierOff() {
+void humidifierOff() {
 	setHumidifierMode('off')
 }
-def setHumidifierMode(mode) {
+void setHumidifierMode(mode) {
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['humidifierMode': "${mode}"])
 	sendEvent(name: 'humidifierMode', value: mode)
 }
-def setHumidifierLevel(level) {
+void setHumidifierLevel(level) {
 	def thermostatId= determine_tstat_id("") 	    
 	setThermostatSettings(thermostatId, ['humidity': "${level}"])
 	sendEvent(name: 'humidifierLevel', value: level)
 }
-def awake() {
+void awake() {
 	setThisTstatClimate("Awake")
 }
-def away() {
+void away() {
 	setThisTstatClimate("Away")
 }
-def present() {
+void present() {
 	def currentProgramType = device.currentValue("programType")
 	if (currentProgramType == "HOLD") { // get rid of overrides before applying new climate
 		resumeThisTstat()
 	}
 	home()
 }
-def home() {
+void home() {
 	setThisTstatClimate("Home")
 }
-def sleep() {
+void sleep() {
 	setThisTstatClimate("Sleep")
 }
-def quickSave() {
+void quickSave() {
 	def thermostatId= determine_tstat_id("") 	    
 	def currentProgramType = device.currentValue("programType")
 	if (currentProgramType.toUpperCase() == 'VACATION') {
@@ -609,7 +609,7 @@ def quickSave() {
 	sendEvent(name: 'programDisplayName', value: "QuickSave")
 }
   
-def setThisTstatClimate(climateName) {
+void setThisTstatClimate(climateName) {
 	def thermostatId= determine_tstat_id("") 	    
 	def currentProgram = device.currentValue("programScheduleName")
 	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
@@ -633,7 +633,7 @@ def parse(String description) {
 
 }
 
-def poll() {
+void poll() {
 	def tstatId,ecobeeType
     
 	def thermostatId= determine_tstat_id("") 	    
@@ -911,7 +911,7 @@ def getThermostatOperatingState() {
 
 // thermostatId may only be a specific thermostatId or "" (for current thermostat)
 // To be called after a poll() or refresh() to have the latest status
-def getClimateList(thermostatId) {
+private def getClimateList(thermostatId) {
 	def climateList=""
     
 	for (i in 0..data.thermostatList[0].program.climates.size() - 1) {
@@ -927,16 +927,16 @@ def getClimateList(thermostatId) {
 }
 
 
-def refresh() {
+void refresh() {
 	poll()
 }
 
-def resumeThisTstat() {
+void resumeThisTstat() {
 	def thermostatId= determine_tstat_id("") 	    
 	resumeProgram(thermostatId) 
 	poll()
 }
-private def api(method, args, success = {}) {
+private void api(method, args, success = {}) {
 	String URI_ROOT = "${get_URI_ROOT()}/1"
 	if (!isLoggedIn()) {
 		login()
@@ -987,7 +987,7 @@ private def api(method, args, success = {}) {
 }
 
 // Need to be authenticated in before this is called. So don't call this. Call api.
-private def doRequest(uri, args, type, success) {
+private void doRequest(uri, args, type, success) {
 	def params = [
 		uri: uri,
 		headers: [
