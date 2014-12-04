@@ -86,6 +86,8 @@ metadata {
 		attribute "ventilatorMode", "string"
 		attribute "programDisplayName", "string"
 		attribute "thermostatOperatingState", "string"        
+		attribute "climateList", "string" 
+        attribute "modelNumber", "string"
         
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -143,7 +145,8 @@ metadata {
 		command "iterateSetThermostatSettings"
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
-		command "refreshChildTokens"        
+		command "refreshChildTokens"  
+        command "getClimateList"
 }        
 simulator {
 		// TODO: define status and reply messages here
@@ -647,6 +650,7 @@ def poll() {
 	sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity,
 		unit: "%")
 	sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
+    sendEvent name: "modelNumber", value: data.thermostatList[0].modelNumber
 	sendEvent(name: 'hasHumidifier', value: data.thermostatList[0].settings.hasHumidifier)
 	sendEvent(name: 'hasDehumidifier', value: data.thermostatList[0].settings.hasDehumidifier)
 	sendEvent(name: 'hasHrv', value: data.thermostatList[0].settings.hasHrv)
@@ -882,10 +886,10 @@ def poll() {
 		}
 	}
 	sendEvent(name: 'groups', value: groupList)
+    
 	// Added posting of basic thermostat Status
- 	def currentOpState = getThermostatOperatingState()
-	sendEvent(name: 'thermostatOperatingState', value: currentOpState)
-
+ 	getThermostatOperatingState()
+	getClimateList()
 }
 // Get the EquipmentStatus including all components (HVAC, fan, dehumidifier/humidifier,HRV/ERV, aux heat)
 // To be called after a poll() or refresh() to have the latest status
@@ -904,8 +908,26 @@ def getThermostatOperatingState() {
 	if ((currentOpState == 'idle') && device.currentValue("thermostatFanMode").toUpperCase().contains('ON') ) {
 		currentOpState = 'fan only' 
 	}  
+	sendEvent(name: 'thermostatOperatingState', value: currentOpState)
 	return currentOpState
 }
+// thermostatId may only be a specific thermostatId or "" (for current thermostat)
+// To be called after a poll() or refresh() to have the latest status
+def getClimateList(thermostatId) {
+	def climateList=[]
+    
+	for (i in 0..data.thermostatList[0].program.climates.size() - 1) {
+		climateList = data.thermostatList[0].program.climates[i].name  + climateList
+	}
+	if (settings.trace) {
+		log.debug "getClimateList>climateList=${climateList}"
+		sendEvent name: "verboseTrace", value:
+			"getClimateList>climateList=${climateList}"
+	}
+	sendEvent name: "climateList", value:"${climateList}"
+}
+
+
 def refresh() {
 	poll()
 }
@@ -2185,6 +2207,7 @@ def getModelNumber() {
 	}
 	return ((data.thermostatList[0].identifier)? data.thermostatList[0].modelNumber: "")
 }
+
 private def refresh_tokens() {
 	def method = 
 	[
@@ -2539,8 +2562,7 @@ def initialSetup(device_client_id, auth_data, device_tstat_id) {
 	data.auth.ecobeeType = ecobeeType
 }
 
-def toQueryString(Map m)
-{
+def toQueryString(Map m) {
 	return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
 }
 
