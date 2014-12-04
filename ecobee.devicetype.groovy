@@ -914,10 +914,10 @@ def getThermostatOperatingState() {
 // thermostatId may only be a specific thermostatId or "" (for current thermostat)
 // To be called after a poll() or refresh() to have the latest status
 def getClimateList(thermostatId) {
-	def climateList=[]
+	def climateList=""
     
 	for (i in 0..data.thermostatList[0].program.climates.size() - 1) {
-		climateList = data.thermostatList[0].program.climates[i].name  + climateList
+		climateList = data.thermostatList[0].program.climates[i].name  + "," + climateList
 	}
 	if (settings.trace) {
 		log.debug "getClimateList>climateList=${climateList}"
