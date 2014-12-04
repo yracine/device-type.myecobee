@@ -99,7 +99,7 @@ private send(msg) {
 		log.debug("sending push message")
 		sendPush(msg)
 	}
-	if (phone) {1
+	if (phone) {
 		log.debug("sending text message")
 		sendSms(phone, msg)
 	}
