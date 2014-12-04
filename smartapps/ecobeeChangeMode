@@ -27,23 +27,37 @@ definition(
 
 
 preferences {
-	section("When Smartthings's hello home mode change to [ex. 'Away', 'Home']") {
-		input "newMode", "mode", metadata:[values:["Away", "Home", "Night"]]
-	}
+	page(name: "selectThermostats", title: "Thermostats", install: false, unintall: false, nextPage: "selectProgram") {
+ 		section("When Smartthings's hello home mode change to [ex. 'Away', 'Home']") {
+			input "newMode", "mode", metadata:[values:["Away", "Home", "Night"]]
+		}
 
-	section("Change the following thermostat(s)...") {
-		input "thermostats", "capability.thermostat", title:"Which thermostat(s)", multiple: true
+		section("Change the following ecobee thermostat(s)...") {
+			input "thermostats", "capability.thermostat", title:"Which thermostat(s)", multiple:true
+		}
 	}
-	section("to this thermostat's program... (ex. Away, Home, Awake, Sleep, any Custom)") {
-		input "givenClimate", "string", title: "Climate?"
-	}
-    
-    section( "Notifications" ) {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
-		input "phone", "phone", title: "Send a Text Message?", required: false
-	}
-    
+    page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")    
+	page(name: "Notifications", title: "Notifications Options", install: true, unintall: true) {
+	    section( "Notifications" ) {
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+			input "phone", "phone", title: "Send a Text Message?", required: false
+		}
+    }
 }
+
+def selectProgram() {
+	def ecobeePrograms = thermostats[0].currentClimateList.tokenize(',')
+    log.debug "programs: $ecobeePrograms"
+    
+    
+    return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage: "Notifications") {
+            section("Select Program") {
+                input "givenClimate", "enum", title: "Which program?", options: ecobeePrograms, required: true
+            }
+     }
+        
+}
+
 
 def installed() {
 	subscribe(location, changeMode)
@@ -55,6 +69,10 @@ def updated() {
 	subscribe(location, changeMode)
 	subscribe(app, changeMode)
 }
+
+def climateListHandler(evt) {
+    log.debug "$evt.name $evt.value"
+}    
 
 def changeMode(evt) {
     def message
