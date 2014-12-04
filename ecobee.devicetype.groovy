@@ -146,8 +146,8 @@ metadata {
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
 		command "refreshChildTokens" 
-		command "getClimateList"
 }        
+
 simulator {
 		// TODO: define status and reply messages here
 	}
@@ -634,59 +634,14 @@ def parse(String description) {
 }
 
 def poll() {
-	def AWAY_PROG = 'Away'
-	def SLEEP_PROG = 'Sleep'
-	def HOME_PROG = 'Home'
-	def AWAKE_PROG = 'Awake'
-	def CUSTOM_PROG = 'Custom'
-	def QUICKSAVE = 'QuickSave'
 	def tstatId,ecobeeType
     
 	def thermostatId= determine_tstat_id("") 	    
 	
 	getThermostatInfo(thermostatId)
-	sendEvent(name: 'thermostatName', value: data.thermostatList[0].name)
-	sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
-	sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity,
-		unit: "%")
-	sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
-	sendEvent name: "modelNumber", value: data.thermostatList[0].modelNumber
-	sendEvent(name: 'hasHumidifier', value: data.thermostatList[0].settings.hasHumidifier)
-	sendEvent(name: 'hasDehumidifier', value: data.thermostatList[0].settings.hasDehumidifier)
-	sendEvent(name: 'hasHrv', value: data.thermostatList[0].settings.hasHrv)
-	sendEvent(name: 'hasErv', value: data.thermostatList[0].settings.hasErv)
-	if (data.thermostatList[0].settings.hasHumidifier) {
-		sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
-		sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,
-			unit: "%")
-	}
-	if (data.thermostatList[0].settings.hasDehumidifier) {
-		sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
-		sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel,
-			unit: "%")
-	}
-	if ((data.thermostatList[0].settings.hasHrv) || (data.thermostatList[0].settings
-		.hasErv)) {
-		sendEvent(name: 'ventilatorMinOnTime', value: data.thermostatList[0].settings
-			.ventilatorMinOnTime)
-		sendEvent(name: 'ventilatorMode', value: data.thermostatList[0].settings.vent)
-	}
-	// post weather events
-	sendEvent(name: 'weatherStation', value: data.thermostatList[0].weather.weatherStation)
-	sendEvent(name: 'weatherDateTime', value:
-		"Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}")
 
-	sendEvent(name: 'weatherSymbol', value: data.thermostatList[0].weather.forecasts[0].weatherSymbol)
-	sendEvent(name: 'weatherCondition', value: data.thermostatList[0].weather.forecasts[0].condition)
-	sendEvent(name: 'weatherPressure', value: data.thermostatList[0].weather.forecasts[0].pressure, unit: "hpa")
-	sendEvent(name: 'weatherRelativeHumidity', value: data.thermostatList[0].weather
-		.forecasts[0].relativeHumidity,
-		unit: "%")
-	sendEvent(name: 'weatherWindDirection', value: data.thermostatList[0].weather
-		.forecasts[0].windDirection + " Winds")
-	sendEvent(name: 'weatherPop', value: data.thermostatList[0].weather.forecasts[
-			0].pop, unit: "%")
-	// post program events
+	// determine if there is an event running
+    
 	Integer indiceEvent = 0
 	Boolean foundEvent = false
 	if (data.thermostatList[0].events.size > 0) {
@@ -698,6 +653,16 @@ def poll() {
 			}
 		}
 	}
+
+	def currentClimate = null
+	// Get the current Climate 
+	data.thermostatList[0].program.climates.each() {
+		if (it.climateRef == data.thermostatList[0].program.currentClimateRef) {
+			currentClimate = it
+			exit
+		}
+	}
+
 	if (settings.trace) {
 		log.debug "poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
 		sendEvent name: "verboseTrace", value:
@@ -725,135 +690,141 @@ def poll() {
 				"poll>thermostatId = ${thermostatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
 		}
 	}
-	def currentClimate = null
-	// Get the current Climate 
-	data.thermostatList[0].program.climates.each() {
-		if (it.climateRef == data.thermostatList[0].program.currentClimateRef) {
-			currentClimate = it
-			exit
-		}
-	}
-	if (foundEvent) {
-		// Display the current event's name, type, and message
-		sendEvent(name: 'programScheduleName', value: data.thermostatList[0].events[
-			indiceEvent].name)
-		sendEvent(name: 'programType', value: data.thermostatList[0].events[
-			indiceEvent].type)
-		if (data.thermostatList[0].events[indiceEvent].type != 'quickSave') {
-			sendEvent(name: 'programEndTimeMsg', value:
-				"${data.thermostatList[0].events[indiceEvent].type}" +
-				" ends at ${data.thermostatList[0].events[indiceEvent].endDate} ${data.thermostatList[0].events[indiceEvent].endTime.substring(0,5)}"
-			)
-		} else {
-			sendEvent(name: 'programEndTimeMsg', value: "Quicksave running")
-		}
-	} else {
-		// if there is no event running, then display the current program
-		sendEvent(name: 'programScheduleName', value: currentClimate.name)
-		sendEvent(name: 'programType', value: currentClimate.type)
-		sendEvent(name: 'programEndTimeMsg', value: "No Events running")
-	}
-	def progCurrentName = device.currentValue("programScheduleName")
     
-	def progType = device.currentValue("programType").trim().toUpperCase()
+	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
+
+	def dataEvents = [
+ 		thermostatName:data.thermostatList[0].name,
+		thermostatMode:data.thermostatList[0].settings.hvacMode,
+		temperature: data.thermostatList[0].runtime.actualTemperature,
+		humidity:data.thermostatList[0].runtime.actualHumidity,
+		coolingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].coolHoldTemp: 
+			data.thermostatList[0].runtime.desiredCool,
+		heatingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].heatHoldTemp: 
+			data.thermostatList[0].runtime.desiredHeat,
+        modelNumber: data.thermostatList[0].modelNumber,
+		equipmentStatus:getEquipmentStatus(),
+		thermostatOperatingState: getThermostatOperatingState(),
+		hasHumidifier:data.thermostatList[0].settings.hasHumidifier.toString(),
+		hasDehumidifier:data.thermostatList[0].settings.hasDehumidifier.toString(),
+		hasHrv:data.thermostatList[0].settings.hasHrv.toString(),
+		hasErv:data.thermostatList[0].settings.hasErv.toString(),
+		programScheduleName: (foundEvent)? data.thermostatList[0].events[indiceEvent].name : currentClimate.name,
+		programType: (foundEvent)?data.thermostatList[0].events[indiceEvent].type : currentClimate.type,
+		programEndTimeMsg: (foundEvent)? "${data.thermostatList[0].events[indiceEvent].type}" +
+				" ends at ${data.thermostatList[0].events[indiceEvent].endDate}" +
+				"${data.thermostatList[0].events[indiceEvent].endTime.substring(0,5)}":
+ 				"No Events running",
+		thermostatFanMode: (foundEvent)? data.thermostatList[0].events[indiceEvent].fan: 
+			data.thermostatList[0].runtime.desiredFanMode,
+		fanMinOnTime: (foundEvent)? data.thermostatList[0].events[indiceEvent].fanMinOnTime.toString() :
+			data.thermostatList[0].settings.fanMinOnTime.toString(),
+		programFanMode: (data.thermostatList[0].settings.hvacMode == 'cool')? currentClimate.coolFan : currentClimate.heatFan,
+		programDisplayName: getCurrentProgName(),
+		weatherStation:data.thermostatList[0].weather.weatherStation,
+		weatherSymbol:data.thermostatList[0].weather.forecasts[0].weatherSymbol.toString(),
+		weatherTemperature:data.thermostatList[0].weather.forecasts[0].temperature,
+		weatherDateTime:"Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}",
+		weatherCondition:data.thermostatList[0].weather.forecasts[0].condition,
+		weatherTemp: data.thermostatList[0].weather.forecasts[0].temperature,
+		weatherTempHigh: data.thermostatList[0].weather.forecasts[0].tempHigh, 
+		weatherTempLow: data.thermostatList[0].weather.forecasts[0].tempLow,
+        weatherWindSpeed: (data.thermostatList[0].weather.forecasts[0].windSpeed/1000),		// divided by 1000 for display
+		weatherPressure:data.thermostatList[0].weather.forecasts[0].pressure.toString(),
+		weatherRelativeHumidity:data.thermostatList[0].weather.forecasts[0].relativeHumidity,
+		weatherWindDirection:data.thermostatList[0].weather.forecasts[0].windDirection + " Winds",
+		weatherPop:data.thermostatList[0].weather.forecasts[0].pop.toString(),
+		programCoolTemp:(currentClimate.coolTemp / 10),										// divided by 10 for display
+		programHeatTemp:(currentClimate.heatTemp / 10),
+		alerts: getAlerts(),
+		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
+		climateList: getClimateList()
+	]
+     
+	if (data.thermostatList[0].events[indiceEvent].type == 'quickSave') {
+			dataEvents.programEndTimeMsg ="Quicksave running"
+	}
+
+	generateEvent(dataEvents)
+	if (data.thermostatList[0].settings.hasHumidifier) {
+		sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
+		sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,
+			unit: "%")
+	}
+	if (data.thermostatList[0].settings.hasDehumidifier) {
+		sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
+		sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel,
+			unit: "%")
+	}
+	if ((data.thermostatList[0].settings.hasHrv) || (data.thermostatList[0].settings
+		.hasErv)) {
+		sendEvent(name: 'ventilatorMinOnTime', value: data.thermostatList[0].settings
+			.ventilatorMinOnTime)
+		sendEvent(name: 'ventilatorMode', value: data.thermostatList[0].settings.vent)
+	}
+    
+}
+
+
+private void generateEvent(Map results)
+{
+	if (settings.trace) {
+		log.debug "generateEvents>parsing data $results"
+	}
+    
+	if(results)
+	{
+		results.each { name, value ->
+			def isDisplayed = true
+            
+			if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {
+				float tempValue = getTemperature(value).toFloat().round(1)
+				def isChange = isTemperatureStateChange(device, name, tempValue.toString())
+				isDisplayed = isChange
+                sendEvent(name: name, value: tempValue.toString(), unit: getTemperatureScale(), displayed: isDisplayed)                                     									 
+            } else if (name.toUpperCase().contains("SPEED")) {
+ 				float speedValue = getSpeed(value).toFloat().round(1)
+				def isChange = isStateChange(device, name, speedValue.toString())
+				isDisplayed = isChange
+				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
+            } else if (name.toUpperCase().contains("HUMIDITY")) {
+ 				float humidityValue = value.toFloat().round(1)
+				def isChange = isStateChange(device, name, humidityValue.toString())
+				isDisplayed = isChange
+				sendEvent(name: name, value: humidityValue.toString(), unit: "%", displayed: isDisplayed)                                     									 
+            } else {
+				def isChange = isStateChange(device, name, value)
+				isDisplayed = isChange
+
+				sendEvent(name: name, value: value, isStateChange: isChange, displayed: isDisplayed)       
+			}
+		}
+	}
+}
+
+
+private def getCurrentProgName() {
+	def AWAY_PROG = 'Away'
+	def SLEEP_PROG = 'Sleep'
+	def HOME_PROG = 'Home'
+	def AWAKE_PROG = 'Awake'
+	def CUSTOM_PROG = 'Custom'
+	def QUICKSAVE = 'QuickSave'
+
+	def progCurrentName = device.currentValue("programScheduleName")
+	def progType = device.currentValue("programType")
+    progType = (progType == null) ? "": progType.trim().toUpperCase()
+    progCurrentName = (progCurrentName == null) ? "": progCurrentName.trim().toUpperCase()
 	if ((progCurrentName != AWAY_PROG) && (progCurrentName != SLEEP_PROG) && (
 			progCurrentName != AWAKE_PROG) &&
 		(progCurrentName != HOME_PROG) && (progCurrentName != QUICKSAVE)) {
 		progCurrentName = (progType == 'VACATION') ? AWAY_PROG : CUSTOM_PROG
 	}
-	sendEvent(name: 'programDisplayName', value: progCurrentName)
-	if (foundEvent) {
-		// current fan mode based on running event
-		sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].events[
-			indiceEvent].fan)
-		sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].events[
-			indiceEvent].fanMinOnTime)
-	} else {
-		// otherwise the fanMode is taken from the runtime object
-		sendEvent(name: 'thermostatFanMode', value: data.thermostatList[0].runtime.desiredFanMode)
-			// otherwise the fanMinOnTime is taken from the settings object
-		sendEvent(name: 'fanMinOnTime', value: data.thermostatList[0].settings.fanMinOnTime)
-	}
-	if (data.thermostatList[0].settings.hvacMode == 'cool') {
-		sendEvent(name: 'programFanMode', value: currentClimate.coolFan)
-	} else {
-		sendEvent(name: 'programFanMode', value: currentClimate.heatFan)
-	}
-	def scale = getTemperatureScale()
-	if (scale == 'C') {
-		float actualTemp = fToC(data.thermostatList[0].runtime.actualTemperature)
-		float desiredCoolTemp, desiredHeatTemp
-		if (foundEvent) {
-			// post desired heat and cool setPoints based on running event
-			desiredCoolTemp = fToC(data.thermostatList[0].events[indiceEvent].coolHoldTemp)
-			desiredHeatTemp = fToC(data.thermostatList[0].events[indiceEvent].heatHoldTemp)
-		} else {
-			// else if no running events, then post according to runtime values
-			desiredCoolTemp = fToC(data.thermostatList[0].runtime.desiredCool)
-			desiredHeatTemp = fToC(data.thermostatList[0].runtime.desiredHeat)
-		}
-		sendEvent(name: 'temperature', value: actualTemp.round(1).toString(),
-			unit: "C", state: data.thermostatList[0].settings.hvacMode)
-		sendEvent(name: 'coolingSetpoint', value: desiredCoolTemp.round(1).toString(),
-			unit: "C")
-		sendEvent(name: 'heatingSetpoint', value: desiredHeatTemp.round(1).toString(),
-				unit: "C")
-		// post weather temps
-		float weatherTemp = fToC(data.thermostatList[0].weather.forecasts[0].temperature)
-		float weatherTempHigh = fToC(data.thermostatList[0].weather.forecasts[0].tempHigh)
-		float weatherTempLow = fToC(data.thermostatList[0].weather.forecasts[0].tempLow)
-		sendEvent(name: 'weatherTemperature', value: weatherTemp.round(1).toString(),
-			unit: "C")
-		sendEvent(name: 'weatherTempHigh', value: weatherTempHigh.round(1).toString(),
-			unit: "C")
-		sendEvent(name: 'weatherTempLow', value: weatherTempLow.round(1).toString(),
-			unit: "C")
-		float windSpeed = milesToKm((data.thermostatList[0].weather.forecasts[0].windSpeed
-			.toFloat() / 1000))
-		sendEvent(name: 'weatherWindSpeed', value: windSpeed.round(1).toString(),
-				unit: 'kmh')
-		// post program temps
-		float programHeatTemp = fToC((currentClimate.heatTemp / 10))
-		float programCoolTemp = fToC((currentClimate.coolTemp / 10))
-		sendEvent(name: 'programCoolTemp', value: programCoolTemp.round(1).toString(),
-			unit: "C")
-		sendEvent(name: 'programHeatTemp', value: programHeatTemp.round(1).toString(),
-			unit: "C")
-	} else {
-		sendEvent(name: 'temperature', value: (data.thermostatList[0].runtime.actualTemperature),
-			unit: "F", state: data.thermostatList[0].settings.hvacMode)
-		if (foundEvent) {
-			// post desired heat and cool setPoints based on running event
-			sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].events[
-				indiceEvent].coolHoldTemp), unit: "F")
-			sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].events[
-				indiceEvent].heatHoldTemp), unit: "F")
-		} else {
-			// if no running events, then post according to runtime values
-			sendEvent(name: 'coolingSetpoint', value: (data.thermostatList[0].runtime.desiredCool),
-				unit: "F")
-			sendEvent(name: 'heatingSetpoint', value: (data.thermostatList[0].runtime.desiredHeat),
-				unit: "F")
-		}
-		// post weather temps
-		sendEvent(name: 'weatherTemperature', value: data.thermostatList[0].weather.forecasts[
-			0].temperature, unit: "F")
-		sendEvent(name: 'weatherTempHigh', value: data.thermostatList[0].weather.forecasts[
-			0].tempHigh, unit: "F")
-		sendEvent(name: 'weatherTempLow', value: data.thermostatList[0].weather.forecasts[
-			0].tempLow, unit: "F")
-		float windSpeed = data.thermostatList[0].weather.forecasts[0].windSpeed.toFloat() /
-			1000
-		sendEvent(name: 'weatherWindSpeed', value: windSpeed.round(1).toString(), unit: 'mph')
-		// post program temps
-		sendEvent(name: 'programCoolTemp', value: (currentClimate.coolTemp / 10),
-			unit: "F")
-		sendEvent(name: 'programHeatTemp', value: (currentClimate.heatTemp / 10),
-			unit: "F")
-	}
-	def equipStatus = getEquipmentStatus()
-	sendEvent(name: 'equipmentStatus', value: equipStatus)    
-	// post alerts
+	return progCurrentName
+}
+
+private def getAlerts() {
+
 	def alerts = null
 	if (data.thermostatList[0].alerts.size() > 0) {
 		alerts = 'Alert(s) '
@@ -864,33 +835,55 @@ def poll() {
 		}
 	}
 	alerts = (alerts != null) ? alerts + '\ngo to ecobee portal' : 'No alerts'
-	sendEvent(name: 'alerts', value: alerts)
-	// post group(s)
+    return alerts
+}
+
+private def getThermostatGroups(thermostatId) {
+
 	def groupList = 'No groups'
-	// by default, the ecobeeType is registered (SMART & SMART-SI thermostats)
-	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
-	if (ecobeeType.toUpperCase() == 'REGISTERED') {
-		// get Groups associated to this thermostatId
-		getGroups(thermostatId)
-		// post group names associated to this thermostatId
-		if (data.groups.size() > 0) {
-			groupList = 'Group(s) '
-			def j=0
-			for (i in 0..data.groups.size() - 1) {
-				if (data.groups[i].groupName != '') {
-					groupList = (j > 0) ? ' \n' + groupList + data.groups[i].groupName :
-						groupList + data.groups[i].groupName
-					j++    
-				}        
-			}
+	getGroups(thermostatId)
+	if (data.groups.size() > 0) {
+		groupList = 'Group(s) '
+		def j=0
+		for (i in 0..data.groups.size() - 1) {
+			if (data.groups[i].groupName != '') {
+				groupList = (j > 0) ? ' \n' + groupList + data.groups[i].groupName :
+					groupList + data.groups[i].groupName
+				j++    
+			}        
 		}
 	}
-	sendEvent(name: 'groups', value: groupList)
-    
-	// Added posting of basic thermostat Status
- 	getThermostatOperatingState()
-	getClimateList()
+    return groupList
 }
+
+private def getTemperature(value) {
+	def farenheits = value
+	if(getTemperatureScale() == "F"){
+		return farenheits
+	} else {
+		return fToC(farenheits)
+	}
+}
+
+private def getSpeed(value) {
+	def miles = value
+	if(getTemperatureScale() == "F"){
+		return miles
+	} else {
+		return milesToKm(miles) 
+	}
+}
+
+private def getDistanceScale() {
+	def scale= getTemperatureScale()
+    if (scale == 'C') {
+    
+    	return "km"
+    }
+    return "miles"
+}
+
+
 // Get the EquipmentStatus including all components (HVAC, fan, dehumidifier/humidifier,HRV/ERV, aux heat)
 // To be called after a poll() or refresh() to have the latest status
 def getEquipmentStatus() {
@@ -900,17 +893,22 @@ def getEquipmentStatus() {
 }
 // Get the basic thermostat status (heating,cooling,fan only)
 // To be called after a poll() or refresh() to have the latest status
+
 def getThermostatOperatingState() {
 
-	def equipStatus = device.currentValue("equipmentStatus").toUpperCase()
+	def equipStatus = device.currentValue("equipmentStatus")
+	if (equipStatus == null) 
+ 		return ""
+	
+	equipStatus = equipStatus.trim().toUpperCase()
     
 	def currentOpState = equipStatus.contains('HEAT')? 'heating' : (equipStatus.contains('COOL')? 'cooling' : 'idle')
 	if ((currentOpState == 'idle') && device.currentValue("thermostatFanMode").toUpperCase().contains('ON') ) {
 		currentOpState = 'fan only' 
 	}  
-	sendEvent(name: 'thermostatOperatingState', value: currentOpState)
 	return currentOpState
 }
+
 // thermostatId may only be a specific thermostatId or "" (for current thermostat)
 // To be called after a poll() or refresh() to have the latest status
 def getClimateList(thermostatId) {
@@ -924,6 +922,7 @@ def getClimateList(thermostatId) {
 		sendEvent name: "verboseTrace", value:
 			"getClimateList>climateList=${climateList}"
 	}
+    return climateList
 	sendEvent name: "climateList", value:"${climateList}"
 }
 
@@ -931,6 +930,7 @@ def getClimateList(thermostatId) {
 def refresh() {
 	poll()
 }
+
 def resumeThisTstat() {
 	def thermostatId= determine_tstat_id("") 	    
 	resumeProgram(thermostatId) 
@@ -1106,7 +1106,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // settings can be anything supported by ecobee 
 //		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
-def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
+void iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
@@ -1150,7 +1150,7 @@ def iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
-def setThermostatSettings(thermostatId,tstatSettings = []) {
+void setThermostatSettings(thermostatId,tstatSettings = []) {
     
 	thermostatId= determine_tstat_id(thermostatId) 	    
 	if (settings.trace) {
@@ -1182,7 +1182,7 @@ def setThermostatSettings(thermostatId,tstatSettings = []) {
 //		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 // extraHoldParams may be any other sethold or events properties  
 //		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml for more details
-def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
+void iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = [], extraHoldParams=[]) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
@@ -1228,7 +1228,7 @@ def iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 // This setHold function is kept for better compatibility with previous releases
-def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
+void setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = []) {
     
     // Call the setHoldExtraParams function with null value as extraHoldParams 
@@ -1242,7 +1242,7 @@ def setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 // extraHoldParams may be any other sethold or events properties  
 //		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml
-def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
+void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 	tstatSettings = [], extraHoldParams=[]) {
     
 	Integer targetCoolTemp = null,targetHeatTemp = null
@@ -1303,7 +1303,7 @@ def setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 // iterateCreateVacation: iterate thru all the thermostats under a specific account and create the vacation
 // tstatType =managementSet or registered (no spaces).  
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
-def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
+void iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 	targetHeatTemp, targetStartDateTime, targetEndDateTime) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
@@ -1348,7 +1348,7 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
+void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	targetStartDateTime, targetEndDateTime) {
     
 	thermostatId = determine_tstat_id(thermostatId)
@@ -1398,7 +1398,7 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 // iterateDeleteVacation: iterate thru all the thermostats under a specific account and delete the vacation
 // tstatType =managementSet or registered (no spaces).  
 //	May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
-def iterateDeleteVacation(tstatType, vacationName) {
+void iterateDeleteVacation(tstatType, vacationName) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
@@ -1441,7 +1441,7 @@ def iterateDeleteVacation(tstatType, vacationName) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def deleteVacation(thermostatId, vacationName) {
+void deleteVacation(thermostatId, vacationName) {
   
 	thermostatId = determine_tstat_id(thermostatId)
 	def vacationParams = [name: vacationName.trim()]
@@ -1465,7 +1465,7 @@ def deleteVacation(thermostatId, vacationName) {
 
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // iterateResumeProgram: iterate thru all the thermostats under a specific account and resume their program
-def iterateResumeProgram(tstatType) {
+void iterateResumeProgram(tstatType) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
@@ -1505,7 +1505,7 @@ def iterateResumeProgram(tstatType) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def resumeProgram(thermostatId=settings.thermostatId) {
+void resumeProgram(thermostatId=settings.thermostatId) {
   
 	thermostatId = determine_tstat_id(thermostatId)
 	def bodyReq = build_body_request('resumeProgram',null,thermostatId,null)
@@ -1615,7 +1615,7 @@ def getGroups(thermostatId) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings may be a map of settings separated by ",", no spaces; 
 // 	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def iterateUpdateGroup(thermostatId, groupSettings = []) {
+void iterateUpdateGroup(thermostatId, groupSettings = []) {
 
 	thermostatId = determine_tstat_id(thermostatId)
 	getGroups(thermostatId)
@@ -1655,7 +1655,7 @@ def iterateUpdateGroup(thermostatId, groupSettings = []) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings could be a map of settings separated by ",", no spaces; 
 //	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
+void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	String updateGroupParams
 	def groupSettingsJson = new JsonBuilder(groupSettings)
 	def groupSet = groupSettingsJson.toString().minus('{').minus('}')
@@ -1699,7 +1699,7 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 
 // Only valid for Smart and Antenna thermostats
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def deleteGroup(groupRef, groupName) {
+void deleteGroup(groupRef, groupName) {
 	String updateGroupParams
 
 	if ((groupRef != null) && (groupRef.trim() != "")) {
@@ -1740,7 +1740,7 @@ def deleteGroup(groupRef, groupName) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings could be a map of settings separated by ",", no spaces; 
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-def createGroup(groupName, thermostatId, groupSettings = []) {
+void createGroup(groupName, thermostatId, groupSettings = []) {
 	updateGroup(null, groupName, thermostatId, groupSettings)
 }
 
@@ -1748,7 +1748,7 @@ def createGroup(groupName, thermostatId, groupSettings = []) {
 // climate name is the name of the climate to be created (ex. "Bedtime").
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
-def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized,
+void createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized,
 	coolFan, heatFan) {
     
 	updateClimate(thermostatId, climateName, 'false', null, coolTemp, heatTemp,
@@ -1757,14 +1757,14 @@ def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized,
 
 // thermostatId can be only 1 thermostat (not a list) 
 // climate name is the name of the climate to be deleted (ex. "Bedtime").
-def deleteClimate(thermostatId, climateName, substituteClimateName) {
+void deleteClimate(thermostatId, climateName, substituteClimateName) {
 	updateClimate(thermostatId, climateName, 'true', substituteClimateName, null,
 		null, null, null, null)
 }
 // iterateSetClimate: iterate thru all the thermostats under a specific account and set their Climate
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // climate name is the name of the climate bet set to(ex. "Home", "Away").
-def iterateSetClimate(tstatType, climateName) {
+void iterateSetClimate(tstatType, climateName) {
 	Integer MAX_TSTAT_BATCH = 25
 	def tstatlist = null
 	Integer nTstats = 0
@@ -1803,7 +1803,7 @@ def iterateSetClimate(tstatType, climateName) {
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 //	The settings.thermostatId (input) is the default one
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
-def setClimate(thermostatId, climateName) {
+void setClimate(thermostatId, climateName) {
 	def climateRef = null
 	def tstatParams
 
@@ -1856,7 +1856,7 @@ def setClimate(thermostatId, climateName) {
 // subClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
-def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
+void iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 	subClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
     
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
@@ -1890,7 +1890,7 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 // substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
-def updateClimate(thermostatId, climateName, deleteClimateFlag,
+void updateClimate(thermostatId, climateName, deleteClimateFlag,
 		substituteClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
   
 	Integer targetCoolTemp,targetHeatTemp
@@ -2039,7 +2039,7 @@ def updateClimate(thermostatId, climateName, deleteClimateFlag,
 // plugName is the name of the plug name to be controlled 
 // plugState is the state to be set
 // plugSettings are the different settings at https://www.ecobee.com/home/developer/api/documentation/v1/functions/ControlPlug.shtml
-def controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
+void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 	def plugSettingsJson = new JsonBuilder(plugSettings)
 	def plugSet = plugSettingsJson.toString().minus('{').minus('}')
 
@@ -2095,7 +2095,7 @@ def controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
-def getThermostatInfo(thermostatId=settings.thermostatId) {
+void getThermostatInfo(thermostatId=settings.thermostatId) {
 
 	if (settings.trace) {
 		log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
@@ -2164,7 +2164,7 @@ def getThermostatInfo(thermostatId=settings.thermostatId) {
 
 // tstatType =managementSet or registered (no spaces). 
 // May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
-def getThermostatSummary(tstatType) {
+void getThermostatSummary(tstatType) {
 
 	def bodyReq = build_body_request('thermostatSummary',tstatType,null,null)
 	if (settings.trace) {
@@ -2268,7 +2268,7 @@ private def refresh_tokens() {
 	}
 	return true
 }
-def refreshChildTokens(auth) {
+void refreshChildTokens(auth) {
 	if (settings.trace) {
 		log.debug "refreshChildTokens>begin token auth= $auth"
 	}
@@ -2283,7 +2283,7 @@ def refreshChildTokens(auth) {
 	}
 }
 
-private def refreshParentTokens() {
+private void refreshParentTokens() {
 	if (settings.trace) {
 		log.debug "refreshParentTokens>begin data.auth = ${data.auth}"
 	}
@@ -2296,7 +2296,7 @@ private def refreshParentTokens() {
 	}         
 }
 
-private def login() {
+private void login() {
 	if (settings.trace) {
 		log.debug "login> about to call setAuthTokens"
 	}
@@ -2317,7 +2317,7 @@ private def login() {
 	}
 }
 
-def getEcobeePinAndAuth() {
+void getEcobeePinAndAuth() {
 	String SCOPE = "smartWrite,ems"
 	def method = 
     [
@@ -2372,7 +2372,7 @@ def getEcobeePinAndAuth() {
 	}
 }
 
-def setAuthTokens() {
+void setAuthTokens() {
 	def method = 
 	[
 		headers: [
@@ -2536,7 +2536,7 @@ private def get_appKey() {
 }    
 
 // Called by My ecobee Init for initial creation of a child Device
-def initialSetup(device_client_id, auth_data, device_tstat_id) {
+void initialSetup(device_client_id, auth_data, device_tstat_id) {
 	settings.trace='true'
 	if (settings.trace) {
 		log.debug "initialSetup>begin"
