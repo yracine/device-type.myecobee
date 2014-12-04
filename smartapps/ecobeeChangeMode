@@ -29,7 +29,7 @@ definition(
 
 preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false, unintall: false, nextPage: "selectProgram") {
-		section("When Smartthings's hello home mode change to [ex. 'Away', 'Home']") {
+		section("When Smartthings' hello home mode change to [ex. 'Away', 'Home']") {
 			input "newMode", "mode", metadata: [values: ["Away", "Home", "Night"]]
 		}
 
@@ -99,7 +99,7 @@ private send(msg) {
 		log.debug("sending push message")
 		sendPush(msg)
 	}
-	if (phone) {
+	if (phone) {1
 		log.debug("sending text message")
 		sendSms(phone, msg)
 	}
