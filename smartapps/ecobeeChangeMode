@@ -17,45 +17,48 @@
  * Don't forget to set the app to run only for the target mode.
  */
 definition(
-    name: "ecobeeChangeMode",
-    namespace: "yracine",
-    author: "Yves Racine",
-    description: "Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)",
-    category: "",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+	name: "ecobeeChangeMode",
+	namespace: "yracine",
+	author: "Yves Racine",
+	description:
+	"Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)",
+	category: "",
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
 
 
 preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false, unintall: false, nextPage: "selectProgram") {
- 		section("When Smartthings's hello home mode change to [ex. 'Away', 'Home']") {
-			input "newMode", "mode", metadata:[values:["Away", "Home", "Night"]]
+		section("When Smartthings's hello home mode change to [ex. 'Away', 'Home']") {
+			input "newMode", "mode", metadata: [values: ["Away", "Home", "Night"]]
 		}
 
 		section("Change the following ecobee thermostat(s)...") {
-			input "thermostats", "capability.thermostat", title:"Which thermostat(s)", multiple:true
+			input "thermostats", "capability.thermostat", title: "Which thermostat(s)", multiple: true
 		}
 	}
-    page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")    
+	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
 	page(name: "Notifications", title: "Notifications Options", install: true, unintall: true) {
-	    section( "Notifications" ) {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+		section("Notifications") {
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
+				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
 		}
-    }
+	}
 }
+
 
 def selectProgram() {
 	def ecobeePrograms = thermostats[0].currentClimateList.tokenize(',')
-    log.debug "programs: $ecobeePrograms"
-    
-    
-    return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage: "Notifications") {
-            section("Select Program") {
-                input "givenClimate", "enum", title: "Which program?", options: ecobeePrograms, required: true
-            }
-     }
-        
+	log.debug "programs: $ecobeePrograms"
+
+
+	return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage:
+		"Notifications") {
+		section("Select Program") {
+			input "givenClimate", "enum", title: "Which program?", options: ecobeePrograms, required: true
+		}
+	}
 }
 
 
@@ -70,40 +73,36 @@ def updated() {
 	subscribe(app, changeMode)
 }
 
-def climateListHandler(evt) {
-    log.debug "$evt.name $evt.value"
-}    
 
 def changeMode(evt) {
-    def message
-    
-   log.info message	
-    message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
-    send(message)
-    if (newMode == "Away") {
-        if (givenClimate.trim().toUpperCase() == 'AWAY') {
-        	thermostats?.away()
-                
-        } else thermostats?.setClimate("", givenClimate) 
+	def message
 
-    }
-    else {
-        if (givenClimate.trim().toUpperCase() == 'HOME') {
-            thermostats?.present()
-                
-        } else thermostats?.setClimate("", givenClimate) 
-    }
+	log.info message
+	message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
+	send(message)
+	if (newMode == "Away") {
+		if (givenClimate.trim().toUpperCase() == 'AWAY') {
+			thermostats?.away()
+
+		} else thermostats?.setClimate("", givenClimate)
+
+	} else {
+		if (givenClimate.trim().toUpperCase() == 'HOME') {
+			thermostats?.present()
+
+		} else thermostats?.setClimate("", givenClimate)
+	}
 }
 
 private send(msg) {
-    if ( sendPushMessage != "No" ) {
-        log.debug( "sending push message" )
-        sendPush( msg )	
-    }
-    if ( phone ) {
-        log.debug( "sending text message" )
-        sendSms( phone, msg )
-    }
+	if (sendPushMessage != "No") {
+		log.debug("sending push message")
+		sendPush(msg)
+	}
+	if (phone) {
+		log.debug("sending text message")
+		sendSms(phone, msg)
+	}
 
-    log.debug msg
+	log.debug msg
 }
