@@ -742,7 +742,7 @@ void poll() {
 	]
      
 	if (data.thermostatList[0].events[indiceEvent].type == 'quickSave') {
-			dataEvents.programEndTimeMsg ="Quicksave running"
+		dataEvents.programEndTimeMsg ="Quicksave running"
 	}
 
 	generateEvent(dataEvents)
