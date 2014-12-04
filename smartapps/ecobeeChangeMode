@@ -28,7 +28,7 @@ definition(
 
 
 preferences {
-	page(name: "selectThermostats", title: "Thermostats", install: false, unintall: false, nextPage: "selectProgram") {
+	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
 		section("When Smartthings' hello home mode change to [ex. 'Away', 'Home']") {
 			input "newMode", "mode", metadata: [values: ["Away", "Home", "Night"]]
 		}
