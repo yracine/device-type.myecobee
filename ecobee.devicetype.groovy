@@ -702,7 +702,7 @@ def poll() {
 			data.thermostatList[0].runtime.desiredCool,
 		heatingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].heatHoldTemp: 
 			data.thermostatList[0].runtime.desiredHeat,
-        modelNumber: data.thermostatList[0].modelNumber,
+		modelNumber: data.thermostatList[0].modelNumber,
 		equipmentStatus:getEquipmentStatus(),
 		thermostatOperatingState: getThermostatOperatingState(),
 		hasHumidifier:data.thermostatList[0].settings.hasHumidifier.toString(),
@@ -729,7 +729,7 @@ def poll() {
 		weatherTemp: data.thermostatList[0].weather.forecasts[0].temperature,
 		weatherTempHigh: data.thermostatList[0].weather.forecasts[0].tempHigh, 
 		weatherTempLow: data.thermostatList[0].weather.forecasts[0].tempLow,
-        weatherWindSpeed: (data.thermostatList[0].weather.forecasts[0].windSpeed/1000),		// divided by 1000 for display
+		weatherWindSpeed: (data.thermostatList[0].weather.forecasts[0].windSpeed/1000),		// divided by 1000 for display
 		weatherPressure:data.thermostatList[0].weather.forecasts[0].pressure.toString(),
 		weatherRelativeHumidity:data.thermostatList[0].weather.forecasts[0].relativeHumidity,
 		weatherWindDirection:data.thermostatList[0].weather.forecasts[0].windDirection + " Winds",
@@ -777,22 +777,22 @@ private void generateEvent(Map results)
 		results.each { name, value ->
 			def isDisplayed = true
             
-			if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {
+		if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {
 				float tempValue = getTemperature(value).toFloat().round(1)
 				def isChange = isTemperatureStateChange(device, name, tempValue.toString())
 				isDisplayed = isChange
-                sendEvent(name: name, value: tempValue.toString(), unit: getTemperatureScale(), displayed: isDisplayed)                                     									 
-            } else if (name.toUpperCase().contains("SPEED")) {
+				sendEvent(name: name, value: tempValue.toString(), unit: getTemperatureScale(), displayed: isDisplayed)                                     									 
+		} else if (name.toUpperCase().contains("SPEED")) {
  				float speedValue = getSpeed(value).toFloat().round(1)
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
-            } else if (name.toUpperCase().contains("HUMIDITY")) {
+		} else if (name.toUpperCase().contains("HUMIDITY")) {
  				float humidityValue = value.toFloat().round(1)
 				def isChange = isStateChange(device, name, humidityValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: humidityValue.toString(), unit: "%", displayed: isDisplayed)                                     									 
-            } else {
+ 		} else {
 				def isChange = isStateChange(device, name, value)
 				isDisplayed = isChange
 
@@ -813,8 +813,8 @@ private def getCurrentProgName() {
 
 	def progCurrentName = device.currentValue("programScheduleName")
 	def progType = device.currentValue("programType")
-    progType = (progType == null) ? "": progType.trim().toUpperCase()
-    progCurrentName = (progCurrentName == null) ? "": progCurrentName.trim().toUpperCase()
+	progType = (progType == null) ? "": progType.trim().toUpperCase()	
+	progCurrentName = (progCurrentName == null) ? "": progCurrentName.trim().toUpperCase()
 	if ((progCurrentName != AWAY_PROG) && (progCurrentName != SLEEP_PROG) && (
 			progCurrentName != AWAKE_PROG) &&
 		(progCurrentName != HOME_PROG) && (progCurrentName != QUICKSAVE)) {
@@ -835,7 +835,7 @@ private def getAlerts() {
 		}
 	}
 	alerts = (alerts != null) ? alerts + '\ngo to ecobee portal' : 'No alerts'
-    return alerts
+	return alerts
 }
 
 private def getThermostatGroups(thermostatId) {
@@ -852,8 +852,8 @@ private def getThermostatGroups(thermostatId) {
 				j++    
 			}        
 		}
-	}
-    return groupList
+	}	
+	return groupList
 }
 
 private def getTemperature(value) {
