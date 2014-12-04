@@ -86,8 +86,8 @@ metadata {
 		attribute "ventilatorMode", "string"
 		attribute "programDisplayName", "string"
 		attribute "thermostatOperatingState", "string"        
-		attribute "climateList", "string" 
-        attribute "modelNumber", "string"
+		attribute "climateList", "string"	
+		attribute "modelNumber", "string"
         
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -145,8 +145,8 @@ metadata {
 		command "iterateSetThermostatSettings"
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
-		command "refreshChildTokens"  
-        command "getClimateList"
+		command "refreshChildTokens" 
+		command "getClimateList"
 }        
 simulator {
 		// TODO: define status and reply messages here
@@ -650,7 +650,7 @@ def poll() {
 	sendEvent(name: 'humidity', value: data.thermostatList[0].runtime.actualHumidity,
 		unit: "%")
 	sendEvent(name: 'thermostatMode', value: data.thermostatList[0].settings.hvacMode)
-    sendEvent name: "modelNumber", value: data.thermostatList[0].modelNumber
+	sendEvent name: "modelNumber", value: data.thermostatList[0].modelNumber
 	sendEvent(name: 'hasHumidifier', value: data.thermostatList[0].settings.hasHumidifier)
 	sendEvent(name: 'hasDehumidifier', value: data.thermostatList[0].settings.hasDehumidifier)
 	sendEvent(name: 'hasHrv', value: data.thermostatList[0].settings.hasHrv)
