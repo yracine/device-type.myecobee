@@ -57,11 +57,15 @@ preferences {
 
 	}
 	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
-	page(name: "Notifications", title: "Notifications Options", install: true, unintall: true) {
+	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: true) {
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
 				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
+		}
+        	section([mobileOnly:true]) {
+			label title: "Assign a name for this SmartApp", required: false
+			mode title: "Set for specific mode(s)", required: false
 		}
 	}
 }
