@@ -53,7 +53,7 @@ preferences {
 
 
 def selectProgram() {
-    def ecobeePrograms = thermostats[0].currentClimateList.toString().minus('[').minus(']').tokenize(',')
+	def ecobeePrograms = thermostats[0].currentClimateList.toString().minus('[').minus(']').tokenize(',')
 	log.debug "programs: $ecobeePrograms"
 
 
