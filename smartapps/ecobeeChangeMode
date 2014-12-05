@@ -28,7 +28,7 @@ definition(
 
 
 preferences {
-	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
+	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
 		section("When Smartthings' hello home mode change to [ex. 'Away', 'Home']") {
 			input "newMode", "mode", metadata: [values: ["Away", "Home", "Night"]]
 		}
@@ -38,18 +38,22 @@ preferences {
 		}
 	}
 	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
-	page(name: "Notifications", title: "Notifications Options", install: true, unintall: true) {
+	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: true) {
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
 				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
+		}
+        section([mobileOnly:true]) {
+			label title: "Assign a name for this SmartApp", required: false
+			mode title: "Set for specific mode(s)", required: false
 		}
 	}
 }
 
 
 def selectProgram() {
-	def ecobeePrograms = thermostats[0].currentClimateList.tokenize(',')
+    def ecobeePrograms = thermostats[0].currentClimateList.toString().minus('[').minus(']').tokenize(',')
 	log.debug "programs: $ecobeePrograms"
 
 
@@ -84,13 +88,13 @@ def changeMode(evt) {
 		if (givenClimate.trim().toUpperCase() == 'AWAY') {
 			thermostats?.away()
 
-		} else thermostats?.setClimate("", givenClimate)
+		} else thermostats?.setThisTstatClimate(givenClimate)
 
 	} else {
 		if (givenClimate.trim().toUpperCase() == 'HOME') {
 			thermostats?.present()
 
-		} else thermostats?.setClimate("", givenClimate)
+		} else thermostats?.setThisTstatClimate(givenClimate)
 	}
 }
 
