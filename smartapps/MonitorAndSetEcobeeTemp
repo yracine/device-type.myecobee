@@ -301,7 +301,7 @@ private def check_if_hold_needed() {
 	}
 	if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
                 
-		ecobee.setClimate("", "Home")            
+		ecobee.present()            
 		send("MonitorEcobeeTemp>Program now set to Home, motion detected")
  		state.programSetTime = now()
  		state.programSetTimestamp = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
@@ -313,7 +313,7 @@ private def check_if_hold_needed() {
         
 	} else if ((currentProgName.toUpperCase()=='HOME') && (residentsHaveBeenQuiet())) {
                 
-		ecobee.setClimate("", "Away")            
+		ecobee.away()          
 		send("MonitorEcobeeTemp>Program now set to Away,no motion detected")
  		state.programSetTime = now()
  		state.programSetTimestamp = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
