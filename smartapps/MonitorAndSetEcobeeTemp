@@ -232,7 +232,9 @@ def monitorAdjustTemp() {
 			send("MonitorEcobeeTemp>Hold set, checking if still justified")
 		}
 		check_if_hold_justified()
-	} else if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
+	}
+        
+	if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
 		log.trace("MonitorEcobeeTemp>about to call check_if_needs_hold....")
 		check_if_hold_needed()
 	}
@@ -311,7 +313,7 @@ private def check_if_hold_needed() {
 		programHeatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 		programCoolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
-	} else if ((currentProgName.toUpperCase()=='HOME') && (residentsHaveBeenQuiet())) {
+	} else if ((currentProgName.toUpperCase()!='SLEEP')  && (residentsHaveBeenQuiet())) { // Do not adjust the program when asleep
                 
 		ecobee.away()          
 		send("MonitorEcobeeTemp>Program now set to Away,no motion detected")
