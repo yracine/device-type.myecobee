@@ -742,7 +742,7 @@ void poll() {
 	]
      
 	if (data.thermostatList[0].events[indiceEvent].type == 'quickSave') {
-		dataEvents.programEndTimeMsg ="Quicksave running"
+			dataEvents.programEndTimeMsg ="Quicksave running"
 	}
 
 	generateEvent(dataEvents)
@@ -1747,19 +1747,20 @@ void createGroup(groupName, thermostatId, groupSettings = []) {
 // thermostatId may only be 1 thermostat (not a list) 
 // climate name is the name of the climate to be created (ex. "Bedtime").
 // isOptimized is 'true' or 'false'
+// isOccupied is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
-void createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized,
+void createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, isOccupied,
 	coolFan, heatFan) {
     
 	updateClimate(thermostatId, climateName, 'false', null, coolTemp, heatTemp,
-		isOptimized, coolFan, heatFan)
+		isOptimized, isOccupied, coolFan, heatFan)
 }
 
 // thermostatId can be only 1 thermostat (not a list) 
 // climate name is the name of the climate to be deleted (ex. "Bedtime").
 void deleteClimate(thermostatId, climateName, substituteClimateName) {
 	updateClimate(thermostatId, climateName, 'true', substituteClimateName, null,
-		null, null, null, null)
+		null, null, null, null, null)
 }
 // iterateSetClimate: iterate thru all the thermostats under a specific account and set their Climate
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
@@ -1855,9 +1856,10 @@ void setClimate(thermostatId, climateName) {
 // deleteClimateFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // subClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
 // isOptimized is 'true' or 'false'
+// isOccupied is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 void iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
-	subClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+	subClimateName, coolTemp, heatTemp, isOptimized, isOccupied, coolFan, heatFan) {
     
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
@@ -1878,7 +1880,7 @@ void iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 				log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
 			}
 			updateClimate(Id, climateName, deleteClimateFlag, subClimateName, coolTemp,
-				heatTemp, isOptimized, coolFan, heatFan)
+				heatTemp, isOptimized, isOccupied, coolFan, heatFan)
 		}
 	}
 }
@@ -1891,7 +1893,7 @@ void iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 // isOptimized is 'true' or 'false'
 // coolFan & heatFan's mode is 'auto' or 'on'
 void updateClimate(thermostatId, climateName, deleteClimateFlag,
-		substituteClimateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
+		substituteClimateName, coolTemp, heatTemp, isOptimized, isOccupied, coolFan, heatFan) {
   
 	Integer targetCoolTemp,targetHeatTemp
 	def foundClimate = false
@@ -1995,6 +1997,7 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 				.name + '","climateRef":"' +
 				data.thermostatList[0].program.climates[i].climateRef + '","coolTemp":"' +
 				targetCoolTemp + '","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized +
+					'","isOccupied":"' + isOccupied +                
 					'","coolFan":"' + coolFan + '","heatFan":"' + heatFan + '"}'
 		} else {
 			bodyReq = bodyReq + '{"name":"' + data.thermostatList[0].program.climates[i]
@@ -2012,7 +2015,7 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 		bodyReq = bodyReq + ',{"name":"' + climateName.capitalize().trim() +
 			'","coolTemp":"' + targetCoolTemp +
 			'","heatTemp":"' + targetHeatTemp + '","isOptimized":"' + isOptimized +
-			'","coolFan":"' + coolFan + '","heatFan":"' + heatFan + '"' +
+			'","isOccupied":"' + isOccupied  + '","coolFan":"' + coolFan + '","heatFan":"' + heatFan + '"' +
 			',"ventilatorMinOnTime":"5"}' // workaround due to ecobee create Climate bug, to be removed
 	}
 	bodyReq = bodyReq + ']}}}'
