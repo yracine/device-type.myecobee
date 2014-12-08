@@ -48,6 +48,9 @@ preferences {
     section("isOptimized (default=false)") {
         input "isOptimizedFlag", "Boolean", title: "isOptimized?",metadata:[values:["true", "false"]], required: false
     }
+    section("isOccupied (default=false)") {
+        input "isOccupiedFlag", "Boolean", title: "isOccupied?",metadata:[values:["true", "false"]], required: false
+    }
     section("Cool Fan Mode (default=auto)") {
         input "givenCoolFanMode", "enum", title: "Cool Fan Mode ?",metadata:[values:["auto", "on"]], required: false
     }
@@ -91,10 +94,11 @@ def appTouch(evt) {
         coolTemp = givenCoolTemp ?: 75  // by default, 75°F is the cool temp
     }
 
-    def isOptimized = (isOptimizedFlag != null) ? isOptimizedFlag: false  // by default, isOptimized flag is false
+    def isOptimized = (isOptimizedFlag) ? isOptimizedFlag: false  // by default, isOptimized flag is false
+    def isOccupied = (isOccupiedFlag) ? isOccupiedFlag: false  // by default, isOccupied flag is false
     def coolFanMode = givenCoolFanMode ?: 'auto'  // By default, fanMode is auto
     def heatFanMode = givenHeatFanMode ?: 'auto'  // By default, fanMode is auto
-    def deleteClimateFlag = (deleteClimate != null) ? deleteClimate  :'false'
+    def deleteClimateFlag = (deleteClimate) ? deleteClimate  :'false'
     
     log.debug "ecobeeManageClimate> about to take actions"
      
@@ -111,7 +115,7 @@ def appTouch(evt) {
     
         send("ecobeeManageClimate>about to create or update climateName = ${climateName}")
         ecobee.updateClimate(null, climateName, deleteClimateFlag, subClimateName,  
-            coolTemp, heatTemp, isOptimized, coolFanMode, heatFanMode)    
+            coolTemp, heatTemp, isOptimized, isOccupied, coolFanMode, heatFanMode)    
     }
         
 }
