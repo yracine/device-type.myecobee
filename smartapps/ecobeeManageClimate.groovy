@@ -104,7 +104,7 @@ def appTouch(evt) {
      
 
     log.trace "ecobeeManageClimate>climateName =${climateName},deleteClimateFlag =${deleteClimateFlag},subClimateName= ${subClimateName}, isOptimized=${isOptimized}" +
-        ",coolTemp = ${coolTemp},heatTemp = ${heatTemp},coolFanMode= ${coolFanMode}, heatFanMode= ${heatFanMode}" 
+        ",isOccupied=${isOccupied},coolTemp = ${coolTemp},heatTemp = ${heatTemp},coolFanMode= ${coolFanMode}, heatFanMode= ${heatFanMode}" 
         
     if (deleteClimateFlag=='true') {   
         send("ecobeeManageClimate>about to delete climateName = ${climateName}")
