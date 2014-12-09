@@ -148,8 +148,8 @@ metadata {
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
 		command "refreshChildTokens" 
-        command "autoAway"
-        command "followMeComfort"
+		command "autoAway"
+        	command "followMeComfort"
 }        
 
 simulator {
