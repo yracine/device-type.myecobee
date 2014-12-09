@@ -103,6 +103,7 @@ metadata {
 		command "iterateResumeProgram"
 		command "iterateSetHold"
 		command "resumeProgram"
+		command "resumeThisTstat"        
 		command "setAuthTokens"
 		command "setHold"
 		command "setHoldExtraParams"
@@ -148,8 +149,8 @@ metadata {
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
 		command "refreshChildTokens" 
-		command "autoAway"
-        	command "followMeComfort"
+        command "autoAway"
+        command "followMeComfort"
 }        
 
 simulator {
