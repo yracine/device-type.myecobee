@@ -88,6 +88,8 @@ metadata {
 		attribute "thermostatOperatingState", "string"        
 		attribute "climateList", "string"	
 		attribute "modelNumber", "string"
+		attribute "followMeComfort", "string"
+		attribute "autoAway", "string"
         
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -146,6 +148,8 @@ metadata {
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
 		command "refreshChildTokens" 
+        command "autoAway"
+        command "followMeComfort"
 }        
 
 simulator {
@@ -557,6 +561,19 @@ void setHumidifierLevel(level) {
 	setThermostatSettings(thermostatId, ['humidity': "${level}"])
 	sendEvent(name: 'humidifierLevel', value: level)
 }
+void followMeComfort(flag) {
+	flag = flag == 'true' ? 'true' : 'false'
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['followMeComfort': "${flag}"])
+	sendEvent(name: 'followMeComfort', value: flag)
+}
+void autoAway(flag) {
+	flag = flag == 'true' ? 'true' : 'false'
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['autoAway': "${flag}"])
+	sendEvent(name: 'autoAway', value: flag)
+}
+
 void awake() {
 	setThisTstatClimate("Awake")
 }
