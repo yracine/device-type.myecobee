@@ -111,7 +111,6 @@ metadata {
 		command "heatLevelDown"
 		command "coolLevelUp"
 		command "coolLevelDown"
-		command "resumeThisTstat"
 		command "auxHeatOnly"
 		command "setThermostatFanMode"
 		command "dehumidifierOff"
