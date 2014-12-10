@@ -729,7 +729,7 @@ void poll() {
 		programScheduleName: (foundEvent)? data.thermostatList[0].events[indiceEvent].name : currentClimate.name,
 		programType: (foundEvent)?data.thermostatList[0].events[indiceEvent].type : currentClimate.type,
 		programEndTimeMsg: (foundEvent)? "${data.thermostatList[0].events[indiceEvent].type}" +
-				" ends at ${data.thermostatList[0].events[indiceEvent].endDate}" +
+				" ends at ${data.thermostatList[0].events[indiceEvent].endDate} " +
 				"${data.thermostatList[0].events[indiceEvent].endTime.substring(0,5)}":
  				"No Events running",
 		thermostatFanMode: (foundEvent)? data.thermostatList[0].events[indiceEvent].fan: 
