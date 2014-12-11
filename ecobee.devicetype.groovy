@@ -893,11 +893,10 @@ private def getSpeed(value) {
 
 private def getDistanceScale() {
 	def scale= getTemperatureScale()
-    if (scale == 'C') {
-    
-    	return "km"
-    }
-    return "miles"
+	if (scale == 'C') {
+		return "km"
+	}
+	return "miles"
 }
 
 
