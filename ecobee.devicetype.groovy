@@ -148,8 +148,8 @@ metadata {
 		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
 		command "refreshChildTokens" 
-        	command "autoAway"
-        	command "followMeComfort"
+		command "autoAway"
+		command "followMeComfort"
 }        
 
 simulator {
@@ -306,15 +306,15 @@ simulator {
 		// Weather Tiles
 		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
 			decoration: "flat") {
-			state "-2",			label: 'updating...',	icon: "st.unknown.unknown.unknown"
+			state "-2",			label: 'updating...',		icon: "st.unknown.unknown.unknown"
 			state "0",			label: 'Sunny',			icon: "st.Weather.weather14"
 			state "1",			label: 'FewClouds',		icon: "st.Weather.weather15"
-			state "2",			label: 'PartlyCloudy',	icon: "st.Weather.weather15"
-			state "3",			label: 'MostlyCloudy',	icon: "st.Weather.weather15"
+			state "2",			label: 'PartlyCloudy',		icon: "st.Weather.weather15"
+			state "3",			label: 'MostlyCloudy',		icon: "st.Weather.weather15"
 			state "4",			label: 'Overcast',		icon: "st.Weather.weather13"
 			state "5",			label: 'Drizzle',		icon: "st.Weather.weather9"
 			state "6",			label: 'Rain',			icon: "st.Weather.weather10"
-			state "7",			label: 'FreezingRain',	icon: "st.Weather.weather10"
+			state "7",			label: 'FreezingRain',		icon: "st.Weather.weather10"
 			state "8",			label: 'Showers',		icon: "st.Weather.weather10"
 			state "9",			label: 'Hail',			icon: "st.custom.wuk.sleet"
 			state "10",			label: 'Snow',			icon: "st.Weather.weather6"
@@ -322,7 +322,7 @@ simulator {
 			state "12",			label: 'Sleet',			icon: "st.Weather.weather6"
 			state "13",			label: 'Blizzard',		icon: "st.Weather.weather7"
 			state "14",			label: 'Pellets',		icon: "st.custom.wuk.sleet"
-			state "15",			label: 'ThunderStorms',	icon: "st.custom.wuk.tstorms"
+			state "15",			label: 'ThunderStorms',		icon: "st.custom.wuk.tstorms"
 			state "16",			label: 'Windy',			icon: "st.Transportation.transportation5"
 			state "17",			label: 'Tornado',		icon: "st.Weather.weather1"
 			state "18",			label: 'Fog',			icon: "st.Weather.weather13"
@@ -2527,14 +2527,12 @@ def determine_tstat_id(tstat_id) {
 	}
 	if ((tstat_id != null) && (tstat_id != "")) {
 		tstatId = tstat_id.trim()
-	}
-	else if ((settings.thermostatId != null) && (settings.thermostatId  != "")) {
+	} else if ((settings.thermostatId != null) && (settings.thermostatId  != "")) {
 		tstatId = settings.thermostatId.trim()
 		if (settings.trace) {
 			log.debug "determine_tstat_id> tstatId = ${settings.thermostatId}"
 		}
-	}
-	else if ((settings.thermostatId == null) || (settings.thermostatId  == "")) {
+	} else if ((settings.thermostatId == null) || (settings.thermostatId  == "")) {
 		settings.appKey = data.auth.appKey
 		settings.thermostatId = data.auth.thermostatId
 		tstatId=data.auth.thermostatId
