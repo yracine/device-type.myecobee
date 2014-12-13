@@ -30,7 +30,7 @@ preferences {
 	section("Monitor outdoor temp & set the ecobee thermostat setpoints") {
 		input "ecobee", "capability.thermostat", title: "Ecobee?"
 	}
-	section("For more heating in cold season, outdoor temp's threshold (default <= 10°F/-15°C)") {
+	section("For more heating in cold season, outdoor temp's threshold (default <= 10°F/-17°C)") {
 		input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
 	}
 	section("For less heating in cold season, outdoor temp's threshold (default >= 50°F/10°C)") {
@@ -257,7 +257,7 @@ private def check_if_hold_needed() {
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
 		temp_diff = givenTempDiff ?: 2 // 2°C temp differential is applied by default
-		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-15) // by default, -15°C is the outdoor temp's threshold for more heating
+		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-17) // by default, -17°C is the outdoor temp's threshold for more heating
 		more_cool_threshold = (givenMoreCoolThreshold != null) ? givenMoreCoolThreshold : 30 // by default, 30°C is the outdoor temp's threshold for more cooling
 		less_heat_threshold = (givenLessHeatThreshold != null) ? givenLessHeatThreshold : 10 // by default, 10°C is the outdoor temp's threshold for less heating
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 22 // by default, 22°C is the outdoor temp's threshold for less cooling
@@ -344,7 +344,8 @@ private def check_if_hold_needed() {
 				ecobee.setCoolingSetpoint(targetTstatTemp)
 				send("MonitorEcobeeTemp>cooling setPoint now =${targetTstatTemp.toString()}°,outdooTemp >=${more_cool_threshold}°")
 			} else if (outdoorHumidity >= humidity_threshold) {
-				float median_temp = (less_cool_threshold + more_cool_threshold / 2).round(1) // Increase cooling settings based on median temp
+				def extremes = [less_cool_threshold, more_cool_threshold]
+				float median_temp = (extremes.sum() / extremes.size()).round(1) // Increase cooling settings based on median temp
 				if (detailedNotif == 'true') {
 					String medianTempFormat = String.format('%2.1f', median_temp)
 					send("MonitorEcobeeTemp>eval: cool median temp ${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
@@ -384,8 +385,8 @@ private def check_if_hold_needed() {
 				send(
 					"MonitorEcobeeTemp>heating setPoint now= ${targetTstatTemp.toString()}°,outdoorTemp <=${more_heat_threshold}°")
 			} else if (outdoorHumidity >= humidity_threshold) {
-
-				float median_temp = (less_heat_threshold + more_heat_threshold / 2).round(1) // Increase heating settings based on median temp
+				def extremes = [less_heat_threshold, more_heat_threshold]
+				float median_temp = (extremes.sum() / extremes.size()).round(1) // Increase heating settings based on median temp
 				if (detailedNotif == 'true') {
 					String medianTempFormat = String.format('%2.1f', median_temp)
 					send("MonitorEcobeeTemp>eval: heat median temp ${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
@@ -422,7 +423,7 @@ private def check_if_hold_justified() {
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
 		temp_diff = givenTempDiff ?: 2 // 2°C temp differential is applied by default
-		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-15) // by default, -15°C is the outdoor temp's threshold for more heating
+		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-17) // by default, -17°C is the outdoor temp's threshold for more heating
 		more_cool_threshold = (givenMoreCoolThreshold != null) ? givenMoreCoolThreshold : 30 // by default, 30°C is the outdoor temp's threshold for more cooling
 		less_heat_threshold = (givenLessHeatThreshold != null) ? givenLessHeatThreshold : 10 // by default, 10°C is the outdoor temp's threshold for less heating
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 22 // by default, 22°C is the outdoor temp's threshold for less cooling
@@ -514,12 +515,11 @@ private def check_if_hold_justified() {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, cooling setPoint=${coolTemp}°")
 			}
-			float actual_temp_diff = (programCoolTemp - coolTemp).round(1)
-			actual_temp_diff = (actual_temp_diff > 0) ? actual_temp_diff : (actual_temp_diff * -1)
+			float actual_temp_diff = (programCoolTemp - coolTemp).round(1).abs()
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>eval: actual_temp_diff ${actual_temp_diff.toString()}° vs.temp_diff ${temp_diff}°")
 			}
-			if (actual_temp_diff > temp_diff) {
+			if ((actual_temp_diff > temp_diff) && (state?.programHoldSet)) {
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>Hold differential too big (${actual_temp_diff.toString()}), needs adjustment")
 				}
@@ -536,7 +536,7 @@ private def check_if_hold_justified() {
 			send("MonitorEcobeeTemp>eval: lessHeatThreshold ${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
 			send("MonitorEcobeeTemp>eval: moreHeatThresholdHum ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
 		}
-        if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
+		if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 			(outdoorHumidity < humidity_threshold)) {
 			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° < outdoorTemp > ${more_heat_threshold}°")
 			ecobee.resumeProgram()
@@ -544,12 +544,11 @@ private def check_if_hold_justified() {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
 			}
-			float actual_temp_diff = (heatTemp - programHeatTemp).round(1)
-			actual_temp_diff = (actual_temp_diff > 0) ? actual_temp_diff : (actual_temp_diff * -1)
+			float actual_temp_diff = (heatTemp - programHeatTemp).round(1).abs()
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>eval: actualTempDiff ${actual_temp_diff.toString()}° vs.givenTempDiff ${temp_diff}°")
 			}
-			if (actual_temp_diff > temp_diff) {
+			if ((actual_temp_diff > temp_diff) && (state?.programHoldSet)) {
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>Hold differential too big ${actual_temp_diff.toString()}, needs adjustment")
 				}
@@ -589,4 +588,3 @@ def cToF(temp) {
 def fToC(temp) {
 	return (temp - 32) / 1.8
 }
-Status 
