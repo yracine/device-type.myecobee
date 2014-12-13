@@ -519,7 +519,7 @@ private def check_if_hold_justified() {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>eval: actual_temp_diff ${actual_temp_diff.toString()}° vs.temp_diff ${temp_diff}°")
 			}
-			if ((actual_temp_diff > temp_diff) && (state?.programHoldSet)) {
+			if ((actual_temp_diff > temp_diff) && (!state?.programHoldSet)) {
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>Hold differential too big (${actual_temp_diff.toString()}), needs adjustment")
 				}
@@ -548,7 +548,7 @@ private def check_if_hold_justified() {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>eval: actualTempDiff ${actual_temp_diff.toString()}° vs.givenTempDiff ${temp_diff}°")
 			}
-			if ((actual_temp_diff > temp_diff) && (state?.programHoldSet)) {
+			if ((actual_temp_diff > temp_diff) && (!state?.programHoldSet)) {
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>Hold differential too big ${actual_temp_diff.toString()}, needs adjustment")
 				}
