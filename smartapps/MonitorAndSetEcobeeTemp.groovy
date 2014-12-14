@@ -8,7 +8,7 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  Unless required by applicable lax w or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
@@ -467,7 +467,7 @@ private def check_if_hold_justified() {
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
 		log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program")
-		ecobee.resumeProgram()
+		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
         
         /* Get latest heat and cool setting points after climate adjustment */
@@ -482,7 +482,7 @@ private def check_if_hold_justified() {
 	}    
 	if ((state?.programHoldSet == 'Home') && (residentsHaveBeenQuiet())) {
 		log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program")
-		ecobee.resumeProgram()
+		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed program, no motion detected")
         
         	/* Get latest heat and cool setting points after climate adjustment */
@@ -510,7 +510,7 @@ private def check_if_hold_justified() {
 		if ((outdoorTemp > less_cool_threshold) && (outdoorTemp < more_cool_threshold) &&
         		(outdoorHumidity < humidity_threshold)) {
 			send("MonitorEcobeeTemp>resuming program, ${less_cool_threshold}° < outdoorTemp <${more_cool_threshold}°")
-			ecobee.resumeProgram()
+			ecobee.resumeProgram("")
 		} else {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, cooling setPoint=${coolTemp}°")
@@ -539,7 +539,7 @@ private def check_if_hold_justified() {
 		if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 			(outdoorHumidity < humidity_threshold)) {
 			send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° < outdoorTemp > ${more_heat_threshold}°")
-			ecobee.resumeProgram()
+			ecobee.resumeProgram("")
 		} else {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
