@@ -350,7 +350,7 @@ private def check_if_hold_needed() {
 					String medianTempFormat = String.format('%2.1f', median_temp)
 					send("MonitorEcobeeTemp>eval: cool median temp ${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
 				}
-				if (outdoorTemp > median_temp) { // Only increase cooling settings when outdoorTemp < median_temp
+				if (outdoorTemp > median_temp) { // Only increase cooling settings when outdoorTemp > median_temp
 					targetTstatTemp = (programCoolTemp - temp_diff).round(1)
 					ecobee.setCoolingSetpoint(targetTstatTemp)
 					send("MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp.toString()}°,outdoorHum >=${humidity_threshold}%")
