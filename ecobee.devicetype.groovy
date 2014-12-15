@@ -938,7 +938,7 @@ private def getClimateList(thermostatId) {
 		sendEvent name: "verboseTrace", value:
 			"getClimateList>climateList=${climateList}"
 	}
-    	return climateList
+	return climateList
 }
 
 
