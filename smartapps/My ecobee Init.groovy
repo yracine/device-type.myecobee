@@ -200,7 +200,7 @@ def refreshAllChildAuthTokens() {
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 		sendPush("refreshAllChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
 */
-    	it.refreshChildTokens(atomicState) 
+    		it.refreshChildTokens(atomicState) 
 	}
 }
 
