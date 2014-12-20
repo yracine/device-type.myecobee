@@ -41,6 +41,7 @@ metadata {
 		capability "Polling"
 		capability "Thermostat"
 		capability "Refresh"
+		capability "Presence Sensor"
 
 		attribute "thermostatName", "string"
 		attribute "heatLevelUp", "string"
@@ -575,10 +576,11 @@ void autoAway(flag) {
 }
 
 void awake() {
-	setThisTstatClimate("Awake")
+	setThisTstatClimate("Awake")    
 }
 void away() {
 	setThisTstatClimate("Away")
+	sendEvent(name: "presence", value: "not present")
 }
 void present() {
 	def currentProgramType = device.currentValue("programType")
@@ -589,6 +591,8 @@ void present() {
 }
 void home() {
 	setThisTstatClimate("Home")
+	sendEvent(name: "presence", value: "present")
+
 }
 void sleep() {
 	setThisTstatClimate("Sleep")
@@ -709,7 +713,8 @@ void poll() {
 	}
     
 	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
-
+	def progDisplayName = getCurrentProgName()
+    
 	def dataEvents = [
  		thermostatName:data.thermostatList[0].name,
 		thermostatMode:data.thermostatList[0].settings.hvacMode,
@@ -737,7 +742,7 @@ void poll() {
 		fanMinOnTime: (foundEvent)? data.thermostatList[0].events[indiceEvent].fanMinOnTime.toString() :
 			data.thermostatList[0].settings.fanMinOnTime.toString(),
 		programFanMode: (data.thermostatList[0].settings.hvacMode == 'cool')? currentClimate.coolFan : currentClimate.heatFan,
-		programDisplayName: getCurrentProgName(),
+		programDisplayName: progDisplayName,
 		weatherStation:data.thermostatList[0].weather.weatherStation,
 		weatherSymbol:data.thermostatList[0].weather.forecasts[0].weatherSymbol.toString(),
 		weatherTemperature:data.thermostatList[0].weather.forecasts[0].temperature,
@@ -755,7 +760,8 @@ void poll() {
 		programHeatTemp:(currentClimate.heatTemp / 10),
 		alerts: getAlerts(),
 		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
-		climateList: getClimateList()
+		climateList: getClimateList(),
+        presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
 	]
      
 	if (data.thermostatList[0].events[indiceEvent].type == 'quickSave') {
