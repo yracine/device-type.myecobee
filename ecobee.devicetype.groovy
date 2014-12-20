@@ -761,7 +761,7 @@ void poll() {
 		alerts: getAlerts(),
 		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
 		climateList: getClimateList(),
-        presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
+		presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
 	]
      
 	if (data.thermostatList[0].events[indiceEvent].type == 'quickSave') {
