@@ -22,7 +22,7 @@ import java.net.URLEncoder
 // for the UI
 preferences {
 	input("thermostatId", "text", title: "Serial #", description:
-		"The serial number of your thermostat (no spaces)")
+		"The serial number of yo	ur thermostat (no spaces)")
 	input("appKey", "text", title: "App Key", description:
 		"The application key given by Ecobee (no spaces)")
 	input("trace", "text", title: "trace", description:
@@ -761,7 +761,7 @@ void poll() {
 		alerts: getAlerts(),
 		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
 		climateList: getClimateList(),
-		presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
+        presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
 	]
      
 	if (data.thermostatList[0].events[indiceEvent].type == 'quickSave') {
@@ -1833,42 +1833,47 @@ void setClimate(thermostatId, climateName) {
 	getThermostatInfo(thermostatId)
 	for (i in 0..data.thermostatList.size() - 1) {
 		def foundClimate = false
-		for (j in 0..data.thermostatList[i].program.climates.size() - 1) {
-			if (climateName.trim().toUpperCase() == data.thermostatList[i].program.climates[
-				j].name.toUpperCase()) {
-				climateRef = data.thermostatList[i].program.climates[j].climateRef // get the corresponding climateRef
-				foundClimate = true
-			}
-		}
-		if (!foundClimate) {
 
-			log.debug "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"
-			sendEvent name: "verboseTrace", value:
-				"setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"
-			return
-		}
-	}
-	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
-		[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
-			] :
-		[holdClimateRef:"${climateRef}"
-			]
-	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams)
-	api('setHold', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
+		foundClimate = data.thermostatList[i].program.climates.find{ it.name.toUpperCase() == climateName.toUpperCase() }
+		if (foundClimate) {
+        	climateRef = foundClimate.climateRef
 			if (settings.trace) {
-				log.debug "setClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
+				log.debug "setClimate>climateRef ${climateRef} found for thermostatId =${data.thermostatList[i].identifier}"
 				sendEvent name: "verboseTrace", value:
-					"setClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
-			}
+					"setClimate>Climate ${climateRef} found for thermostatId =${data.thermostatList[i].identifier}"
+			}        
 		} else {
-			log.error "setClimate>error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"setClimate>error ${statusCode.toString()} for ${climateName}"
+			if (settings.trace) {
+				log.debug "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"
+				sendEvent name: "verboseTrace", value:
+					"setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"
+			}        
+			continue
 		}
-	}
+        
+        tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
+			] :
+			[holdClimateRef:"${climateRef}"
+			]
+		def bodyReq = build_body_request('setHold',null, data.thermostatList[i].identifier,tstatParams)
+		api('setHold', bodyReq) {resp ->
+			def statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				if (settings.trace) {
+					log.debug "setClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
+					sendEvent name: "verboseTrace", value:
+						"setClimate>done for thermostatId =${data.thermostatList[i].identifier},climateName =${climateName}"
+				}
+			} else {
+				log.error "setClimate>error=${statusCode.toString()}, message = ${message}"
+				sendEvent name: "verboseTrace", value:
+					"setClimate>error ${statusCode.toString()} for ${climateName}"
+			}
+		}
+
+	} /* end for */
 }
 
 // iterateUpdateClimate: iterate thru all the thermostats under a specific account and update their Climate
@@ -1917,7 +1922,7 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 		substituteClimateName, coolTemp, heatTemp, isOptimized, isOccupied, coolFan, heatFan) {
   
 	Integer targetCoolTemp,targetHeatTemp
-	def foundClimate = false
+	def foundClimate = null, foundSubstituteClimate =null
 	String scheduleAsString
 	def substituteClimateRef = null
 	def climateRefToBeReplaced = null
@@ -1940,36 +1945,39 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 	}
 	getThermostatInfo(thermostatId)
 	if ((substituteClimateName != null) && (substituteClimateName != "")) { // find the subsituteClimateRef for the subsitute Climate Name if not null
-		for (i in 0..data.thermostatList[0].program.climates.size() - 1) {
-			if (climateName.trim().toUpperCase() == data.thermostatList[0].program.climates[
-				i].name.toUpperCase()) {
-				climateRefToBeReplaced = data.thermostatList[0].program.climates[i].climateRef
-			}
-			if (substituteClimateName.trim().toUpperCase() == data.thermostatList[0].program
-				.climates[i].name.toUpperCase()) {
-				foundClimate = true
-				substituteClimateRef = data.thermostatList[0].program.climates[i].climateRef
-				if (settings.trace) {
-					log.debug "updateClimate>found climateName ${climateName} at index ({$i}) for substitution by ${substituteClimateName}"
-				}
-			}
-		}
-		if (!foundClimate) {
+
+		foundClimate = data.thermostatList[0].program.climates.find{ it.name.toUpperCase() == climateName.toUpperCase() }
+		foundSubstituteClimate = data.thermostatList[0].program.climates.find { it.name.toUpperCase() == substituteClimateName.toUpperCase() }
+		if (foundClimate) {
+			climateRefToBeReplaced = foundClimate.climateRef       
 			if (settings.trace) {
-				log.debug "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
+				log.debug "updateClimate>climateRef ${climateRefToBeReplaced} found for climateName ${climateName}"
+				sendEvent name: "verboseTrace", value:
+					"updateClimate>climateRef ${climateRefToBeReplaced} found for climateName ${climateName}"
+			}                    
+		} else {
+			if (settings.trace) {
+				log.debug "updateClimate>climateName ${substituteClimateName} for substitution not found"
 				sendEvent name: "verboseTrace", value:
 					"updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
 			}
 			return
-		}
-		if (climateRefToBeReplaced == null) {
+        }
+		if (foundSubstituteClimate) {
+ 			substituteClimateRef = foundSubstituteClimate.climateRef       
 			if (settings.trace) {
-				log.debug "updateClimate>climateName ${climateName} for substitution not found"
+				log.debug "updateClimate>substituteClimateRef ${substituteClimateRef} found for ${substituteClimateName}"
 				sendEvent name: "verboseTrace", value:
-					"updateClimate>climateName ${climateName} for substitution not found"
+					"updateClimate>substituteClimateRef ${substituteClimateRef} found for ${substituteClimateName} "
+			}
+		} else {
+			if (settings.trace) {
+				log.debug "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
+				sendEvent name: "verboseTrace", value:
+					"updateClimate>substituteClimateName ${substituteClimateName}  for substitution not found"
 			}
 			return
-		}
+        }
 	}
 	def bodyReq =
 		'{"selection":{"selectionType":"thermostats","selectionMatch":"' +
