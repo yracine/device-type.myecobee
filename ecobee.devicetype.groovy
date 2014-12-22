@@ -22,7 +22,7 @@ import java.net.URLEncoder
 // for the UI
 preferences {
 	input("thermostatId", "text", title: "Serial #", description:
-		"The serial number of yo	ur thermostat (no spaces)")
+		"The serial number of your thermostat (no spaces)")
 	input("appKey", "text", title: "App Key", description:
 		"The application key given by Ecobee (no spaces)")
 	input("trace", "text", title: "trace", description:
@@ -1832,11 +1832,9 @@ void setClimate(thermostatId, climateName) {
 	thermostatId = determine_tstat_id(thermostatId)
 	getThermostatInfo(thermostatId)
 	for (i in 0..data.thermostatList.size() - 1) {
-		def foundClimate = false
-
-		foundClimate = data.thermostatList[i].program.climates.find{ it.name.toUpperCase() == climateName.toUpperCase() }
+		def foundClimate = data.thermostatList[i].program.climates.find{ it.name.toUpperCase() == climateName.toUpperCase() }
 		if (foundClimate) {
-        	climateRef = foundClimate.climateRef
+        		climateRef = foundClimate.climateRef
 			if (settings.trace) {
 				log.debug "setClimate>climateRef ${climateRef} found for thermostatId =${data.thermostatList[i].identifier}"
 				sendEvent name: "verboseTrace", value:
@@ -1850,8 +1848,7 @@ void setClimate(thermostatId, climateName) {
 			}        
 			continue
 		}
-        
-        tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+        	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
 			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
 			] :
 			[holdClimateRef:"${climateRef}"
@@ -1962,7 +1959,7 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 					"updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
 			}
 			return
-        }
+		}
 		if (foundSubstituteClimate) {
  			substituteClimateRef = foundSubstituteClimate.climateRef       
 			if (settings.trace) {
@@ -1977,7 +1974,7 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 					"updateClimate>substituteClimateName ${substituteClimateName}  for substitution not found"
 			}
 			return
-        }
+		}
 	}
 	def bodyReq =
 		'{"selection":{"selectionType":"thermostats","selectionMatch":"' +
