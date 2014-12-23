@@ -195,9 +195,6 @@ def setHumidityLevel() {
     
         min_temp =(givenMinTemp!=null) ? givenMinTemp : 10                 // Min temp in Farenheits for using HRV/ERV,otherwise too cold
     }
-    Integer max_power = givenPowerLevel ?:3000                             // Do not run above 3000w consumption level by default
-    
-    
     log.debug "setHumidity> location.mode = $location.mode"
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     log.debug "Scheduling Humidity Monitoring & Change every ${delay}  minutes"
