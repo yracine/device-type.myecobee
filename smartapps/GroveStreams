@@ -46,13 +46,12 @@ preferences {
         input "energys", "capability.energyMeter", title: "Energy Meters", required:false, multiple: true 
 
     }
-
     section ("GroveStreams Feed PUT API key...") {
         input "channelKey", "text", title: "API key"
     }
-	section("Sending data at which interval in minutes (default=5)?") {
-		input "givenInterval", "number", title: 'Send Data Interval', required: false
-	}
+    section("Sending data at which interval in minutes (default=5)?") {
+        input "givenInterval", "number", title: 'Send Data Interval', required: false
+    }
 }
 
 def installed() {
