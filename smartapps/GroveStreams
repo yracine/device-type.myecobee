@@ -50,6 +50,9 @@ preferences {
     section ("GroveStreams Feed PUT API key...") {
         input "channelKey", "text", title: "API key"
     }
+	section("Sending data at which interval in minutes (default=5)?") {
+		input "givenInterval", "number", title: 'Send Data Interval', required: false
+	}
 }
 
 def installed() {
@@ -95,7 +98,9 @@ def initialize() {
     subscribe(ecobees, "ventilatorMinOnTime", handleVentilatorMinOnTimeEvent)
     subscribe(ecobees, "programScheduleName", handleProgramNameEvent)
     state.queue = []
-    schedule("0/1 * * * * ?", processQueue)
+    Integer delay = (givenInterval)?: 5
+    
+    schedule("0 0/${delay} * * * ?", processQueue)
 }
 
 def handleTemperatureEvent(evt) {
