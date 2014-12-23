@@ -8,7 +8,7 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable lax or agreed to in writing, software distributed under the License is distributed
+ *  Unless required by applicable lax w or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
@@ -47,7 +47,7 @@ preferences {
 			required: false
 	}
 	section("At which interval in minutes (default =59 min.)?") {
-		input "givenInterval", "number", required: false
+		input "givenInterval", "number", title:"Interval", required: false
 	}
 	section("Temp differential for adjustments in Farenheits/Celcius") {
 		input "givenTempDiff", "decimal", title: "Temperature adjustment (default= +/-5°F/2°C)", required: false
@@ -474,6 +474,7 @@ private def check_if_hold_justified() {
 		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
 		reset_state_values()        
+        return // no more adjustment
 	} else if (state?.programHoldSet == 'Away') {
 		log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
 		send("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
@@ -489,6 +490,7 @@ private def check_if_hold_justified() {
 		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
 		reset_state_values()
+        return // no more adjustment
 	} else if (state?.programHoldSet == 'Home') { 
 		log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
 		if (detailedNotif == 'true') {
