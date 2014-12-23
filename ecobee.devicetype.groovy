@@ -1566,7 +1566,7 @@ void resumeProgram(thermostatId=settings.thermostatId) {
 	}
 }
 
-// Only valid for Smart and Antenna thermostats
+// Only valid for Smart and ecobee3 thermostats (not for EMS)
 // Get all groups related to a thermostatId or all groups
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 def getGroups(thermostatId) {
@@ -1629,7 +1629,7 @@ def getGroups(thermostatId) {
 	}
 }
 
-// Only valid for Smart and Antenna thermostats
+// Only valid for Smart and ecobee3 thermostats (not for EMS)
 // iterateUpdateGroup: iterate thru all the Groups under a specific account and update their settings
 // Get all groups related to a thermostatId and update them with the groupSettings
 // thermostatId may only be 1 thermostat (not a list), if null or empty, then defaulted to this thermostatId (settings)
@@ -1670,7 +1670,7 @@ void iterateUpdateGroup(thermostatId, groupSettings = []) {
 	}
 }
 
-// Only valid for Smart and Antenna thermostats
+// Only valid for Smart and ecobee3 thermostats (not for EMS)
 // If groupRef is not provided, it is assumed that a group creation needs to be done
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
@@ -1718,7 +1718,7 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	}
 }
 
-// Only valid for Smart and Antenna thermostats
+// Only valid for Smart and ecobee3 thermostats (not for EMS)
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 void deleteGroup(groupRef, groupName) {
 	String updateGroupParams
@@ -1756,7 +1756,7 @@ void deleteGroup(groupRef, groupName) {
 	}
 }
 
-// Only valid for Smart and Antenna thermostats
+// Only valid for Smart and ecobee3 thermostats (not for EMS)
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 // groupSettings could be a map of settings separated by ",", no spaces; 
@@ -1848,7 +1848,7 @@ void setClimate(thermostatId, climateName) {
 			}        
 			continue
 		}
-        	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+        tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
 			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
 			] :
 			[holdClimateRef:"${climateRef}"
