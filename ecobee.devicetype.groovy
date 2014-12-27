@@ -1067,7 +1067,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
             	// get all EMS thermostats from the root
 				[selection: [selectionType: 'managementSet', selectionMatch: '/',
 					includeEquipmentStatus: 'true']
-            			] : // Or Specific to a location
+				] : // Or Specific to a location
 				[selection: [selectionType: 'managementSet', selectionMatch: tstatType.trim(),
 					includeEquipmentStatus: 'true']
 				]
