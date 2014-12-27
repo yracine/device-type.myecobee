@@ -1848,7 +1848,7 @@ void setClimate(thermostatId, climateName) {
 			}        
 			continue
 		}
-        	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+        tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
 			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
 			] :
 			[holdClimateRef:"${climateRef}"
@@ -2480,12 +2480,13 @@ private def isLoggedIn() {
 	return true
 }
 private def isTokenExpired() {
-	def now = new Date().getTime();
+	def buffer_time_expiration=5   // set a 5 min. buffer time before token expiration to avoid auth_err 
+	def time_check_for_exp = now() + (buffer_time_expiration * 60 * 1000);
 	if (settings.trace) {
-		log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time now: ${now}"
+		log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time check for exp: ${time_check_for_exp}"
 		log.debug "isTokenExpired> auth: ${data.auth}"
 	}
-	if (data.auth.authexptime > now) {
+	if (data.auth.authexptime > time_check_for_exp) {
 		if (settings.trace) {
 			log.debug "isTokenExpired> not expired"
 		}
@@ -2496,6 +2497,7 @@ private def isTokenExpired() {
 	}
 	return true
 }
+
 
 // Determine ecobee type from tstatType or settings
 // tstatType =managementSet or registered (no spaces). 
@@ -2532,9 +2534,6 @@ private def determine_ecobee_type_or_location(tstatType) {
 def determine_tstat_id(tstat_id) {
 	def tstatId
     
-	if (settings.trace) {
-		log.debug "determine_tstat_id>begin tstatId = ${tstatId}"
-	}
 	if ((tstat_id != null) && (tstat_id != "")) {
 		tstatId = tstat_id.trim()
 	} else if ((settings.thermostatId != null) && (settings.thermostatId  != "")) {
@@ -2550,10 +2549,6 @@ def determine_tstat_id(tstat_id) {
 			log.debug "determine_tstat_id> tstatId from data= ${data.auth.thermostatId}"
 		}
 	}
-	if (settings.trace) {
-		log.debug "determine_tstat_id>end tstatId = ${tstatId}"
-	}
-    
 	return tstatId
 }
 
