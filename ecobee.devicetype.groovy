@@ -1848,7 +1848,7 @@ void setClimate(thermostatId, climateName) {
 			}        
 			continue
 		}
-        tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+        	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
 			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
 			] :
 			[holdClimateRef:"${climateRef}"
