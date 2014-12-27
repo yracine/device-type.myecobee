@@ -8,7 +8,7 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable lax or agreed to in writing, software distributed under the License is distributed
+ *  Unless required by applicable lax w or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
@@ -300,6 +300,9 @@ private def check_if_hold_needed() {
 	if (detailedNotif == 'true') {
 		send("MonitorEcobeeTemp>needs Hold? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,progHeatSetPoint ${programHeatTemp}°,progCoolSetPoint ${programCoolTemp}°")
 		send("MonitorEcobeeTemp>needs Hold? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,heatingSetPoint ${heatTemp}°,coolingSetPoint ${coolTemp}°")
+		if (state.programHoldSet!= '') {
+			send("MonitorEcobeeTemp>Hold ${state.programHoldSet} has been set")
+		}
 	}
 	if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
                 
@@ -464,6 +467,9 @@ private def check_if_hold_justified() {
 	if (detailedNotif == 'true') {
 		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,progHeatSetPoint ${programHeatTemp}°,progCoolSetPoint ${programCoolTemp}°")
 		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,heatingSetPoint ${heatTemp}°,coolingSetPoint ${coolTemp}°")
+		if (state.programHoldSet!= '') {
+			send("MonitorEcobeeTemp>Hold ${state.programHoldSet} has been set")
+		}
 	}
 	if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
 		log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program")
