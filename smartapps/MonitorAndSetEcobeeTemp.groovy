@@ -475,10 +475,6 @@ private def check_if_hold_justified() {
 		log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program")
 		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
-        
-        /* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
 		reset_state_values()        
         return // no more adjustment
 	} else if (state?.programHoldSet == 'Away') {
@@ -491,10 +487,6 @@ private def check_if_hold_justified() {
 		log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program")
 		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed program, no motion detected")
-        
-        	/* Get latest heat and cool setting points after climate adjustment */
-		heatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
-		coolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
 		reset_state_values()
         return // no more adjustment
 	} else if (state?.programHoldSet == 'Home') { 
