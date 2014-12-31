@@ -764,7 +764,7 @@ void poll() {
         presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
 	]
      
-	if (data.thermostatList[0].events[indiceEvent].type == 'quickSave') {
+	if (data.thermostatList[0].events[indiceEvent] != null && 'quickSave' == data.thermostatList[0].events[indiceEvent].type ) {
 			dataEvents.programEndTimeMsg ="Quicksave running"
 	}
 
