@@ -99,6 +99,12 @@ def ecobeeDeviceList() {
 
 	log.debug "device list: $stats"
 
+	def ems = getEcobeeThermostats("ems")
+
+	log.debug "device list: $ems"
+
+	stats = stats + ems
+    
 	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", uninstall: true) {
 		section(""){
 			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings."
@@ -110,11 +116,17 @@ def ecobeeDeviceList() {
 	return p
 }
 
-def getEcobeeThermostats() {
+def getEcobeeThermostats(String type="") {
 	log.debug "getting device list"
-
-	def requestBody = '{"selection":{"selectionType":"registered","selectionMatch":""}}'
-
+	def requestBody
+    
+	if ((type == "") || (type == null)) {
+    
+	 	requestBody = '{"selection":{"selectionType":"registered","selectionMatch":""}}'
+	} else {
+		requestBody = '{"selection":{"selectionType":"managementSet","selectionMatch":"/"}}'
+	}    
+    
 	def deviceListParams = [
 		uri: "https://api.ecobee.com",
 		path: "/1/thermostat",
@@ -126,39 +138,49 @@ def getEcobeeThermostats() {
 	log.debug "device list params: $deviceListParams"
 
 	def stats = [:]
-	httpGet(deviceListParams) { resp ->
+    try {
+		httpGet(deviceListParams) { resp ->
 
-		if(resp.status == 200)
-		{
-/*        
-        	int i=0    // Used to simulate many thermostats
-*/
-			resp.data.thermostatList.each { stat ->
-				def dni = [ app.id, stat.name, stat.identifier ].join('.')
-				stats[dni] = getThermostatDisplayName(stat)
-/*
-				dni = [ app.id, stat.name, i,stat.identifier ].join('.')    // Used to simulate many thermostats     
-				stats[dni] = getThermostatDisplayName(stat)
-*/
-			}
-		}
-		else
-		{
-			log.debug "http status: ${resp.status}"
-
-			//refresh the auth token
-			if (resp.status == 500 && resp.data.status.code == 14)
+			if(resp.status == 200)
 			{
-				log.debug "Storing the failed action to try later"
-				data.action = "getEcobeeThermostats"
-				log.debug "Refreshing your auth_token!"
+/*        
+        		int i=0    // Used to simulate many thermostats
+*/
+				resp.data.thermostatList.each { stat ->
+					def dni = [ app.id, stat.name, stat.identifier ].join('.')
+					stats[dni] = getThermostatDisplayName(stat)
+/*
+					dni = [ app.id, stat.name, i,stat.identifier ].join('.')    // Used to simulate many thermostats     
+					stats[dni] = getThermostatDisplayName(stat)
+*/
+				}
 			}
 			else
 			{
-				log.error "Authentication error, invalid authentication method, lack of credentials, etc."
+				log.debug "http status: ${resp.status}"
+
+				//refresh the auth token
+				if (resp.status == 500 && resp.data.status.code == 14)
+				{
+					log.debug "Storing the failed action to try later"
+					data.action = "getEcobeeThermostats"
+					log.debug "Refreshing your auth_token!"
+				}
+				else
+				{
+					log.error "Authentication error, invalid authentication method, lack of credentials, etc."
+				}
 			}
-		}
-	}
+            
+    	}        
+	} catch (java.net.UnknownHostException e) {
+		log.error "getEcobeeThermostats> Unknown host - check the URL " + deviceListParams.uri
+	} catch (java.net.NoRouteToHostException t) {
+		log.error "getEcobeeThermostats> No route to host - check the URL " + deviceListParams.uri
+	} catch (java.io.IOException e) {
+		log.error "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
+			deviceListParams
+    }
 
 	log.debug "thermostats: $stats"
 
