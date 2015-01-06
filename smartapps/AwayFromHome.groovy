@@ -41,7 +41,7 @@ preferences {
         input "switches", "capability.switch", title: "Switch", multiple: true, required: optional
     }
     section("And activate the alarm system (optional)") {
-        input "alarmSwitch", "capability.contactSensor", title: "Alarm Switch"
+        input "alarmSwitch", "capability.contactSensor", title: "Alarm Switch",required: false
     }
     section("Set the ecobee thermostat(s)") {
         input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple:true
