@@ -138,7 +138,7 @@ def getEcobeeThermostats(String type="") {
 	log.debug "device list params: $deviceListParams"
 
 	def stats = [:]
-    try {
+	try {
 		httpGet(deviceListParams) { resp ->
 
 			if(resp.status == 200)
@@ -172,7 +172,7 @@ def getEcobeeThermostats(String type="") {
 				}
 			}
             
-    	}        
+    		}        
 	} catch (java.net.UnknownHostException e) {
 		log.error "getEcobeeThermostats> Unknown host - check the URL " + deviceListParams.uri
 	} catch (java.net.NoRouteToHostException t) {
@@ -180,7 +180,8 @@ def getEcobeeThermostats(String type="") {
 	} catch (java.io.IOException e) {
 		log.error "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
 			deviceListParams
-    }
+		
+	}
 
 	log.debug "thermostats: $stats"
 
