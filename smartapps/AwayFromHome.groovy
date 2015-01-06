@@ -40,7 +40,7 @@ preferences {
     section("Turn off these lights") {
         input "switches", "capability.switch", title: "Switch", multiple: true, required: optional
     }
-    section("And activate the alarm system") {
+    section("And activate the alarm system (optional)") {
         input "alarmSwitch", "capability.contactSensor", title: "Alarm Switch"
     }
     section("Set the ecobee thermostat(s)") {
@@ -68,9 +68,9 @@ preferences {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
         input "phone", "phone", title: "Send a Text Message?", required: false
     }
-	section("Detailed Notifications") {
+    section("Detailed Notifications") {
         input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
-	}
+    }
 
 }
 
@@ -194,7 +194,7 @@ def takeActions() {
 
     if (everyoneIsAway() && residentsHaveBeenQuiet()) {
         send("AwayFromHome>Nobody is at home, and it's quiet, about to take actions")
-        if (alarmSwitch.currentContact == "open") {
+        if (alarmSwitch?.currentContact == "open") {
             log.debug "alarm is not set, arm it..."  
             alarmSwitch.on()								     // arm the alarm system
             if (detailedNotif == 'true') {
@@ -239,10 +239,9 @@ def takeActions() {
             send(msg)
         }    
         log.info msg
-
-
-        runIn (delay, "checkAlarmSystem", [overwrite:false])     // check that the alarm system is armed
-
+        if (alarmSwitch) {
+            runIn (delay, "checkAlarmSystem", [overwrite:false])     // check that the alarm system is armed
+        }
     }
 
 
