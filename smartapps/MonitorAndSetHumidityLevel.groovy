@@ -119,7 +119,6 @@ def initialize() {
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
-
 def ecobeeHeatTempHandler(evt) {
     log.debug "ecobee's heating temp: $evt.value"
 }
@@ -172,7 +171,7 @@ def setHumidityLevel() {
 
     if (detailedNotif == 'true') {
         Integer delay =givenInterval ?: 59   // By default, do it every hour
-        send("MonitorEcobeeTemp>monitoring every ${delay} minute(s)")
+        send("MonitorEcobeeHumidity>monitoring every ${delay} minute(s)")
     }
 
     if (powerSwitch?.currentSwitch == "off") {
@@ -199,18 +198,17 @@ def setHumidityLevel() {
     Integer delay =givenInterval ?: 59   // By default, do it every hour
     log.debug "Scheduling Humidity Monitoring & Change every ${delay}  minutes"
 
-//  Polling of ecobee device
+//  Polling of ecobee
 
     ecobee.poll()
-    def heatTemp = ecobee.currentHeatingSetpoint
-    def coolTemp = ecobee.currentCoolingSetpoint
-    def ecobeeHumidity = ecobee.currentHumidity
+
     def indoorHumidity=0 
     def indoorTemp = ecobee.currentTemperature
     def hasDehumidifier = (ecobee.currentHasDehumidifier!=null) ? ecobee.currentHasDehumidifier : 'false' 
     def hasHumidifier = (ecobee.currentHasHumidifier!=null) ? ecobee.currentHasHumidifier : 'false' 
     def hasHrv = (ecobee.currentHasHrv !=null)? ecobee.currentHasHrv : 'false' 
     def hasErv = (ecobee.currentHasErv !=null)? ecobee.currentHasErv : 'false' 
+    def outdoorHumidity
     
     // use the readings from another sensor if better precision neeeded
     if ((indoorSensor != null) && (indoorSensor != "")) {
@@ -218,10 +216,21 @@ def setHumidityLevel() {
         indoorTemp = indoorSensor.currentTemperature
     }
     
-    def outdoorHumidity = outdoorSensor.currentHumidity
+    def outdoorSensorHumidity = outdoorSensor.currentHumidity
     def outdoorTemp = outdoorSensor.currentTemperature
     String ecobeeMode = ecobee.currentThermostatMode
     log.debug "setHumidity> ecobee Mode = $ecobeeMode"
+    
+    outdoorHumidity = (scale == 'C')? 
+        calculate_corr_humidity(outdoorTemp, outdoorSensorHumidity, indoorTemp) :
+        calculate_corr_humidity(fToC(outdoorTemp), outdoorSensorHumidity, fToC(indoorTemp))
+
+
+    log.debug "setHumidity> outdoorSensorHumidity = $outdoorSensorHumidity%, Corresponding outdoorHumidity based on ambient temperature = $outdoorHumidity%"
+    if (detailedNotif == 'true') {
+       send "MonitorHumidity>calculated outdoor humidity is ${outdoorHumidity}%, sensor outdoor humidity ${outdoorSensorHumidity}%"
+    }    
+    
     
 //  If indoorSensor specified, use the more precise humidity measure instead of ecobeeHumidity
 
@@ -386,6 +395,34 @@ def setHumidityLevel() {
     }
             
     log.debug "End of Fcn"
+}
+
+
+private def bolton(t) {
+
+//  Estimates the saturation vapour pressure in hPa at a given temperature,  T, in Celcius
+//  return saturation vapour pressure at a given temperature in Celcius
+
+    
+    Double es = 6.112*Math.exp(17.67*t/(t+243.5))
+	return es
+
+}
+
+  
+private def calculate_corr_humidity(t1, rh1, t2) {
+
+
+    log.debug( "calculate_corr_humidity t1= $t1, rh1=$rh1, t2=$t2" )
+
+    Double es = bolton(t1)
+    Double es2 = bolton(t2)
+    Double vapor = rh1/100.0 * es
+    Double rh2= ((vapor/es2)*100.0).round(2)
+    
+    log.debug( "calculate_corr_humidity rh2= $rh2" )
+  
+    return rh2
 }
 
 
