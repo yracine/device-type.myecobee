@@ -403,9 +403,8 @@ private def bolton(t) {
 //  Estimates the saturation vapour pressure in hPa at a given temperature,  T, in Celcius
 //  return saturation vapour pressure at a given temperature in Celcius
 
-    
     Double es = 6.112*Math.exp(17.67*t/(t+243.5))
-	return es
+    return es
 
 }
 
