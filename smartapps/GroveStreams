@@ -46,12 +46,13 @@ preferences {
         input "energys", "capability.energyMeter", title: "Energy Meters", required:false, multiple: true 
 
     }
+
     section ("GroveStreams Feed PUT API key...") {
         input "channelKey", "text", title: "API key"
     }
-    section("Sending data at which interval in minutes (default=5)?") {
-        input "givenInterval", "number", title: 'Send Data Interval', required: false
-    }
+	section("Sending data at which interval in minutes (default=5)?") {
+		input "givenInterval", "number", title: 'Send Data Interval', required: false
+	}
 }
 
 def installed() {
@@ -105,6 +106,11 @@ def initialize() {
 def handleTemperatureEvent(evt) {
     queueValue(evt) { it.toString() }
 }
+
+def handleHumidityEvent(evt) {
+    queueValue(evt) { it.toString() }
+}
+
 def handleHeatingSetpointEvent(evt) {
     queueValue(evt) { it.toString() }
 }
@@ -141,13 +147,10 @@ def handleVentilatorMinOnTimeEvent(evt) {
 }
 
 def handleThermostatOperatingStateEvent(evt) {
-    queueValue(evt) { it.toString() }
+    queueValue(evt) {  it == "idle" ? 0 : (it == 'fan only') ? 1: (it == 'heating')? 2: 3 }
+
 }
 def handleEquipmentStatusEvent(evt) {
-    queueValue(evt) { it.toString() }
-}
-
-def handleHumidityEvent(evt) {
     queueValue(evt) { it.toString() }
 }
 
@@ -170,7 +173,7 @@ def handleIlluminanceEvent(evt) {
 }
 
 def handleLockEvent(evt) {
-    queueValue(evt) { it == "locked" ? "true" : "false" }
+    queueValue(evt) { it == "locked" ? true : false }
 }
 
 def handleBatteryEvent(evt) {
@@ -178,23 +181,23 @@ def handleBatteryEvent(evt) {
 }
 
 def handleContactEvent(evt) {
-    queueValue(evt) { it == "open" ? "true" : "false" }
+    queueValue(evt) { it == "open" ? true : false }
 }
 
 def handleAccelerationEvent(evt) {
-    queueValue(evt) { it == "active" ? "true" : "false" }
+    queueValue(evt) { it == "active" ? true : false }
 }
 
 def handleMotionEvent(evt) {
-    queueValue(evt) { it == "active" ? "true" : "false" }
+    queueValue(evt) { it == "active" ? true : false }
 }
 
 def handlePresenceEvent(evt) {
-    queueValue(evt) { it == "present" ? "true" : "false" }
+    queueValue(evt) { it == "present" ? true : false }
 }
 
 def handleSwitchEvent(evt) {
-    queueValue(evt) { it == "on" ? "true" : "false" }
+    queueValue(evt) { it == "on" ? true : false }
 }
 
 def handlePowerEvent(evt) {
