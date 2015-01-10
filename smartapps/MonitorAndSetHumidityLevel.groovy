@@ -202,6 +202,9 @@ def setHumidityLevel() {
 
     ecobee.poll()
 
+    def heatTemp = ecobee.currentHeatingSetpoint
+    def coolTemp = ecobee.currentCoolingSetpoint
+    def ecobeeHumidity = ecobee.currentHumidity
     def indoorHumidity=0 
     def indoorTemp = ecobee.currentTemperature
     def hasDehumidifier = (ecobee.currentHasDehumidifier!=null) ? ecobee.currentHasDehumidifier : 'false' 
