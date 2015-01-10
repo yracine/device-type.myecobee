@@ -2226,7 +2226,7 @@ void reportSummary(thermostatId, startDateTime, endDateTime, startInterval, endI
 			data.endInterval = resp.data.endInterval
 			data.columns = resp.data.columns
 			if (includeSensorData=='true') {
-				data.sensorList =  resp.data.sensorList
+	        	data.sensorList =  resp.data.sensorList
 			}                
 			if (settings.trace) {
 				log.debug "reportSummary> startDate= ${data.startDate}"
@@ -2331,19 +2331,19 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 		try {
 			total += rowDetails[2]?.toInteger()
 			nbRows++
-			max = Math.max(rowDetails[2]?.toInteger(),max)
-			min = (min==0) ? rowDetails[2]?.toInteger() : Math.min(rowDetails[2]?.toInteger(),min)
+			max = Math.max(rowDetails[2].toInteger(),max)
+			min = (min==0) ? rowDetails[2].toInteger() : Math.min(rowDetails[2].toInteger(),min)
 		} catch (any) {
 			log.debug "calculate_stats> no values ($rowDetails) for $component at $i"
 			continue
 		}	
 	}
 	if (settings.trace) {
-		log.debug "calculate_stats> total= ${total} for component $component"
-		log.debug "calculate_stats> nbRows with value= ${nbRows} for component $component"
-		log.debug "calculate_stats> avg= ${total/nbRows} for component $component"
-		log.debug "calculate_stats> max= ${max} for component $component"
-		log.debug "calculate_stats> min= ${min} for component $component"
+		log.debug "calculate_stats> total= ${total} for $component component"
+		log.debug "calculate_stats> nbRows with value= ${nbRows} for $component component"
+		log.debug "calculate_stats> avg= ${total/nbRows} for $component component"
+		log.debug "calculate_stats> max= ${max} for $component component"
+		log.debug "calculate_stats> min= ${min} for $component component"
 	}
     if (operation == 'avg') {
 		return total/nbRows    
