@@ -2191,7 +2191,7 @@ void reportSummary(thermostatId, startDateTime, endDateTime, startInterval, endI
 		int startIntervalHr = (startCalendar.HOUR_OF_DAY>0) ? (startCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
 		int startIntervalMin = (startCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (startCalendar.MINUTE) / REPORT_TIME_INTERVAL:0 
         startInterval = startIntervalHr + startIntervalMin
-    }
+	}
 	if (endInterval == null) {
 		int endIntervalHr = (endCalendar.HOUR_OF_DAY>0) ? (endCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
 		int endIntervalMin = (endCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (endCalendar.MINUTE) / REPORT_TIME_INTERVAL:0
@@ -2302,8 +2302,7 @@ void generateReportRuntimeEvents(component,startInterval, endInterval) {
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "dehumidifierRuntimeInPeriod", value: runtimeInMin.toString()
                 
-	}
-    else if (component.contains('humidifier')) {
+	} else if (component.contains('humidifier')) {
 		totalRuntime = calculateRuntime('humidifier', startInterval, endInterval)
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "humidifierRuntimeInPeriod", value: runtimeInMin.toString()
