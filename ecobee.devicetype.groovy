@@ -2190,12 +2190,12 @@ void reportSummary(thermostatId, startDateTime, endDateTime, startInterval, endI
 	if (startInterval ==null) {
 		int startIntervalHr = (startCalendar.HOUR_OF_DAY>0) ? (startCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
 		int startIntervalMin = (startCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (startCalendar.MINUTE) / REPORT_TIME_INTERVAL:0 
-        startInterval = startIntervalHr + startIntervalMin
+		startInterval = startIntervalHr + startIntervalMin
 	}
 	if (endInterval == null) {
 		int endIntervalHr = (endCalendar.HOUR_OF_DAY>0) ? (endCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
-		int endIntervalMin = (endCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (endCalendar.MINUTE) / REPORT_TIME_INTERVAL:0
-        endInterval = endIntervalHr + endIntervalMin
+		int endIntervalMin = (endCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (endCalendar.MINUTE) / REPORT_TIME_INTERVAL
+		endInterval = endIntervalHr + endIntervalMin
 	}
     
 	def bodyReq = '{"startInterval":"' + startInterval + '","endInterval":"' + endInterval + '","startDate":"' +
@@ -2256,54 +2256,54 @@ void generateReportRuntimeEvents(component,startInterval, endInterval) {
 	float runtimeInMin
     
 	if (component.contains('auxHeat1')) {
-		totalRuntime = calculateRuntime('auxHeat1', startInterval, endInterval)
+		totalRuntime = calculate_stats('auxHeat1', startInterval, endInterval, 'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "auxHeat1RuntimeInPeriod", value: runtimeInMin.toString()
 	}
 
 	if (component.contains('auxHeat2')) {
-		totalRuntime = calculateRuntime('auxHeat2', startInterval, endInterval)
+		totalRuntime = calculate_stats('auxHeat2', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "auxHeat2RuntimeInPeriod", value: runtimeInMin.toString()
 	}
 
 	if (component.contains('auxHeat3')) {
-		totalRuntime = calculateRuntime('auxHeat3', startInterval, endInterval)
+		totalRuntime = calculate_stats('auxHeat3', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "auxHeat3RuntimeInPeriod", value: runtimeInMin.toString()
 	}
 
 	if (component.contains('coolComp1')) {
-		totalRuntime = calculateRuntime('coolComp1', startInterval, endInterval)
+		totalRuntime = calculate_stats('coolComp1', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "coolComp1RuntimeInPeriod", value: runtimeInMin.toString()
 	}
 
 	if (component.contains('coolComp2')) {
-		totalRuntime = calculateRuntime('coolComp2', startInterval, endInterval)
+		totalRuntime = calculate_stats('coolComp2', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "coolComp2RuntimeInPeriod", value: runtimeInMin.toString()
 	}
 
 	if (component.contains('fan')) {
-		totalRuntime = calculateRuntime('fan', startInterval, endInterval)
+		totalRuntime = calculate_stats('fan', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "fanRuntimeInPeriod", value: runtimeInMin.toString()
 	}
 
 	if (component.contains('ventilator')) {
- 		totalRuntime = calculateRuntime('ventilator', startInterval, endInterval)
+ 		totalRuntime = calculate_stats('ventilator', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "ventilatorRuntimeInPeriod", value: runtimeInMin.toString()
 	}
     
 	if (component.contains('dehumidifier')) {
-		totalRuntime = calculateRuntime('dehumidifier', startInterval, endInterval)
+		totalRuntime = calculate_stats('dehumidifier', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "dehumidifierRuntimeInPeriod", value: runtimeInMin.toString()
                 
 	} else if (component.contains('humidifier')) {
-		totalRuntime = calculateRuntime('humidifier', startInterval, endInterval)
+		totalRuntime = calculate_stats('humidifier', startInterval, endInterval,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		sendEvent name: "humidifierRuntimeInPeriod", value: runtimeInMin.toString()
                 
@@ -2311,37 +2311,49 @@ void generateReportRuntimeEvents(component,startInterval, endInterval) {
 }
 
 
-private int calculateRuntime(component, startInterval, endInterval) {
-	int totalRuntime=0
-    
+private float calculate_stats(component, startInterval, endInterval, typeData, operation='total') {
+	int total=0	
+	int nbRows=0
+	int min=0,max=0
+	
 	int startRow = (startInterval) ? Math.min(data.endInterval.toInteger(), startInterval): 0
-	int rowCount = data.reportList[0].rowCount.toInteger()
-	int lastRow = (endInterval) ? Math.min(endInterval,data.endInterval.toInteger()) :
-    	Math.min(data.endInterval.toInteger(), rowCount)   
-    
+	int rowCount = (typeData=='sensor')? data.sensorList.data[0].size(): data.reportList.rowList[0].size()
+	int lastRow = (endInterval) ? Math.min(endInterval,data.endInterval.toInteger()) :data.endInterval.toInteger()   
 
 	if (settings.trace) {
 		log.debug "calculateRuntime> about to process rowCount= ${rowCount},startRow=${startRow},lastRow=${lastRow}"
 	}
 	for (i in startRow..lastRow -1) {
-		def rowDetails = data.reportList.rowList[0][i].split(",")
+		def rowDetails = (typeData=='sensor')? data.sensorList.data[0][i].split(","): data.reportList.rowList[0][i].split(",")
 		try {
-			totalRuntime += rowDetails[2]?.toInteger()
-		                
+			total += rowDetails[2]?.toInteger()
+			nbRows++
+			max = Math.max(rowDetails[2]?.toInteger(),max)
+			min = (min==0) ? rowDetails[2]?.toInteger() : Math.min(rowDetails[2]?.toInteger(),min)
 		} catch (any) {
-        
-			log.debug "calculateRuntime> no values for $component's runtime at $i"
-        	continue
+			log.debug "calculate_stats> no values ($rowDetails) for $component's at $i"
+			continue
 		}	
 	}
 	if (settings.trace) {
-		log.debug "calculateRuntime> totalRuntime= ${totalRuntime} for component $component"
+		log.debug "calculate_stats> total= ${total} for component $component"
+		log.debug "calculate_stats> nbRows with value= ${nbRows} for component $component"
+		log.debug "calculate_stats> avg= ${total/nbRows} for component $component"
+		log.debug "calculate_stats> max= ${max} for component $component"
+		log.debug "calculate_stats> min= ${min} for component $component"
 	}
-	return totalRuntime
+    if (operation == 'avg') {
+		return total/nbRows    
+    }
+    if (operation == 'max') {	
+		return max    	
+    }
+    if (operation == 'min') {	
+		return min    	
+    }
+	return total
 }
     
-    
-
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 void getThermostatInfo(thermostatId=settings.thermostatId) {
