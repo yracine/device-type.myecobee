@@ -33,9 +33,8 @@ definition(
 
 preferences {
 
-    section("Monitor & set the ecobee thermostat's dehumidifer") {
+    section("Monitor & set the ecobee thermostat's dehumidifer/humidifier/HRV/ERV") {
         input "ecobee", "capability.thermostat", title: "Ecobee?"
-
     }	  
     section("To this humidity level") {
         input "givenHumidityLevel", "number", title: "humidity level (default=calculated based on outside temp)", required:false
