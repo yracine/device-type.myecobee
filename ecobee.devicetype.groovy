@@ -2187,14 +2187,17 @@ void reportSummary(thermostatId, startDateTime, endDateTime, startInterval, endI
 	Calendar endCalendar = Calendar.getInstance()
 	endCalendar.setTime(endDateTime)
 
-	if (startInterval ==null) {
-		int startIntervalHr = (startCalendar.HOUR_OF_DAY>0) ? (startCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
-		int startIntervalMin = (startCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (startCalendar.MINUTE) / REPORT_TIME_INTERVAL:0 
+	if (startInterval == null) {
+		int startIntervalHr = (startCalendar.HOUR_OF_DAY>0) ? 
+        	(startCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
+		int startIntervalMin = (startCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? 
+        	(startCalendar.MINUTE) / REPORT_TIME_INTERVAL:0 
 		startInterval = startIntervalHr + startIntervalMin
 	}
 	if (endInterval == null) {
 		int endIntervalHr = (endCalendar.HOUR_OF_DAY>0) ? (endCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
-		int endIntervalMin = (endCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (endCalendar.MINUTE) / REPORT_TIME_INTERVAL
+		int endIntervalMin = (endCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? 
+        	(endCalendar.MINUTE) / REPORT_TIME_INTERVAL :0
 		endInterval = endIntervalHr + endIntervalMin
 	}
     
@@ -2223,7 +2226,7 @@ void reportSummary(thermostatId, startDateTime, endDateTime, startInterval, endI
 			data.endInterval = resp.data.endInterval
 			data.columns = resp.data.columns
 			if (includeSensorData=='true') {
-	        	data.sensorList =  resp.data.sensorList
+				data.sensorList =  resp.data.sensorList
 			}                
 			if (settings.trace) {
 				log.debug "reportSummary> startDate= ${data.startDate}"
@@ -2331,7 +2334,7 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 			max = Math.max(rowDetails[2]?.toInteger(),max)
 			min = (min==0) ? rowDetails[2]?.toInteger() : Math.min(rowDetails[2]?.toInteger(),min)
 		} catch (any) {
-			log.debug "calculate_stats> no values ($rowDetails) for $component's at $i"
+			log.debug "calculate_stats> no values ($rowDetails) for $component at $i"
 			continue
 		}	
 	}
