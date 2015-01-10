@@ -495,7 +495,7 @@ private void turn_off_dehumidifier() {
 
     log.trace("Turning off dehumidifier after timeout")
     
-    ecobee.setThermostatSettings("",['dehumidifierMode':'off']) 
+    ecobee.setThermostatSettings("",['dehumidifierMode':'off','fan':"off"]) 
 
 }
 
