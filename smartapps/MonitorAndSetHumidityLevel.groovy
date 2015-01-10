@@ -104,6 +104,7 @@ def updated() {
 }
 
 def initialize() {
+    state.currentRevision =null // for further with thermostatRevision later
     
     subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
@@ -231,9 +232,9 @@ def setHumidityLevel() {
            
                 ecobee.setThermostatSettings("",['vent':'off','dehumidifierMode':'off','humidifierMode':'off','dehumidifyWithAC':'false',
                    'desiredFanMode':'auto'])  
-               return
+                return
          
-           }
+            }
         } catch (any) {
             log.error "Exception while trying to get power data " 
         }
@@ -445,25 +446,16 @@ def setHumidityLevel() {
         Calendar oneHourAgoCal = new GregorianCalendar()
         oneHourAgoCal.add(Calendar.HOUR, -1 )
         Date oneHourAgo= oneHourAgoCal.getTime()
-		log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
-          "anHourAgo's date/time in UTC= ${String.format('%tF %<tT',oneHourAgo)}")
+	log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
+            "anHourAgo's date/time in UTC= ${String.format('%tF %<tT',oneHourAgo)}")
         
 		
-        def currentRevision = ecobee.currentThermostatRevision
         def newRevision = ecobee.getThermostatRevision("","")
-		if (currentRevision != null) {
-        
-        	if (currentRevision != newRevision) {
-				// Get the dehumidifier's runtime 
-				ecobee.getReportData("", oneHourAgo, now, 0, null, "dehumidifier",false)
-				ecobee.generateReportRuntimeEvents("dehumidifier",oneHourAgo, now, null, null, 'lastHour')
-            
-            }
-		} else { /* first run */
-				// Get the dehumidifier's runtime 
-				ecobee.getReportData("", oneHourAgo, now, 0, null, "dehumidifier",false)
-				ecobee.generateReportRuntimeEvents("dehumidifier",oneHourAgo, now, null, null, 'lastHour')
-                currentRevision = newRevision
+        if (state.currentRevision != newRevision) {
+            // Get the dehumidifier's runtime 
+            ecobee.getReportData("", oneHourAgo, now, 0, null, "dehumidifier",false)
+            ecobee.generateReportRuntimeEvents("dehumidifier",oneHourAgo, now, null, null, 'lastHour')
+            state.currentRevision = newRevision // For further checks later
         }
         float dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
         if (detailedNotif == 'true') {
