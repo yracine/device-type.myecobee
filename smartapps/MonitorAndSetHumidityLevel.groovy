@@ -20,19 +20,16 @@
  *
 */
 
-
-
 // Automatically generated. Make future change here.
 definition(
-    name: "MonitorEcobeeDehumidifier",
+    name: "Monitor And Set Ecobee's humidity",
     namespace: "yracine",
     author: "Yves Racine",
-    description: "MonitorEcobeeDehumidifier: this smartapp allows a ST user to control its dehumidifer via the ecobee's APIs.",
+    description: "Monitor And set Ecobee's humidity",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
-
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+)
 
 preferences {
 
@@ -417,11 +414,11 @@ def setHumidityLevel() {
         Calendar anHourAgoCal = new GregorianCalendar()
         anHourAgoCal.add( Calendar.HOUR, -1 )
         Date anHourAgo= anHourAgoCal.getTime()
-		log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
+        log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
           "anHourAgo's date/time in UTC= ${String.format('%tF %<tT',anHourAgo)}")
         
         // Get the dehumidifier's runtime 
-		ecobee.reportSummary("", anHourAgo, now, 0, null, "dehumidifier",false)
+        ecobee.reportSummary("", anHourAgo, now, 0, null, "dehumidifier",false)
         float dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
         if (detailedNotif == 'true') {
             send "MonitorEcobeeHumidity>dehumidifier runtime in the last hour is ${dehumidifierRunInMin.toString()} minutes"
