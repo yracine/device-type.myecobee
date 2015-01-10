@@ -2225,8 +2225,8 @@ void reportSummary(thermostatId, startDateTime, endDateTime, startInterval, endI
 			data.startInterval = resp.data.startInterval
 			data.endInterval = resp.data.endInterval
 			data.columns = resp.data.columns
-			if (includeSensorData=='true') {
-	        	data.sensorList =  resp.data.sensorList
+			if (includeSensorData=='true') {	
+				data.sensorList =  resp.data.sensorList
 			}                
 			if (settings.trace) {
 				log.debug "reportSummary> startDate= ${data.startDate}"
