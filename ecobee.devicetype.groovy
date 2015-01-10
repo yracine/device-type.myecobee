@@ -1877,7 +1877,7 @@ void setClimate(thermostatId, climateName) {
 			}        
 			continue
 		}
-        tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+        	tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
 			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
 			] :
 			[holdClimateRef:"${climateRef}"
@@ -2237,7 +2237,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 			data.endInterval = resp.data.endInterval
 			data.columns = resp.data.columns
 			if (includeSensorData=='true') {
-	        	data.sensorList =  resp.data.sensorList
+	        		data.sensorList =  resp.data.sensorList
 			}                
 			if (settings.trace) {
 				log.debug "getReportData> startDate= ${data.startDate}"
@@ -2436,15 +2436,15 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 		log.debug "calculate_stats> max= ${max} for $component component"
 		log.debug "calculate_stats> min= ${min} for $component component"
 	}
-    if (operation == 'avg') {
+    	if (operation == 'avg') {
 		return avg    
-    }
-    if (operation == 'max') {	
+    	}
+    	if (operation == 'max') {	
 		return max    	
-    }
-    if (operation == 'min') {	
+    	}
+    	if (operation == 'min') {	
 		return min    	
-    }
+    	}
 	return total
 }
     
@@ -2532,10 +2532,10 @@ def getThermostatRevision(tstatType, thermostatId) {
 		def thermostatName = thermostatDetails[1]
 		def connected = thermostatDetails[2]
 		def thermostatRevision = thermostatDetails[3]
-        if (thermostatId == id) {
+        	if (thermostatId == id) {
 			sendEvent name: "thermostatRevision", value: thermostatRevision
 			return
-        }
+        	}
 	}
 }
 
