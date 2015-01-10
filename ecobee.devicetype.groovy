@@ -2196,13 +2196,13 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 	}
 
 	if (startInterval == null) {
-    	startInterval = get_interval(startDateTime)
+    		startInterval = get_interval(startDateTime)
 		if (settings.trace) {
 			log.debug "getReportData> startInterval = ${startInterval}"
-        }
+        	}
 	}
 	if (endInterval == null) {
-    	endInterval = get_interval(endDateTime)
+    		endInterval = get_interval(endDateTime)
 		Calendar startCalendar = startDateTime.toCalendar()
 		Calendar endCalendar = endDateTime.toCalendar()
 
