@@ -789,7 +789,7 @@ void poll() {
 		alerts: getAlerts(),
 		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
 		climateList: getClimateList(),
-        presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
+        	presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present'
 	]
      
 	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type == 'quickSave')) {
@@ -2295,7 +2295,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
     	startInterval = get_interval(startDateTime)
 		if (settings.trace) {
 			log.debug "generateReportRuntimeEvents> startInterval = ${startInterval}"
-        }
+        	}
 	}
 	if (endInterval == null) {
     	endInterval = get_interval(endDateTime)
@@ -2405,8 +2405,8 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 	int total=0	
 	int nbRows=0
 	int max=0
-	def min = null
-    int rowValue
+	def min = nul
+	int rowValue
     
 	int startRow = (startInterval) ? Math.min(data.endInterval.toInteger(), startInterval): 0
 	int rowCount = (typeData=='sensor')? data.sensorList.data[0].size(): data.reportList.rowList[0].size()
