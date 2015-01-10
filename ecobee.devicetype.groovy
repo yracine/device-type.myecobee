@@ -19,6 +19,8 @@
  */
 import groovy.json.JsonBuilder
 import java.net.URLEncoder
+import java.text.DateFormat
+
 // for the UI
 preferences {
 	input("thermostatId", "text", title: "Serial #", description:
@@ -92,6 +94,19 @@ metadata {
 		attribute "followMeComfort", "string"
 		attribute "autoAway", "string"
         
+        // Report Runtime events
+        
+		attribute "auxHeat1RuntimeInPeriod", "string"
+		attribute "auxHeat2RuntimeInPeriod", "string"
+		attribute "auxHeat3RuntimeInPeriod", "string"
+		attribute "coolComp1RuntimeInPeriod", "string"
+		attribute "coolComp2RuntimeInPeriod", "string"
+		attribute "dehumidifierRuntimeInPeriod", "string"
+		attribute "humidifierRuntimeInPeriod", "string"
+		attribute "ventilatorRuntimeInPeriod", "string"
+		attribute "fanRuntimeInPeriod", "string"
+		        
+        
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
@@ -151,6 +166,8 @@ metadata {
 		command "refreshChildTokens" 
 		command "autoAway"
 		command "followMeComfort"
+		command "reportSummary"
+		command "generateReportRuntimeEvents"
 }        
 
 simulator {
@@ -765,7 +782,7 @@ void poll() {
 	]
      
 	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type == 'quickSave')) {
-			dataEvents.programEndTimeMsg ="Quicksave running"
+		dataEvents.programEndTimeMsg ="Quicksave running"
 	}
 
 	generateEvent(dataEvents)
@@ -996,7 +1013,10 @@ private void api(method, args, success = {}) {
 		'updateClimate': 
 			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
 		'controlPlug': 
-			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post']
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'runtimeReport': 
+			[uri:"${URI_ROOT}/runtimeReport?format=json&body=${args_encoded}", 
+          		type: 'get'],
 		]
 	def request = methods.getAt(method)
 	if (settings.trace) {
@@ -1092,9 +1112,6 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 		selection = [selectionType: 'thermostats', selectionMatch: thermostatId]
 	}
 	selectionJson = new JsonBuilder(selection)
-	if (settings.trace) {
-		log.debug "build_body_request> about to build request for method = ${method} & thermostatId= ${thermostatId} with selection = ${selectionJson}"
-	}
 	if ((method != 'setThermostatSettings') && (tstatSettings != null) && (tstatSettings != [])) {
 		def function_clause = ((tstatParams != null) && (tsatParams != [])) ? 
 			[type:method, params: tstatParams
@@ -1122,6 +1139,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 		return simpleBodyJson
     }    
 }
+
 
 // iterateSetThermostatSettings: iterate thru all the thermostats under a specific account and set the desired settings
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
@@ -2122,6 +2140,209 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 	}
 }
 
+
+
+// thermostatId shall refer to a single thermostat to avoid processing too much data
+//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// reportColumn shall be 1 component only (ex. auxHeat1, coolComp1, fan, ventilator, humidifier, dehumidifier)
+// startDateTime and endDateTime should be in UTC timezone format
+// startInterval & endInterval may be null. In that case, the intervals are calculated using the startDateTime and endDateTime
+
+void reportSummary(thermostatId, startDateTime, endDateTime, startInterval, endInterval, reportColumn, includeSensorData) {
+	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
+	def REPORT_TIME_INTERVAL=5
+    
+	thermostatId = determine_tstat_id(thermostatId)
+
+	Double nbDaysInPeriod = (endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY
+        
+	if (nbDaysInPeriod > 1) {  // Report period should not be bigger than 1 day to avoid summarizing too much data.
+		if (settings.trace) {
+				sendEvent name: "verboseTrace", value:"reportSummary> report's period too big (${nbDaysInPeriod.toString()} > 1)"
+				log.error "reportSummary> report's period too big (${nbDaysInPeriod.toString()} >1)"
+			return
+		}
+	} 
+	if (thermostatId.contains(',')) {  // Report should run on a single thermostat only
+		if (settings.trace) {
+			sendEvent name: "verboseTrace", value:"reportSummary> report should run on a single thermostatId only (${thermostatId})"
+			log.error "reportSummary> report should run on a single thermostatId only (${thermostatId})"
+		}
+		return
+	}
+    
+	if (reportColumn.contains(',')) {  // Report should run on a single component only
+		if (settings.trace) {
+			sendEvent name: "verboseTrace", value:"reportSummary> report should run on a single component only (${reportColumn})"
+			log.error "reportSummary> report should run on a single component only (${reportColumn})"
+		}
+		return
+	}
+	if (settings.trace) {
+		log.debug "reportSummary> startDate in UTC timezone =${String.format('%tF %<tT',startDateTime)}," +
+        	"endDate in UTC timezone =${String.format('%tF %<tT',endDateTime)}"
+	}
+	Calendar startCalendar = Calendar.getInstance()
+	startCalendar.setTime(startDateTime)
+	Calendar endCalendar = Calendar.getInstance()
+	endCalendar.setTime(endDateTime)
+
+	if (startInterval ==null) {
+		int startIntervalHr = (startCalendar.HOUR_OF_DAY>0) ? (startCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
+		int startIntervalMin = (startCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (startCalendar.MINUTE) / REPORT_TIME_INTERVAL:0 
+        startInterval = startIntervalHr + startIntervalMin
+    }
+	if (endInterval == null) {
+		int endIntervalHr = (endCalendar.HOUR_OF_DAY>0) ? (endCalendar.HOUR_OF_DAY * 60) / REPORT_TIME_INTERVAL:0 
+		int endIntervalMin = (endCalendar.MINUTE> REPORT_TIME_INTERVAL-1) ? (endCalendar.MINUTE) / REPORT_TIME_INTERVAL:0
+        endInterval = endIntervalHr + endIntervalMin
+	}
+    
+	def bodyReq = '{"startInterval":"' + startInterval + '","endInterval":"' + endInterval + '","startDate":"' +
+					String.format('%tY-%<tm-%<td',startDateTime) + '",' + '"endDate":"' +
+					String.format('%tY-%<tm-%<td',startDateTime) + '",' +
+					'"columns":"' +  reportColumn + '","includeSensors":"' + includeSensorData + '",' +
+					'"selection":{"selectionType":"thermostats","selectionMatch":"' + thermostatId + '"}}'
+                  
+	if (settings.trace) {
+		log.debug "reportSummary> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
+	}
+	api('runtimeReport', bodyReq) {resp ->
+		def statusCode = resp.data.status.code
+		def message = resp.data.status.message
+		if (!statusCode) {
+			if (settings.trace) {
+				sendEvent name: "verboseTrace", value:"reportSummary> done for thermostatId ${thermostatId}"
+				log.debug "reportSummary> done for thermostatId ${thermostatId}"
+			}
+
+			data.reportList = resp.data.reportList
+			data.startDate = resp.data.startDate
+			data.endDate = resp.data.endDate
+			data.startInterval = resp.data.startInterval
+			data.endInterval = resp.data.endInterval
+			data.columns = resp.data.columns
+			if (includeSensorData=='true') {
+	        	data.sensorList =  resp.data.sensorList
+			}                
+			if (settings.trace) {
+				log.debug "reportSummary> startDate= ${data.startDate}"
+				log.debug "reportSummary> endDate= ${data.endDate}"
+				log.debug "reportSummary> startInterval= ${data.startInterval}"
+				log.debug "reportSummary> endInterval= ${data.endInterval}"
+				log.debug "reportSummary> columns= ${data.columns}"
+				log.debug "reportSummary> reportList= ${data.reportList}"
+				log.debug "reportSummary> sensorList= ${data.sensorList}"
+			}
+
+			generateReportRuntimeEvents(reportColumn,data.startInterval.toInteger(),data.endInterval.toInteger())
+        	        
+		} else {
+			log.error "reportSummary> error=${statusCode.toString()}, message = ${message}"
+			sendEvent name: "verboseTrace", value:
+				"reportSummary>error=${statusCode} for ${thermostatId}"
+		}
+	}
+}
+
+// reportSummary must be called prior to calling the generateReportRuntimeEvents
+// component may be auxHeat1, coolComp1, fan, ventilator, humidifier, dehumidifier, etc.
+// startInterval & endInterval may be null. 
+//	Intervals will be then defaulted to the ones used to generate the report
+
+void generateReportRuntimeEvents(component,startInterval, endInterval) {
+
+	float totalRuntime
+	float runtimeInMin
+    
+	if (component.contains('auxHeat1')) {
+		totalRuntime = calculateRuntime('auxHeat1', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "auxHeat1RuntimeInPeriod", value: runtimeInMin.toString()
+	}
+
+	if (component.contains('auxHeat2')) {
+		totalRuntime = calculateRuntime('auxHeat2', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "auxHeat2RuntimeInPeriod", value: runtimeInMin.toString()
+	}
+
+	if (component.contains('auxHeat3')) {
+		totalRuntime = calculateRuntime('auxHeat3', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "auxHeat3RuntimeInPeriod", value: runtimeInMin.toString()
+	}
+
+	if (component.contains('coolComp1')) {
+		totalRuntime = calculateRuntime('coolComp1', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "coolComp1RuntimeInPeriod", value: runtimeInMin.toString()
+	}
+
+	if (component.contains('coolComp2')) {
+		totalRuntime = calculateRuntime('coolComp2', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "coolComp2RuntimeInPeriod", value: runtimeInMin.toString()
+	}
+
+	if (component.contains('fan')) {
+		totalRuntime = calculateRuntime('fan', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "fanRuntimeInPeriod", value: runtimeInMin.toString()
+	}
+
+	if (component.contains('ventilator')) {
+ 		totalRuntime = calculateRuntime('ventilator', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "ventilatorRuntimeInPeriod", value: runtimeInMin.toString()
+	}
+    
+	if (component.contains('dehumidifier')) {
+		totalRuntime = calculateRuntime('dehumidifier', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "dehumidifierRuntimeInPeriod", value: runtimeInMin.toString()
+                
+	}
+    else if (component.contains('humidifier')) {
+		totalRuntime = calculateRuntime('humidifier', startInterval, endInterval)
+		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
+		sendEvent name: "humidifierRuntimeInPeriod", value: runtimeInMin.toString()
+                
+	}
+}
+
+
+private int calculateRuntime(component, startInterval, endInterval) {
+	int totalRuntime=0
+    
+	int startRow = (startInterval) ? Math.min(data.endInterval.toInteger(), startInterval): 0
+	int rowCount = data.reportList[0].rowCount.toInteger()
+	int lastRow = (endInterval) ? Math.min(endInterval,data.endInterval.toInteger()) :
+    	Math.min(data.endInterval.toInteger(), rowCount)   
+    
+
+	if (settings.trace) {
+		log.debug "calculateRuntime> about to process rowCount= ${rowCount},startRow=${startRow},lastRow=${lastRow}"
+	}
+	for (i in startRow..lastRow -1) {
+		def rowDetails = data.reportList.rowList[0][i].split(",")
+		try {
+			totalRuntime += rowDetails[2]?.toInteger()
+		                
+		} catch (any) {
+        
+			log.debug "calculateRuntime> no values for $component's runtime at $i"
+        	continue
+		}	
+	}
+	if (settings.trace) {
+		log.debug "calculateRuntime> totalRuntime= ${totalRuntime} for component $component"
+	}
+	return totalRuntime
+}
+    
+    
+
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
 //	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
 void getThermostatInfo(thermostatId=settings.thermostatId) {
@@ -2484,7 +2705,6 @@ private def isTokenExpired() {
 	def time_check_for_exp = now() + (buffer_time_expiration * 60 * 1000);
 	if (settings.trace) {
 		log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time check for exp: ${time_check_for_exp}"
-		log.debug "isTokenExpired> auth: ${data.auth}"
 	}
 	if (data.auth.authexptime > time_check_for_exp) {
 		if (settings.trace) {
