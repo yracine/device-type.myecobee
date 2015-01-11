@@ -68,35 +68,35 @@ void generateStats() {
           "yesterday's date/time in UTC= ${String.format('%tF %<tT', yesterday)}")
         
  	// Get the auxHeat1's runtime for yesterday
-    def component = "auxHeat1"
+	def component = "auxHeat1"
 	ecobee.generateRuntimeReport(component,yesterday, now)
 	float runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
 	}     
  	// Get the compcool1's runtime for yesterday
-    component = "coolComp1"
+ 	component = "coolComp1"
 	ecobee.generateRuntimeReport(component,yesterday, now)
 	runtimeTotalDaily = ecobee.currentCoolComp1RuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
 	}     
  	// Get the fan's runtime for yesterday
-    component = "fan"
+ 	component = "fan"
 	ecobee.generateRuntimeReport(component,yesterday, now)
 	runtimeTotalDaily = ecobee.currentFanRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
 	}     
  	// Get the dehumidifier's runtime for yesterday
-    component = "dehumidifier"
+	component = "dehumidifier"
 	ecobee.generateRuntimeReport(component,yesterday, now)
 	runtimeTotalDaily = ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
 	}     
  	// Get the humidifier's runtime for yesterday
-    component = "humidifier"
+	component = "humidifier"
 	ecobee.generateRuntimeReport(component,yesterday, now)
 	runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
@@ -104,7 +104,7 @@ void generateStats() {
 	}     
     
  	// Get the ventilator's runtime for yesterday
-    component = "ventilator"
+	component = "ventilator"
 	ecobee.generateRuntimeReport(component,yesterday, now)
 	runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
