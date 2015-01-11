@@ -2534,9 +2534,13 @@ def getThermostatRevision(tstatType, thermostatId) {
 		def connected = thermostatDetails[2]
 		def thermostatRevision = thermostatDetails[3]
         	if (thermostatId == id) {
-			sendEvent name: "thermostatRevision", value: thermostatRevision
-			return
+				sendEvent name: "thermostatRevision", value: thermostatRevision
+				if (settings.trace) {
+					log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$thermostatRevision}"
+				}
+				return
         	}
+		            
 	}
 }
 
