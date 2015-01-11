@@ -29,6 +29,18 @@ preferences {
 		input "ecobee", "capability.thermostat", title: "Ecobee?"
 
 	}
+	section("Start date for the initial run, format = DD-MM-YYYY") {
+		input "givenStartDate", "text", title: "Beginning Date"
+	}        
+	section("Start time for initial run HH:MM (24HR)") {
+		input "givenStartTime", "text", title: "Beginning time"	
+	}        
+	section("End date for the initial run = DD-MM-YYYY") {
+		input "givenEndDate", "text", title: "End Date"
+	}        
+	section("End time for the initial run (24HR)" ) {
+		input "givenEndTime", "text", title: "End time"
+	}        
 	section( "Notifications" ) {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
 		input "phoneNumber", "phone", title: "Send a text message?", required: false
@@ -53,62 +65,82 @@ def updated() {
 }
 
 def initialize() {
-	// generate the stats every day at 0:00
+	// generate the stats every day at 1:00 (am)
 
-	schedule("0 0 0 * * ?", generateStats)    
+	schedule("0 0 1 * * ?", dailyRun)    
+	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
 }
 
-
+void dailyRun() {
+	settings.givenStartDate=null
+	settings.givenStartTime=null
+	settings.givenEndDate=null
+	settings.givenEndTime=null
+	generateStats()
+    
+}
 void generateStats() {
+    
+	Date startDate = new Date().clearTime()
+	Date endDate = (startDate -1).clearTime()
 
-	Date now = new Date()
-	Date yesterday = now -1
+	if (settings.givenStartDate != null) { // Not daily report submitted
+    
+		String dateTime = givenStartDate + " " + givenStartTime
+		log.debug( "Start datetime= ${dateTime}" )
+ 		startDate = new Date().parse('d-M-yyyy H:m', dateTime)
+    
+		dateTime = givenEndDate  + " " + givenEndTime
+		log.debug( "End datetime= ${dateTime}" )
+		endDate = new Date().parse('d-M-yyyy H:m', dateTime)
+
+    }
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
-	log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
-          "yesterday's date/time in UTC= ${String.format('%tF %<tT', yesterday)}")
+	log.debug("local date/time= ${nowInLocalTime}, date/time startDate in UTC = ${String.format('%tF %<tT',startDate)}," +
+          "date/time endDate in UTC= ${String.format('%tF %<tT', endDate)}")
         
  	// Get the auxHeat1's runtime for yesterday
 	def component = "auxHeat1"
-	ecobee.generateRuntimeReport(component,yesterday, now)
+	generateRuntimeReport(component,startDate, endDate)
 	float runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
  	// Get the compcool1's runtime for yesterday
  	component = "coolComp1"
-	ecobee.generateRuntimeReport(component,yesterday, now)
+	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentCoolComp1RuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
  	// Get the fan's runtime for yesterday
  	component = "fan"
-	ecobee.generateRuntimeReport(component,yesterday, now)
+	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentFanRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
  	// Get the dehumidifier's runtime for yesterday
 	component = "dehumidifier"
-	ecobee.generateRuntimeReport(component,yesterday, now)
+	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
  	// Get the humidifier's runtime for yesterday
 	component = "humidifier"
-	ecobee.generateRuntimeReport(component,yesterday, now)
+	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
     
  	// Get the ventilator's runtime for yesterday
 	component = "ventilator"
-	ecobee.generateRuntimeReport(component,yesterday, now)
-	runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
+	generateRuntimeReport(component,startDate, endDate)
+	runtimeTotalDaily = ecobee.currentVentilotorRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
     
 	send "ecobeeGenerateStats>generated stats done for ${String.format('%tF', yesterday)}"
@@ -117,7 +149,6 @@ void generateStats() {
 
 private void generateRuntimeReport(component, startDate, endDate) {
 
- 	// Get the auxheat1's runtime 
 	ecobee.getReportData("", startDate, endDate, 0, null, component,false)
 	ecobee.generateReportRuntimeEvents(component, startDate,endDate, 0, null,'daily')
 
