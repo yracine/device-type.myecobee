@@ -458,7 +458,7 @@ def setHumidityLevel() {
             ecobee.getReportData("", oneHourAgo, now, 0, null, "dehumidifier",false)
             ecobee.generateReportRuntimeEvents("dehumidifier",oneHourAgo, now, null, null, 'lastHour')
             if (detailedNotif == 'true') {
-                send "MonitorEcobeeHumidity> just got Report Data, newThermostatRevision=${state.currentRevision}"
+                send "MonitorEcobeeHumidity> just got Report Data, new thermostatRevision= ${newRevision},old revision=${state.currentRevision}"
             }    
             log.trace("new thermostatRevision= ${newRevision}, oldRevision = ${state.currentRevision}") 
             state.currentRevision = newRevision // For further checks later
