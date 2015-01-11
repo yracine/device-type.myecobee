@@ -2353,9 +2353,9 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 		totalRuntime = calculate_stats('coolComp1', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
-			sendEvent name: "coolComp1RuntimeDaily", value: runtimeInMin.toString()
+			sendEvent name: "compCool1RuntimeDaily", value: runtimeInMin.toString()
 		} else {            
-			sendEvent name: "coolComp1RuntimeInPeriod", value: runtimeInMin.toString()
+			sendEvent name: "compCool1RuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
 
