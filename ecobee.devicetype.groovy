@@ -2163,7 +2163,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
-    int beginInt, endInt
+	int beginInt, endInt
     
 	thermostatId = determine_tstat_id(thermostatId)
 
@@ -2205,7 +2205,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 		beginInt=startInterval.toInteger()
 	}
 	if (endInterval == null) {
-    	endInt = get_interval(endDateTime)
+		endInt = get_interval(endDateTime)
 		Calendar startCalendar = startDateTime.toCalendar()
 		Calendar endCalendar = endDateTime.toCalendar()
 
@@ -2306,7 +2306,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 		beginInt=startInterval.toInteger()
 	}
 	if (endInterval == null) {
-    	endInt = get_interval(endDateTime)
+		endInt = get_interval(endDateTime)
 		Calendar startCalendar = startDateTime.toCalendar()
 		Calendar endCalendar = endDateTime.toCalendar()
 
