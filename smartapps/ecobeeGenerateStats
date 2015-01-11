@@ -1,0 +1,126 @@
+/**
+ *  ecobeeGenerateStats
+ *
+ *  Copyright 2015 Yves Racine
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+definition(
+    name: "ecobeeGenerateStats",
+    namespace: "yracine",
+    author: "Yves Racine",
+    description: "This smartapp allows a ST user to generate runtime stats on their devices controlled by ecobee such as a heating & cooling component,fan, dehumidifier/humidifier/HRV/ERV",
+    category: "",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
+    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+
+
+preferences {
+	section("Generate stats for this ecobee thermostat") {
+		input "ecobee", "capability.thermostat", title: "Ecobee?"
+
+	}
+	section( "Notifications" ) {
+		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
+		input "phoneNumber", "phone", title: "Send a text message?", required: false
+    }
+	section("Detailed Notifications") {
+		input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
+    }
+    
+}
+
+def installed() {
+	log.debug "Installed with settings: ${settings}"
+
+	initialize()
+}
+
+def updated() {
+	log.debug "Updated with settings: ${settings}"
+
+	unsubscribe()
+	initialize()
+}
+
+def initialize() {
+	// generate the stats every day at 0:00
+
+	schedule("0 0 0 * * ?", generateStats)    
+}
+
+
+void generateStats() {
+
+	Date now = new Date()
+	Date yesterday = now -1
+	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
+	log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
+          "yesterday's date/time in UTC= ${String.format('%tF %<tT', yesterday)}")
+        
+ 	// Get the auxHeat1's runtime for yesterday
+	ecobee.generateRuntimeReport("auxHeat1",yesterday, now)
+	float runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+	}     
+ 	// Get the compcool1's runtime for yesterday
+	ecobee.generateRuntimeReport("coolComp1",yesterday, now)
+	runtimeTotalDaily = ecobee.currentCoolComp1RuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+	}     
+ 	// Get the fan's runtime for yesterday
+	ecobee.generateRuntimeReport("fan",yesterday, now)
+	runtimeTotalDaily = ecobee.currentFanRuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+	}     
+ 	// Get the dehumidifier's runtime for yesterday
+	ecobee.generateRuntimeReport("dehumidifier",yesterday, now)
+	runtimeTotalDaily = ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+	}     
+ 	// Get the humidifier's runtime for yesterday
+	ecobee.generateRuntimeReport("humidifier",yesterday, now)
+	runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', yesterday)}"
+	}     
+    
+	send "ecobeeGenerateStats>generated stats done for ${String.format('%tF', yesterday)}"
+
+}
+
+private void generateRuntimeReport(component, startDate, endDate) {
+
+ 	// Get the auxheat1's runtime 
+	ecobee.getReportData("", startDate, endDate, 0, null, component,false)
+	ecobee.generateReportRuntimeEvents(component, startDate,endDate, 0, null,'daily')
+
+}
+
+private send(msg) {
+	if ( sendPushMessage != "No" ) {
+		log.debug( "sending push message" )
+		sendPush( msg )
+       
+	}
+	if ( phoneNumber ) {
+		log.debug( "sending text message" )
+ 		sendSms( phoneNumber, msg )
+	}
+
+	log.debug msg
+}
+
