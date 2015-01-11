@@ -97,7 +97,7 @@ void generateStats() {
     }
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 	log.debug("local date/time= ${nowInLocalTime}, date/time startDate in UTC = ${String.format('%tF %<tT',startDate)}," +
-          "date/time endDate in UTC= ${String.format('%tF %<tT', endDate)}")
+		"date/time endDate in UTC= ${String.format('%tF %<tT', endDate)}")
         
  	// Get the auxHeat1's runtime for yesterday
 	def component = "auxHeat1"
@@ -138,7 +138,7 @@ void generateStats() {
  	// Get the ventilator's runtime for yesterday
 	component = "ventilator"
 	generateRuntimeReport(component,startDate, endDate)
-	runtimeTotalDaily = ecobee.currentVentilotorRuntimeDaily.toFloat().round(2)
+	runtimeTotalDaily = ecobee.currentVentilatorRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
