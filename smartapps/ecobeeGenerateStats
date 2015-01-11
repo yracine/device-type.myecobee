@@ -106,8 +106,8 @@ void generateStats() {
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
- 	// Get the compcool1's runtime for yesterday
- 	component = "coolComp1"
+ 	// Get the compCool1's runtime for yesterday
+ 	component = "compCool1"
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentCoolComp1RuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
