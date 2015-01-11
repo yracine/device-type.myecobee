@@ -84,7 +84,7 @@ preferences {
     section("Check energy consumption at (optional)") {
         input "ted", "capability.powerMeter", title: "Power meter?"
     }
-    section("Do not run any devices above this power consumption level at a given time (default=3000W") {
+    section("Do not run any devices above this power consumption level at a given time (default=3000W)") {
         input "givenPowerLevel", "number", title: "power?", required:false
     }
 }
