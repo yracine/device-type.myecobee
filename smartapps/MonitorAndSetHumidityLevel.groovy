@@ -130,7 +130,7 @@ def initialize() {
 
 }
 def tedPowerHandler(evt) {
-    log.debug "ted power: $evt.value"
+    log.debug "Power usage: $evt.value"
 }
 
 def ecobeeHeatTempHandler(evt) {
