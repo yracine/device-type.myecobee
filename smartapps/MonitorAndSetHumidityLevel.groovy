@@ -82,7 +82,7 @@ preferences {
         input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
     }
     section("Check energy consumption at (optional)") {
-        input "ted", "capability.powerMeter", title: "Power meter?"
+        input "ted", "capability.powerMeter", title: "Power meter?", required:flase
     }
     section("Do not run any devices above this power consumption level at a given time (default=3000W)") {
         input "givenPowerLevel", "number", title: "power?", required:false
@@ -453,15 +453,26 @@ def setHumidityLevel() {
         
 		
         def newRevision = ecobee.getThermostatRevision("","")
-        if (state.currentRevision != newRevision) {
+        if ((state.currentRevision ==null) || (state?.currentRevision != newRevision))  {
             // Get the dehumidifier's runtime 
             ecobee.getReportData("", oneHourAgo, now, 0, null, "dehumidifier",false)
             ecobee.generateReportRuntimeEvents("dehumidifier",oneHourAgo, now, null, null, 'lastHour')
-	    log.trace("new thermostatRevision= ${newRevision}, oldRevision = ${state.currentRevision}") 
+            log.trace("new thermostatRevision= ${newRevision}, oldRevision = ${state.currentRevision}") 
             state.currentRevision = newRevision // For further checks later
             
         }
-        float dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
+        float dehumidifierRunInMin
+        try {
+            dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
+        }
+        catch (any) { 
+            dehumidifierRunInMin=0
+            if (detailedNotif == 'true') {
+                send "MonitorEcobeeHumidity> not able to get dehumidifierRunInMin, set to 0"
+            }    
+            log.debug "not able to get dehumidifierRunInMin, set to 0"
+
+        }
         if (detailedNotif == 'true') {
             send "MonitorEcobeeHumidity>dehumidifier runtime in the last hour is ${dehumidifierRunInMin.toString()} minutes"
         }    
