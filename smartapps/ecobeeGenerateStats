@@ -143,7 +143,7 @@ void generateStats() {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
 	}     
     
-	send "ecobeeGenerateStats>generated stats done for ${String.format('%tF', startDate) - ${String.format('%tF', endDate) period}"
+	send "ecobeeGenerateStats>generated stats done for ${String.format('%tF', startDate) - ${String.format('%tF', endDate)}  period"
 
 }
 
