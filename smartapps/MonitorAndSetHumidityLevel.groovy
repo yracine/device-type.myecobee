@@ -448,7 +448,7 @@ def setHumidityLevel() {
         Calendar oneHourAgoCal = new GregorianCalendar()
         oneHourAgoCal.add(Calendar.HOUR, -1 )
         Date oneHourAgo= oneHourAgoCal.getTime()
-	log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
+        log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
             "oneHourAgo's date/time in UTC= ${String.format('%tF %<tT',oneHourAgo)}")
         
 		
