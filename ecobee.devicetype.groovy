@@ -2408,7 +2408,7 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 	def min = nul
 	int rowValue
     
-	int startRow = (startInterval) ? Math.min(data.endInterval.toInteger(), startInterval): 0
+	int startRow = (startInterval) ? startInterval: data.startInterval.toInteger()
 	int rowCount = (typeData=='sensor')? data.sensorList.data[0].size(): data.reportList.rowList[0].size()
 	int lastRow = (endInterval) ? Math.min(endInterval,data.endInterval.toInteger()) :data.endInterval.toInteger()   
 
