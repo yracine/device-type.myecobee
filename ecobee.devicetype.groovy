@@ -867,7 +867,7 @@ private def getCurrentProgName() {
 	progType = (progType == null) ? "": progType.trim().toUpperCase()	
 	progCurrentName = (progCurrentName == null) ? "": progCurrentName.trim().toUpperCase()
 	if ((progCurrentName != AWAY_PROG) && (progCurrentName != SLEEP_PROG) && (
-			progCurrentName != AWAKE_PROG) &&
+		progCurrentName != AWAKE_PROG) &&
 		(progCurrentName != HOME_PROG) && (progCurrentName != QUICKSAVE)) {
 		progCurrentName = (progType == 'VACATION') ? AWAY_PROG : CUSTOM_PROG
 	}
@@ -1877,7 +1877,7 @@ void setClimate(thermostatId, climateName) {
 			}        
 			continue
 		}
-        tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+		tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
 			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
 			] :
 			[holdClimateRef:"${climateRef}"
@@ -2292,13 +2292,13 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	float runtimeInMin
     
 	if (startInterval == null) {
-    	startInterval = get_interval(startDateTime)
+		startInterval = get_interval(startDateTime)
 		if (settings.trace) {
 			log.debug "generateReportRuntimeEvents> startInterval = ${startInterval}"
         	}
 	}
 	if (endInterval == null) {
-    	endInterval = get_interval(endDateTime)
+		endInterval = get_interval(endDateTime)
 		Calendar startCalendar = startDateTime.toCalendar()
 		Calendar endCalendar = endDateTime.toCalendar()
 
@@ -2439,11 +2439,11 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 	}
 	if (operation == 'avg') {
 		return avg    
-    }
-    if (operation == 'max') {	
+	}
+	if (operation == 'max') {	
 		return max    	
 	}
-    if (operation == 'min') {	
+	if (operation == 'min') {	
 		return min    	
 	}
 	return total
@@ -2635,7 +2635,8 @@ private def refresh_tokens() {
 	// determine token's expire time
 	def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
 	data.auth.authexptime = authexptime
-// If this thermostat was created by initialSetup, go and refresh the parent and all other children
+
+	// If this thermostat was created by initialSetup, go and refresh the parent and all other children
 	if (data.auth.thermostatId) {		// Created by initalSetup, need to refresh Parent tokens and other children
 		refreshParentTokens()
 	}        
