@@ -2437,15 +2437,15 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 		log.debug "calculate_stats> max= ${max} for $component component"
 		log.debug "calculate_stats> min= ${min} for $component component"
 	}
-    	if (operation == 'avg') {
+	if (operation == 'avg') {
 		return avg    
-    	}
-    	if (operation == 'max') {	
+    }
+    if (operation == 'max') {	
 		return max    	
-    	}
-    	if (operation == 'min') {	
+	}
+    if (operation == 'min') {	
 		return min    	
-    	}
+	}
 	return total
 }
     
