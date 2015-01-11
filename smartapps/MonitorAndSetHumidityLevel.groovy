@@ -82,7 +82,7 @@ preferences {
         input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
     }
     section("Check energy consumption at (optional)") {
-        input "ted", "capability.powerMeter", title: "Power meter?", required:flase
+        input "ted", "capability.powerMeter", title: "Power meter?", required:false
     }
     section("Do not run any devices above this power consumption level at a given time (default=3000W)") {
         input "givenPowerLevel", "number", title: "power?", required:false
