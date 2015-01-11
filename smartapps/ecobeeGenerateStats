@@ -104,35 +104,35 @@ void generateStats() {
 	generateRuntimeReport(component,startDate, endDate)
 	float runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
  	// Get the compCool1's runtime for startDate-endDate period
  	component = "compCool1"
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentCompCool1RuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
  	// Get the fan's runtime for startDate-endDate period
  	component = "fan"
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentFanRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
  	// Get the dehumidifier's for startDate-endDate period
 	component = "dehumidifier"
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
  	// Get the humidifier's runtime for startDate-endDate period
 	component = "humidifier"
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
     
  	// Get the ventilator's runtime for  startDate-endDate period
@@ -140,7 +140,7 @@ void generateStats() {
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentVentilatorRuntimeDaily.toFloat().round(2)
 	if (detailedNotif == 'true') {
-		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} for ${String.format('%tF', startDate)}"
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
     
 	send "ecobeeGenerateStats>generated stats done for ${String.format('%tF', startDate)} - ${String.format('%tF', endDate)} period"
