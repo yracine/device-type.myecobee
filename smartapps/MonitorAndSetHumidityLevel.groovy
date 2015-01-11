@@ -104,7 +104,7 @@ def updated() {
 }
 
 def initialize() {
-    state.currentRevision =null // for further with thermostatRevision later
+    state.currentRevision =null // for further check with thermostatRevision later
     
     subscribe(ted, "power", tedPowerHandler)
     subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
@@ -452,7 +452,8 @@ def setHumidityLevel() {
             "oneHourAgo's date/time in UTC= ${String.format('%tF %<tT',oneHourAgo)}")
         
 		
-        def newRevision = ecobee.getThermostatRevision("","")
+        ecobee.getThermostatRevision("","")
+        def newRevision = ecobee.currentThermostatRevision
         if ((state.currentRevision ==null) || (state?.currentRevision != newRevision))  {
             // Get the dehumidifier's runtime 
             ecobee.getReportData("", oneHourAgo, now, 0, null, "dehumidifier",false)
