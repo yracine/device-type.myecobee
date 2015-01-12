@@ -81,8 +81,8 @@ void dailyRun() {
 }
 void generateStats() {
     
-	Date startDate = new Date().clearTime()
-	Date endDate = (startDate -1).clearTime()
+	Date endDate = new Date().clearTime()
+	Date startDate = (endDate -1).clearTime()
 
 	if (settings.givenStartDate != null) { // Not daily report submitted
     
