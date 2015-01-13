@@ -2167,7 +2167,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
     
 	thermostatId = determine_tstat_id(thermostatId)
 
-	Double nbDaysInPeriod = (endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY
+	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
         
 	if (nbDaysInPeriod > 2) {  // Report period should not be bigger than 2 days to avoid summarizing too much data.
 		if (settings.trace) {
@@ -2209,8 +2209,8 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 		Calendar startCalendar = startDateTime.toCalendar()
 		Calendar endCalendar = endDateTime.toCalendar()
 
-		if (endCalendar.get(Calendar.DAY_OF_MONTH) != startCalendar.get(Calendar.DAY_OF_MONTH) && (nbDaysInPeriod>0)) {
-			endInt += (nbDaysInPeriod * REPORT_MAX_INTERVALS_PER_DAY)	
+		if (endCalendar.get(Calendar.DAY_OF_MONTH) != startCalendar.get(Calendar.DAY_OF_MONTH)) {
+			endInt += (nbDaysInPeriod> 1) ? nbDaysInPeriod.toInteger() * REPORT_MAX_INTERVALS_PER_DAY: REPORT_MAX_INTERVALS_PER_DAY	
 			if (settings.trace) {
 				log.debug "generateReportRuntimeEvents> endInterval after $nbDaysInPeriod days added = ${endInt.toString()}"
 			}
@@ -2290,7 +2290,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	def REPORT_MAX_INTERVALS_PER_DAY=287
 	int beginInt, endInt
     
-	Double nbDaysInPeriod = (endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY
+	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
 
 	float totalRuntime
 	float runtimeInMin
@@ -2308,8 +2308,8 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 		Calendar startCalendar = startDateTime.toCalendar()
 		Calendar endCalendar = endDateTime.toCalendar()
 
-		if (endCalendar.get(Calendar.DAY_OF_MONTH) != startCalendar.get(Calendar.DAY_OF_MONTH) && (nbDaysInPeriod>0)) {
-			endInt += (nbDaysInPeriod * REPORT_MAX_INTERVALS_PER_DAY)	
+		if (endCalendar.get(Calendar.DAY_OF_MONTH) != startCalendar.get(Calendar.DAY_OF_MONTH)) {
+			endInt += (nbDaysInPeriod> 1) ? nbDaysInPeriod.toInteger() * REPORT_MAX_INTERVALS_PER_DAY: REPORT_MAX_INTERVALS_PER_DAY	
 			if (settings.trace) {
 				log.debug "generateReportRuntimeEvents> endInterval after $nbDaysInPeriod days added = ${endInt.toString()}"
 			}
@@ -2423,6 +2423,14 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 	if (settings.trace) {
 		log.debug "calculate_stats> about to process rowCount= ${rowCount},startRow=${startRow},lastRow=${lastRow}"
 	}
+    if (lastRow <= startRow) {
+    
+		if (settings.trace) {
+			log.error "calculate_stats>lastRow=${lastRow} is not greater than startRow=${startRow}"
+		}
+        return 0.0
+		    
+    }
 	for (i in startRow..lastRow -1) {
 		def rowDetails = (typeData=='sensor')? data.sensorList.data[0][i].split(","): data.reportList.rowList[0][i].split(",")
 		try {
