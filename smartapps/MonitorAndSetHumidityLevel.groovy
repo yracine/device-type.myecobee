@@ -497,13 +497,13 @@ def setHumidityLevel() {
             float delay = ((min_vent_time.toFloat()/60) * scheduleInterval.toFloat()).round()
             int delayInt = delay.toInteger()
             if (detailedNotif == 'true') {
-                send "MonitorEcobeeHumidity> need to run dehumidifier in this cycle for ${delayInt} min."
+                send "MonitorEcobeeHumidity> need to run dehumidifier in this cycle for ${delayInt} minute(s)"
             }    
-            delayInt = (delayInt > (1.5*60))? delayInt: (1.5*60) // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
+            delayInt = (delayInt > 1)? delayInt: 1 // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
             if (detailedNotif == 'true') {
-                send "MonitorEcobeeHumidity>turning off the dehumidifier in ${delayInt} min..."
+                send "MonitorEcobeeHumidity>turning off the dehumidifier in ${delayInt} minute(s)..."
             }    
-            runIn(delayInt, "turn_off_dehumidifier")  // turn off the dehumidifier after delay
+            runIn((delayInt*60), "turn_off_dehumidifier")  // turn off the dehumidifier after delay
         } else {
             if (detailedNotif == 'true') {
                 send "MonitorEcobeeHumidity> dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle"
