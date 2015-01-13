@@ -107,6 +107,32 @@ void generateStats() {
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
+
+/* Get the auxHeat2's runtime for startDate-endDate period
+ 	Uncomment if you have an auxHeat2 component
+
+	// Get the auxHeat2's runtime for startDate-endDate period
+	component = "auxHeat2"
+	generateRuntimeReport(component,startDate, endDate)
+	runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
+	}     
+*/
+
+
+/* Get the auxHeat3's runtime for startDate-endDate period
+ 	Uncomment if you have an auxHeat3 component
+
+	component = "auxHeat3"
+	generateRuntimeReport(component,startDate, endDate)
+	runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
+	} 
+    
+*/
+
  	// Get the compCool1's runtime for startDate-endDate period
  	component = "compCool1"
 	generateRuntimeReport(component,startDate, endDate)
@@ -114,6 +140,17 @@ void generateStats() {
 	if (detailedNotif == 'true') {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
+    
+/* Get the compCool2's runtime for startDate-endDate period
+ 	Uncomment if you have a compCool2 component
+    
+ 	component = "compCool2"
+	generateRuntimeReport(component,startDate, endDate)
+	runtimeTotalDaily = ecobee.currentCompCool1RuntimeDaily.toFloat().round(2)
+	if (detailedNotif == 'true') {
+		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
+	} 
+*/    
  	// Get the fan's runtime for startDate-endDate period
  	component = "fan"
 	generateRuntimeReport(component,startDate, endDate)
