@@ -2264,12 +2264,10 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 
 private int get_interval(Date dateTime) {
 	def REPORT_TIME_INTERVAL=5
-    
 	Calendar c = dateTime.toCalendar()
-    
 	int intervalHr = (c.get(Calendar.HOUR_OF_DAY)>0) ? 
         (c.get(Calendar.HOUR_OF_DAY) * 60) / REPORT_TIME_INTERVAL :0 
-	int intervalMin = (c.get(Calendar.MINUTE)> REPORT_TIME_INTERVAL-1) ? 
+	int intervalMin = (c.get(Calendar.MINUTE)>= REPORT_TIME_INTERVAL) ? 
        	c.get(Calendar.MINUTE) / REPORT_TIME_INTERVAL :0 
 	if (settings.trace) {
 		log.debug "get_interval> Calendar hour= ${c.get(Calendar.HOUR_OF_DAY)}"
@@ -2281,12 +2279,12 @@ private int get_interval(Date dateTime) {
 }
 
 // getReportData() must be called prior to calling the generateReportRuntimeEvents
-// component may be auxHeat1, coolComp1, fan, ventilator, humidifier, dehumidifier, etc.
+// component may be auxHeat1, compCool1, fan, ventilator, humidifier, dehumidifier, etc.
 // startInterval & endInterval may be null. 
 //	Intervals will be then defaulted to the ones used to generate the report
 // typeEvent may be 'daily' or others
 
-void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInterval, endInterval, typeEvent ) {
+void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInterval, endInterval, typeEvent ='daily') {
 	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
@@ -2418,9 +2416,9 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 	def min = nul
 	int rowValue
     
-	int startRow = (startInterval) ? startInterval: data.startInterval.toInteger()
+	int startRow = (startInterval != null) ? startInterval: data.startInterval.toInteger()
 	int rowCount = (typeData=='sensor')? data.sensorList.data[0].size(): data.reportList.rowList[0].size()
-	int lastRow = (endInterval) ? Math.min(endInterval,data.endInterval.toInteger()) :data.endInterval.toInteger()   
+	int lastRow = (endInterval !=null) ? Math.min(endInterval,data.endInterval.toInteger()) :data.endInterval.toInteger()   
 
 	if (settings.trace) {
 		log.debug "calculate_stats> about to process rowCount= ${rowCount},startRow=${startRow},lastRow=${lastRow}"
@@ -2542,9 +2540,9 @@ def getThermostatRevision(tstatType, thermostatId) {
 		def id = thermostatDetails[0]
 		def thermostatName = thermostatDetails[1]
 		def connected = thermostatDetails[2]
-		def thermostatRevision = thermostatDetails[3]
+		def internalRevision = thermostatDetails[6]
         	if (thermostatId == id) {
-				sendEvent name: "thermostatRevision", value: thermostatRevision
+				sendEvent name: "thermostatRevision", value: internalRevision
 				if (settings.trace) {
 					log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$thermostatRevision}"
 				}
@@ -2591,7 +2589,8 @@ void getThermostatSummary(tstatType) {
 		}
 	}
 }
-/* Return thermostat's current Model Number */
+// poll() or getThermostatInfo() must be called prior to calling the getModelNumber() method 
+// Return thermostat's current Model Number */
 def getModelNumber() {
 
 	if (settings.trace) {
