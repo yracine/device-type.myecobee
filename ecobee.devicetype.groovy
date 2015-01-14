@@ -792,8 +792,8 @@ void poll() {
 		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
 		climateList: getClimateList(),
 		presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present',
-		heatStages:data.thermostatList[0].settings.heatStages.toString(),
-		coolStages:data.thermostatList[0].settings.coolStages.toString()
+        heatStages:data.thermostatList[0].settings.heatStages.toString(),
+        coolStages:data.thermostatList[0].settings.coolStages.toString()
 	]
      
 	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type == 'quickSave')) {
@@ -2200,27 +2200,10 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
         	"endDate in UTC timezone =${String.format('%tF %<tT',endDateTime)}"
 	}
 
-	if (startInterval == null) {
-		beginInt = get_interval(startDateTime)
-		if (settings.trace) {
-			log.debug "getReportData> startInterval = ${beginInt}"
-		}
-	} else {
-		beginInt=startInterval.toInteger()
-	}
-	if (endInterval == null) {
-		endInt = get_interval(endDateTime)
-		Calendar startCalendar = startDateTime.toCalendar()
-		Calendar endCalendar = endDateTime.toCalendar()
-
-		if (endCalendar.get(Calendar.DAY_OF_MONTH) != startCalendar.get(Calendar.DAY_OF_MONTH)) {
-			endInt += (nbDaysInPeriod> 1) ? nbDaysInPeriod.toInteger() * REPORT_MAX_INTERVALS_PER_DAY: REPORT_MAX_INTERVALS_PER_DAY	
-			if (settings.trace) {
-				log.debug "generateReportRuntimeEvents> endInterval after $nbDaysInPeriod days added = ${endInt.toString()}"
-			}
-		}    
-	} else {
-		endInt=endInterval.toInteger()
+	beginInt = (startInterval==null)? get_interval(startDateTime):startInterval.toInteger()
+	endInt = (endInterval==null)? get_interval(endDateTime):endInterval.toInteger()
+	if (settings.trace) {
+		log.debug "getReportData> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
 	def bodyReq = '{"startInterval":"' + beginInt.toString() + '","endInterval":"' + endInt.toString() + 
     				'","startDate":"' + String.format('%tY-%<tm-%<td',startDateTime) + '",' + '"endDate":"' +
@@ -2299,27 +2282,10 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	float totalRuntime
 	float runtimeInMin
     
-	if (startInterval == null) {
-		beginInt = get_interval(startDateTime)
-		if (settings.trace) {
-			log.debug "getReportData> startInterval = ${beginInt}"
-		}
-	} else {
-		beginInt=startInterval.toInteger()
-	}
-	if (endInterval == null) {
-		endInt = get_interval(endDateTime)
-		Calendar startCalendar = startDateTime.toCalendar()
-		Calendar endCalendar = endDateTime.toCalendar()
-
-		if (endCalendar.get(Calendar.DAY_OF_MONTH) != startCalendar.get(Calendar.DAY_OF_MONTH)) {
-			endInt += (nbDaysInPeriod> 1) ? nbDaysInPeriod.toInteger() * REPORT_MAX_INTERVALS_PER_DAY: REPORT_MAX_INTERVALS_PER_DAY	
-			if (settings.trace) {
-				log.debug "generateReportRuntimeEvents> endInterval after $nbDaysInPeriod days added = ${endInt.toString()}"
-			}
-		}    
-	} else {
-		endInt=endInterval.toInteger()
+	beginInt = (startInterval==null)? get_interval(startDateTime):startInterval.toInteger()
+	endInt = (endInterval==null)? get_interval(endDateTime):endInterval.toInteger()
+	if (settings.trace) {
+		log.debug "generateReportRuntimeEvents> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
 	if (component.contains('auxHeat1')) {
 		totalRuntime = calculate_stats('auxHeat1', beginInt, endInt, 'report')
