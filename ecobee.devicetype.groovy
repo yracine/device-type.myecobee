@@ -2200,8 +2200,13 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
         	"endDate in UTC timezone =${String.format('%tF %<tT',endDateTime)}"
 	}
 
-	beginInt = (startInterval==null)? get_interval(startDateTime):startInterval.toInteger()
-	endInt = (endInterval==null)? get_interval(endDateTime):endInterval.toInteger()
+	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
+	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
+	startCalendar = startDateTime.toCalendar()
+	endCalendar = endStartTime.toCalendar()
+	if (endCalendar.get(Calendar.DATE) != startCalendar.get(Calendar.DATE)) {
+		endInt += nbDaysInPeriod.intValue() * REPORT_MAX_INTERVALS_PER_DAY 
+	}
 	if (settings.trace) {
 		log.debug "getReportData> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
@@ -2282,8 +2287,13 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	float totalRuntime
 	float runtimeInMin
     
-	beginInt = (startInterval==null)? get_interval(startDateTime):startInterval.toInteger()
-	endInt = (endInterval==null)? get_interval(endDateTime):endInterval.toInteger()
+	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
+	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
+	startCalendar = startDateTime.toCalendar()
+	endCalendar = endStartTime.toCalendar()
+	if (endCalendar.get(Calendar.DATE) != startCalendar.get(Calendar.DATE)) {
+		endInt += nbDaysInPeriod.intValue() * REPORT_MAX_INTERVALS_PER_DAY 
+	}
 	if (settings.trace) {
 		log.debug "generateReportRuntimeEvents> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
