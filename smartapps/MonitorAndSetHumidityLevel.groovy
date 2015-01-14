@@ -74,18 +74,18 @@ preferences {
     section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
         input "powerSwitch", "capability.switch", required: false
     }    
+    section("Check energy consumption at (optional)") {
+        input "ted", "capability.powerMeter", title: "Power meter?", required:false
+    }
+    section("Do not run any devices above this power consumption level at a given time (default=3000W)") {
+        input "givenPowerLevel", "number", title: "power?", required:false
+    }
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
         input "phoneNumber", "phone", title: "Send a text message?", required: false
     }
     section("Detailed Notifications") {
         input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
-    }
-    section("Check energy consumption at (optional)") {
-        input "ted", "capability.powerMeter", title: "Power meter?", required:false
-    }
-    section("Do not run any devices above this power consumption level at a given time (default=3000W)") {
-        input "givenPowerLevel", "number", title: "power?", required:false
     }
 }
 
@@ -124,7 +124,6 @@ def initialize() {
     }
     subscribe(outdoorSensor, "temperature", outdoorTempHandler)
     Integer delay =givenInterval ?: 59   // By default, do it every hour
-    log.debug "Scheduling Humidity Monitoring every ${delay}  minutes"
     
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
@@ -288,7 +287,8 @@ def setHumidityLevel() {
     
     log.trace("Evaluate: Ecobee humidity: ${ecobeeHumidity} vs. outdoor humidity ${outdoorHumidity},"  +
         "coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
-    log.trace("hasErv=${hasErv}, hasHrv=${hasHrv},hasHumidifier=${hasHumidifier},hasDehumidifier=${hasDehumidifier}, freeCoolingFlag=${freeCoolingFlag}, useDehumidifierAsHRV=${useDehumidifierAsHRVFlag}") 
+    log.trace("hasErv=${hasErv}, hasHrv=${hasHrv},hasHumidifier=${hasHumidifier},hasDehumidifier=${hasDehumidifier}, freeCoolingFlag=${freeCoolingFlag}," +
+        "useDehumidifierAsHRV=${useDehumidifierAsHRVFlag}") 
 
     if ((ecobeeMode == 'cool' && (hasHrv=='true' || hasErv=='true')) && 
         (ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) && 
@@ -496,7 +496,7 @@ def setHumidityLevel() {
                 
             float delay = ((min_vent_time.toFloat()/60) * scheduleInterval.toFloat()).round()
             int delayInt = delay.toInteger()
-            delayInt = (delayInt > 1)? delayInt: 1 // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
+            delayInt = (delayInt > 1)? delayInt: 1.5 // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
             if (detailedNotif == 'true') {
                 send "MonitorEcobeeHumidity>turning off the dehumidifier in ${delayInt} minute(s)..."
             }    
