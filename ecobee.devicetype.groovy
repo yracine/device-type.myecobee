@@ -2202,8 +2202,8 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 
 	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
-	startCalendar = startDateTime.toCalendar()
-	endCalendar = endStartTime.toCalendar()
+	Calendar startCalendar = startDateTime.toCalendar()
+	Calendar endCalendar = endDateTime.toCalendar()
 	if (endCalendar.get(Calendar.DATE) != startCalendar.get(Calendar.DATE)) {
 		endInt += nbDaysInPeriod.intValue() * REPORT_MAX_INTERVALS_PER_DAY 
 	}
@@ -2271,7 +2271,7 @@ private int get_interval(Date dateTime) {
 }
 
 // getReportData() must be called prior to calling the generateReportRuntimeEvents
-// component may be auxHeat1, compCool1, fan, ventilator, humidifier, dehumidifier, etc.
+// component may be all_components or specific component such as auxHeat1, compCool1, fan, ventilator, humidifier, dehumidifier, etc.
 // startInterval & endInterval may be null. 
 //	Intervals will be then defaulted to the ones used to generate the report
 // typeEvent may be 'daily' or others
@@ -2289,8 +2289,8 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
     
 	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
-	startCalendar = startDateTime.toCalendar()
-	endCalendar = endStartTime.toCalendar()
+	Calendar startCalendar = startDateTime.toCalendar()
+	Calendar endCalendar = endDateTime.toCalendar()
 	if (endCalendar.get(Calendar.DATE) != startCalendar.get(Calendar.DATE)) {
 		endInt += nbDaysInPeriod.intValue() * REPORT_MAX_INTERVALS_PER_DAY 
 	}
