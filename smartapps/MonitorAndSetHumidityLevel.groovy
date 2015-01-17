@@ -351,7 +351,7 @@ def setHumidityLevel() {
 //      Need a minimum differential to humidify the house to the target if any humidifier available
 
         ecobee.setThermostatSettings("",['humidifierMode':'auto','humidity':"${target_humidity}",'dehumidifierMode':'off',
-            'condensationAvoid':'true','fanMinOnTime':"${min_fan_time}",'fan':"on"])
+            'fanMinOnTime':"${min_fan_time}",'fan':"on"])
 
        if (detailedNotif == 'true') {
            send "MonitorEcobeeHumidity> humidify to ${target_humidity} in ${ecobeeMode} mode"
