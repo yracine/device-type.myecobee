@@ -2212,7 +2212,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 	}
 	def bodyReq = '{"startInterval":"' + beginInt.toString() + '","endInterval":"' + endInt.toString() + 
     				'","startDate":"' + String.format('%tY-%<tm-%<td',startDateTime) + '",' + '"endDate":"' +
-					String.format('%tY-%<tm-%<td',startDateTime) + '",' +
+					String.format('%tY-%<tm-%<td',endDateTime) + '",' +
 					'"columns":"' +  reportColumn + '","includeSensors":"' + includeSensorData + '",' +
 					'"selection":{"selectionType":"thermostats","selectionMatch":"' + thermostatId + '"}}'
 	if (settings.trace) {
