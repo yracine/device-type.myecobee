@@ -26,7 +26,7 @@ definition(
 
 
 preferences {
-	section("Generate stats for this ecobee thermostat") {
+	section("Generate daily stats for this ecobee thermostat") {
 		input "ecobee", "capability.thermostat", title: "Ecobee?"
 
 	}
