@@ -117,7 +117,14 @@ metadata {
 		attribute "humidifierRuntimeDaily", "string"
 		attribute "ventilatorRuntimeDaily", "string"
 		attribute "fanRuntimeDaily", "string"
+
+		// Report Sensor Stats
 		        
+		attribute "sensorMetadata", "string"
+		attribute "sensorAvgInPeriod", "string"
+		attribute "sensorMinInPeriod", "string"
+		attribute "sensorMaxInPeriod", "string"
+		attribute "sensorTotalInPeriod", "string"
         
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
@@ -180,6 +187,7 @@ metadata {
 		command "followMeComfort"
 		command "getReportData"
 		command "generateReportRuntimeEvents"
+		command "generateSensorStatsEvents"
 		command "getThermostatRevision"
 }        
 
@@ -2387,6 +2395,68 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 		}
 	}
 }
+
+
+// getReportData() must be called prior to calling the generateSensorRuntimeEvents
+// sensorId may be null or a specific sensorId as specified in the sensor metadata
+//	see https://www.ecobee.com/home/developer/api/documentation/v1/objects/RuntimeSensorMetadata.shtml
+// startInterval & endInterval may be null. 
+//	Intervals will be then defaulted to the ones used to generate the report
+// operation may be one or several stats separated by comma (ex. avg, min, max, total)
+
+void generateSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterval, endInterval, operation) {
+	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
+	def REPORT_TIME_INTERVAL=5
+	def REPORT_MAX_INTERVALS_PER_DAY=287
+	int beginInt, endInt
+	Boolean foundSensor=false
+    
+	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
+
+	float runtimeSensorStat
+    
+	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
+	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
+	Calendar startCalendar = startDateTime.toCalendar()
+	Calendar endCalendar = endDateTime.toCalendar()
+	if (endCalendar.get(Calendar.DATE) != startCalendar.get(Calendar.DATE)) {
+		endInt += nbDaysInPeriod.intValue() * REPORT_MAX_INTERVALS_PER_DAY 
+	}
+	if (settings.trace) {
+		log.debug "generateSensorRuntimeEvents> startInterval = ${beginInt}, endInterval = ${endInt}"
+	}
+
+ 	sendEvent name: "sensorMetadata", value: data.sensorList.sensors[0].toString()
+	if (sensorId != null) {
+		foundSensor = data.sensorList.sensors[0].find{ it.sensorId == sensorId }
+    	}
+	if (!foundSensor) {
+		if (settings.trace) {
+			log.error "generateSensorStatsEvents> sensor ${sensorId} not found in last sensor data from getReportData()"
+		}
+		return
+	}
+    
+	if (operation.contains('avg')) {
+		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor', 'avg')
+ 		sendEvent name: "sensorAvgInPeriod", value: runtimeSensorStat.round(2).toString() 
+	}
+	if (operation.contains('min')) {
+		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor', 'min')
+ 		sendEvent name: "sensorMinInPeriod", value: runtimeSensorStat.round(2).toString()
+	}
+	if (operation.contains('max')) {
+		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor', 'max')
+ 		sendEvent name: "sensorMaxInPeriod", value: runtimeSensorStat.round(2).toString()
+	}
+	if (operation.contains('total')) {
+		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor')
+ 		sendEvent name: "sensorTotalInPeriod", value: runtimeSensorStat.round(2).toString()
+	}
+    
+
+}
+
 
 
 private float calculate_stats(component, startInterval, endInterval, typeData, operation='total') {
