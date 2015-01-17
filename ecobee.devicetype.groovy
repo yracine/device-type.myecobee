@@ -2271,7 +2271,7 @@ private int get_interval(Date dateTime) {
 }
 
 // getReportData() must be called prior to calling the generateReportRuntimeEvents
-// component may be all_components or specific component such as auxHeat1, compCool1, fan, ventilator, humidifier, dehumidifier, etc.
+// component may be auxHeat1, compCool1, fan, ventilator, humidifier, dehumidifier, etc.
 // startInterval & endInterval may be null. 
 //	Intervals will be then defaulted to the ones used to generate the report
 // typeEvent may be 'daily' or others
