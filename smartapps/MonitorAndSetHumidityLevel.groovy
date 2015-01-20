@@ -503,8 +503,14 @@ def setHumidityLevel() {
             runIn((delayInt*60), "turn_off_dehumidifier")  // turn off the dehumidifier after delay
         } else {
             if (detailedNotif == 'true') {
-                send "MonitorEcobeeHumidity> dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle"
+                send "MonitorEcobeeHumidity>dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle"
+            }
+            if (equipStatus.contains("dehumidifier")) {
+                turn_off_dehumidifier()
+            } else { 
+                log.trace("dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle")
             }    
+            
         }    
     }
     
@@ -513,9 +519,12 @@ def setHumidityLevel() {
 
 private void turn_off_dehumidifier() {
 
-    log.trace("Turning off dehumidifier after timeout")
+    if (detailedNotif == 'true') {
+        send ("MonitorEcobeeHumidity>about to turn off dehumidifier used as HRV....")
+    }
+    log.trace("About to turn off the dehumidifier used as HRV after timeout")
     
-    ecobee.setThermostatSettings("",['dehumidifierMode':'off','fan':"off"]) 
+    ecobee.setThermostatSettings("",['dehumidifierMode':'off','fan':"auto"]) 
 
 }
 
