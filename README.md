@@ -13,8 +13,8 @@ Code: https://github.com/yracine/device-type.myecobee
 **************************************************************************************************
 If you like My Ecobee Device and related smartapps, please support the developer:
 
+If you like this app, please support the developer:<br/> [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif) yracine@yahoo.com](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=A5K5L44TEF77U)
 
-https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest
 **************************************************************************************************
 
 =====================
