@@ -39,7 +39,7 @@ under https://github.com/yracine/device-type.myecobee
 
 e) Hit the create button at the bottom
 
-f) Hit the "publish/for me" button at the top right corner (code window)
+f) Hit the "publish/for me" button at the top right corner (in the code window)
 
 *************************************************
 2) Create a new smartapp (My ecobee Init)
@@ -135,7 +135,7 @@ You can enable/disable the smartapp with a button on/off tile (ex.virtual switch
 
 The smartapp can use an outdoor sensor or a virtual weather station, such as
 
-https://github.com/yracine/device-type.weatherstation8
+https://github.com/yracine/device-type.weatherstation
 
 to get the oudoor temperature and humidity.
 
