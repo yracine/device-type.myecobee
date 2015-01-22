@@ -316,7 +316,8 @@ private def check_if_hold_needed() {
 		programHeatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 		programCoolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
-	} else if ((currentProgName.toUpperCase()!='SLEEP')  && (residentsHaveBeenQuiet())) { // Do not adjust the program when asleep
+	} else if (((currentProgName.toUpperCase()!='SLEEP') && (currentProgName.toUpperCase()!='AWAY'))  && (residentsHaveBeenQuiet())) {
+		// Do not adjust the program when asleep or away    
                 
 		ecobee.away()          
 		send("MonitorEcobeeTemp>Program now set to Away,no motion detected")
