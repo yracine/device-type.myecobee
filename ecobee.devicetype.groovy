@@ -117,6 +117,7 @@ metadata {
 		attribute "humidifierRuntimeDaily", "string"
 		attribute "ventilatorRuntimeDaily", "string"
 		attribute "fanRuntimeDaily", "string"
+		attribute "reportData", "string"
 
 		// Report Sensor Stats
 		        
@@ -2171,8 +2172,24 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 // reportColumn shall be 1 component only (ex. auxHeat1, coolComp1, fan, ventilator, humidifier, dehumidifier)
 // startDateTime and endDateTime should be in UTC timezone format
 // startInterval & endInterval may be null. In that case, the intervals are calculated using the startDateTime and endDateTime
+// includeSensorData may be 'true' or 'false'
+// See https://www.ecobee.com/home/developer/api/documentation/v1/operations/get-runtime-report.shtml for more details
+// If you want to retrieve the data, then set postData to 'true', by default, reportdata and sensorData are not posted
+//
+// 	One can loop on the reportData or sensorData with the following logic 
+//		ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier",'false','true')
+//		def reportData = ecobee.currentReportData.toString().split(",,")
+//            
+//  	for (i in 0..reportData.size()-1) {
+//			def rowDetails = reportData[i].split(',')
+//			def dateReportData = rowDetails[0]
+//			def timeReportData = rowDetails[1]
+//			def valueReportData = rowDetails[2]
+//       }    
+            
 
-void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endInterval, reportColumn, includeSensorData) {
+
+void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endInterval, reportColumn, includeSensorData, postData='false') {
 	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
@@ -2245,6 +2262,23 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 			if (includeSensorData=='true') {
 	        		data.sensorList =  resp.data.sensorList
 			}                
+			if (postData=='true') {
+				if (settings.trace) {
+					log.debug "getReportData>about to post reportData = $data.reportList.rowList[0].toString()"
+		                
+				}
+				sendEvent name: "reportData", value: data.reportList.rowList[0].toString().minus('[').minus(']')
+				if (includeSensorData=='true') {
+					sendEvent name: "sensorMetadata", value: data.sensorList.sensors[0].toString()
+ 					sendEvent name: "sensorData", value: data.sensorList.data[0].toString().minus('[').minus(']')
+				}                        
+			} else { // reinitialize data (empty the variables)
+            
+					sendEvent name: "reportData", value: ''
+					sendEvent name: "sensorMetadata", value: ''
+ 					sendEvent name: "sensorData", value: ''
+			}                
+            
 			if (settings.trace) {
 				log.debug "getReportData> startDate= ${data.startDate}"
 				log.debug "getReportData> endDate= ${data.endDate}"
@@ -2253,6 +2287,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 				log.debug "getReportData> columns= ${data.columns}"
 				log.debug "getReportData> reportList= ${data.reportList}"
 				log.debug "getReportData> sensorList= ${data.sensorList}"
+				log.debug "getReportData> postData= ${postData}"
 			}
         	        
 		} else {
@@ -2427,8 +2462,6 @@ void generateSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterv
 		log.debug "generateSensorRuntimeEvents> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
 
- 	sendEvent name: "sensorMetadata", value: data.sensorList.sensors[0].toString()
- 	sendEvent name: "sensorData", value: data.sensorList.data[0].toString()
 	if (sensorId != null) {
 		foundSensor = data.sensorList.sensors[0].find{ it.sensorId == sensorId }
     	}
@@ -2459,8 +2492,6 @@ void generateSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterv
 
 }
 
-
-
 private float calculate_stats(component, startInterval, endInterval, typeData, operation='total') {
 	int total=0	
 	int nbRows=0
@@ -2480,7 +2511,7 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 		if (settings.trace) {
 			log.error "calculate_stats>lastRow=${lastRow} is not greater than startRow=${startRow}"
 		}
-		return 0.0
+		return null
 	}
 	for (i in startRow..lastRow -1) {
 		def rowDetails = (typeData=='sensor')? data.sensorList.data[0][i].split(","): data.reportList.rowList[0][i].split(",")
@@ -2603,7 +2634,7 @@ def getThermostatRevision(tstatType, thermostatId) {
         	if (thermostatId == id) {
 				sendEvent name: "thermostatRevision", value: internalRevision
 				if (settings.trace) {
-					log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$thermostatRevision}"
+					log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision"
 				}
 				return
         	}
