@@ -121,6 +121,7 @@ metadata {
 		// Report Sensor Stats
 		        
 		attribute "sensorMetadata", "string"
+		attribute "sensorData", "string"
 		attribute "sensorAvgInPeriod", "string"
 		attribute "sensorMinInPeriod", "string"
 		attribute "sensorMaxInPeriod", "string"
@@ -2183,7 +2184,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
         
 	if (nbDaysInPeriod > 2) {  // Report period should not be bigger than 2 days to avoid summarizing too much data.
 		if (settings.trace) {
-			sendEvent name: "verboseTrace", value:"getReportData> report's period too big (${nbDaysInPeriod.toString()} > 1)"
+			sendEvent name: "verboseTrace", value:"getReportData> report's period too big (${nbDaysInPeriod.toString()} > 2)"
 			log.error "getReportData> report's period too big (${nbDaysInPeriod.toString()} >1)"
 			return
 		}
@@ -2278,7 +2279,7 @@ private int get_interval(Date dateTime) {
 	return (intervalHr + intervalMin)
 }
 
-// getReportData() must be called prior to calling the generateReportRuntimeEvents
+// getReportData() must be called prior to calling generateReportRuntimeEvents() function
 // component may be auxHeat1, compCool1, fan, ventilator, humidifier, dehumidifier, etc.
 // startInterval & endInterval may be null. 
 //	Intervals will be then defaulted to the ones used to generate the report
@@ -2293,7 +2294,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
 
 	float totalRuntime
-	float runtimeInMin
+	float runtimeInMin   // Calculations are done in minutes
     
 	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
@@ -2427,6 +2428,7 @@ void generateSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterv
 	}
 
  	sendEvent name: "sensorMetadata", value: data.sensorList.sensors[0].toString()
+ 	sendEvent name: "sensorData", value: data.sensorList.data[0].toString()
 	if (sensorId != null) {
 		foundSensor = data.sensorList.sensors[0].find{ it.sensorId == sensorId }
     	}
