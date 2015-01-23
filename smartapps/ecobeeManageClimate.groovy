@@ -94,11 +94,11 @@ def appTouch(evt) {
         coolTemp = givenCoolTemp ?: 75  // by default, 75°F is the cool temp
     }
 
-    def isOptimized = (isOptimizedFlag) ? isOptimizedFlag: false  // by default, isOptimized flag is false
-    def isOccupied = (isOccupiedFlag) ? isOccupiedFlag: false  // by default, isOccupied flag is false
+    def isOptimized = (isOptimizedFlag!=null) ? isOptimizedFlag: false  // by default, isOptimized flag is false
+    def isOccupied = (isOccupiedFlag!=null) ? isOccupiedFlag: false  // by default, isOccupied flag is false
     def coolFanMode = givenCoolFanMode ?: 'auto'  // By default, fanMode is auto
     def heatFanMode = givenHeatFanMode ?: 'auto'  // By default, fanMode is auto
-    def deleteClimateFlag = (deleteClimate) ? deleteClimate  :'false'
+    def deleteClimateFlag = (deleteClimate!=null) ? deleteClimate  :'false'
     
     log.debug "ecobeeManageClimate> about to take actions"
      
