@@ -2181,10 +2181,10 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 //		def reportData = ecobee.currentReportData.toString().split(",,")
 //            
 //  	for (i in 0..reportData.size()-1) {
-//			def rowDetails = reportData[i].split(',')
-//			def dateReportData = rowDetails[0]
-//			def timeReportData = rowDetails[1]
-//			def valueReportData = rowDetails[2]
+//		def rowDetails = reportData[i].split(',')
+//		def dateReportData = rowDetails[0]
+//		def timeReportData = rowDetails[1]
+//		def valueReportData = rowDetails[2]
 //       }    
             
 
