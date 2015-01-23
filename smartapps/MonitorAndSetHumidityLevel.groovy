@@ -456,7 +456,7 @@ def setHumidityLevel() {
         def newRevision = ecobee.currentThermostatRevision
         if ((state.currentRevision ==null) || (state?.currentRevision != newRevision))  {
             // Get the dehumidifier's runtime 
-            ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier",false)
+            ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier",'false')
             ecobee.generateReportRuntimeEvents("dehumidifier",oneHourAgo, now, 0, null, 'lastHour')
             if (detailedNotif == 'true') {
                 send "MonitorEcobeeHumidity> just got report data, new thermostatRevision= ${newRevision},old revision=${state.currentRevision}"
@@ -465,7 +465,14 @@ def setHumidityLevel() {
                 log.trace("new thermostatRevision= ${newRevision}, oldRevision = ${state.currentRevision}") 
             }    
             state.currentRevision = newRevision // For further checks later
-            
+/*          (not required here) Example of how to loop thru the reportData, need to call getReportData() with postData='true' beforehand.            
+        	def reportData = ecobee.currentReportData.toString().split(",,")
+            for (i in 0..reportData.size()-1) {
+                def rowDetails = reportData[i].split(',')
+                def rowValue =rowDetails[2] 
+                log.trace("Report data, row no $i= $rowDetails")
+            }    
+*/            
         } else {
             if (detailedNotif == 'true') {
                 send "MonitorEcobeeHumidity>revision has not changed: new thermostatRevision= ${newRevision} vs. oldRevision =  ${state.currentRevision}"
@@ -486,7 +493,7 @@ def setHumidityLevel() {
             }
         } 
        
-        if (diffVentTimeInMin >0) {
+        if ((diffVentTimeInMin >0) && (!equipStatus.contains("dehumidifier"))) {
             if (detailedNotif == 'true') {
                 send "MonitorEcobeeHumidity>About to turn the dehumidifier on for ${diffVentTimeInMin.toString()} min. within an hour..."
             }
@@ -501,17 +508,15 @@ def setHumidityLevel() {
                 send "MonitorEcobeeHumidity>turning off the dehumidifier in ${delayInt} minute(s)..."
             }    
             runIn((delayInt*60), "turn_off_dehumidifier")  // turn off the dehumidifier after delay
-        } else {
+        } else if (diffVentTimeInMin <=0) {
             if (detailedNotif == 'true') {
                 send "MonitorEcobeeHumidity>dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle"
             }
-            if (equipStatus.contains("dehumidifier")) {
-                turn_off_dehumidifier()
-            } else { 
-                log.trace("dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle")
-            }    
+            log.trace("dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle")
             
-        }    
+        } else if (equipStatus.contains("dehumidifier")) {
+            turn_off_dehumidifier()
+        }
     }
     
     log.debug "End of Fcn"
