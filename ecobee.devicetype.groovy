@@ -2180,12 +2180,12 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 //		ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier",'false','true')
 //		def reportData = ecobee.currentReportData.toString().split(",,")
 //            
-//  	for (i in 0..reportData.size()-1) {
-//		def rowDetails = reportData[i].split(',')
-//		def dateReportData = rowDetails[0]
-//		def timeReportData = rowDetails[1]
-//		def valueReportData = rowDetails[2]
-//       }    
+//		for (i in 0..reportData.size()-1) {
+//			def rowDetails = reportData[i].split(',')
+//			def dateReportData = rowDetails[0]
+//			def timeReportData = rowDetails[1]
+//			def valueReportData = rowDetails[2]
+//		}    
             
 
 
@@ -2226,7 +2226,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
         	"endDate in UTC timezone =${String.format('%tF %<tT',endDateTime)}"
 	}
 
-	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
+	beginInt = (startInterval == null)? get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
 	Calendar startCalendar = startDateTime.toCalendar()
 	Calendar endCalendar = endDateTime.toCalendar()
@@ -2302,9 +2302,9 @@ private int get_interval(Date dateTime) {
 	def REPORT_TIME_INTERVAL=5
 	Calendar c = dateTime.toCalendar()
 	int intervalHr = (c.get(Calendar.HOUR_OF_DAY)>0) ? 
-        (c.get(Calendar.HOUR_OF_DAY) * 60) / REPORT_TIME_INTERVAL :0 
+		(c.get(Calendar.HOUR_OF_DAY) * 60) / REPORT_TIME_INTERVAL :0 
 	int intervalMin = (c.get(Calendar.MINUTE)>= REPORT_TIME_INTERVAL) ? 
-       	c.get(Calendar.MINUTE) / REPORT_TIME_INTERVAL :0 
+		c.get(Calendar.MINUTE) / REPORT_TIME_INTERVAL :0 
 	if (settings.trace) {
 		log.debug "get_interval> Calendar hour= ${c.get(Calendar.HOUR_OF_DAY)}"
 		log.debug "get_interval> Calendar minute= ${c.get(Calendar.MINUTE)}"
@@ -2331,7 +2331,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	float totalRuntime
 	float runtimeInMin   // Calculations are done in minutes
     
-	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
+	beginInt = (startInterval == null)? get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
 	Calendar startCalendar = startDateTime.toCalendar()
 	Calendar endCalendar = endDateTime.toCalendar()
@@ -2451,7 +2451,7 @@ void generateSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterv
 
 	float runtimeSensorStat
     
-	beginInt = (startInterval == null)? beginInt = get_interval(startDateTime): startInterval.toInteger()
+	beginInt = (startInterval == null)? get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
 	Calendar startCalendar = startDateTime.toCalendar()
 	Calendar endCalendar = endDateTime.toCalendar()
