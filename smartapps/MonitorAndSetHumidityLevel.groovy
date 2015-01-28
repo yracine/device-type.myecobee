@@ -350,7 +350,7 @@ def setHumidityLevel() {
                         
 //      Need a minimum differential to humidify the house to the target if any humidifier available
 
-        ecobee.setThermostatSettings("",['humidifierMode':'auto','humidity':"${target_humidity}",'dehumidifierMode':'off',
+        ecobee.setThermostatSettings("",['humidifierMode':'on','humidity':"${target_humidity}",'dehumidifierMode':'off',
             'fanMinOnTime':"${min_fan_time}",'fan':"on"])
 
        if (detailedNotif == 'true') {
@@ -465,7 +465,7 @@ def setHumidityLevel() {
                 log.trace("new thermostatRevision= ${newRevision}, oldRevision = ${state.currentRevision}") 
             }    
             state.currentRevision = newRevision // For further checks later
-/*          (not required here) Example of how to loop thru the reportData, need to call getReportData() with postData='true' beforehand.            
+/*          Example of how to loop thru the reportData, not required here, need to call getReportData() with postData='true' beforehand.            
         	def reportData = ecobee.currentReportData.toString().split(",,")
             for (i in 0..reportData.size()-1) {
                 def rowDetails = reportData[i].split(',')
@@ -517,7 +517,7 @@ def setHumidityLevel() {
         } else if (equipStatus.contains("dehumidifier")) {
             turn_off_dehumidifier()
         }
-    }
+    } // end if useDehumidifierAsHRVFlag =='true'
     
     log.debug "End of Fcn"
 }
