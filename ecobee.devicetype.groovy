@@ -119,7 +119,7 @@ metadata {
 		attribute "fanRuntimeDaily", "string"
 		attribute "reportData", "string"
 
-		// Report Sensor Stats
+		// Report Sensor Data & Stats
 		        
 		attribute "sensorMetadata", "string"
 		attribute "sensorData", "string"
@@ -241,6 +241,8 @@ simulator {
 				icon: "st.Outdoor.outdoor19"
 			state "cool", label: '${name}', action: "thermostat.heat", 
 				icon: "st.Weather.weather7"
+			state("auto", action:"thermostat.auto", 
+            	icon: "st.thermostat.auto")
 		}
 		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
 			decoration: "flat") {
