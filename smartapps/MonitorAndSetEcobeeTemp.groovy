@@ -46,7 +46,7 @@ preferences {
 		input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling/heating",
 			required: false
 	}
-	section("At which interval in minutes (default =59 min.)?") {
+	section("At which interval in minutes (range=[10..59],default=59 min.)?") {
 		input "givenInterval", "number", title:"Interval", required: false
 	}
 	section("Temp differential for adjustments in Farenheits/Celcius") {
@@ -111,13 +111,24 @@ def initialize() {
 		subscribe(powerSwitch, "switch.off", offHandler)
 		subscribe(powerSwitch, "switch.on", onHandler)
 	}
+    
 	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	if ((delay < 10) || (delay>59)) {
+		log.error "Scheduling delay not in range (${delay} min), exiting..."
+		runIn(30, "sendNotifDelayNotInRange")
+ 		return
+	}
 	log.debug "Scheduling Outdoor temp Monitoring and adjustment every ${delay}  minutes"
 
 	schedule("0 0/${delay} * * * ?", monitorAdjustTemp) // monitor & set indoor temp according to delay specified
 
 }
 
+private def sendNotifDelayNotInRange() {
+
+	send "MonitorEcobeeTemp>scheduling delay (${givenInterval} min.) not in range, please restart..."
+    
+}
 
 def motionEvtHandler(evt) {
  	if (evt.value == "active") {
@@ -477,11 +488,11 @@ private def check_if_hold_justified() {
 		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
 		reset_state_values()        
-        return // no more adjustment
+		return // no more adjustment
 	} else if (state?.programHoldSet == 'Away') {
 		log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
 		send("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
-        if (currentProgName.toUpperCase() == 'AWAY') {
+		if (currentProgName.toUpperCase() == 'AWAY') {
         
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>hold no longer needed, program already in Away mode")
@@ -489,33 +500,31 @@ private def check_if_hold_justified() {
 			reset_state_values()
 			ecobee.resumeProgram("")
         
-        } else {
-	 		return // hold justified, no more adjustments
-    	}
+		} else {
+			return // hold justified, no more adjustments
+		}
 	}    
 	if ((state?.programHoldSet == 'Home') && (residentsHaveBeenQuiet())) {
 		log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program")
 		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed program, no motion detected")
 		reset_state_values()
-        return // no more adjustment
+		return // no more adjustment
 	} else if (state?.programHoldSet == 'Home')  { 
 		log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
 		}
-        if (currentProgName.toUpperCase() == 'HOME') {
-        
+		if (currentProgName.toUpperCase() == 'HOME') {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>hold no longer needed, program already in Home mode")
 			}
 			reset_state_values()
 			ecobee.resumeProgram("")
-        
-        } else {
+		} else {
 			return // hold justified, no more adjustments
-        }
- 	}    
+		}
+	}    
 	if (ecobeeMode == 'cool') {
 		log.trace("check_if_hold_justified>evaluate: moreCoolThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
 		log.trace(
