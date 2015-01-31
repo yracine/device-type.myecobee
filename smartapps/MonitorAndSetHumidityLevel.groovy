@@ -42,7 +42,7 @@ preferences {
     section("To this humidity level") {
         input "givenHumidityLevel", "number", title: "Humidity level (default=calculated based on outside temp)", required:false
     }
-    section("At which interval in minutes (default =59 min.)?"){
+    section("At which interval in minutes (range=[10..59],default =59 min.)?"){
         input "givenInterval", "number", title: "Interval", required: false
     }
     section("Humidity differential for adjustments") {
@@ -113,7 +113,7 @@ def initialize() {
     subscribe(ecobee, "temperature", ecobeeTempHandler)
     subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
     subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
-    if (indoorSensor != null) {
+    if (indoorSensor) {
         subscribe(indoorSensor, "humidity", indoorSensorHumHandler)
         subscribe(indoorSensor, "temperature", indoorTempHandler)
         
@@ -123,11 +123,25 @@ def initialize() {
         subscribe(powerSwitch, "switch.on", onHandler)
     }
     subscribe(outdoorSensor, "temperature", outdoorTempHandler)
-    Integer delay =givenInterval ?: 59   // By default, do it every hour
-    
+	Integer delay = givenInterval ?: 59 // By default, do it every hour
+    if ((delay < 10) || (delay > 59)) {
+        log.error "Scheduling delay not in range (${delay} min.), exiting..."
+        runIn(30, "sendNotifDelayNotInRange")
+        return
+    }
+    log.debug "Scheduling Humidity Monitoring and adjustment every ${delay} minutes"
+
     schedule("0 0/${delay} * * * ?", setHumidityLevel)    // monitor the humidity according to delay specified
 
 }
+
+
+private def sendNotifDelayNotInRange() {
+
+    send "MonitorEcobeeHumidity>scheduling delay (${givenInterval} min.) not in range, please restart..."
+    
+}
+    
 def tedPowerHandler(evt) {
     log.debug "Power usage: $evt.value"
 }
