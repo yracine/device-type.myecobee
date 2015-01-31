@@ -127,7 +127,7 @@ def smokeHandler(evt) {
         takeActions(evt.value)
 
     } else if (evt.value == CLEAR_ALERT) {
-    	theMessage = "${evt.displayName} is clear for smoke."
+    	theMessage = "${evt.displayName} is clear of smoke."
         sendMsg("FireCO2Alarm>${theMessage}")
         takeActions(CLEAR_ALERT)
         
@@ -311,8 +311,8 @@ private flashLights() {
             switches.eachWithIndex {s, i ->
                 if (initialActionOn[i]) {
                     s.off(delay: delay)
-	    	
-	            }
+
+                }
                 else {
                     s.on(delay:delay)
                 }
@@ -330,6 +330,6 @@ private sendMsg(theMessage) {
     }
  
     if (sendPushMessage == "Yes") {
-    	sendPush(theMessage)
+        sendPush(theMessage)
     }
 }
