@@ -1,20 +1,20 @@
 /**
- *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *  for the specific language governing permissions and limitations under the License.
- *
- *  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the siren, unlock the doors, turn
- *  off the thermostat(s), turn off the alarm system, etc.
- *
- */
+*  Copyright 2014 Yves Racine
+*  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+*
+*  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License. You may obtain a copy of the License at:
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+*  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+*  for the specific language governing permissions and limitations under the License.
+*
+*  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the siren, unlock the doors, turn
+*  off the thermostat(s), turn off the alarm system, etc.
+*
+*/
 
 
 // Automatically generated. Make future change here.
@@ -31,28 +31,28 @@ definition(
 preferences {
 
 
-    section("Select smoke detector(s)..."){
+    section("Select smoke/CO2 detector(s)..."){
         input "smoke_detectors", "capability.smokeDetector", title: "Which one(s)...?", multiple: true
     }
     section( "Low battery warning" ){
         input "lowBattThreshold", "number", title: "Low Batt Threshold % (default 10%)", required: false
     }
-    section("Unlock the doors") {
+    section("Unlock the doors [optional]") {
         input "locks", "capability.lock", multiple: true,required: false
     }
     section("Open this Garage Door in case of CO2...") {
-        input "garageSwitch", "capability.switch",title: "Which Garage Door Switch"
+        input "garageSwitch", "capability.switch",title: "Which Garage Door Switch", required:false
     }
     section("Only If this Garage's Contact is closed") {  
-        input "garageMulti", "capability.contactSensor",title: "Which Garage Door Contact"
+        input "garageMulti", "capability.contactSensor",title: "Which Garage Door Contact", required:false
     }
-    section("Turn off the thermostat(s)") {
+    section("Turn off the thermostat(s) [optional]") {
         input "tstat", "capability.thermostat", title: "Thermostat(s)", multiple:true, required: false
     }
-    section("Dismarm the alarm system if armed") {
-        input "alarmSwitch", "capability.contactSensor", title: "Alarm System"
+    section("Dismarm the alarm system if armed [optional]") {
+        input "alarmSwitch", "capability.contactSensor", title: "Alarm System",required: false
     }
-    section("Flash/turn on the ligths..."){
+    section("Flash/turn on the lights..."){
         input "switches", "capability.switch", title: "These lights", multiple: true
         input "numFlashes", "number", title: "This number of times (default 20)", required: false
     }
@@ -60,10 +60,10 @@ preferences {
         input "givenOnFor", "number", title: "On for (default 1000)", required: false
         input "givenOffFor", "number", title: "Off for (default 1000)", required: false
     }
-    section("And activate the siren") {
-        input "securityAlert", "capability.alarm", title: "Security Alert"
+    section("And activate the siren [optional]") {
+        input "securityAlert", "capability.alarm", title: "Security Alert",required: false
     }
-    section("Clear alarm threshold (defaults to 1 min)") {
+    section("Clear alarm threshold (default = 1 min) [optional]") {
         input "clearAlarmThreshold", "decimal", title: "Number of minutes", required: false
     }
     section( "Notifications" ) {
@@ -91,10 +91,30 @@ private initialize() {
     subscribe(locks, "lock", doorUnlockedHandler)
     subscribe(garageMulti, "contact", garageDoorContact)
     subscribe(alarmSwitch, "contact", alarmSwitchContact)
-    if ((tstat != null) && (tstat != "")) {
+    if (tstat) {
         subscribe(tstat, "thermostatMode", thermostatModeHandler)
-    }    
+    }
+    
+    reset_state_variables()
 }
+
+
+private def reset_state_variables() {
+
+	state.lastActivated=null
+    state.lastThermostatMode=null
+    
+    if (tstat) {
+        state.lastThermostatMode=" "
+        tstat.each {
+            log.debug "reset_state_variables>thermostat mode reset for $it"
+            state.lastThermostatMode = state.lastThermostatMode + "${it.currentThermostatMode}" + ","
+        }
+    } 
+    log.debug "reset_state_variables>state.lastThermostatMode= $state.lastThermostatMode"
+    
+}
+
 
 def thermostatModeHandler(evt) {
     log.debug "thermostat mode: $evt.value"
@@ -114,6 +134,7 @@ def doorUnlockedHandler(evt) {
 def smokeHandler(evt) {
     def SMOKE_ALERT = 'detected_SMOKE'
     def CLEAR_ALERT = 'clear'
+    def CLEAR_SMOKE_ALERT = 'clear_SMOKE'
     def DETECTED_ALERT = 'detected'
     def TESTED_ALERT = 'tested'
     
@@ -123,28 +144,29 @@ def smokeHandler(evt) {
     
     if (evt.value == TESTED_ALERT) {
     	theMessage = "${evt.displayName} was tested for smoke."
-        sendMsg("FireCO2Alarm>${theMessage}")
+        send("FireCO2Alarm>${theMessage}")
         takeActions(evt.value)
 
     } else if (evt.value == CLEAR_ALERT) {
     	theMessage = "${evt.displayName} is clear of smoke."
-        sendMsg("FireCO2Alarm>${theMessage}")
-        takeActions(CLEAR_ALERT)
+        send("FireCO2Alarm>${theMessage}")
+        takeActions(CLEAR_SMOKE_ALERT)
         
     } else if (evt.value == DETECTED_ALERT) {
     	theMessage = "${evt.displayName} detected smoke!"
-        sendMsg("FireCO2Alarm>${theMessage}")
+        send("FireCO2Alarm>${theMessage}")
         takeActions(SMOKE_ALERT)
     } else {
     	theMessage = ("Unknown event received from ${evt.name}")
-        sendMsg("FireCO2Alarm>${theMessage}")
+        send("FireCO2Alarm>${theMessage}")
     }
     
 }
- 
+
  
 def carbonMonoxideHandler(evt) {
     def CO2_ALERT = 'detected_CO2'
+    def CLEAR_CO2_ALERT = 'clear_CO2'
     def CLEAR_ALERT = 'clear'
     def DETECTED_ALERT = 'detected'
     def TESTED_ALERT = 'tested'
@@ -155,18 +177,18 @@ def carbonMonoxideHandler(evt) {
     
     if (evt.value == TESTED_ALERT) {
     	theMessage = "${evt.displayName} was tested for carbon monoxide."
-        sendMsg("FireCO2Alarm>${theMessage}")
+        send("FireCO2Alarm>${theMessage}")
     } else if (evt.value == CLEAR_ALERT) {
     	theMessage = "${evt.displayName} is clear of carbon monoxide."
-        sendMsg("FireCO2Alarm>${theMessage}")
-        takeActions(CLEAR_ALERT)
+        send("FireCO2Alarm>${theMessage}")
+        takeActions(CLEAR_CO2_ALERT)
     } else if (evt.value == DETECTED_ALERT) {
     	theMessage = "${evt.displayName} detected carbon monoxide!"
-        sendMsg("FireCO2Alarm>${theMessage}")
+        send("FireCO2Alarm>${theMessage}")
         takeActions(CO2_ALERT)
     } else {
     	theMessage = "Unknown event received from ${evt.name}"
-        sendMsg("FireCO2Alarm>${theMessage}")
+        send("FireCO2Alarm>${theMessage}")
     }
     
 }
@@ -180,7 +202,7 @@ def batteryHandler(evt) {
     
     if (battLevel < lowBattThreshold ?: 10) {
     	theMessage = "${evt.displayName} has battery of ${battLevel}"
-        sendMsg("FireCO2Alarm>${theMessage}")
+        send("FireCO2Alarm>${theMessage}")
     }
 }
  
@@ -191,13 +213,43 @@ def alarmSwitchContact(evt)
     log.info "alarmSwitchContact, $evt.name: $evt.value"
 }
 
-def clearAlert() { 
-    securityAlert.off()                                // Turned off the security alert
+def clearAlert() {
+
+    if (securityAlert) {
+        securityAlert.off()                                // Turned off the security alert
+        send("FireCO2Alarm>Cleared, turn security alert off...")
+    }
     
-    sendMsg("FireCO2Alarm>Cleared, set the security alert off...")
-     
-    tstat?.auto()
-    sendMsg("FireCO2Alarm>Cleared, thermostat(s) mode is now set to auto")
+    if (locks) {
+        locks.lock()                                      // Lock the locks 
+        send("FireCO2Alarm>Cleared, locked all locks...")
+    }
+
+    if (tstat) {
+        if (state.lastThermostatMode) {
+             def lastThermostatMode=state.lastThermostatMode.toString().split(',')
+             int i=0
+             tstat.each {
+                 def lastSavedMode = lastThermostatMode[i]
+                 
+                 if (lastSavedMode) {
+                     log.debug "About to set ${it}, back to saved thermostatMode=${lastSavedMode}"
+                     if (lastSavedMode == 'cool') {
+                         it.cool()                 
+                     } else if (lastSavedMode.contains('heat')) {
+                         it.heat()
+                     } else if (lastSavedMode == 'auto') {
+                         it.auto()
+                     }
+                     send("FireCO2Alarm>Cleared, thermostat ${it}'s mode is now set back to ${lastThermostatMode[i]}")
+                 }  
+                 i++
+            }     
+        } else {
+            tstat.auto()
+            send("FireCO2Alarm>Cleared, thermostat(s) mode is now set to auto")
+        }    
+    }
 }
 
 
@@ -206,18 +258,26 @@ private takeActions(String alert) {
     def CO2_ALERT = 'detected_CO2'
     def SMOKE_ALERT = 'detected_SMOKE'
     def CLEAR_ALERT = 'clear'
+    def CLEAR_SMOKE_ALERT = 'clear_SMOKE'
+    def CLEAR_CO2_ALERT = 'clear_CO2'
     def DETECTED_ALERT = 'detected'
     def TESTED_ALERT = 'tested'
 
 // Proceed with the following actions when clear alert
 
-    if (alert == CLEAR_ALERT) {
+    if ((alert == CLEAR_SMOKE_ALERT) || (alert == CLEAR_CO2_ALERT)) {
 
-        def delay = (clearAlarmThreshold ?: 1) * 60               // default is 3 minutes
+        def delay = (clearAlarmThreshold ?: 1) * 60               // default is 1 minute
         //  Wait a certain delay before clearing the alert
 
-        sendMsg("FireCO2Alarm>Cleared, wait for ${delay} seconds...")
+        send("FireCO2Alarm>Cleared, wait for ${delay} seconds...")
         runIn ( delay, "clearAlert", [overwrite:false])
+        
+        if ((alert == CLEAR_CO2_ALERT) && (garageMulti?.currentContact == "open")) {
+            log.debug "garage door is open,about to close it following cleared CO2 alert..."  
+            garageSwitch?.on()                               // Open the garage door if it is closed
+            send("FireCO2Alarm>Closed the garage door following cleared CO2 alert...")
+        }
         
         return
     }
@@ -230,34 +290,48 @@ private takeActions(String alert) {
 // Proceed with the following actions in case of SMOKE or CO2 alert
 
 
-    securityAlert.on()                                     // Turned on the security alert
-    sendMsg("FireCO2Alarm>Security Alert on...")
+//  Reset state variables 
 
-    if (alarmSwitch.currentContact == "closed") {
-        log.debug "alarm system is on, about to disarm it..."  
-        alarmSwitch.off()                                  // disarm the alarm system
-        sendMsg("FireCO2Alarm>Alarm system disarmed")
+    reset_state_variables()
+    
+    if (securityAlert) {
+        securityAlert.on()                                // Turned on the security alert
+        send("FireCO2Alarm>Security Alert on...")
     }
-    tstat?.off()                                           // Turn off the thermostats
+    if (alarmSwitch) {
+        if (alarmSwitch.currentContact == "closed") {
+            log.debug "alarm system is on, about to disarm it..."  
+            alarmSwitch.off()                              // disarm the alarm system
+            send("FireCO2Alarm>Alarm system disarmed")
+        }    
+    }
+    if (tstat) {
+        tstat.off()                                        // Turn off the thermostats
+        send("FireCO2Alarm>Turning off all thermostats...")
+    }    
     if (location.mode != 'Away') {
-       locks?.unlock()                                     // Unlock the locks if mode is not 'Away'
-	   sendMsg("FireCO2Alarm>Unlocked the doors...")
-       if (((alert == CO2_ALERT) || (alert == TESTED_ALERT)) && (garageMulti.currentContact == "closed")) {
-           log.debug "garage door is closed,about to open it following CO2 alert..."  
-           garageSwitch.on()                               // Open the garage door if it is closed
-           sendMsg("FireCO2Alarm>Opened the garage door following CO2 alert...")
-       }
+        if (locks) {
+            locks.unlock()                                // Unlock the locks if mode is not 'Away'
+	        send("FireCO2Alarm>Unlocked the doors...")
+        }    
+        if ((alert == CO2_ALERT) && (garageSwitch)) {
+            if (garageMulti?.currentContact == "closed") {
+                log.debug "garage door is closed,about to open it following CO2 alert..."  
+                garageSwitch.on()                               // Open the garage door if it is closed
+                send("FireCO2Alarm>Opened the garage door following CO2 alert...")
+            }
+        }
 
     }
 
     flashLights()                                          // Flash the lights
-    sendMsg("FireCO2Alarm>Flashed the lights...")
+    send("FireCO2Alarm>Flashed the lights...")
 
     def now = new Date().getTime()                         // Turn the switches on at night
     astroCheck()
     if (now > state.setTime) {                                
         switches?.on()
-        sendMsg("FireCO2Alarm>Turned on the lights at night")
+        send("FireCO2Alarm>Turned on the lights at night")
 
     }
    
@@ -322,14 +396,17 @@ private flashLights() {
     }
 }
 
+private send(msg) {
+    if (sendPushMessage != "No") {
+        log.debug("sending push message")
+        sendPush(msg)
+    }
 
-private sendMsg(theMessage) {
-    log.debug "Sending message: ${theMessage}"
     if (phoneNumber) {
-        sendSms(phoneNumber, theMessage)
+        log.debug("sending text message")
+        sendSms(phoneNumber, msg)
     }
- 
-    if (sendPushMessage == "Yes") {
-        sendPush(theMessage)
-    }
+    log.debug msg
 }
+
+
