@@ -101,7 +101,7 @@ private initialize() {
 
 private def reset_state_variables() {
 
-	state.lastActivated=null
+    state.lastActivated=null
     state.lastThermostatMode=null
     
     if (tstat) {
