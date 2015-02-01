@@ -125,7 +125,7 @@ def initialize() {
     subscribe(outdoorSensor, "temperature", outdoorTempHandler)
 	Integer delay = givenInterval ?: 59 // By default, do it every hour
     if ((delay < 10) || (delay > 59)) {
-        log.error "Scheduling delay not in range (${delay} min.), exiting..."
+        log.error "Scheduling delay not in range (${delay} min.), exiting"
         runIn(30, "sendNotifDelayNotInRange")
         return
     }
@@ -316,9 +316,7 @@ def setHumidityLevel() {
            'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}",'vent':'minontime','ventilatorMinOnTime': "${min_vent_time}",
            'fan':"on"]) 
 
-        if (detailedNotif == 'true') {
-            send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode, using ERV/HRV and dehumidifier if available"
-        }
+        send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode, using ERV/HRV and dehumidifier if available"
                  
     }
     else if (((ecobeeMode == 'heat') || (ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true' || hasDehumidifier=='true')) && 
@@ -326,18 +324,16 @@ def setHumidityLevel() {
              (ecobeeHumidity >= outdoorHumidity - min_humidity_diff) && 
              (outdoorTemp > min_temp)) {
              
-       log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
+        log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
            "normalized outdoor humidity is within range (${outdoorHumidity}) & outdoor temp is ${outdoorTemp},not too cold"
                         
-//     Turn on the dehumidifer and HRV/ERV, the outdoor temp is not too cold 
+//      Turn on the dehumidifer and HRV/ERV, the outdoor temp is not too cold 
 
-       ecobee.setThermostatSettings("",['dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",
+        ecobee.setThermostatSettings("",['dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",
             'humidifierMode':'off','fanMinOnTime':"${min_fan_time}",'vent':'minontime','ventilatorMinOnTime': "${min_vent_time}",
             'fan':"auto"]) 
 
-       if (detailedNotif == 'true') {
-           send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode"
-       }    
+        send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode"
     }    
     else if (((ecobeeMode == 'heat') ||(ecobeeMode == 'off') && (hasHrv=='true' || hasErv=='true' || hasDehumidifier=='true')) && 
              (ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
@@ -367,10 +363,8 @@ def setHumidityLevel() {
         ecobee.setThermostatSettings("",['humidifierMode':'on','humidity':"${target_humidity}",'dehumidifierMode':'off',
             'fanMinOnTime':"${min_fan_time}",'fan':"on"])
 
-       if (detailedNotif == 'true') {
-           send "MonitorEcobeeHumidity> humidify to ${target_humidity} in ${ecobeeMode} mode"
-       }    
-    }
+        send "MonitorEcobeeHumidity> humidify to ${target_humidity} in ${ecobeeMode} mode"
+    } 
     else if (((ecobeeMode == 'cool') && (hasDehumidifier =='false') && (hasHrv=='true' || hasErv=='true')) && 
              (ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
              (outdoorHumidity > target_humidity)) {   
@@ -383,9 +377,7 @@ def setHumidityLevel() {
         ecobee.setThermostatSettings("",['dehumidifyWithAC':'true','dehumidifierLevel':"${target_humidity}",
             'dehumidiferMode':'off','fanMinOnTime':"${min_fan_time}",'vent':'off','fan':"on"])
           
-        if (detailedNotif == 'true') {
-            send "MonitorEcobeeHumidity>dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and normalized outdoor humidity (${outdoorHumidity}%) is too high to dehumidify"
-        }    
+        send "MonitorEcobeeHumidity>dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and normalized outdoor humidity (${outdoorHumidity}%) is too high to dehumidify"
              
     }
     else if (((ecobeeMode == 'cool') && (hasDehumidifier=='true')) && 
@@ -399,9 +391,7 @@ def setHumidityLevel() {
         ecobee.setThermostatSettings("",['dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",'humidifierMode':'off',
             'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}",'vent':'off','fan':"on"])
 
-        if (detailedNotif == 'true') {
-            send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode using the dehumidifier only"
-        }    
+        send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode using the dehumidifier only"
           
     
     }
@@ -414,9 +404,7 @@ def setHumidityLevel() {
 
         ecobee.setThermostatSettings("",['dehumidifierMode':'on','dehumidifierLevel':"${target_humidity}",'humidifierMode':'off',
             'dehumidifyWithAC':'false','fanMinOnTime':"${min_fan_time}",'fan':"on"]) 
-        if (detailedNotif == 'true') {
-            send "MonitorEcobeeHumidity>Outdoor temp is lower than inside, using dehumidifier for more efficient cooling"
-        }    
+        send "MonitorEcobeeHumidity>Outdoor temp is lower than inside, using dehumidifier for more efficient cooling"
           
     
     }
@@ -430,9 +418,7 @@ def setHumidityLevel() {
         ecobee.setThermostatSettings("",['fanMinOnTime':"${min_fan_time}",
             'vent':'minontime','ventilatorMinOnTime': "${min_vent_time}",'fan':"on"])
           
-        if (detailedNotif == 'true') {
-            send "MonitorEcobeeHumidity>Outdoor temp is lower than inside, using the HRV/ERV for more efficient cooling"
-        }    
+        send "MonitorEcobeeHumidity>Outdoor temp is lower than inside, using the HRV/ERV for more efficient cooling"
              
     }
     else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
@@ -518,9 +504,7 @@ def setHumidityLevel() {
             float delay = ((min_vent_time.toFloat()/60) * scheduleInterval.toFloat()).round()
             int delayInt = delay.toInteger()
             delayInt = (delayInt > 1)? delayInt: 1.5 // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
-            if (detailedNotif == 'true') {
-                send "MonitorEcobeeHumidity>turning off the dehumidifier in ${delayInt} minute(s)..."
-            }    
+            send "MonitorEcobeeHumidity>turning off the dehumidifier (used as HRV) in ${delayInt} minute(s)..."
             runIn((delayInt*60), "turn_off_dehumidifier")  // turn off the dehumidifier after delay
         } else if (diffVentTimeInMin <=0) {
             if (detailedNotif == 'true') {
