@@ -31,10 +31,10 @@ definition(
 preferences {
 
 
-    section("Select smoke/CO2 detector(s)..."){
-        input "smoke_detectors", "capability.smokeDetector", title: "Which one(s)...?", multiple: true
+    section("When these smoke/CO2 detector trigger, the following actions will be taken..."){
+        input "smoke_detectors", "capability.smokeDetector", title: "Which Smoke/CO2 detector(s)?", multiple: true
     }
-    section( "Low battery warning" ){
+    section( "Detectors' low battery warning" ){
         input "lowBattThreshold", "number", title: "Low Batt Threshold % (default 10%)", required: false
     }
     section("Unlock the doors [optional]") {
@@ -56,15 +56,15 @@ preferences {
         input "switches", "capability.switch", title: "These lights", multiple: true
         input "numFlashes", "number", title: "This number of times (default 20)", required: false
     }
-    section("Time settings in milliseconds [optional]"){
+    section("Time settings in milliseconds (optional)"){
         input "givenOnFor", "number", title: "On for (default 1000)", required: false
         input "givenOffFor", "number", title: "Off for (default 1000)", required: false
     }
     section("And activate the siren [optional]") {
         input "securityAlert", "capability.alarm", title: "Security Alert",required: false
     }
-    section("Clear alarm threshold (default = 1 min) [optional]") {
-        input "clearAlarmThreshold", "decimal", title: "Number of minutes", required: false
+    section("Clear alarm threshold (default = 1 min) to revert actions[optional]") {
+        input "clearAlarmThreshold", "decimal", title: "Number of minutes after clear alarm", required: false
     }
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
