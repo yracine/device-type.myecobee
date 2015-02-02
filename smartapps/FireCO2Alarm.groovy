@@ -219,12 +219,12 @@ def clearAlert() {
         securityAlert.off()                                // Turned off the security alert
         send("FireCO2Alarm>Cleared, turn security alert off...")
     }
-    
+/*    
     if (locks) {
         locks.lock()                                      // Lock the locks 
         send("FireCO2Alarm>Cleared, locked all locks...")
     }
-
+*/
     if (tstat) {
         if (state.lastThermostatMode) {
              def lastThermostatMode=state.lastThermostatMode.toString().split(',')
