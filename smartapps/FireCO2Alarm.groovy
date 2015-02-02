@@ -56,7 +56,7 @@ preferences {
         input "switches", "capability.switch", title: "These lights", multiple: true
         input "numFlashes", "number", title: "This number of times (default 20)", required: false
     }
-    section("Time settings in milliseconds (optional)"){
+    section("Time settings in milliseconds [optional]"){
         input "givenOnFor", "number", title: "On for (default 1000)", required: false
         input "givenOffFor", "number", title: "Off for (default 1000)", required: false
     }
