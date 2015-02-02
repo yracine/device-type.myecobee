@@ -138,10 +138,10 @@ private residentsHaveBeenQuiet() {
 
 	def threshold = residentsQuietThreshold ?: 15   // By default, the delay is 15 minutes
 	def result = true
-    def t0 = new Date(now() - (threshold * 60 *1000))
-    for (sensor in motions) {
-       	def recentStates = sensor.statesSince("motion", t0)
-       	if (recentStates.find{it.value == "active"}) {
+	def t0 = new Date(now() - (threshold * 60 *1000))
+	for (sensor in motions) {
+       		def recentStates = sensor.statesSince("motion", t0)
+		if (recentStates.find{it.value == "active"}) {
 			result = false
 			break
 		}	
@@ -495,7 +495,7 @@ private def check_if_hold_justified() {
 		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed current program, motion detected")
 		reset_state_values()  
-        check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
+		check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
 		return // no more adjustment
 	} else if (state?.programHoldSet == 'Away') {
 		log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
@@ -524,7 +524,7 @@ private def check_if_hold_justified() {
 		ecobee.resumeProgram("")
 		send("MonitorEcobeeTemp>resumed program, no motion detected")
 		reset_state_values()
-        check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat because of outside temp ) 
+		check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat because of outside temp ) 
 		return // no more adjustment
 	} else if (state?.programHoldSet == 'Home')  { 
 		log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
@@ -538,7 +538,7 @@ private def check_if_hold_justified() {
 			reset_state_values()
 			ecobee.resumeProgram("")
  			check_if_hold_needed()   // check if another type of hold is now needed (ex. more heat because of outside temp ) 
-            return
+            		return
 		} else {
 			return // hold justified, no more adjustments
 		}
