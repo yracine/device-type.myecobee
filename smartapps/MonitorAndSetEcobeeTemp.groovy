@@ -14,6 +14,8 @@
  *
  * The MonitorAndSetEcobeeTemp monitors the outdoor temp and adjusts the heating and cooling set points
  * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
+ * It also constantly monitors any 'hold' at the thermostat to make sure that these holds are justified according to
+ * the presence sensor at home and the given thresholds.
  */
 definition(
 	name: "Monitor And Set Ecobee Temp",
@@ -237,7 +239,7 @@ def monitorAdjustTemp() {
 
 	String currentProgType = ecobee.currentProgramType
 	log.trace("MonitorEcobeeTemp> program Type= ${currentProgType}")
-	if (currentProgType.contains("hold")) { 						// don't make any further adustments 
+	if (currentProgType.contains("hold")) { 						
 		log.trace("MonitorEcobeeTemp>about to call check_if_hold_justified....")
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>Hold set, checking if still justified")
