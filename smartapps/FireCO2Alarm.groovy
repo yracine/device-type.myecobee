@@ -22,7 +22,7 @@ definition(
     name: "FireCO2Alarm",
     namespace: "yracine",
     author: "yracine@yahoo.com",
-    description: "Turn on all the lights/thermostat in case of a fire/CO2 alarm, unlock the doors, disarm the alarm system & open the garage door ",
+    description: "In case of a fire/CO2 alarm,turn on all the lights/turn off all thermostats, unlock the doors, disarm the alarm system & open the garage door when CO2 is detected ",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
