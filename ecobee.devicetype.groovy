@@ -95,6 +95,7 @@ metadata {
 		attribute "thermostatRevision", "string"
 		attribute "heatStages", "string"
 		attribute "coolStages", "string"
+		attribute "climateName", "string"
         
         // Report Runtime events
         
@@ -242,7 +243,7 @@ simulator {
 			state "cool", label: '${name}', action: "thermostat.heat", 
 				icon: "st.Weather.weather7"
 			state("auto", action:"thermostat.auto", 
-            			icon: "st.thermostat.auto")
+            	icon: "st.thermostat.auto")
 		}
 		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
 			decoration: "flat") {
@@ -805,7 +806,8 @@ void poll() {
 		climateList: getClimateList(),
 		presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present',
 		heatStages:data.thermostatList[0].settings.heatStages.toString(),
-		coolStages:data.thermostatList[0].settings.coolStages.toString()
+		coolStages:data.thermostatList[0].settings.coolStages.toString(),
+		climateName: currentClimate.name,
 	]
      
 	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type == 'quickSave')) {
