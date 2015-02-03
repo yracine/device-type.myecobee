@@ -155,7 +155,7 @@ private residentsHaveBeenQuiet() {
 private isProgramScheduleSet(climateName, threshold) {
 	def result = false
  	def t0 = new Date(now() - (threshold * 60 *1000))
-	def recentStates = ecobee.statesSince("programScheduleName", t0)
+	def recentStates = ecobee.statesSince("climateName", t0)
 	if (recentStates.find{it.value == climateName}) {
 		result = true
 	}
@@ -166,7 +166,7 @@ private isProgramScheduleSet(climateName, threshold) {
 def motionEvtHandler(evt) {
  	if (evt.value == "active") {
 		log.debug "Motion at home..."
-		String currentProgName = ecobee.currentProgramScheduleName
+		String currentProgName = ecobee.currentClimateName
 		if (state?.programHoldSet == 'Away') {
 			check_if_hold_justified()
 		}
@@ -287,7 +287,7 @@ private def check_if_hold_needed() {
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
 
-	String currentProgName = ecobee.currentProgramScheduleName
+	String currentProgName = ecobee.currentClimateName
 
 	Integer outdoorHumidity = outdoorSensor.currentHumidity
 	float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
@@ -337,7 +337,7 @@ private def check_if_hold_needed() {
 			programCoolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
 		} else if (((currentProgName.toUpperCase()!='SLEEP') && (currentProgName.toUpperCase()!='AWAY'))  && (residentsHaveBeenQuiet())) {
-			// Do not adjust the program when asleep or away    
+			// Do not adjust the program when ecobee mode = Sleep or Away    
                 
 			ecobee.away()          
 			send("MonitorEcobeeTemp>Program now set to Away,no motion detected")
@@ -356,7 +356,7 @@ private def check_if_hold_needed() {
     
 	if (ecobeeMode == 'cool') {
 
-		if (location.mode.toUpperCase() != 'AWAY') { // increase cooling settings only if mode != Away
+		if (location.mode.toUpperCase() != 'AWAY') { // increase cooling settings only if ST mode != Away
 			log.trace(
 				"check_if_hold_needed>evaluate: moreCoolThreshold= ${more_cool_threshold}° vs. outdoorTemp ${outdoorTemp}°")
 			log.trace(
@@ -461,7 +461,7 @@ private def check_if_hold_justified() {
 		less_heat_threshold = (givenLessHeatThreshold != null) ? givenLessHeatThreshold : 50 // by default, 50°F is the outdoor temp's threshold for less heating
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
-	String currentProgName = ecobee.currentProgramScheduleName
+	String currentProgName = ecobee.currentClimateName
 	float heatTemp = ecobee.currentHeatingSetpoint.toFloat()
 	float coolTemp = ecobee.currentCoolingSetpoint.toFloat()
 	float programHeatTemp = ecobee.currentProgramHeatTemp.toFloat()
@@ -501,10 +501,8 @@ private def check_if_hold_justified() {
 			send("MonitorEcobeeTemp>resumed current program, motion detected")
 			reset_state_values()  
 			check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
-			return // no more adjustment
+			return // no more adjustments
 		} else if (state?.programHoldSet == 'Away') {
-			log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
-			send("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, 'Away' hold justified")
 			if (currentProgName.toUpperCase() == 'AWAY') {
         
 				if (detailedNotif == 'true') {
@@ -521,6 +519,8 @@ private def check_if_hold_justified() {
 				ecobee.resumeProgram("")
         
 			} else {
+				log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, current program= ${currentProgName},'Away' hold justified")
+				send("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Away' hold justified")
 				return // hold justified, no more adjustments
 			}    
 		}
@@ -530,12 +530,8 @@ private def check_if_hold_justified() {
 			send("MonitorEcobeeTemp>resumed program, no motion detected")
 			reset_state_values()
 			check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat because of outside temp ) 
-			return // no more adjustment
+			return // no more adjustments
 		} else if (state?.programHoldSet == 'Home')  { 
-			log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
-			if (detailedNotif == 'true') {
-				send("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, 'Home' hold justified")
-			}
 			if (currentProgName.toUpperCase() == 'HOME') {
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>hold no longer needed, program already in Home mode")
@@ -545,6 +541,10 @@ private def check_if_hold_justified() {
  				check_if_hold_needed()   // check if another type of hold is now needed (ex. more heat because of outside temp ) 
 				return
 			} else {
+				log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Home' hold justified")
+				if (detailedNotif == 'true') {
+					send("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Home' hold justified")
+				}
 				return // hold justified, no more adjustments
 			}
 		}            
