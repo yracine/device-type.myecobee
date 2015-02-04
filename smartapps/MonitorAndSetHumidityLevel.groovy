@@ -62,11 +62,9 @@ preferences {
     }
     section("Choose Indoor humidity sensor to be used for better adjustment (optional, default=ecobee sensor)") {
         input "indoorSensor", "capability.relativeHumidityMeasurement", title: "Indoor Humidity Sensor", required:false
-        
     }	
     section("Choose Outdoor humidity sensor to be used") {
         input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
-        
     }	
     section("Minimum temperature for dehumidification (in Farenheits/Celcius)") {
         input "givenMinTemp", "decimal", title: "Min Temp (default=10°F/-15°C)", required:false
@@ -362,8 +360,8 @@ def setHumidityLevel() {
                         
 //      Need a minimum differential to humidify the house to the target if any humidifier available
 
-        ecobee.setThermostatSettings("",['humidifierMode':'auto','humidity':"${target_humidity}",'dehumidifierMode':'off',
-            'fanMinOnTime':"${min_fan_time}", 'condensationAvoid':"${frostControlFlag}"])
+        def humidifierMode = (frostControlFlag=='true')?'auto':'manual'
+        ecobee.setThermostatSettings("",['humidifierMode':"${humidifierMode}",'humidity':"${target_humidity}",'dehumidifierMode':'off'])
 
         send "MonitorEcobeeHumidity> humidify to ${target_humidity} in ${ecobeeMode} mode"
     } 
