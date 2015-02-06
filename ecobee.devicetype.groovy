@@ -684,7 +684,7 @@ void setThisTstatClimate(climateName) {
 	// If climate is different from current one, then change it to the given climate
 	if (currentProgram.toUpperCase() != climateName.trim().toUpperCase()) {
     
-		resumeThisTstat()
+		resumeProgram(thermostatId)
 		setClimate(thermostatId, climateName)
 		sendEvent(name: 'programScheduleName', value: climateName)
 		poll() // to refresh the values in the UI
