@@ -56,7 +56,7 @@ preferences {
         input "switches", "capability.switch", title: "These lights", multiple: true
         input "numFlashes", "number", title: "This number of times (default 20)", required: false
     }
-    section("Time settings in milliseconds (optional)"){
+    section("Time settings in milliseconds [optional]"){
         input "givenOnFor", "number", title: "On for (default 1000)", required: false
         input "givenOffFor", "number", title: "Off for (default 1000)", required: false
     }
@@ -65,6 +65,9 @@ preferences {
     }
     section("Clear alarm threshold (default = 1 min) to revert actions[optional]") {
         input "clearAlarmThreshold", "decimal", title: "Number of minutes after clear alarm", required: false
+    }
+    section("Use Speech capability to warn the residents (optional) ") {
+        input "theVoice", "capability.speechSynthesis",  required: false
     }
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
@@ -214,10 +217,16 @@ def alarmSwitchContact(evt)
 }
 
 def clearAlert() {
-
+    def msg
+    
     if (securityAlert) {
         securityAlert.off()                                // Turned off the security alert
-        send("FireCO2Alarm>Cleared, turn security alert off...")
+        msg = "turned security alert off"
+        send("FireCO2Alarm>now clear, ${msg}")
+        if (theVoice){
+            theVoice.setLevel(40)
+            theVoice.speak(msg)
+        }
     }
 /*    
     if (locks) {
@@ -241,20 +250,28 @@ def clearAlert() {
                      } else if (lastSavedMode == 'auto') {
                          it.auto()
                      }
-                     send("FireCO2Alarm>Cleared, thermostat ${it}'s mode is now set back to ${lastThermostatMode[i]}")
+                     msg ="thermostat ${it}'s mode is now set back to ${lastThermostatMode[i]}"
+                     send("FireCO2Alarm>Cleared, ${msg}")
+                     if (theVoice){
+                         theVoice.speak(msg)
+                     }
                  }  
                  i++
             }     
         } else {
             tstat.auto()
-            send("FireCO2Alarm>Cleared, thermostat(s) mode is now set to auto")
+            msg ="thermostats set to auto"
+            send("FireCO2Alarm>Cleared, ${msg}")
+            if (theVoice){
+                theVoice.speak(msg)
+            }
         }    
     }
 }
 
 
 private takeActions(String alert) {
-
+    def msg
     def CO2_ALERT = 'detected_CO2'
     def SMOKE_ALERT = 'detected_SMOKE'
     def CLEAR_ALERT = 'clear'
@@ -270,13 +287,20 @@ private takeActions(String alert) {
         def delay = (clearAlarmThreshold ?: 1) * 60               // default is 1 minute
         //  Wait a certain delay before clearing the alert
 
+         
         send("FireCO2Alarm>Cleared, wait for ${delay} seconds...")
         runIn ( delay, "clearAlert", [overwrite:false])
         
         if ((alert == CLEAR_CO2_ALERT) && (garageMulti?.currentContact == "open")) {
             log.debug "garage door is open,about to close it following cleared CO2 alert..."  
             garageSwitch?.on()                               // Open the garage door if it is closed
-            send("FireCO2Alarm>Closed the garage door following cleared CO2 alert...")
+            msg = "closed the garage door following cleared CO2 alert"
+            send("FireCO2Alarm>${msg}...")
+            if (theVoice){
+                theVoice.setLevel(50)
+                theVoice.speak(msg)
+            }
+            
         }
         
         return
@@ -296,42 +320,75 @@ private takeActions(String alert) {
     
     if (securityAlert) {
         securityAlert.on()                                // Turned on the security alert
-        send("FireCO2Alarm>Security Alert on...")
+        msg = "security Alert on"
+        send("FireCO2Alarm>${msg}...")
+        if (theVoice){
+            theVoice.setLevel(75)
+            theVoice.speak(msg)
+        }
     }
     if (alarmSwitch) {
         if (alarmSwitch.currentContact == "closed") {
             log.debug "alarm system is on, about to disarm it..."  
             alarmSwitch.off()                              // disarm the alarm system
-            send("FireCO2Alarm>Alarm system disarmed")
+            msg = "alarm system disarmed"
+            send("FireCO2Alarm>${msg}...")
+            if (theVoice){
+                theVoice.setLevel(75)
+                theVoice.speak(msg)
+            }
+            
         }    
     }
     if (tstat) {
         tstat.off()                                        // Turn off the thermostats
-        send("FireCO2Alarm>Turning off all thermostats...")
+        msg = "turning off all thermostats"
+        send("FireCO2Alarm>${msg}...")
+        if (theVoice){
+            theVoice.speak(msg)
+        }
     }    
     if (location.mode != 'Away') {
         if (locks) {
             locks.unlock()                                // Unlock the locks if mode is not 'Away'
-	        send("FireCO2Alarm>Unlocked the doors...")
+	        msg= "unlocked the doors"
+	        send("FireCO2Alarm>${msg}...")
+            if (theVoice){
+                theVoice.speak(msg)
+            }
         }    
         if ((alert == CO2_ALERT) && (garageSwitch)) {
             if (garageMulti?.currentContact == "closed") {
                 log.debug "garage door is closed,about to open it following CO2 alert..."  
                 garageSwitch.on()                               // Open the garage door if it is closed
-                send("FireCO2Alarm>Opened the garage door following CO2 alert...")
+                msg ="opened the garage door following CO2 alert"
+                send("FireCO2Alarm>${msg}...")
+                if (theVoice){
+                    theVoice.speak(msg)
+                }
             }
         }
 
     }
 
     flashLights()                                          // Flash the lights
-    send("FireCO2Alarm>Flashed the lights...")
+    msg = "flashed the lights"
+    send("FireCO2Alarm>${msg}...")
+    
+    if (theVoice){
+        theVoice.speak(msg)
+    }
 
     def now = new Date().getTime()                         // Turn the switches on at night
     astroCheck()
     if (now > state.setTime) {                                
         switches?.on()
-        send("FireCO2Alarm>Turned on the lights at night")
+        
+        msg ="turned on the lights"
+        send("FireCO2Alarm>${msg}")
+        if (theVoice){
+            theVoice.speak(msg)
+        }
 
     }
    
