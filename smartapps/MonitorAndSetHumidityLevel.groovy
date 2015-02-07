@@ -497,9 +497,8 @@ def setHumidityLevel() {
             if (detailedNotif == 'true') {
                 send "MonitorEcobeeHumidity>About to turn the dehumidifier on for ${diffVentTimeInMin.toString()} min. within an hour..."
             }
-            // use setHold instead of setThermotatSettings to turn on fan
             
-            ecobee.setHold("",coolTemp, heatTemp,'on',['dehumidifierMode':'on','dehumidifierLevel':'25',
+            ecobee.setThermostatSettings("",['dehumidifierMode':'on','dehumidifierLevel':'25',
                 'fanMinOnTime':"${min_fan_time}"]) 
             // calculate the delay to turn off the dehumidifier according to the scheduled monitoring cycle
                 
@@ -526,17 +525,13 @@ def setHumidityLevel() {
 private void turn_off_dehumidifier() {
 
 
-    def heatTemp = ecobee.currentHeatingSetpoint
-    def coolTemp = ecobee.currentCoolingSetpoint
-
     if (detailedNotif == 'true') {
         send ("MonitorEcobeeHumidity>about to turn off dehumidifier used as HRV....")
     }
     log.trace("About to turn off the dehumidifier used as HRV and the fan after timeout")
 
 
-    // use of setHold instead of setThermostatSettings to turn off the fan
-    ecobee.setHold("",coolTemp, heatTemp,'auto',['dehumidifierMode':'off'])
+    ecobee.setThermostatSettings("",['dehumidifierMode':'off'])
 
 }
 
