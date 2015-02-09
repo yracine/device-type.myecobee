@@ -968,10 +968,8 @@ def getThermostatOperatingState() {
 	
 	equipStatus = equipStatus.trim().toUpperCase()
     
-	def currentOpState = equipStatus.contains('HEAT')? 'heating' : (equipStatus.contains('COOL')? 'cooling' : 'idle')
-	if ((currentOpState == 'idle') && device.currentValue("thermostatFanMode").toUpperCase().contains('ON') ) {
-		currentOpState = 'fan only' 
-	}  
+	def currentOpState = equipStatus.contains('HEAT')? 'heating' : (equipStatus.contains('COOL')? 'cooling' : 
+    	equipStatus.contains('FAN')? 'fan only': 'idle')
 	return currentOpState
 }
 
@@ -1202,7 +1200,7 @@ void iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 						"iterateSetThermostatSettings>about to call setThermostatSettings for ${tstatlist}"
 					log.debug "iterateSetThermostatSettings> about to call setThermostatSettings for ${tstatlist}"
 				}
-				setThermostatSettings(tstatlist,tstatSettings)
+				setThermostatSettings("${tstatlist}",tstatSettings)
 				tstatlist = Id
 				nTstats = 1
 			} else {
@@ -1279,7 +1277,7 @@ void iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 						"iterateSetHold>about to call setHold for ${tstatlist}"
 					log.debug "iterateSethold> about to call setHold for ${tstatlist}"
 				}
-				setHoldExtraParams(tstatlist, coolingSetPoint, heatingSetPoint, fanMode,
+				setHoldExtraParams("${tstatlist}", coolingSetPoint, heatingSetPoint, fanMode,
 					tstatSettings, extraHoldParams)
 				tstatlist = Id
 				nTstats = 1
@@ -1400,7 +1398,7 @@ void iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 						"iterateCreateVacation>about to call createVacation for ${tstatlist}"
 					log.debug "iterateCreateVacation>about to call createVacation for ${tstatlist}"
 				}
-				createVacation(tstatlist, vacationName, targetCoolTemp, targetHeatTemp,
+				createVacation("${tstatlist}", vacationName, targetCoolTemp, targetHeatTemp,
 					targetStartDateTime, targetEndDateTime)
 				tstatlist = Id
 				nTstats = 1
@@ -1494,7 +1492,7 @@ void iterateDeleteVacation(tstatType, vacationName) {
 						"iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
 					log.debug "iterateDeleteVacation> about to call deleteVacation for ${tstatlist}"
 				}
-				deleteVacation(tstatlist, vacationName)
+				deleteVacation("${tstatlist}", vacationName)
 				tstatlist = Id
 				nTstats = 1
 			} else {
@@ -1558,7 +1556,7 @@ void iterateResumeProgram(tstatType) {
 						"iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
 					log.debug "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
 				}
-				resumeProgram(tstatlist)
+				resumeProgram("${tstatlist}")
 				tstatlist = Id
 				nTstats = 1
 			} else {
@@ -1855,7 +1853,7 @@ void iterateSetClimate(tstatType, climateName) {
 			}
 			if ((nTstats > MAX_TSTAT_BATCH) || (i == (data.thermostatCount - 1))) { 
 				// process a batch of maximum 25 thermostats according to API doc
-				setClimate(tstatlist, climateName)
+				setClimate("${tstatlist}", climateName)
 				tstatlist = Id
 				nTstats = 1
 			} else {
