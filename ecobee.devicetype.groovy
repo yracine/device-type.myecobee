@@ -1139,8 +1139,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 	selectionJson = new JsonBuilder(selection)
 	if ((method != 'setThermostatSettings') && (tstatSettings != null) && (tstatSettings != [])) {
 		def function_clause = ((tstatParams != null) && (tsatParams != [])) ? 
-			[type:method, params: tstatParams
-			] : 
+			[type:method, params: tstatParams] : 
 			[type: method]
 		def bodyWithSettings = [functions: [function_clause], selection: selection,
 				thermostat: [settings: tstatSettings]
@@ -2631,10 +2630,10 @@ def getThermostatRevision(tstatType, thermostatId) {
 		def thermostatName = thermostatDetails[1]
 		def connected = thermostatDetails[2]
 		def internalRevision = thermostatDetails[6]
-        if (thermostatId == id) {
+		if (thermostatId == id) {
 			sendEvent name: "thermostatRevision", value: internalRevision
 			if (settings.trace) {	
-            	log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision"
+				log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision"
 			}
 			return
 		}
