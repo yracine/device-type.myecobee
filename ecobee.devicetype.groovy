@@ -844,22 +844,22 @@ private void generateEvent(Map results)
 		results.each { name, value ->
 			def isDisplayed = true
             
-		if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {
+			if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {
 				float tempValue = getTemperature(value).toFloat().round(1)
 				def isChange = isTemperatureStateChange(device, name, tempValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: tempValue.toString(), unit: getTemperatureScale(), displayed: isDisplayed)                                     									 
-		} else if (name.toUpperCase().contains("SPEED")) {
+			} else if (name.toUpperCase().contains("SPEED")) {
  				float speedValue = getSpeed(value).toFloat().round(1)
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
-		} else if (name.toUpperCase().contains("HUMIDITY")) {
+			} else if (name.toUpperCase().contains("HUMIDITY")) {
  				float humidityValue = value.toFloat().round(1)
 				def isChange = isStateChange(device, name, humidityValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: humidityValue.toString(), unit: "%", displayed: isDisplayed)                                     									 
- 		} else {
+ 			} else {
 				def isChange = isStateChange(device, name, value)
 				isDisplayed = isChange
 
@@ -2631,13 +2631,13 @@ def getThermostatRevision(tstatType, thermostatId) {
 		def thermostatName = thermostatDetails[1]
 		def connected = thermostatDetails[2]
 		def internalRevision = thermostatDetails[6]
-        	if (thermostatId == id) {
-				sendEvent name: "thermostatRevision", value: internalRevision
-				if (settings.trace) {
-					log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision"
-				}
-				return
-        	}
+        if (thermostatId == id) {
+			sendEvent name: "thermostatRevision", value: internalRevision
+			if (settings.trace) {	
+            	log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision"
+			}
+			return
+		}
 		            
 	}
 }
