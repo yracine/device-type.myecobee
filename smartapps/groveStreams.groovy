@@ -2,7 +2,6 @@
  *  groveStreams
  *
  *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -178,7 +177,7 @@ def handleWaterEvent(evt) {
 def handleSmokeEvent(evt) {
     queueValue(evt) { it.toString() }
 }
-def handleCarboneMonoxideEvent(evt) {
+def handleCarbonMonoxideEvent(evt) {
     queueValue(evt) { it.toString() }
 }
 
