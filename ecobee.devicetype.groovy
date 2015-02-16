@@ -490,17 +490,20 @@ void heatLevelDown() {
 }
 
 // handle commands
+// handle commands
 void setHeatingSetpoint(temp) {
 	def thermostatId= determine_tstat_id("") 	    
 	setHold(thermostatId, device.currentValue("coolingSetpoint"), temp,
 		null, null)
-	sendEvent(name: 'heatingSetpoint', value: temp)
+	sendEvent(name: 'heatingSetpoint', value: temp,unit: getTemperatureScale())
+	sendEvent("name":"thermostatSetpoint", "value": temp, unit: getTemperatureScale())     
 }
 void setCoolingSetpoint(temp) {
 	def thermostatId= determine_tstat_id("") 	    
 	setHold(settings.thermostatId, temp, device.currentValue("heatingSetpoint"),
 		null, null)
-	sendEvent(name: 'coolingSetpoint', value: temp)
+	sendEvent(name: 'coolingSetpoint', value: temp,unit: getTemperatureScale())
+	sendEvent("name":"thermostatSetpoint", "value": temp,unit: getTemperatureScale())     
 }
 void off() {
 	setThermostatMode('off')
@@ -534,6 +537,9 @@ void fanAuto() {
 }
 void fanOff() { // fanOff is not supported, setting it to 'auto' instead.
 	setThermostatFanMode('auto')
+}
+def fanCirculate() {
+	fanOn()
 }
 void setThermostatFanMode(mode) {
 	def thermostatId= determine_tstat_id("") 	    
