@@ -155,6 +155,7 @@ metadata {
 		command "dehumidifierOn"
 		command "humidifierOff"
 		command "humidifierAuto"
+		command "humidifierManual"
 		command "setHumidifierLevel"
 		command "setDehumidifierLevel"
 		command "updateGroup"
@@ -183,7 +184,6 @@ metadata {
 		command "setThisTstatClimate"
 		command "setThermostatSettings"
 		command "iterateSetThermostatSettings"
-		command "getThermostatOperatingState"
 		command "getEquipmentStatus"
 		command "refreshChildTokens" 
 		command "autoAway"
@@ -269,12 +269,12 @@ simulator {
 		}
 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false,
 			decoration: "flat") {
-			state "heat", label: '${currentValue}° heat', unit: "C", 
+			state "heat", label: '${currentValue}° heat', unit: "F", 
 			backgroundColor: "#ffffff"
 		}
 		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false,
 			decoration: "flat") {
-			state "cool", label: '${currentValue}° cool', unit: "C", 
+			state "cool", label: '${currentValue}° cool', unit: "F", 
 			backgroundColor: "#ffffff"
 		}
 		valueTile("humidity", "device.humidity", inactiveLabel: false, 
@@ -490,7 +490,7 @@ void heatLevelDown() {
 }
 
 // handle commands
-// handle commands
+
 void setHeatingSetpoint(temp) {
 	def thermostatId= determine_tstat_id("") 	    
 	setHold(thermostatId, device.currentValue("coolingSetpoint"), temp,
@@ -539,7 +539,8 @@ void fanOff() { // fanOff is not supported, setting it to 'auto' instead.
 	setThermostatFanMode('auto')
 }
 def fanCirculate() {
-	fanOn()
+	fanAuto()
+	setFanMinOnTime(15)	// Set a minimum of 15 minutes of fan per hour
 }
 void setThermostatFanMode(mode) {
 	def thermostatId= determine_tstat_id("") 	    
@@ -549,7 +550,8 @@ void setThermostatFanMode(mode) {
 	sendEvent(name: 'thermostatFanMode', value: mode)
 }
 void setFanMinOnTime(minutes) {
-	setThermostatSettings(settings.thermostatId, ['fanMinOnTime': "${minutes}"])
+	def thermostatId= determine_tstat_id("") 	    
+	setThermostatSettings(thermostatId, ['fanMinOnTime': "${minutes}"])
 	sendEvent(name: 'fanMinOnTime', value: minutes)
 }
 void ventilatorOn() {
@@ -575,8 +577,8 @@ void setVentilatorMode(mode) {
 }
 void setCondensationAvoid(flag) { // set the flag to true or false
 	flag = flag == 'true' ? 'true' : 'false'
-	def thermostatId= determine_tstat_id("") 	    
-	setThermostatSettings(thermostatId, ['condensationAvoid': "${flag}"])
+    def mode = (flag=='true')? 'auto': 'manual'
+	setHumidifierMode(mode)
 	sendEvent(name: 'condensationAvoid', value: flag)
 }
 void dehumidifierOn() {
@@ -597,6 +599,9 @@ void setDehumidifierLevel(level) {
 }
 void humidifierAuto() {
 	setHumidifierMode('auto')
+}
+void humidifierManual() {
+	setHumidifierMode('manual')
 }
 void humidifierOff() {
 	setHumidifierMode('off')
