@@ -577,7 +577,7 @@ void setVentilatorMode(mode) {
 }
 void setCondensationAvoid(flag) { // set the flag to true or false
 	flag = flag == 'true' ? 'true' : 'false'
-    def mode = (flag=='true')? 'auto': 'manual'
+ 	def mode = (flag=='true')? 'auto': 'manual'
 	setHumidifierMode(mode)
 	sendEvent(name: 'condensationAvoid', value: flag)
 }
