@@ -51,7 +51,7 @@ preferences {
 	section("At which interval in minutes (range=[10..59],default=59 min.)?") {
 		input "givenInterval", "number", title:"Interval", required: false
 	}
-	section("Maximum Temp differential for adjustments in Farenheits/Celcius") {
+	section("Maximum Temp adjustments in Farenheits/Celcius") {
 		input "givenTempDiff", "decimal", title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false
 	}
 	section("Choose outdoor Temperature & Humidity sensor to be used for monitoring") {
@@ -59,7 +59,7 @@ preferences {
 
 	}
 	section("Choose indoor temp sensors for average temp adjustment (optional)") {
-        	input "tempSensors", "capability.temperatureMeasurement", title: "Which temp sensors?",  multiple: true, required: false
+        	input "tempSensors", "capability.temperatureMeasurement", title: "Avg Temp on which temp sensors?",  multiple: true, required: false
     }
 	section("Choose indoor motion sensors for climate settings [Away, Home] (optional)") {
         	input "motions", "capability.motionSensor", title: "Where?",  multiple: true, required: false
