@@ -183,18 +183,18 @@ def motionEvtHandler(evt) {
 
 
 def ecobeeHeatTempHandler(evt) {
-	log.debug "ecobee's heating temp: $evt.value"
-}
-
-def ecobeeProgramTCoolHandler(evt) {
-	log.debug "ecobee's heating temp: $evt.value"
-}
-def ecobeeProgramHeatHandler(evt) {
-	log.debug "ecobee's heating temp: $evt.value"
+	log.debug "ecobee's heating setpoint: $evt.value"
 }
 
 def ecobeeCoolTempHandler(evt) {
-	log.debug "ecobee's cooling temp: $evt.value"
+	log.debug "ecobee's cooling setpoint: $evt.value"
+}
+
+def ecobeeProgramTCoolHandler(evt) {
+	log.debug "ecobee's program Cool temp: $evt.value"
+}
+def ecobeeProgramHeatHandler(evt) {
+	log.debug "ecobee's progran Heat temp: $evt.value"
 }
 
 def ecobeeHumidityHandler(evt) {
