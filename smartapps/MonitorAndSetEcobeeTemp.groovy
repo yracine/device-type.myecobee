@@ -144,7 +144,7 @@ private residentsHaveBeenQuiet() {
 	def result = true
 	def t0 = new Date(now() - (threshold * 60 *1000))
 	for (sensor in motions) {
-       		def recentStates = sensor.statesSince("motion", t0)
+		def recentStates = sensor.statesSince("motion", t0)
 		if (recentStates.find{it.value == "active"}) {
 			result = false
 			break
