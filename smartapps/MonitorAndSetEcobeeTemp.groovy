@@ -183,19 +183,19 @@ def motionEvtHandler(evt) {
 
 
 def ecobeeHeatTempHandler(evt) {
-	log.debug "ecobee's heating setpoint: $evt.value"
-}
-def ecobeeCoolTempHandler(evt) {
-	log.debug "ecobee's cooling setpoint: $evt.value"
+	log.debug "ecobee's heating temp: $evt.value"
 }
 
 def ecobeeProgramTCoolHandler(evt) {
-	log.debug "ecobee's program Cool temp: $evt.value"
+	log.debug "ecobee's heating temp: $evt.value"
 }
 def ecobeeProgramHeatHandler(evt) {
-	log.debug "ecobee's program heat temp: $evt.value"
+	log.debug "ecobee's heating temp: $evt.value"
 }
 
+def ecobeeCoolTempHandler(evt) {
+	log.debug "ecobee's cooling temp: $evt.value"
+}
 
 def ecobeeHumidityHandler(evt) {
 	log.debug "ecobee's humidity level: $evt.value"
@@ -284,7 +284,7 @@ private def check_if_hold_needed() {
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
 		max_temp_diff = givenTempDiff ?: 2 // 2°C temp differential is applied by default
-		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-25) // by default, -17°C is the outdoor temp's threshold for more heating
+		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-17) // by default, -17°C is the outdoor temp's threshold for more heating
 		more_cool_threshold = (givenMoreCoolThreshold != null) ? givenMoreCoolThreshold : 30 // by default, 30°C is the outdoor temp's threshold for more cooling
 		less_heat_threshold = (givenLessHeatThreshold != null) ? givenLessHeatThreshold : 10 // by default, 10°C is the outdoor temp's threshold for less heating
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 22 // by default, 22°C is the outdoor temp's threshold for less cooling
@@ -490,7 +490,7 @@ private def check_if_hold_justified() {
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
 		max_temp_diff = givenTempDiff ?: 2 // 2°C temp differential is applied by default
-		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-25) // by default, -17°C is the outdoor temp's threshold for more heating
+		more_heat_threshold = (givenMoreHeatThreshold != null) ? givenMoreHeatThreshold : (-17) // by default, -17°C is the outdoor temp's threshold for more heating
 		more_cool_threshold = (givenMoreCoolThreshold != null) ? givenMoreCoolThreshold : 30 // by default, 30°C is the outdoor temp's threshold for more cooling
 		less_heat_threshold = (givenLessHeatThreshold != null) ? givenLessHeatThreshold : 10 // by default, 10°C is the outdoor temp's threshold for less heating
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 22 // by default, 22°C is the outdoor temp's threshold for less cooling
