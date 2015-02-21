@@ -21,7 +21,7 @@ definition(
 	name: "MonitorAndSetEcobeeTemp",
 	namespace: "yracine",
 	author: "Yves Racine",
-	description: "Monitor And Set Ecobee Temperature according to outdoor temperature and humidity.",
+	description: "Monitor And Set Ecobee Temperature according to indoor motion sensors & outdoor temperature and humidity.",
 	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
