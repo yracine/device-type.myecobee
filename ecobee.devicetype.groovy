@@ -209,7 +209,7 @@ simulator {
 		valueTile("temperature", "device.temperature", width: 2, height: 2,
 			canChangeIcon: true) {
 //		If one prefers Celsius over Farenheits, just comment out the temperature in Farenheits 
-//		and remove the comment below to have the right color scale in Celcius.
+//		and remove the comment below to have the right color scale in Celsius.
 //		This issue will be solved as soon as Smartthings supports dynamic tiles
 //		valueTile("temperature", "device.temperature", width: 2, height: 2) {
 //			state("temperature", label: '${currentValue}°', unit: "C", 
