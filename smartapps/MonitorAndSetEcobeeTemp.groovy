@@ -51,7 +51,7 @@ preferences {
 	section("At which interval in minutes (range=[10..59],default=59 min.)?") {
 		input "givenInterval", "number", title:"Interval", required: false
 	}
-	section("Maximum Temp adjustment in Farenheits/Celcius") {
+	section("Maximum Temp adjustment in Farenheits/Celsius") {
 		input "givenTempDiff", "decimal", title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false
 	}
 	section("Choose outdoor Temperature & Humidity sensor to be used for monitoring") {
