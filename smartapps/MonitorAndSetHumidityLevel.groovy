@@ -66,7 +66,7 @@ preferences {
     section("Choose Outdoor humidity sensor to be used") {
         input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
     }	
-    section("Minimum temperature for dehumidification (in Farenheits/Celcius)") {
+    section("Minimum temperature for dehumidification (in Farenheits/Celsius)") {
         input "givenMinTemp", "decimal", title: "Min Temp (default=10°F/-15°C)", required:false
     }
     section("Use free cooling using HRV/Dehumidifier (By default=false)") {
