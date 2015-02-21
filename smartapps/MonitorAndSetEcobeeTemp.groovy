@@ -29,61 +29,91 @@ definition(
 
 preferences {
 
-	section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
-		input "ecobee", "capability.thermostat", title: "Which Ecobee?"
-	}
-	section("For more heating in cold season, outdoor temp's threshold (default <= 10°F/-17°C)") {
-		input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
-	}
-	section("For less heating in cold season, outdoor temp's threshold (default >= 50°F/10°C)") {
-		input "givenLessHeatThreshold", "decimal", title: "Outdoor temp's threshold for less heating", required: false
-	}
-	section("For more cooling in hot season, outdoor temp's threshold (default >= 85°F/30°C)") {
-		input "givenMoreCoolThreshold", "decimal", title: "Outdoor temp's threshold for more cooling", required: false
-	}
-	section("For less cooling in hot season, outdoor temp's threshold (default <= 75°F/22°C)") {
-		input "givenLessCoolThreshold", "decimal", title: "Outdoor temp's threshold for less cooling", required: false
-	}
-	section("For more cooling/heating, outdoor humidity's threshold (default >= 85%)") {
-		input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling/heating",
-			required: false
-	}
-	section("At which interval in minutes (range=[10..59],default=59 min.)?") {
-		input "givenInterval", "number", title:"Interval", required: false
-	}
-	section("Maximum Temp adjustment in Farenheits/Celsius") {
-		input "givenTempDiff", "decimal", title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false
-	}
-	section("Choose outdoor Temperature & Humidity sensor to be used for temp adjustment") {
-		input "outdoorSensor", "capability.temperatureMeasurement", title: "Outdoor Temperature Sensor"
+	page(name: "thresholdSettings", title: "ThresholdSettings")
+	page(name: "sensorSettings", title: "SensorSettings")
+	page(name: "otherSettings", title: "OtherSettings")
+}
 
-	}
-	section("Choose indoor sensor(s) with both Motion & Temp capabilities to be used for dynamic temp adjustment when occupied (optional)") {
-		input "indoorSensors", "capability.motionSensor", title: "Which Indoor Motion/Temperature Sensor(s)", required: false, multiple:true
 
+def thresholdSettings() {
+	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
+    	section("About") {	
+			paragraph "MonitorAndSetEcobeeTemp, the smartapp that can adjust your ecobee's setpoints based on in/out-door sensors"
+			paragraph "Version 1.9\n\n" +
+			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
+			"Copyright©2014 Yves Racine"
+			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
+			description: "http://github.com/yracine/device-type.myecobee"
+		}
+		section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
+			input "ecobee", "capability.thermostat", title: "Which Ecobee?"
+		}
+		section("For more heating in cold season, outdoor temp's threshold (default <= 10°F/-17°C)") {
+			input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
+		}
+		section("For less heating in cold season, outdoor temp's threshold (default >= 50°F/10°C)") {
+			input "givenLessHeatThreshold", "decimal", title: "Outdoor temp's threshold for less heating", required: false
+		}
+		section("For more cooling in hot season, outdoor temp's threshold (default >= 85°F/30°C)") {
+			input "givenMoreCoolThreshold", "decimal", title: "Outdoor temp's threshold for more cooling", required: false
+		}	
+		section("For less cooling in hot season, outdoor temp's threshold (default <= 75°F/22°C)") {
+			input "givenLessCoolThreshold", "decimal", title: "Outdoor temp's threshold for less cooling", required: false
+		}
+		section("For more cooling/heating, outdoor humidity's threshold (default >= 85%)") {
+			input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling/heating",
+				required: false
+		}
+		section("At which interval in minutes (range=[10..59],default=59 min.)?") {
+			input "givenInterval", "number", title:"Interval", required: false
+		}
+		section("Maximum Temp adjustment in Farenheits/Celsius") {
+			input "givenTempDiff", "decimal", title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false
+		}
 	}
-	section("Choose any other indoor temp sensors for avg temp adjustment (optional)") {
+}
+    
+
+def sensorSettings() {
+	dynamicPage(name: "sensorSettings", title: "Sensors to be used", install: false, nextPage: otherSettings) {
+		section("Choose outdoor Temperature & Humidity sensor to be used for temp adjustment") {
+			input "outdoorSensor", "capability.temperatureMeasurement", title: "Outdoor Temperature Sensor"
+		}
+		section("Choose indoor sensor(s) with both Motion & Temp capabilities to be used for dynamic temp adjustment when occupied (optional)") {
+			input "indoorSensors", "capability.motionSensor", title: "Which Indoor Motion/Temperature Sensor(s)", required: false, multiple:true
+		}
+		section("Choose any other indoor temp sensors for avg temp adjustment (optional)") {
         	input "tempSensors", "capability.temperatureMeasurement", title: "Any other temp sensors?",  multiple: true, required: false
-    }
-	section("Choose any other indoor motion sensors for setting climate to [Away, Home] (optional)") {
+    	}
+		section("Choose any other indoor motion sensors for setting climate to [Away, Home] (optional)") {
         	input "motions", "capability.motionSensor", title: "Any other motion sensors?",  multiple: true, required: false
-    }
-	section("Trigger climate/temp adjustment when motion or no motion has been detected for (default=15 minutes)") {
+    	}
+		section("Trigger climate/temp adjustment when motion or no motion has been detected for (default=15 minutes)") {
         	input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
+		}
+	}        
+}
+ 
+ 
+def otherSettings() {
+	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
+    
+		section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
+			input "powerSwitch", "capability.switch", required: false
+		}
+		section("Notifications") {
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
+				false
+			input "phoneNumber", "phone", title: "Send a text message?", required: false
+		}
+		section("Detailed Notifications") {
+			input "detailedNotif", "Boolean", title: "Detailed Notifications?", metadata: [values: ["true", "false"]], required:
+				false
+		}
+		section([mobileOnly:true]) {
+			label title: "Assign a name for this SmartApp", required: false
+		}
 	}
-	section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
-		input "powerSwitch", "capability.switch", required: false
-	}
-	section("Notifications") {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
-			false
-		input "phoneNumber", "phone", title: "Send a text message?", required: false
-	}
-	section("Detailed Notifications") {
-		input "detailedNotif", "Boolean", title: "Detailed Notifications?", metadata: [values: ["true", "false"]], required:
-			false
-	}
-
 }
 
 
@@ -101,6 +131,7 @@ def updated() {
 	initialize()
 }
 def initialize() {
+	log.debug "Initialized with settings: ${settings}"
 
  	reset_state_program_values()
 	reset_state_motions()
@@ -117,8 +148,8 @@ def initialize() {
 	schedule("0 0/${delay} * * * ?", monitorAdjustTemp) // monitor & set indoor temp according to delay specified
 
 
-	subscribe(indoorSensors, "motion",motionEvtHandler)
-	subscribe(motions, "motion", motionEvtHandler)
+	subscribe(indoorSensors, "motion",motionEvtHandler, [filterEvents: false])
+	subscribe(motions, "motion", motionEvtHandler, [filterEvents: false])
     
 /*    
 	subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
@@ -135,8 +166,8 @@ def initialize() {
 	subscribe(ecobee, "programHeatTemp", ecobeeProgramHeatHandler)
 */
 	if (powerSwitch) {
-		subscribe(powerSwitch, "switch.off", offHandler)
-		subscribe(powerSwitch, "switch.on", onHandler)
+		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
+		subscribe(powerSwitch, "switch.on", onHandler, [filterEvents: false])
 	}
 	log.debug("initialize state=$state")
     
@@ -339,7 +370,7 @@ private def reset_state_motions() {
 }
 
 private def check_if_hold_needed() {
-	log.debug "Begin of Fcn check_if_hold_needed"
+	log.debug "Begin of Fcn check_if_hold_needed, settings= $settings"
 	float max_temp_diff
 	Integer humidity_threshold = givenHumThreshold ?: 85 // by default, 85% is the outdoor Humidity's threshold for more cooling
 	float more_heat_threshold, more_cool_threshold
@@ -556,7 +587,7 @@ private def check_if_hold_needed() {
 }
 
 private def check_if_hold_justified() {
-	log.debug "Begin of Fcn check_if_hold_justified"
+	log.debug "Begin of Fcn check_if_hold_justified, settings=$settings"
 	Integer humidity_threshold = givenHumThreshold ?: 85 // by default, 85% is the outdoor Humidity's threshold for more cooling
 	float more_heat_threshold, more_cool_threshold
 	float less_heat_threshold, less_cool_threshold
