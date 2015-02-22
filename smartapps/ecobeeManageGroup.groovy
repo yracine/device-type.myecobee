@@ -15,121 +15,126 @@
  *
  */
 definition(
-    name: "ecobeeManageGroup",
-    namespace: "yracine",
-    author: "Yves Racine",
-    description: "Allows a user to create,update, and delete an ecobee group",
-    category: "My Apps",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
+	name: "ecobeeManageGroup",
+	namespace: "yracine",
+	author: "Yves Racine",
+	description: "Allows a user to create,update, and delete an ecobee group",
+	category: "My Apps",
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png"
 )
 
 preferences {
-    
-    section("For this ecobee thermostat") {
-        input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
-    }
-    section("Create this group or update all groups (empty for all groups)") {
-        input "groupName", "text", title: "group Name", required: false
-    }
-    section("Or delete the group (By default=false)") {
-        input "deleteGroup", "Boolean", title: "delete?",metadata:[values:["true", "false"]], required:false
-    }
-    section("Synchronize Vacation") {
-        input "synchronizeVacation", "Boolean", title: "synchronize Vacation (default=false)?",metadata:[values:["true", "false"]], required: false
-    }
-    section("Synchronize Schedule") {
-        input "synchronizeSchedule", "Boolean", title: "synchronize Schedule(default=false)?",metadata:[values:["true", "false"]], required: false
-    }
-    section("Synchronize SystemMode") {
-        input "synchronizeSystemMode", "Boolean", title: "synchronize SystemMode (default=false)?",metadata:[values:["true", "false"]], required: false
-    }
-    section("Synchronize Alerts") {
-        input "synchronizeAlerts", "Boolean", title: "synchronize Alerts (default=false)?",metadata:[values:["true", "false"]], required: false
-    }
-    section("Synchronize QuickSave") {
-        input "synchronizeQuickSave", "Boolean", title: "synchronize QuickSave (default=false)?",metadata:[values:["true", "false"]], required: false
-    }
-    section("Synchronize User Preferences") {
-        input "synchronizeUserPreferences", "Boolean", title: "synchronize User Preferences (default=false)?",metadata:[values:["true", "false"]], required: false
-    }
+	section("About") {
+		paragraph "ecobeeManageGroup, the smartapp that manages your ecobee groups ['creation', 'update', 'delete']"
+		paragraph "Version 1.9\n\n" +
+			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
+			"Copyright©2014 Yves Racine"
+		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
+			description: "http://github.com/yracine"
+	}
+	section("For this ecobee thermostat") {
+		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+	}
+	section("Create this group or update all groups (empty for all groups)") {
+		input "groupName", "text", title: "Group Name", required: false
+	}
+	section("Or delete the group (By default=false)") {
+		input "deleteGroup", "Boolean", title: "delete?", metadata: [values: ["true", "false"]], required: false
+	}
+	section("Synchronize Vacation") {
+		input "synchronizeVacation", "Boolean", title: "synchronize Vacation (default=false)?", metadata: [values: ["true", "false"]], required: false
+	}
+	section("Synchronize Schedule") {
+		input "synchronizeSchedule", "Boolean", title: "synchronize Schedule(default=false)?", metadata: [values: ["true", "false"]], required: false
+	}
+	section("Synchronize SystemMode") {
+		input "synchronizeSystemMode", "Boolean", title: "synchronize SystemMode (default=false)?", metadata: [values: ["true", "false"]], required: false
+	}
+	section("Synchronize Alerts") {
+		input "synchronizeAlerts", "Boolean", title: "synchronize Alerts (default=false)?", metadata: [values: ["true", "false"]], required: false
+	}
+	section("Synchronize QuickSave") {
+		input "synchronizeQuickSave", "Boolean", title: "synchronize QuickSave (default=false)?", metadata: [values: ["true", "false"]], required: false
+	}
+	section("Synchronize User Preferences") {
+		input "synchronizeUserPreferences", "Boolean", title: "synchronize User Preferences (default=false)?", metadata: [values: ["true", "false"]], required: false
+	}
 
-    section( "Notifications" ) {
-        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
-        input "phoneNumber", "phone", title: "Send a text message?", required: false
-    }
-    
+	section("Notifications") {
+		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
+		input "phoneNumber", "phone", title: "Send a text message?", required: false
+	}
 
-            
+
+
 
 }
 
 
 
 def installed() {
-    
-    ecobee.poll()
-    subscribe(app, appTouch)
+
+	ecobee.poll()
+	subscribe(app, appTouch)
 
 }
 
 
 def updated() {
-    
-    
-    ecobee.poll()
-    subscribe(app, appTouch)
+
+
+	ecobee.poll()
+	subscribe(app, appTouch)
 
 
 }
 
 def appTouch(evt) {
-    log.debug "EcobeeManageGroup> about to take actions"
-     
-    // by default,  all flags are set to false
- 
-    def syncVacationFlag = (synchronizeVacation != null) ? synchronizeVacation : 'false'      
-    def syncScheduleFlag = (synchronizeSchedule != null) ? synchronizeSchedule: 'false'    
-    def syncSystemModeFlag = (synchronizeSystemMode != null) ? synchronizeSystemMode : 'false'
-    def syncAlertsFlag = (synchronizeAlerts != null) ? synchronizeAlerts : 'false'         
-    def syncQuickSaveFlag = (synchronizeQuickSave != null) ? synchronizeQuickSave : 'false'   
-    def syncUserPreferencesFlag = (synchronizeUserPreferences != null) ? synchronizeUserPreferences : 'false'   
-    def deleteGroupFlag = (deleteGroup != null) ? deleteGroup  : 'false'
-    
-    def groupSettings = [synchronizeVacation:"${syncVacationFlag}",synchronizeSchedule:"${syncScheduleFlag}",
-                        synchronizeSystemMode:"${syncSystemModeFlag}",synchronizeAlerts:"${syncAlertsFlag}",
-                        synchronizeQuickSave:"${syncQuickSaveFlag}",synchronizeUserPreferences:"${syncUserPreferencesFlag}"
-                        ]
+	log.debug "EcobeeManageGroup> about to take actions"
 
-    log.trace "ecobeeManageGroup>deleteGroupFlag=${deleteGroupFlag},  groupName = ${groupName}, groupSettings= ${groupSettings}" 
-    
-    if (deleteGroupFlag=='true') {
-       ecobee.deleteGroup(null,groupName )
-       send("ecobeeManageGroup>groupName=${groupName} deleted")
-    
-    }
-    else if ((groupName != "") && (groupName != null)) {
-    
-       ecobee.createGroup(groupName, null, groupSettings )
-       send("ecobeeManageGroup>groupName=${groupName} created")
-    }
-    else {
-       ecobee.iterateUpdateGroup(null, groupSettings)    
-       send("ecobeeManageGroup>all groups associated with thermostat updated with ${groupSettings}")
-    }
-    
+	// by default,  all flags are set to false
+
+	def syncVacationFlag = (synchronizeVacation != null) ? synchronizeVacation : 'false'
+	def syncScheduleFlag = (synchronizeSchedule != null) ? synchronizeSchedule : 'false'
+	def syncSystemModeFlag = (synchronizeSystemMode != null) ? synchronizeSystemMode : 'false'
+	def syncAlertsFlag = (synchronizeAlerts != null) ? synchronizeAlerts : 'false'
+	def syncQuickSaveFlag = (synchronizeQuickSave != null) ? synchronizeQuickSave : 'false'
+	def syncUserPreferencesFlag = (synchronizeUserPreferences != null) ? synchronizeUserPreferences : 'false'
+	def deleteGroupFlag = (deleteGroup != null) ? deleteGroup : 'false'
+
+	def groupSettings = [synchronizeVacation: "${syncVacationFlag}", synchronizeSchedule: "${syncScheduleFlag}",
+		synchronizeSystemMode: "${syncSystemModeFlag}", synchronizeAlerts: "${syncAlertsFlag}",
+		synchronizeQuickSave: "${syncQuickSaveFlag}", synchronizeUserPreferences: "${syncUserPreferencesFlag}"
+	]
+
+	log.trace "ecobeeManageGroup>deleteGroupFlag=${deleteGroupFlag},  groupName = ${groupName}, groupSettings= ${groupSettings}"
+
+	if (deleteGroupFlag == 'true') {
+		ecobee.deleteGroup(null, groupName)
+		send("ecobeeManageGroup>groupName=${groupName} deleted")
+
+	} else if ((groupName != "") && (groupName != null)) {
+
+		ecobee.createGroup(groupName, null, groupSettings)
+		send("ecobeeManageGroup>groupName=${groupName} created")
+	} else {
+		ecobee.iterateUpdateGroup(null, groupSettings)
+		send("ecobeeManageGroup>all groups associated with thermostat updated with ${groupSettings}")
+	}
+
 }
 
 private send(msg) {
-    if ( sendPushMessage != "No" ) {
-        log.debug( "sending push message" )
-        sendPush( msg )
-    }
+	if (sendPushMessage != "No") {
+		log.debug("sending push message")
+		sendPush(msg)
+	}
 
-    if ( phone ) {
-        log.debug( "sending text message" )
-        sendSms( phone, msg )
-    }
+	if (phone) {
+		log.debug("sending text message")
+		sendSms(phone, msg)
+	}
 
-    log.debug msg
+	log.debug msg
 }
