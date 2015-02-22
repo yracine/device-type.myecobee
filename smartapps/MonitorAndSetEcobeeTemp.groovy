@@ -24,9 +24,9 @@ definition(
 	author: "Yves Racine",
 	description: "Monitor And Set Ecobee Temperature according to indoor motion sensors & outdoor temperature and humidity.",
 	category: "My Apps",
-	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-	iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
+)
 
 preferences {
 
