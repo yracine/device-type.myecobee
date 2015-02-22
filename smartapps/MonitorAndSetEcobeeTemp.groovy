@@ -2,7 +2,7 @@
  *  MonitorAndSetEcobeeTemp
  *
  *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
  *
@@ -37,7 +37,7 @@ preferences {
 
 def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
-		section("About") {	
+    	section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp, the smartapp that can adjust your ecobee's setpoints based on in/out-door sensors"
 			paragraph "Version 1.9\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
@@ -448,7 +448,7 @@ private def check_if_hold_needed() {
 	}
 	reset_state_motions()
     
-	if (state.motions) {  // the following logic is done only if motion sensors are provided as input parameters
+	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
     
 		if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
                 
@@ -664,7 +664,7 @@ private def check_if_hold_justified() {
 		}
 	}
 	reset_state_motions()
-	if (state.motions) {  // the following logic is done only if motion sensors are provided as input parameters
+	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
 		if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
 			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program...")
 			ecobee.resumeProgram("")
