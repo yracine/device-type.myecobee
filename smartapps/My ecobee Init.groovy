@@ -1,4 +1,4 @@
-/**
+ /**
  *	My ecobee Init (Service Manager)
  *
  *	Author: scott
@@ -9,10 +9,10 @@
  *      JLH - 02-15-2014 - Fuller use of ecobee API
  *		Y.Racine Nov 2014 - Simplified the Service Manager as much as possible to reduce tight coupling with 
  *							its child device types (device handlers) for better performance and reliability.
- *                       linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
-  */
+ *      linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ **/
 definition(
-    name: "My ecobee Init",
+    name: "MyEcobeeInit",
     namespace: "yracine",
     author: "Yves Racine",
     description: "Connect your Ecobee thermostat to SmartThings.",
@@ -21,7 +21,8 @@ definition(
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 preferences {
-	page(name: "auth", title: "ecobee", nextPage:"deviceList", content:"authPage", uninstall: true)
+	page(name: "about", title: "About", nextPage: "auth")
+	page(name: "auth", title: "ecobee", content:"authPage", nextPage:"deviceList")
 	page(name: "deviceList", title: "ecobee", content:"ecobeeDeviceList", install:true)
 }
 
@@ -31,6 +32,19 @@ mappings {
 			GET: "swapToken"
 		]
 	}
+}
+
+def about() {
+ 	dynamicPage(name: "about", install: false, uninstall: true) {
+ 		section("About") {	
+			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
+			paragraph "Version 1.9\n\n" +
+			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
+			"Copyright©2014 Yves Racine"
+			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
+			description: "http://github.com/yracine/device-type.myecobee"
+		}
+	}        
 }
 
 def authPage() {
@@ -139,7 +153,7 @@ def getEcobeeThermostats(String type="") {
 	log.debug "device list params: $deviceListParams"
 
 	def stats = [:]
-	try {
+    try {
 		httpGet(deviceListParams) { resp ->
 
 			if(resp.status == 200)
@@ -173,7 +187,7 @@ def getEcobeeThermostats(String type="") {
 				}
 			}
             
-    		}        
+    	}        
 	} catch (java.net.UnknownHostException e) {
 		log.error "getEcobeeThermostats> Unknown host - check the URL " + deviceListParams.uri
 	} catch (java.net.NoRouteToHostException t) {
@@ -181,8 +195,7 @@ def getEcobeeThermostats(String type="") {
 	} catch (java.io.IOException e) {
 		log.error "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
 			deviceListParams
-		
-	}
+    }
 
 	log.debug "thermostats: $stats"
 
@@ -289,7 +302,7 @@ def updated() {
 def initialize() {
     
 	log.debug "initialize"
-    	int i =0
+   	int i =0
 	def devices = thermostats.collect { dni ->
 
 		def d = getChildDevice(dni)
