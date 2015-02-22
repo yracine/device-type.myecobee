@@ -2,7 +2,6 @@
  *  ecobeeSetClimate
  *
  *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -31,6 +30,14 @@ definition(
 preferences {
 
 	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
+		section("About") {
+			paragraph "ecobeeSetClimate, the smartapp that sets your ecobee thermostat to a given climate at a given day & time"
+			paragraph "Version 1.1\n\n" +
+				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
+				"Copyright©2014 Yves Racine"
+			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
+				description: "http://github.com/yracine"
+		}
 		section("Set the ecobee thermostat(s)") {
 			input "ecobee", "capability.thermostat", title: "Which ecobee thermostat(s)?", multiple: true
 
