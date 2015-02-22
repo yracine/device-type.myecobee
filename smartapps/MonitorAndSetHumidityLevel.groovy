@@ -26,8 +26,8 @@ definition(
 	author: "Yves Racine",
 	description: "Monitor And set Ecobee's humidity",
 	category: "My Apps",
-	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
 preferences {
@@ -45,7 +45,7 @@ def humiditySettings() {
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine/device-type.myecobee", style: "embedded", required: false, title: "More information...",
-				description: "http://github.com/yracine/device-type.myecobee"
+			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Monitor & set the ecobee thermostat's dehumidifer/humidifier/HRV/ERV") {
 			input "ecobee", "capability.thermostat", title: "Ecobee?"
