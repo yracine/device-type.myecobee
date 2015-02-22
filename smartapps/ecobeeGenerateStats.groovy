@@ -1,7 +1,6 @@
 /**
  *  ecobeeGenerateStats
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- * 
+ *
  *  Copyright 2015 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
  *
@@ -21,19 +20,18 @@ definition(
     author: "Yves Racine",
     description: "This smartapp allows a ST user to generate runtime stats (daily by scheduling or based on custom dates) on their devices controlled by ecobee such as a heating & cooling component,fan, dehumidifier/humidifier/HRV/ERV. ",
     category: "My Apps",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
-
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
+)
 
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
 		paragraph "Version 1.9\n\n" +
-				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
-				"Copyright©2014 Yves Racine"
+			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
+			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-			description: "http://github.com/yracine"
+		description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 
 	section("Generate daily stats for this ecobee thermostat") {
