@@ -2,7 +2,7 @@
  *  groveStreams
  *
  *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
  *
@@ -20,9 +20,9 @@ definition(
 	author: "Yves Racine",
 	description: "Log to groveStreams and send data streams based on devices selection",
 	category: "My Apps",
-	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-	iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
+)
 
 
 
@@ -33,7 +33,7 @@ preferences {
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-			description: "http://github.com/yracine"
+		description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 	section("Log devices...") {
 		input "temperatures", "capability.temperatureMeasurement", title: "Temperatures", required: false, multiple: true
