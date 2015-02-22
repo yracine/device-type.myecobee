@@ -3,7 +3,7 @@
  *
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- * 
+ 
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
  *
@@ -24,20 +24,20 @@ definition(
 	description:
 	"Change the mode manually (by pressing the app's play button) and automatically at the ecobee thermostat(s)",
 	category: "My Apps",
-	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
-
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
+)
 
 preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
-                " based on ST hello mode."
+                		" based on ST hello mode."
 			paragraph "Version 1.9\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-				description: "http://github.com/yracine"
+			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("When SmartThings' hello home mode change to [ex. 'Away', 'Home']") {
 			input "newMode", "mode", metadata: [values: ["Away", "Home", "Night"]]
