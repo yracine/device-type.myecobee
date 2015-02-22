@@ -2,7 +2,6 @@
  *  ecobeeChangeMode
  *
  *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -30,7 +29,16 @@ definition(
 
 preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
-		section("When Smartthings' hello home mode change to [ex. 'Away', 'Home']") {
+		section("About") {
+			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
+                " based on ST hello mode."
+			paragraph "Version 1.9\n\n" +
+				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
+				"Copyright©2014 Yves Racine"
+			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
+				description: "http://github.com/yracine"
+		}
+		section("When SmartThings' hello home mode change to [ex. 'Away', 'Home']") {
 			input "newMode", "mode", metadata: [values: ["Away", "Home", "Night"]]
 		}
 
@@ -45,7 +53,7 @@ preferences {
 				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
 		}
-        	section([mobileOnly:true]) {
+        section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
 			mode title: "Set for specific mode(s)", required: false
 		}
@@ -54,14 +62,14 @@ preferences {
 
 
 def selectProgram() {
-	def ecobeePrograms = thermostats[0].currentClimateList.toString().minus('[').minus(']').tokenize(',')
+    def ecobeePrograms = thermostats[0].currentClimateList.toString().minus('[').minus(']').tokenize(',')
 	log.debug "programs: $ecobeePrograms"
 
 
 	return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage:
 		"Notifications") {
 		section("Select Program") {
-			input "givenClimate", "enum", title: "Which program?", options: ecobeePrograms, required: true
+			input "givenClimate", "enum", title: "Change to this program?", options: ecobeePrograms, required: true
 		}
 	}
 }
