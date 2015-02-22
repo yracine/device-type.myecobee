@@ -22,8 +22,8 @@ definition(
 	author: "Yves Racine",
 	description: "resumes your ecobee's scheduled program when a presence is back home",
 	category: "My Apps",
-	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
 preferences {
@@ -33,7 +33,7 @@ preferences {
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-			description: "http://github.com/yracine"
+		description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 
 	section("When one of these people arrive at home") {
