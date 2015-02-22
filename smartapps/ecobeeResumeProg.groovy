@@ -20,7 +20,7 @@ definition(
 	name: "ecobeeResumeProg",
 	namespace: "yracine",
 	author: "Yves Racine",
-	description: "EcobeeResumeProg",
+	description: "resumes your ecobee's scheduled program when a presence is back home",
 	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
@@ -140,7 +140,7 @@ def presence(evt) {
 def takeActions() {
 
 
-	ecobee.resumeProgram()
+	ecobee.resumeProgram("")
 
 }
 
