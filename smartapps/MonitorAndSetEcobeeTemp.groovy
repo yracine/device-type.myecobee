@@ -734,7 +734,7 @@ private def check_if_hold_justified() {
 			send("MonitorEcobeeTemp>eval:  moreCoolThresholdHumidity ${humidity_threshold}% vs. outdoorHumidity ${outdoorHumidity}%")
 			send("MonitorEcobeeTemp>eval:  programCoolTemp= ${programCoolTemp}° vs. avgIndoorTemp= ${avg_indoor_temp}°")
 		}
-		if ((state.tempSensors) && (avg_indoor_temp > coolTemp)) {
+		if ((state.tempSensors != []) && (avg_indoor_temp > coolTemp)) {
 			send("MonitorEcobeeTemp>Hold justified, avgIndoorTemp ($avg_indoor_temp°) > coolingSetpoint (${coolTemp}°)")
 			return
 		}                
@@ -770,7 +770,7 @@ private def check_if_hold_justified() {
 			send("MonitorEcobeeTemp>eval: moreHeatThresholdHum ${humidity_threshold}% vs. outdoorHum ${outdoorHumidity}%")
 			send("MonitorEcobeeTemp>eval: programHeatTemp= ${programHeatTemp}° vs. avgIndoorTemp= ${avg_indoor_temp}°")
 		}
-		if ((state.tempSensors) && (avg_indoor_temp < heatTemp)) {
+		if ((state.tempSensors != []) && (avg_indoor_temp < heatTemp)) {
 			send("MonitorEcobeeTemp>Hold justified, avgIndoorTemp ($avg_indoor_temp°) < heatingSetpoint (${heatTemp}°)")
 			return
 		}                
