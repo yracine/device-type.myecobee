@@ -1,6 +1,7 @@
 /**
  *  ecobeeGenerateStats
- *
+ *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ * 
  *  Copyright 2015 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
  *
