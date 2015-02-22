@@ -30,7 +30,7 @@ definition(
 
 preferences {
 	section("About") {
-		paragraph "AwayFromHome, the smartapp that sets your ecobee thermostat to 'Away' or to some specific settings when all presences leaves your home"
+		paragraph "AwayFromHome, the smartapp that sets your ecobee thermostat to 'Away' or to some specific settings when all presences leave your home"
 		paragraph "Version 1.9\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
