@@ -96,6 +96,7 @@ metadata {
 		attribute "heatStages", "string"
 		attribute "coolStages", "string"
 		attribute "climateName", "string"
+		attribute "setClimate", "string"
         
         // Report Runtime events
         
@@ -384,11 +385,11 @@ simulator {
 		}
 		valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel:
 			false, width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Out Temp ${currentValue}°', unit: "C"
+			state "default", label: 'OutTemp ${currentValue}°', unit: "C"
 		}
 		valueTile("weatherRelativeHumidity", "device.weatherRelativeHumidity",
 			inactiveLabel: false, width: 1, height: 1.5, decoration: "flat") {
-			state "default", label: 'Out Hum ${currentValue}%', unit: "humidity"
+			state "default", label: 'OutHum ${currentValue}%', unit: "humidity"
 		}
 		valueTile("weatherTempHigh", "device.weatherTempHigh", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
@@ -697,7 +698,9 @@ void setThisTstatClimate(climateName) {
     
 		resumeProgram(thermostatId)
 		setClimate(thermostatId, climateName)
+        
 		sendEvent(name: 'programScheduleName', value: climateName)
+
 		poll() // to refresh the values in the UI
 	}
 }
@@ -705,6 +708,8 @@ void setThisTstatClimate(climateName) {
 def parse(String description) {
 
 }
+
+
 
 void poll() {
 	def tstatId,ecobeeType
@@ -736,10 +741,14 @@ void poll() {
 		}
 	}
 
+	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
+	def progDisplayName = getCurrentProgName()
+	def currentClimateTemplate = device.currentValue("setClimate")
+	currentClimateTemplate= (currentClimateTemplate)? currentClimateTemplate: progDisplayName  // if not climate template set, then use current program
 	if (settings.trace) {
-		log.debug "poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+		log.debug "poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef},currentClimateTemplate=${currentClimateTemplate}"
 		sendEvent name: "verboseTrace", value:
-			"poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef}"
+			"poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef},currentClimateTemplate=${currentClimateTemplate}"
 		if (foundEvent) {
 			sendEvent name: "verboseTrace", value:
 				"poll>thermostatId = ${thermostatId},indiceEvent=${indiceEvent}"
@@ -763,15 +772,12 @@ void poll() {
 				"poll>thermostatId = ${thermostatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
 		}
 	}
-    
-	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
-	def progDisplayName = getCurrentProgName()
-    
+
 	def dataEvents = [
  		thermostatName:data.thermostatList[0].name,
 		thermostatMode:data.thermostatList[0].settings.hvacMode,
 		temperature: data.thermostatList[0].runtime.actualTemperature,
-		humidity:data.thermostatList[0].runtime.actualHumidity,
+		humidity:data.thermostatList[0].runtime.actualHumidity.toDouble(),
 		coolingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].coolHoldTemp: 
 			data.thermostatList[0].runtime.desiredCool,
 		heatingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].heatHoldTemp: 
@@ -813,12 +819,13 @@ void poll() {
 		alerts: getAlerts(),
 		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
 		climateList: getClimateList(),
-		presence: (progDisplayName.toUpperCase()!='AWAY')? 'present':'not present',
+		presence: (currentClimateTemplate.toUpperCase()!='AWAY')? "present":"not present",
 		heatStages:data.thermostatList[0].settings.heatStages.toString(),
 		coolStages:data.thermostatList[0].settings.coolStages.toString(),
 		climateName: currentClimate.name,
+		setClimate: currentClimateTemplate
 	]
-     
+         
 	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type == 'quickSave')) {
 		dataEvents.programEndTimeMsg ="Quicksave running"
 	}
@@ -854,13 +861,18 @@ private void generateEvent(Map results)
 	{
 		results.each { name, value ->
 			def isDisplayed = true
-            
-			if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {
+
+// 			Temperature variable names contain 'temp' or 'setpoint'            
+
+			if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {  
 				float tempValue = getTemperature(value).toFloat().round(1)
 				def isChange = isTemperatureStateChange(device, name, tempValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: tempValue.toString(), unit: getTemperatureScale(), displayed: isDisplayed)                                     									 
-			} else if (name.toUpperCase().contains("SPEED")) {
+			} else if (name.toUpperCase().contains("SPEED")) { // Temperature variable names contain 'temp' or 'setpoint'
+
+// 			Speed variable names contain 'speed'
+
  				float speedValue = getSpeed(value).toFloat().round(1)
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
@@ -879,6 +891,7 @@ private void generateEvent(Map results)
 		}
 	}
 }
+
 
 
 private def getCurrentProgName() {
@@ -939,7 +952,7 @@ private def getTemperature(value) {
 	if(getTemperatureScale() == "F"){
 		return farenheits
 	} else {
-		return fToC(farenheits)
+		return fToC(farenheits) 
 	}
 }
 
@@ -955,9 +968,9 @@ private def getSpeed(value) {
 private def getDistanceScale() {
 	def scale= getTemperatureScale()
 	if (scale == 'C') {
-		return "km"
+		return "kmh"
 	}
-	return "miles"
+	return "mph"
 }
 
 
@@ -1234,20 +1247,25 @@ void setThermostatSettings(thermostatId,tstatSettings = []) {
 			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
 	}
 	def bodyReq = build_body_request('setThermostatSettings',null,thermostatId,null,tstatSettings)
-	api('setThermostatSettings', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			if (settings.trace) {
+
+	def statusCode=true
+	int j=0        
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+		api('setThermostatSettings', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				if (settings.trace) {
+					sendEvent name: "verboseTrace", value:
+						"setThermostatSettings>done for ${thermostatId}"
+				}
+			} else {
+				log.error "setThermostatSettings> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
-					"setThermostatSettings>done for ${thermostatId}"
-			}
-		} else {
-			log.error "setThermostatSettings> error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"setThermostatSettings>error ${statusCode.toString()} for ${thermostatId}"
-		}
-	}
+					"setThermostatSettings>error ${statusCode.toString()} for ${thermostatId}"
+			} /* end if statusCode */
+		} /* end api call */                
+	} /* end for */
 }
 
 // iterateSetHold: iterate thru all the thermostats under a specific account and create the hold event
@@ -1358,20 +1376,26 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
     		
 	}
 	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams,tstatSettings)
-	api('setHold', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			if (settings.trace) {
+
+	def statusCode=true
+	int j=0        
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+		api('setHold', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				if (settings.trace) {
+					sendEvent name: "verboseTrace", value:
+						"setHold>done for ${thermostatId}"
+				}
+			} else {
+				log.error "setHold> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
-					"setHold>done for ${thermostatId}"
-			}
-		} else {
-			log.error "setHold> error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"setHold>error ${statusCode.toString()} for ${thermostatId}"
-		}
-	}
+					"setHold>error ${statusCode.toString()} for ${thermostatId}"
+			} /* end if statusCode */
+		} /* end api call */
+        
+	}/* end while */
 }
 
 // iterateCreateVacation: iterate thru all the thermostats under a specific account and create the vacation
@@ -1754,21 +1778,27 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	if (settings.trace) {
 		log.debug "updateGroup> about to call api with body = ${bodyReq} for groupName =${groupName},thermostatId = ${thermostatId}..."
 	}
-	api('updateGroup', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			if (settings.trace) {
-				log.debug "updateGroup>done for groupName =${groupName}, ${thermostatId}"
+	def statusCode=true
+        
+	int j=0        
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+		api('updateGroup', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+					if (settings.trace) {
+					log.debug "updateGroup>done for groupName =${groupName}, ${thermostatId}"
+					sendEvent name: "verboseTrace", value:
+						"updateGroup>done for groupName =${groupName}, ${thermostatId}"
+				}
+			} else {
+				log.error "updateGroup> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
-					"updateGroup>done for groupName =${groupName}, ${thermostatId}"
-			}
-		} else {
-			log.error "updateGroup> error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"updateGroup>error ${statusCode.toString()} for ${thermostatId}"
-		}
-	}
+					"updateGroup>error ${statusCode.toString()} for ${thermostatId}"
+			} /* end if statusCode */
+		} /* end api call */                
+                        
+	} /* end while */
 }
 
 // Only valid for Smart and ecobee3 thermostats (not for EMS)
@@ -1907,23 +1937,34 @@ void setClimate(thermostatId, climateName) {
 			[holdClimateRef:"${climateRef}"
 			]
 		def bodyReq = build_body_request('setHold',null, data.thermostatList[i].identifier,tstatParams)
-		api('setHold', bodyReq) {resp ->
-			def statusCode = resp.data.status.code
-			def message = resp.data.status.message
-			if (!statusCode) {
-				if (settings.trace) {
-					log.debug "setClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
-					sendEvent name: "verboseTrace", value:
-						"setClimate>done for thermostatId =${data.thermostatList[i].identifier},climateName =${climateName}"
-				}
-			} else {
-				log.error "setClimate>error=${statusCode.toString()}, message = ${message}"
-				sendEvent name: "verboseTrace", value:
-					"setClimate>error ${statusCode.toString()} for ${climateName}"
-			}
-		}
+        def statusCode=true
+		int j=0        
+		while ((statusCode) && (j++ <2)) { // retries once if api call fails
+            
+			api('setHold', bodyReq) {resp ->
+				statusCode = resp.data.status.code
+				def message = resp.data.status.message
+				if (!statusCode) {
+					if (settings.trace) {
+						log.debug "setClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
+						sendEvent name: "verboseTrace", value:
+							"setClimate>done for thermostatId =${data.thermostatList[i].identifier},climateName =${climateName}"
 
+						/* Post the setClimate value */    
+                        
+						sendEvent(name: 'setClimate', value: climateName)
+					}
+				} else {
+					log.error "setClimate>error=${statusCode.toString()}, message = ${message}"
+					sendEvent name: "verboseTrace", value:
+						"setClimate>error ${statusCode.toString()} for ${climateName}"
+				} /* end if statusCode */
+			} /* end api call */                   
+		} /* end while */               
 	} /* end for */
+    
+    
+
 }
 
 // iterateUpdateClimate: iterate thru all the thermostats under a specific account and update their Climate
@@ -2098,22 +2139,26 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 			',"ventilatorMinOnTime":"5"}' // workaround due to ecobee create Climate bug, to be removed
 	}
 	bodyReq = bodyReq + ']}}}'
-	api('updateClimate', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			if (settings.trace) {
-				log.debug "updateClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
-				sendEvent name: "verboseTrace", value:
-					"updateClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
-			}
-		} else {
-			log.error "updateClimate>error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-					"updateClimate>error ${statusCode.toString()} for ${climateName}"
-		}
 
-	}
+	def statusCode=true
+	int j=0        
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+		api('updateClimate', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				if (settings.trace) {
+					log.debug "updateClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
+					sendEvent name: "verboseTrace", value:
+						"updateClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
+				}
+			} else {
+				log.error "updateClimate>error=${statusCode.toString()}, message = ${message}"
+				sendEvent name: "verboseTrace", value:"updateClimate>error ${statusCode.toString()} for ${climateName}"
+
+			} /* end if statusCode */
+		} /* end api call */               
+	} /* end for */
 }
 
 // thermostatId may only be 1 thermostat (not a list) 
@@ -2152,27 +2197,32 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 	}
 
 	bodyReq = bodyReq + '}}]}'
-	api('controlPlug', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			if (settings.trace) {
-				log.debug "controlPlug>done for thermostatId =${thermostatId}, plugName =${plugName}"
+
+	def statusCode=true
+	int j=0        
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+        api('controlPlug', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				if (settings.trace) {
+					log.debug "controlPlug>done for thermostatId =${thermostatId}, plugName =${plugName}"
+					sendEvent name: "verboseTrace", value:
+						"controlPlug>done for thermostatId =${thermostatId},plugName =${plugName}"
+				}
+				// post plug values 
+				sendEvent name: "plugName", value: "${plugName}"
+				sendEvent name: "plugState", value: "${plugState}"
+				if ((plugSettings != null) && (plugSettings != '')) {
+					sendEvent name: "plugSettings", value: "${plugSettings}"
+				}
+			} else {
+				log.error "controlPlug>error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
-					"controlPlug>done for thermostatId =${thermostatId},plugName =${plugName}"
-			}
-			// post plug values 
-			sendEvent name: "plugName", value: "${plugName}"
-			sendEvent name: "plugState", value: "${plugState}"
-			if ((plugSettings != null) && (plugSettings != '')) {
-				sendEvent name: "plugSettings", value: "${plugSettings}"
-			}
-		} else {
-			log.error "controlPlug>error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"controlPlug>error ${statusCode.toString()} for ${plugName}"
-		}
-	}
+					"controlPlug>error ${statusCode.toString()} for ${plugName}"
+			} /* end if statusCode */
+		} /* end api call */               
+	} /* end while */
 }
 
 
@@ -2254,58 +2304,62 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 	if (settings.trace) {
 		log.debug "getReportData> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
 	}
-	api('runtimeReport', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			if (settings.trace) {
-				sendEvent name: "verboseTrace", value:"getReportData> done for thermostatId ${thermostatId}"
-				log.debug "getReportData> done for thermostatId ${thermostatId}"
-			}
+	def statusCode=true
+	int j=0        
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
 
-			data.reportList = resp.data.reportList
-			data.startDate = resp.data.startDate
-			data.endDate = resp.data.endDate
-			data.startInterval = resp.data.startInterval
-			data.endInterval = resp.data.endInterval
-			data.columns = resp.data.columns
-			if (includeSensorData=='true') {
-	        		data.sensorList =  resp.data.sensorList
-			}                
-			if (postData=='true') {
+		api('runtimeReport', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
 				if (settings.trace) {
-					log.debug "getReportData>about to post reportData = $data.reportList.rowList[0].toString()"
-		                
+					sendEvent name: "verboseTrace", value:"getReportData> done for thermostatId ${thermostatId}"
+					log.debug "getReportData> done for thermostatId ${thermostatId}"
 				}
-				sendEvent name: "reportData", value: data.reportList.rowList[0].toString().minus('[').minus(']')
+
+				data.reportList = resp.data.reportList
+				data.startDate = resp.data.startDate
+				data.endDate = resp.data.endDate
+				data.startInterval = resp.data.startInterval
+				data.endInterval = resp.data.endInterval
+				data.columns = resp.data.columns
 				if (includeSensorData=='true') {
-					sendEvent name: "sensorMetadata", value: data.sensorList.sensors[0].toString()
- 					sendEvent name: "sensorData", value: data.sensorList.data[0].toString().minus('[').minus(']')
-				}                        
-			} else { // reinitialize data (empty the variables)
+	        		data.sensorList =  resp.data.sensorList
+				}                
+				if (postData=='true') {
+					if (settings.trace) {
+						log.debug "getReportData>about to post reportData = $data.reportList.rowList[0].toString()"
+					}
+					sendEvent name: "reportData", value: data.reportList.rowList[0].toString().minus('[').minus(']')
+					if (includeSensorData=='true') {
+						sendEvent name: "sensorMetadata", value: data.sensorList.sensors[0].toString()
+ 						sendEvent name: "sensorData", value: data.sensorList.data[0].toString().minus('[').minus(']')
+					}                        
+				} else { // reinitialize data (empty the variables)
             
 					sendEvent name: "reportData", value: ''
 					sendEvent name: "sensorMetadata", value: ''
  					sendEvent name: "sensorData", value: ''
-			}                
+				}                
             
-			if (settings.trace) {
-				log.debug "getReportData> startDate= ${data.startDate}"
-				log.debug "getReportData> endDate= ${data.endDate}"
-				log.debug "getReportData> startInterval= ${data.startInterval}"
-				log.debug "getReportData> endInterval= ${data.endInterval}"
-				log.debug "getReportData> columns= ${data.columns}"
-				log.debug "getReportData> reportList= ${data.reportList}"
-				log.debug "getReportData> sensorList= ${data.sensorList}"
-				log.debug "getReportData> postData= ${postData}"
-			}
+				if (settings.trace) {
+					log.debug "getReportData> startDate= ${data.startDate}"
+					log.debug "getReportData> endDate= ${data.endDate}"
+					log.debug "getReportData> startInterval= ${data.startInterval}"
+					log.debug "getReportData> endInterval= ${data.endInterval}"
+					log.debug "getReportData> columns= ${data.columns}"
+					log.debug "getReportData> reportList= ${data.reportList}"
+					log.debug "getReportData> sensorList= ${data.sensorList}"
+					log.debug "getReportData> postData= ${postData}"
+				}
         	        
-		} else {
-			log.error "getReportData> error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"getReportData>error=${statusCode} for ${thermostatId}"
-		}
-	}
+			} else {
+				log.error "getReportData> error=${statusCode.toString()}, message = ${message}"
+				sendEvent name: "verboseTrace", value:
+					"getReportData>error=${statusCode} for ${thermostatId}"
+			} /* end if statusCode */
+		} /* end api call */                
+	} /* end while */
 }
 
 private int get_interval(Date dateTime) {
@@ -2568,62 +2622,67 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 	if (settings.trace) {
 		log.debug "getThermostatInfo> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
 	}
-	api('thermostatInfo', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			data.thermostatList = resp.data.thermostatList
-			def thermostatName = data.thermostatList[0].name
-			// divide the temperature by 10 before for display or calculations later.
-			data.thermostatList[0].runtime.actualTemperature = data.thermostatList[0].runtime
-				.actualTemperature / 10
-			data.thermostatList[0].runtime.desiredCool = data.thermostatList[0].runtime
-				.desiredCool / 10
-			data.thermostatList[0].runtime.desiredHeat = data.thermostatList[0].runtime
-				.desiredHeat / 10
-			data.thermostatList[0].weather.forecasts[0].temperature = data.thermostatList[
-				0].weather.forecasts[0].temperature / 10
-			data.thermostatList[0].weather.forecasts[0].tempLow = data.thermostatList[
-				0].weather.forecasts[0].tempLow / 10
-			data.thermostatList[0].weather.forecasts[0].tempHigh = data.thermostatList[
-				0].weather.forecasts[0].tempHigh / 10
-			data.thermostatList[0].settings.quickSaveSetBack = data.thermostatList[0].settings
-				.quickSaveSetBack / 10
-			data.thermostatList[0].settings.quickSaveSetForward = data.thermostatList[
-				0].settings.quickSaveSetForward / 10
-			if (data.thermostatList[0].events.size() > 0) {
-				for (i in 0..data.thermostatList[0].events.size() - 1) {
-					if (data.thermostatList[0].events[i].running) {
-						// Divide the running events' temps by 10 for display later
-						data.thermostatList[0].events[i].coolHoldTemp = data.thermostatList[0].events[
-							i].coolHoldTemp / 10
-						data.thermostatList[0].events[i].heatHoldTemp = data.thermostatList[0].events[
-							i].heatHoldTemp / 10
+	def statusCode=true
+    int j=0    
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+
+		api('thermostatInfo', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				data.thermostatList = resp.data.thermostatList
+				def thermostatName = data.thermostatList[0].name
+				// divide the temperature by 10 before for display or calculations later.
+				data.thermostatList[0].runtime.actualTemperature = data.thermostatList[0].runtime
+					.actualTemperature / 10
+				data.thermostatList[0].runtime.desiredCool = data.thermostatList[0].runtime
+					.desiredCool / 10
+				data.thermostatList[0].runtime.desiredHeat = data.thermostatList[0].runtime
+					.desiredHeat / 10
+				data.thermostatList[0].weather.forecasts[0].temperature = data.thermostatList[
+					0].weather.forecasts[0].temperature / 10
+				data.thermostatList[0].weather.forecasts[0].tempLow = data.thermostatList[
+					0].weather.forecasts[0].tempLow / 10
+				data.thermostatList[0].weather.forecasts[0].tempHigh = data.thermostatList[
+					0].weather.forecasts[0].tempHigh / 10
+				data.thermostatList[0].settings.quickSaveSetBack = data.thermostatList[0].settings
+					.quickSaveSetBack / 10
+				data.thermostatList[0].settings.quickSaveSetForward = data.thermostatList[
+					0].settings.quickSaveSetForward / 10
+				if (data.thermostatList[0].events.size() > 0) {
+					for (i in 0..data.thermostatList[0].events.size() - 1) {
+						if (data.thermostatList[0].events[i].running) {
+							// Divide the running events' temps by 10 for display later
+							data.thermostatList[0].events[i].coolHoldTemp = data.thermostatList[0].events[
+								i].coolHoldTemp / 10
+							data.thermostatList[0].events[i].heatHoldTemp = data.thermostatList[0].events[
+								i].heatHoldTemp / 10
+						}                                    
 					}
+				}                        
+				if (settings.trace) {
+					log.debug "getTstatInfo> got info for ${thermostatId} name=${thermostatName}, features=${resp.data}"
 				}
-			}
-			if (settings.trace) {
-				log.debug "getTstatInfo> got info for ${thermostatId} name=${thermostatName}, features=${resp.data}"
-			}
-			def runtimeSettings = data.thermostatList[0].runtime
-			def thermostatSettings = data.thermostatList[0].settings
-			if (settings.trace) {
+				def runtimeSettings = data.thermostatList[0].runtime
+				def thermostatSettings = data.thermostatList[0].settings
+				if (settings.trace) {
+					sendEvent name: "verboseTrace", value:
+						"getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," +
+						"fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+						"current Humidity = ${runtimeSettings.actualHumidity}, desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
+						"desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
+					log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
+						"fan = ${runtimeSettings.desiredFanMode},fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
+						"current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
+						"desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
+				}
+			} else {
+				log.error "getThermostatInfo> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
-					"getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," +
-					"fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
-					"current Humidity = ${runtimeSettings.actualHumidity}, desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
-					"desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
-				log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
-					"fan = ${runtimeSettings.desiredFanMode},fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
-					"current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
-					"desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
-			}
-		} else {
-			log.error "getThermostatInfo> error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"getTstatInfo>error=${statusCode} for ${thermostatId}"
-		}
-	}
+					"getTstatInfo>error=${statusCode} for ${thermostatId}"
+			} /* end if statusCode */                 
+		} /* end api call */
+	} /* end while */
 }
 
 // tstatType =managementSet or registered (no spaces). 
@@ -2661,33 +2720,38 @@ void getThermostatSummary(tstatType) {
 	if (settings.trace) {
 		log.debug "getThermostatSummary> about to call api with body = ${bodyReq}"
 	}
-	api('thermostatSummary', bodyReq) {resp ->
-		def statusCode = resp.data.status.code
-		def message = resp.data.status.message
-		if (!statusCode) {
-			data.revisionList = resp.data.revisionList
-			data.statusList = resp.data.statusList
-			data.thermostatCount = data.revisionList.size()
-			for (i in 0..data.thermostatCount - 1) {
-				def thermostatDetails = data.revisionList[i].split(':')
-				def thermostatId = thermostatDetails[0]
-				def thermostatName = thermostatDetails[1]
-				def connected = thermostatDetails[2]
-				def thermostatRevision = thermostatDetails[3]
-				def alertRevision = thermostatDetails[4]
-				def runtimeRevision = thermostatDetails[5]
-				if (settings.trace) {
-					log.debug "getThermostatSummary> thermostatId = ${thermostatId}, name = ${thermostatName}, connected =${connected}"
-					sendEvent name: "verboseTrace", value:
-						"getTstatSummary> found ${thermostatId},name=${thermostatName},connected=${connected}"
-				}
-			}
-		} else {
-			log.error "getThermostatSummary> error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"getTstatSummary> error= ${statusCode.toString()}"
-		}
-	}
+	def statusCode=true
+	int j=0        
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+
+		api('thermostatSummary', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				data.revisionList = resp.data.revisionList
+				data.statusList = resp.data.statusList
+				data.thermostatCount = data.revisionList.size()
+				for (i in 0..data.thermostatCount - 1) {
+					def thermostatDetails = data.revisionList[i].split(':')
+					def thermostatId = thermostatDetails[0]
+					def thermostatName = thermostatDetails[1]
+					def connected = thermostatDetails[2]
+					def thermostatRevision = thermostatDetails[3]
+					def alertRevision = thermostatDetails[4]
+					def runtimeRevision = thermostatDetails[5]
+					if (settings.trace) {
+						log.debug "getThermostatSummary>thermostatId=${thermostatId},name=${thermostatName},connected =${connected}"
+						sendEvent name: "verboseTrace", value:
+							"getTstatSummary> found ${thermostatId},name=${thermostatName},connected=${connected}"
+					}
+				} /* end for */                        
+			} else {
+				log.error "getThermostatSummary> error=${statusCode.toString()}, message = ${message}"
+				sendEvent name: "verboseTrace", value:
+					"getTstatSummary> error= ${statusCode.toString()}"
+			} /* end if statusCode */
+		}  /* end api call */              
+	} /* end while */
 }
 // poll() or getThermostatInfo() must be called prior to calling the getModelNumber() method 
 // Return thermostat's current Model Number */
@@ -3051,14 +3115,14 @@ def toQueryString(Map m) {
 	return m.collect { k, v -> "${k}=${URLEncoder.encode(v.toString())}" }.sort().join("&")
 }
 
-def cToF(temp) {
+private def cToF(temp) {
 	return (temp * 1.8 + 32)
 }
-def fToC(temp) {
+private def fToC(temp) {
 	return (temp - 32) / 1.8
 }
-def milesToKm(distance) {
-	return (distance * 1.609344)
+private def milesToKm(distance) {
+	return (distance * 1.609344) 
 }
 private def get_URI_ROOT() {
 	return "https://api.ecobee.com"
