@@ -777,7 +777,7 @@ void poll() {
  		thermostatName:data.thermostatList[0].name,
 		thermostatMode:data.thermostatList[0].settings.hvacMode,
 		temperature: data.thermostatList[0].runtime.actualTemperature,
-		humidity:data.thermostatList[0].runtime.actualHumidity.toDouble(),
+		humidity:data.thermostatList[0].runtime.actualHumidity,
 		coolingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].coolHoldTemp: 
 			data.thermostatList[0].runtime.desiredCool,
 		heatingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].heatHoldTemp: 
@@ -1936,8 +1936,8 @@ void setClimate(thermostatId, climateName) {
 			] :
 			[holdClimateRef:"${climateRef}"
 			]
-		def bodyReq = build_body_request('setHold',null, data.thermostatList[i].identifier,tstatParams)
-        def statusCode=true
+		def bodyReq = build_body_request('setHold',null, data.thermostatList[i].identifier,tstatParams)	
+		def statusCode=true
 		int j=0        
 		while ((statusCode) && (j++ <2)) { // retries once if api call fails
             
@@ -2877,7 +2877,7 @@ private void login() {
 void getEcobeePinAndAuth() {
 	String SCOPE = "smartWrite,ems"
 	def method = 
-    [
+	[
 		headers: [
 			'Content-Type': "application/json",
 			'charset': "UTF-8"
