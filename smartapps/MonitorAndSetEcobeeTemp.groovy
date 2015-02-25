@@ -39,7 +39,7 @@ preferences {
 def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
-			paragraph "MonitorAndSetEcobeeTemp, the smartapp that can adjust your ecobee's setpoints based on in/out-door sensors"
+			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your ecobee's setpoints based on in/out-door sensors"
 			paragraph "Version 1.9\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
