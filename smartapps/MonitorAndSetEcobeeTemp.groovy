@@ -190,8 +190,8 @@ private addIndoorSensorsWhenOccupied() {
 	for (sensor in indoorSensors) {
  		def recentStates = sensor.statesSince("motion", t0)
 		if (recentStates.find{it.value == "active"}) {
-			state.tempSensors.add(sensor)
-			log.debug "addTempSensorsWhenOccupied>added sensor $sensor"
+			log.debug "addTempSensorsWhenOccupied>added occupied sensor ${sensor} as ${sensor.device.id}"
+			state.tempSensors.add(sensor.device.id)
 			result= true            
 		}	
             
@@ -203,18 +203,24 @@ private addIndoorSensorsWhenOccupied() {
 private residentsHaveBeenQuiet() {
 
 	def threshold = residentsQuietThreshold ?: 15   // By default, the delay is 15 minutes
-	def result = true
 	def t0 = new Date(now() - (threshold * 60 *1000))
-	for (sensor in state.motions) {
+	for (sensor in motions) {
 		def recentStates = sensor.statesSince("motion", t0)
 		if (recentStates.find{it.value == "active"}) {
-			result = false
-			break
+			log.debug "residentsHaveBeenQuiet: false, found motion at $sensor"
+			return false
+		}	
+	}
+	for (sensor in indoorSensors) {
+		def recentStates = sensor.statesSince("motion", t0)
+		if (recentStates.find{it.value == "active"}) {
+			log.debug "residentsHaveBeenQuiet: false, found motion at $sensor"
+			return false
 		}	
             
 	}
-	log.debug "residentsHaveBeenQuiet: $result"
-	return result
+	log.debug "residentsHaveBeenQuiet: true"
+	return true
 }
 
 
@@ -233,7 +239,7 @@ def motionEvtHandler(evt) {
  	if (evt.value == "active") {
 		log.debug "Motion at home..."
 		String currentProgName = ecobee.currentClimateName
-        String currentProgType = ecobee.currentProgramType
+		String currentProgType = ecobee.currentProgramType
 
 		if (state?.programHoldSet == 'Away') {
 			check_if_hold_justified()
@@ -351,7 +357,7 @@ private def reset_state_tempSensors() {
 // 	By default, the 'static' temp Sensors are the ones used for temp avg calculation
 //  Other 'occupied' sensors may be added dynamically when needed 
             
-		state.tempSensors.add(it) 
+		state.tempSensors.add(it.device.id) 
 	}
 }
 
@@ -359,14 +365,43 @@ private def reset_state_motions() {
 	state.motions=[]
 	if (settings.motions) {
 		settings.motions.each {
-			state.motions.add(it)        
+			state.motions.add(it.device.id)        
 		}
 	}
     
 	if (settings.indoorSensors) {
 		settings.indoorSensors.each {
-			state.motions.add(it)
+			state.motions.add(it.device.id)
 		}
+	}
+}
+
+private void addAllTempsForAverage(indoorTemps) {
+
+	for (sensorId in state.tempSensors) {  // Add dynamically any indoor Sensor's when occupied	 	
+		def sensor = tempSensors.find{it.device.id == sensorId}
+		log.debug "addAllTempsForAverage>trying to find sensorId=$sensorId in $tempSensors from $state.tempSensors"
+		if (sensor != null) {
+			log.debug "addAllTempsForAverage>found sensor $sensor in $tempSensors"
+			def currentTemp =sensor.currentTemperature
+			if (currentTemp != null) {            
+				indoorTemps.add(currentTemp) // Add indoor temp to calculate the average based on all sensors
+				log.trace "addAllTempsForAverage> adding $sensor temp (${currentTemp}) from tempSensors List"
+			}                    
+		}                    
+    }
+
+	for (sensorId in state.tempSensors) {  // Add dynamically any indoor Sensor's when occupied	 	
+		def sensor = indoorSensors.find{it.device.id == sensorId}
+		log.debug "addAllTempsForAverage>trying to find sensorId=$sensorId in $indoorSensors from $state.tempSensors"
+		if (sensor != null) {
+			log.debug "addAllTempsForAverage>found sensor $sensor in $indoorSensors"
+			def currentTemp =sensor.currentTemperature
+			if (currentTemp != null) {            
+				indoorTemps.add(currentTemp) // Add indoor temp to calculate the average based on all sensors
+				log.trace "addAllTempsForAverage> adding $sensor temp (${currentTemp}) from indoorSensors List"
+			}                    
+		}                    
 	}
 }
 
@@ -407,17 +442,11 @@ private def check_if_hold_needed() {
 
 	reset_state_tempSensors()
 	if (addIndoorSensorsWhenOccupied()) {
-		if (detailedNotif == 'true') {
-			send("MonitorEcobeeTemp>occupied indoor Sensors added for check_if_hold_needed")
-		}
+		log.trace("check_if_hold_needed>some occupied indoor Sensors added for avg calculation")
 	}
 	def indoorTemps = [ecobeeTemp]
-	for (sensor in state.tempSensors) {  // Add dynamically any indoor Sensor's when occupied	 	
-		def currentTemp = sensor?.currentTemperature
-		if (currentTemp != null) {
-			indoorTemps.add(currentTemp) // Add indoor temp to calculate the average based on all sensors
-		}                    
-    }
+	addAllTempsForAverage(indoorTemps)        
+	log.trace("check_if_hold_needed> temps count=${indoorTemps.size()}")
 	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).round(1) // this is the avg indoor temp based on indoor sensors
 
 	log.trace "check_if_hold_needed> location.mode = $location.mode"
@@ -448,7 +477,6 @@ private def check_if_hold_needed() {
 		}
 	}
 	reset_state_motions()
-    
 	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
     
 		if ((currentProgName.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
@@ -611,6 +639,7 @@ private def check_if_hold_justified() {
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
 	String currentProgName = ecobee.currentClimateName
+	String currentSetClimate = ecobee.currentSetClimate
 	float heatTemp = ecobee.currentHeatingSetpoint.toFloat()
 	float coolTemp = ecobee.currentCoolingSetpoint.toFloat()
 	float programHeatTemp = ecobee.currentProgramHeatTemp.toFloat()
@@ -620,18 +649,12 @@ private def check_if_hold_justified() {
 
 	reset_state_tempSensors()
 	if (addIndoorSensorsWhenOccupied()) {
-		if (detailedNotif == 'true') {
-			send("MonitorEcobeeTemp>occupied indoor Sensors added for check_if_hold_justified")
-		}
+		log.trace("check_if_hold_justified>some occupied indoor Sensors added for avg calculation")
 	}
     
 	def indoorTemps = [ecobeeTemp]
-	for (sensor in state.tempSensors) {  // Add dynamically any indoor Sensor's when occupied	 	
-		def currentTemp = sensor?.currentTemperature
-		if (currentTemp != null) {
-			indoorTemps.add(currentTemp) // Add indoor temp to calculate the average based on all sensors
-		}                    
-    }
+	addAllTempsForAverage(indoorTemps)
+	log.trace("check_if_hold_justified> temps count=${indoorTemps.size()}")
 	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).round(1) // this is the avg indoor temp based on indoor sensors
 
 	Integer outdoorHumidity = outdoorSensor.currentHumidity
@@ -640,6 +663,7 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified> location.mode = $location.mode"
 	log.trace "check_if_hold_justified> ecobee Mode = $ecobeeMode"
 	log.trace "check_if_hold_justified> currentProgName = $currentProgName"
+	log.trace "check_if_hold_justified> currentSetClimate = $currentSetClimate"
 	log.trace "check_if_hold_justified> outdoorTemp = $outdoorTemp°"
 	log.trace "check_if_hold_justified> state.tempSensors = $state.tempSensors"
 	log.trace "check_if_hold_justified> ecobee's indoorTemp = $ecobeeTemp°"
@@ -667,12 +691,17 @@ private def check_if_hold_justified() {
 	reset_state_motions()
 	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
 		if ((state?.programHoldSet == 'Away') && (!residentsHaveBeenQuiet())) {
-			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program...")
-			ecobee.resumeProgram("")
-			send("MonitorEcobeeTemp>resumed current program, motion detected")
-			reset_state_program_values()
-			check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
-			return // no more adjustments
+			if (currentSetClimate.toUpperCase() == 'AWAY') {       
+				log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program...")
+				ecobee.resumeProgram("")
+				send("MonitorEcobeeTemp>resumed current program, motion detected")
+				reset_state_program_values()
+				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
+				return // no more adjustments
+			}                
+            else {	/* Climate was changed since the last climate set, just reset state program values */
+				reset_state_program_values()
+            }
 		} else if (state?.programHoldSet == 'Away') {
 			if (currentProgName.toUpperCase() == 'AWAY') {
         
@@ -696,12 +725,17 @@ private def check_if_hold_justified() {
 			}    
 		}
 		if ((state?.programHoldSet == 'Home') && (residentsHaveBeenQuiet())) {
-			log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
-			ecobee.resumeProgram("")
-			send("MonitorEcobeeTemp>resumed program, no motion detected")
-			reset_state_program_values()
-			check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat b/c of low outdoor temp ) 
-			return // no more adjustments
+			if (currentSetClimate.toUpperCase() == 'HOME') {       
+				log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
+				ecobee.resumeProgram("")
+				send("MonitorEcobeeTemp>resumed program, no motion detected")
+				reset_state_program_values()
+				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat b/c of low outdoor temp ) 
+				return // no more adjustments
+			}                
+            else {	/* Climate was changed since the last climate set, just reset state program values */
+				reset_state_program_values()
+            }
 		} else if (state?.programHoldSet == 'Home')  { 
 			if (currentProgName.toUpperCase() == 'HOME') {
 				if (detailedNotif == 'true') {
