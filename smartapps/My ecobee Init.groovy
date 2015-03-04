@@ -246,7 +246,7 @@ def refreshThisChildAuthTokens(child) {
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 	sendPush("refreshThisChildAuthTokens>begin child id: ${child.device.deviceNetworkId}, updating it with ${atomicState}")
 */
-    child.refreshChildTokens(atomicState)
+	child.refreshChildTokens(atomicState)
 
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
