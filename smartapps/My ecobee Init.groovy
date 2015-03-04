@@ -1,4 +1,4 @@
- /**
+  /**
  *	My ecobee Init (Service Manager)
  *
  *	Author: scott
@@ -244,21 +244,10 @@ def refreshAllChildAuthTokens() {
 def refreshThisChildAuthTokens(child) {
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("refreshThisChildAuthTokens>begin child id: $child.device.deviceNetworkId, updating it with $atomicState")
+	sendPush("refreshThisChildAuthTokens>begin child id: ${child.device.deviceNetworkId}, updating it with ${atomicState}")
 */
+    child.refreshChildTokens(atomicState)
 
-	def children = getChildDevices().findAll {thermostats.contains(child.device.deviceNetworkId)}
-/*
-	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("refreshThisChildAuthtokens> refreshing ${children.size()} thermostats")
-*/
-	children.each { 
-/*
-	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-		sendPush("refreshThisChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
-*/
-    		it.refreshChildTokens(atomicState)
-	}
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
 	sendPush("refreshThisChildAuthTokens>end")
