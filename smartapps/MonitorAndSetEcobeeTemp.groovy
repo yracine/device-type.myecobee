@@ -84,13 +84,14 @@ def sensorSettings() {
 			input "indoorSensors", "capability.motionSensor", title: "Which Indoor Motion/Temperature Sensor(s)", required: false, multiple:true
 		}
 		section("Choose any other indoor temp sensors for avg temp adjustment (optional)") {
-        	input "tempSensors", "capability.temperatureMeasurement", title: "Any other temp sensors?",  multiple: true, required: false
-    	}
+			input "tempSensors", "capability.temperatureMeasurement", title: "Any other temp sensors?",  multiple: true, required: false
+			
+		}
 		section("Choose any other indoor motion sensors for setting climate to [Away, Home] (optional)") {
-        	input "motions", "capability.motionSensor", title: "Any other motion sensors?",  multiple: true, required: false
-    	}
-		section("Trigger climate/temp adjustment when motion or no motion has been detected for (default=15 minutes)") {
-        	input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
+			input "motions", "capability.motionSensor", title: "Any other motion sensors?",  multiple: true, required: false
+		}
+		section("Trigger climate/temp adjustment when motion or no motion has been detected for (default=15 minutes)") {	
+			input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
 		}
 	}        
 }
@@ -352,10 +353,10 @@ private def reset_state_program_values() {
 
 private def reset_state_tempSensors() {
 
-	state.tempSensors=[]
-    settings.tempSensors.each {
+	state.tempSensors=[]	
+	settings.tempSensors.each {
 // 	By default, the 'static' temp Sensors are the ones used for temp avg calculation
-//  Other 'occupied' sensors may be added dynamically when needed 
+//	Other 'occupied' sensors may be added dynamically when needed 
             
 		state.tempSensors.add(it.device.id) 
 	}
@@ -389,7 +390,8 @@ private void addAllTempsForAverage(indoorTemps) {
 				log.trace "addAllTempsForAverage> adding $sensor temp (${currentTemp}) from tempSensors List"
 			}                    
 		}                    
-    }
+		
+	}
 
 	for (sensorId in state.tempSensors) {  // Add dynamically any indoor Sensor's when occupied	 	
 		def sensor = indoorSensors.find{it.device.id == sensorId}
@@ -699,12 +701,11 @@ private def check_if_hold_justified() {
 				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
 				return // no more adjustments
 			}                
-            else {	/* Climate was changed since the last climate set, just reset state program values */
+ 			else {	/* Climate was changed since the last climate set, just reset state program values */
 				reset_state_program_values()
-            }
+ 			}
 		} else if (state?.programHoldSet == 'Away') {
 			if (currentProgName.toUpperCase() == 'AWAY') {
-        
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>hold no longer needed, program already in Away mode")
 				}
@@ -732,10 +733,10 @@ private def check_if_hold_justified() {
 				reset_state_program_values()
 				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat b/c of low outdoor temp ) 
 				return // no more adjustments
-			}                
-            else {	/* Climate was changed since the last climate set, just reset state program values */
+			}                	
+			else {	/* Climate was changed since the last climate set, just reset state program values */
 				reset_state_program_values()
-            }
+			}
 		} else if (state?.programHoldSet == 'Home')  { 
 			if (currentProgName.toUpperCase() == 'HOME') {
 				if (detailedNotif == 'true') {
