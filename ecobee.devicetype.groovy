@@ -2623,7 +2623,7 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 		log.debug "getThermostatInfo> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
 	}
 	def statusCode=true
-    int j=0    
+	int j=0    
 	while ((statusCode) && (j++ <2)) { // retries once if api call fails
 
 		api('thermostatInfo', bodyReq) {resp ->
