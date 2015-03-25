@@ -513,7 +513,7 @@ private def check_if_hold_needed() {
     
 	if (ecobeeMode == 'cool') {
 
-		if (location.mode.toUpperCase() != 'AWAY') { // increase cooling settings only if ST mode != Away
+		if (!location.mode.toUpperCase().contains('AWAY')) { // increase cooling settings only if ST mode != Away
 			log.trace(
 				"check_if_hold_needed>evaluate: moreCoolThreshold= ${more_cool_threshold}° vs. outdoorTemp ${outdoorTemp}°")
 			log.trace(
@@ -544,7 +544,8 @@ private def check_if_hold_needed() {
 				}
 			} else if ((state.tempSensors) && (avg_indoor_temp > coolTemp)) {
 				float temp_diff = (ecobee_temp - avg_indoor_temp).round(1) // adjust the coolingSetPoint at the ecobee tstat according to the avg indoor temp measured
-				temp_diff = (temp_diff > max_temp_diff)? max_temp_diff: temp_diff
+                
+		        temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
 				targetTstatTemp = (programCoolTemp - temp_diff).round(1)
 				if (temp_diff.abs() > 0.5) {  // adust the temp only if temp diff is significant
 					ecobee.setCoolingSetpoint(targetTstatTemp)
@@ -595,7 +596,7 @@ private def check_if_hold_needed() {
 				}
 			} else if ((state.tempSensors) && (avg_indoor_temp < heatTemp)) {
 				float temp_diff = (ecobeeTemp - avg_indoor_temp).round(1) // adjust the heatingSetPoint at the tstat according to the avg indoor temp measured
-				temp_diff = (temp_diff > max_temp_diff)? max_temp_diff: temp_diff
+		        temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
 				targetTstatTemp = (programHeatTemp + temp_diff).round(1)
 				if (temp_diff.abs() > 0.5) {  // adust the temp only if temp diff is significant
 					ecobee.setHeatingSetpoint(targetTstatTemp)
