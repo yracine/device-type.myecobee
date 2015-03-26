@@ -201,14 +201,14 @@ simulator {
 	tiles {
 		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 1,
 			height: 1, decoration: "flat") {
-			state "default", label: '${currentValue}\n '
+			state "default", label: '${currentValue}'
 		}
 		valueTile("groups", "device.groups", inactiveLabel: false, width: 1, 
 			height: 1, decoration: "flat") {
-			state "default", label: '${currentValue}%'
+			state "default", label: '${currentValue}'
 		}
 		valueTile("temperature", "device.temperature", width: 2, height: 2,
-			canChangeIcon: true) {
+			canChangeIcon: false) {
 //		If one prefers Celsius over Farenheits, just comment out the temperature in Farenheits 
 //		and remove the comment below to have the right color scale in Celsius.
 //		This issue will be solved as soon as Smartthings supports dynamic tiles
@@ -224,7 +224,7 @@ simulator {
 //					[value: 36, color: "#bc2323"]
 //				])
 //		}
-			state("temperature", label:'${currentValue}°', unit:"F",
+			state("temperature", label:'${currentValue}', unit:"F",
 			backgroundColors:[
 					[value: 31, color: "#153591"],
 					[value: 44, color: "#1e9cbb"],
@@ -280,7 +280,7 @@ simulator {
 		}
 		valueTile("humidity", "device.humidity", inactiveLabel: false, 
 			decoration: "flat") {
-			state "default", label: 'Humidity\n${currentValue}%', unit: "humidity"
+			state "default", label: 'Humidity ${currentValue}%', unit: "humidity"
 		}
 		standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false,
 			inactiveLabel: false, decoration: "flat") {
@@ -329,11 +329,11 @@ simulator {
 		// Program Tiles
 		valueTile("programScheduleName", "device.programScheduleName", inactiveLabel:
 			false, width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Mode\n${currentValue}'
+			state "default", label: 'Mode ${currentValue}'
 		}
 		valueTile("programType", "device.programType", inactiveLabel: false, width: 1,
 			height: 1, decoration: "flat") {
-			state "default", label: 'ProgType\n${currentValue}'
+			state "default", label: 'ProgType ${currentValue}'
 		}
 		valueTile("programCoolTemp", "device.programCoolTemp", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
@@ -349,6 +349,7 @@ simulator {
             		icon: "st.Office.office7", backgroundColor: "#ffffff"
 		}
 		// Weather Tiles
+        
 		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
 			decoration: "flat") {
 			state "-2",			label: 'updating...',		icon: "st.unknown.unknown.unknown"
@@ -374,31 +375,34 @@ simulator {
 			state "19",			label: 'Hazy',			icon: "st.Weather.weather13"
 			state "20",			label: 'Smoke',			icon: "st.Weather.weather13"
 			state "21",			label: 'Dust',			icon: "st.Weather.weather13"
-		}
+		}        
 		valueTile("weatherDateTime", "device.weatherDateTime", inactiveLabel: false,
 			width: 2, height: 1, decoration: "flat") {
 			state "default", label: '${currentValue}'
 		}
+       
 		valueTile("weatherConditions", "device.weatherCondition", 
 			inactiveLabel: false, width: 2, height: 1, decoration: "flat") {
-			state "default", label: 'Forecast ${currentValue}'
+			state "default", label: '${currentValue}'
 		}
+        
 		valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel:
-			false, width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'OutTemp ${currentValue}°', unit: "C"
+			false, width: 1, height: 1) {
+			state "default", label: 'OutTemp ${currentValue}', unit: "C"
 		}
 		valueTile("weatherRelativeHumidity", "device.weatherRelativeHumidity",
-			inactiveLabel: false, width: 1, height: 1.5, decoration: "flat") {
+			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
 			state "default", label: 'OutHum ${currentValue}%', unit: "humidity"
 		}
+
 		valueTile("weatherTempHigh", "device.weatherTempHigh", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Fcast High ${currentValue}°', unit: "C"
+			state "default", label: 'Fcast High ${currentValue}', unit: "C"
 		}
 		valueTile("weatherTempLow", "device.weatherTempLow", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
 			state "default", label: 'Fcast Low ${currentValue}°', unit: "C"
-		}
+		}        
 		valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
 			state "default", label: 'Pressure ${currentValue}', unit: "hpa"
@@ -413,8 +417,9 @@ simulator {
 		}
 		valueTile("weatherPop", "device.weatherPop", inactiveLabel: false, width: 1,
 			height: 1, decoration: "flat") {
-			state "default", label: 'PoP\n${currentValue}%', unit: "%"
-		}
+			state "default", label: 'ProbPrecip ${currentValue}%', unit: "%"
+		}       
+        
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
 			state "default", action: "polling.poll", icon: "st.secondary.refresh"
@@ -426,10 +431,14 @@ simulator {
 			"equipStatus", "programEndTimeMsg", "humidity", "alerts",
 			"fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
 			"programHeatTemp", "resProgram",
-			"weatherIcon", "weatherDateTime", "weatherConditions",
-			"weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
-			"weatherTempLow", "weatherPressure", "weatherWindDirection",
-			"weatherWindSpeed", "weatherPop", "refresh",
+			"weatherIcon", "weatherConditions",            
+			"weatherDateTime",             
+			"weatherTemperature", "weatherRelativeHumidity", 
+			"weatherTempHigh",
+			"weatherTempLow", "weatherPressure", 
+            "weatherWindDirection",
+			"weatherWindSpeed", "weatherPop",            
+            "refresh"
 		])
 	}
 }
@@ -804,7 +813,7 @@ void poll() {
 		weatherStation:data.thermostatList[0].weather.weatherStation,
 		weatherSymbol:data.thermostatList[0].weather.forecasts[0].weatherSymbol.toString(),
 		weatherTemperature:data.thermostatList[0].weather.forecasts[0].temperature,
-		weatherDateTime:"Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}",
+		weatherDateTime:"Weather as of ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}",
 		weatherCondition:data.thermostatList[0].weather.forecasts[0].condition,
 		weatherTemp: data.thermostatList[0].weather.forecasts[0].temperature,
 		weatherTempHigh: data.thermostatList[0].weather.forecasts[0].tempHigh, 
@@ -920,12 +929,12 @@ private def getAlerts() {
 	if (data.thermostatList[0].alerts.size() > 0) {
 		alerts = 'Alert(s) '
 		for (i in 0..data.thermostatList[0].alerts.size() - 1) {
-			alerts = (i > 0) ? ' \n' + alerts + data.thermostatList[0].alerts[i].notificationType :
+			alerts = (i > 0) ? ' ' + alerts + data.thermostatList[0].alerts[i].notificationType :
 				alerts +
 				data.thermostatList[0].alerts[i].notificationType
 		}
 	}
-	alerts = (alerts != null) ? alerts + '\ngo to ecobee portal' : 'No alerts'
+	alerts = (alerts != null) ? alerts + ' go to ecobee portal' : 'No alerts'
 	return alerts
 }
 
@@ -938,7 +947,7 @@ private def getThermostatGroups(thermostatId) {
 		def j=0
 		for (i in 0..data.groups.size() - 1) {
 			if (data.groups[i].groupName != '') {
-				groupList = (j > 0) ? ' \n' + groupList + data.groups[i].groupName :
+				groupList = (j > 0) ? ' ' + groupList + data.groups[i].groupName :
 					groupList + data.groups[i].groupName
 				j++    
 			}        
