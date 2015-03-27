@@ -435,10 +435,10 @@ simulator {
 			"weatherDateTime",             
 			"weatherTemperature", "weatherRelativeHumidity", 
 			"weatherTempHigh",
-			"weatherTempLow", "weatherPressure", 
-            "weatherWindDirection",
+			"weatherTempLow", "weatherPressure",
+			"weatherWindDirection",
 			"weatherWindSpeed", "weatherPop",            
-            "refresh"
+			"refresh"
 		])
 	}
 }
