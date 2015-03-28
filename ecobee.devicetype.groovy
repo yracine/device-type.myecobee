@@ -435,7 +435,7 @@ simulator {
 			"weatherDateTime",             
 			"weatherTemperature", "weatherRelativeHumidity", 
 			"weatherTempHigh",
-			"weatherTempLow", "weatherPressure",
+			"weatherTempLow", "weatherPressure", 
 			"weatherWindDirection",
 			"weatherWindSpeed", "weatherPop",            
 			"refresh"
@@ -506,15 +506,23 @@ void setHeatingSetpoint(temp) {
 	setHold(thermostatId, device.currentValue("coolingSetpoint"), temp,
 		null, null)
 	sendEvent(name: 'heatingSetpoint', value: temp,unit: getTemperatureScale())
-	sendEvent("name":"thermostatSetpoint", "value": temp, unit: getTemperatureScale())     
+	def currentMode = device.currentValue("thermostatMode")
+	if (currentMode=='heat') {
+		sendEvent("name":"thermostatSetpoint", "value": temp,unit: getTemperatureScale())     
+	}
 }
+
 void setCoolingSetpoint(temp) {
 	def thermostatId= determine_tstat_id("") 	    
 	setHold(settings.thermostatId, temp, device.currentValue("heatingSetpoint"),
 		null, null)
 	sendEvent(name: 'coolingSetpoint', value: temp,unit: getTemperatureScale())
-	sendEvent("name":"thermostatSetpoint", "value": temp,unit: getTemperatureScale())     
+	def currentMode = device.currentValue("thermostatMode")
+	if (currentMode=='cool') {
+		sendEvent("name":"thermostatSetpoint", "value": temp,unit: getTemperatureScale())     
+	}
 }
+
 void off() {
 	setThermostatMode('off')
 }
@@ -880,10 +888,10 @@ private void generateEvent(Map results)
  				def scale = getTemperatureScale()
                 
 				if (scale == "F") {
-					tempValue = getTemperature(value).toFloat().round()
+					tempValue = getTemperature(value).toDouble().round()
 					tempValueString = String.format('%2d', tempValue.intValue())            
 				} else {
-					tempValue = getTemperature(value).toFloat().round(1)
+					tempValue = getTemperature(value).toDouble().round(1)
 					tempValueString = String.format('%2.1f', tempValue)
 				}                
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
