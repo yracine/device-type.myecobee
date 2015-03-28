@@ -243,7 +243,7 @@ simulator {
 				icon: "st.Outdoor.outdoor19"
 			state "cool", label: '${name}', action: "thermostat.auto", 
 				icon: "st.Weather.weather7"
-			state "auto", label: '${name}', action: "thermostat.heat", 
+			state "auto", action: "thermostat.heat", 
 				icon: "st.thermostat.auto"
 		}
 		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
