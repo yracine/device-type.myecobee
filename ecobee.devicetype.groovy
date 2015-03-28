@@ -692,10 +692,10 @@ void quickSave() {
 	quickSaveCooling = (quickSaveCooling + quickSaveSetForw).round(0)
 	quickSaveHeating = (quickSaveHeating - quickSaveSetBack).round(0)
 	setHold(thermostatId, quickSaveCooling, quickSaveHeating, null, null)
-	def quickSaveMap = ['coolingSetpoint': quickSaveCooling,
-    	'heatingSetpoint': quickSaveHeating,
-        'programScheduleName': "QuickSave",
-        'programDisplayName': "QuickSave"
+	def quickSaveMap = ['coolingSetpoint': quickSaveCooling,		
+		'heatingSetpoint': quickSaveHeating,
+		'programScheduleName': "QuickSave",
+		'programDisplayName': "QuickSave"
 	]        
 	generateEvent(quickSaveMap)    
 }
