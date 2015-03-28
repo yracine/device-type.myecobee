@@ -270,12 +270,12 @@ simulator {
 		}
 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false,
 			decoration: "flat") {
-			state "heat", label: '${currentValue}° heat', unit: "F", 
+			state "heat", label: '${currentValue} heat', unit: "F", 
 			backgroundColor: "#ffffff"
 		}
 		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false,
 			decoration: "flat") {
-			state "cool", label: '${currentValue}° cool', unit: "F", 
+			state "cool", label: '${currentValue} cool', unit: "F", 
 			backgroundColor: "#ffffff"
 		}
 		valueTile("humidity", "device.humidity", inactiveLabel: false, 
@@ -337,11 +337,11 @@ simulator {
 		}
 		valueTile("programCoolTemp", "device.programCoolTemp", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'ProgCool ${currentValue}°'
+			state "default", label: 'ProgCool ${currentValue}'
 		}
 		valueTile("programHeatTemp", "device.programHeatTemp", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'ProgHeat ${currentValue}°'
+			state "default", label: 'ProgHeat ${currentValue}'
 		}
 		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
@@ -401,7 +401,7 @@ simulator {
 		}
 		valueTile("weatherTempLow", "device.weatherTempLow", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Fcast Low ${currentValue}°', unit: "C"
+			state "default", label: 'Fcast Low ${currentValue}', unit: "C"
 		}        
 		valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
@@ -435,10 +435,10 @@ simulator {
 			"weatherDateTime",             
 			"weatherTemperature", "weatherRelativeHumidity", 
 			"weatherTempHigh",
-			"weatherTempLow", "weatherPressure",
-			"weatherWindDirection",
+			"weatherTempLow", "weatherPressure", 
+            "weatherWindDirection",
 			"weatherWindSpeed", "weatherPop",            
-			"refresh"
+            "refresh"
 		])
 	}
 }
@@ -874,10 +874,21 @@ private void generateEvent(Map results)
 // 			Temperature variable names contain 'temp' or 'setpoint'            
 
 			if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {  
-				float tempValue = getTemperature(value).toFloat().round(1)
-				def isChange = isTemperatureStateChange(device, name, tempValue.toString())
+				String tempValueString
+				Double tempValue
+                
+ 				def scale = getTemperatureScale()
+                
+				if (scale == "F") {
+					tempValue = getTemperature(value).toFloat().round()
+					tempValueString = String.format('%2d', tempValue.intValue())            
+				} else {
+					tempValue = getTemperature(value).toFloat().round(1)
+					tempValueString = String.format('%2.1f', tempValue)
+				}                
+				def isChange = isTemperatureStateChange(device, name, tempValueString)
 				isDisplayed = isChange
-				sendEvent(name: name, value: tempValue.toString(), unit: getTemperatureScale(), displayed: isDisplayed)                                     									 
+				sendEvent(name: name, value: tempValueString, unit: scale, displayed: isDisplayed)                                     									 
 			} else if (name.toUpperCase().contains("SPEED")) { // Temperature variable names contain 'temp' or 'setpoint'
 
 // 			Speed variable names contain 'speed'
