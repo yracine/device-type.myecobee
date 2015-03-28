@@ -692,10 +692,12 @@ void quickSave() {
 	quickSaveCooling = (quickSaveCooling + quickSaveSetForw).round(0)
 	quickSaveHeating = (quickSaveHeating - quickSaveSetBack).round(0)
 	setHold(thermostatId, quickSaveCooling, quickSaveHeating, null, null)
-	sendEvent(name: 'coolingSetpoint', value: quickSaveCooling.toString())
-	sendEvent(name: 'heatingSetpoint', value: quickSaveHeating.toString())
-	sendEvent(name: 'programScheduleName', value: "QuickSave")
-	sendEvent(name: 'programDisplayName', value: "QuickSave")
+	def quickSaveMap = ['coolingSetpoint': quickSaveCooling,
+    	'heatingSetpoint': quickSaveHeating,
+        'programScheduleName': "QuickSave",
+        'programDisplayName': "QuickSave"
+	]        
+	generateEvent(quickSaveMap)    
 }
   
 void setThisTstatClimate(climateName) {
