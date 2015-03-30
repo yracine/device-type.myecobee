@@ -126,7 +126,18 @@ https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 Amongst others:
 
 ********************************
-a) Monitor And Set Ecobee Temp
+a) ecobee3RemoteSensorInit
+********************************
+This smartapp will expose your ecobee3's remote sensors as Motion and Temperature Sensors in SmartThings, so
+that you can use them in your automation scenarios.
+
+See the following readme file for instructions (code is still in beta branch)
+
+https://github.com/yracine/device-type.myecobee/blob/beta/smartapps/readme.ecobee3RemoteSensor
+
+
+********************************
+b) Monitor And Set Ecobee Temp
 ********************************
 
 In brief, the smartapp allows automatic adjustments of the cooling/heating setpoints according to indoor/outdoor conditions. This is particularly useful in Winter/Summer where outdoor temperature and humidity can vary throughout the day.  It can also set your thermostat to 'Away' or 'Home' based on your indoor motion sensors.  It will ajust
@@ -141,23 +152,23 @@ https://github.com/yracine/device-type.weatherstation
 to get the oudoor temperature and humidity.
 
 ***********************************
-b) Monitor And Set Ecobee Humidity
+c) Monitor And Set Ecobee Humidity
 ***********************************
 
 Monitor humidity level indoor vs. outdoor at regular intervals (in minutes) and set the humidifier/dehumidifier/HRV/ERV to a target humidity level.
 
 *******************
-c) ecobeeChangeMode
+d) ecobeeChangeMode
 *******************
 Change your ecobee climate (Away,Home) according to your hello home mode.
 
 *************************************
-d) AwayFromHome and ecobeeResumeProg
+e) AwayFromHome and ecobeeResumeProg
 *************************************
 Use presence sensors to set a target climate or heatin/cooling setpoints based on your presence/absence.
 
 *************************************
-e) ecobeeSetClimate
+f) ecobeeSetClimate
 *************************************
 This smartapp allows a ST user to set the ecobee thermostat(s) to a given climate (Away,Home,Awake,Sleep, other custom programs) at a given day&time.
 
