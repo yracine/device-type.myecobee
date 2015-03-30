@@ -1,4 +1,4 @@
-  /**
+ /**
  *	My ecobee Init (Service Manager)
  *
  *	Author: scott
@@ -156,8 +156,7 @@ def getEcobeeThermostats(String type="") {
     try {
 		httpGet(deviceListParams) { resp ->
 
-			if(resp.status == 200)
-			{
+			if(resp.status == 200) {
 /*        
         		int i=0    // Used to simulate many thermostats
 */
@@ -169,9 +168,7 @@ def getEcobeeThermostats(String type="") {
 					stats[dni] = getThermostatDisplayName(stat)
 */
 				}
-			}
-			else
-			{
+			} else {
 				log.debug "http status: ${resp.status}"
 
 				//refresh the auth token
@@ -180,9 +177,7 @@ def getEcobeeThermostats(String type="") {
 					log.debug "Storing the failed action to try later"
 					data.action = "getEcobeeThermostats"
 					log.debug "Refreshing your auth_token!"
-				}
-				else
-				{
+				} else {
 					log.error "Authentication error, invalid authentication method, lack of credentials, etc."
 				}
 			}
@@ -272,7 +267,7 @@ def getThermostatId(stat) {
 
 def getThermostatTypeName(stat) {
 	log.debug "getThermostatTypeName"
-	return stat.modelNumber == "siSmart" ? "Smart Si" : "Smart"
+	return stat.modelNumber == "siSmart" ? "Smart Si" : (stat.modelNumber=="idtSmart") ? "Smart" : (stat.modelNumber=="athenaSmart") ? "Ecobee3" : "Ems"
 }
 
 def installed() {
@@ -288,9 +283,27 @@ def updated() {
 	initialize()
 }
 
-def initialize() {
-    
-	log.debug "initialize"
+
+private def delete_child_devices() {
+	def delete
+	// Delete any that are no longer in settings
+	if(!thermostats)
+	{
+		log.debug "delete thermostats"
+		delete = getAllChildDevices()
+	}
+	else
+	{
+		delete = getChildDevices().findAll { !thermostats.contains(it.deviceNetworkId) }
+	}
+
+	log.debug "deleting ${delete.size()} thermostats"
+	delete.each { deleteChildDevice(it.deviceNetworkId) }
+
+}
+
+private def create_child_devices() {
+
    	int i =0
 	def devices = thermostats.collect { dni ->
 
@@ -319,44 +332,37 @@ def initialize() {
 			log.debug "found ${d.displayName} with id $dni already exists"
 		}
 
-		return d
 	}
 
 	log.debug "created ${devices.size()} thermostats"
 
-	def delete
-	// Delete any that are no longer in settings
-	if(!thermostats)
-	{
-		log.debug "delete thermostats"
-		delete = getAllChildDevices()
-	}
-	else
-	{
-		delete = getChildDevices().findAll { !thermostats.contains(it.deviceNetworkId) }
-	}
 
-	log.debug "deleting ${delete.size()} thermostats"
-	delete.each { deleteChildDevice(it.deviceNetworkId) }
 
-	pollHandler()
+}
 
+def initialize() {
     
-    	// set up internal poll timer
+	log.debug "initialize"
+
+	delete_child_devices()	
+	create_child_devices()
+    
+	takeAction()
+	// set up internal poll timer
 	def pollTimer = 20
 
 	log.trace "setting poll to ${pollTimer}"
-	schedule("0 0/${pollTimer.toInteger()} * * * ?", pollHandler)
+	schedule("0 0/${pollTimer.toInteger()} * * * ?", takeAction)
 }
 
-def pollHandler() {
-	log.trace "pollHandler>begin"
+def takeAction() {
+	log.trace "takeAction>begin"
 	def devices = thermostats.collect { dni ->
 		def d = getChildDevice(dni)
-		log.debug "pollHandler>Looping thru thermostats, found id $dni, about to poll"
+		log.debug "takeAction>Looping thru thermostats, found id $dni, about to poll"
 		d.poll()
 	}
-	log.trace "pollHandler>end"
+	log.trace "takeAction>end"
 }
 
 
