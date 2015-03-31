@@ -137,6 +137,7 @@ Amongst others:
 a) ecobee3RemoteSensorInit
 
 /****************************************************
+
 This smartapp will expose your ecobee3's remote sensors as Motion and Temperature Sensors in SmartThings, so
 that you can use them in your automation scenarios.
 
@@ -150,6 +151,7 @@ https://github.com/yracine/device-type.myecobee/blob/beta/smartapps/readme.ecobe
 b) Monitor And Set Ecobee Temp
 
 /****************************************************
+
 
 In brief, the smartapp allows automatic adjustments of the cooling/heating setpoints according to indoor/outdoor conditions. This is particularly useful in Winter/Summer where outdoor temperature and humidity can vary throughout the day.  It can also set your thermostat to 'Away' or 'Home' based on your indoor motion sensors.  It will ajust
 your thermostat's setpoints based on occupied rooms (similar to ecobee3, but with ST connected sensors).
