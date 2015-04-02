@@ -253,10 +253,10 @@ simulator {
 				icon: "st.Weather.weather14", backgroundColor: "#ffffff"
 			state "off", label: '${name}', action: "thermostat.cool", 
 				icon: "st.Outdoor.outdoor19"
-			state "cool", label: '${name}', action: "thermostat.heat", 
+			state "cool", label: '${name}', action: "thermostat.auto", 
 				icon: "st.Weather.weather7"
-			state("auto", action:"thermostat.auto", 
-				icon: "st.thermostat.auto")
+			state "auto", action: "thermostat.heat", 
+				icon: "st.thermostat.auto"
 		}
 		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
 			decoration: "flat") {
