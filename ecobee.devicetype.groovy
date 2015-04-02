@@ -17,8 +17,6 @@
  *  for the specific language governing permissions and limitations under the License.
  * 
  */
-import groovy.json.JsonBuilder
-import java.net.URLEncoder
 
 // for the UI
 preferences {
@@ -43,6 +41,7 @@ metadata {
 		capability "Thermostat"
 		capability "Refresh"
 		capability "Presence Sensor"
+		capability "Actuator"
 
 		attribute "thermostatName", "string"
 		attribute "heatLevelUp", "string"
@@ -98,7 +97,7 @@ metadata {
 		attribute "climateName", "string"
 		attribute "setClimate", "string"
         
-        // Report Runtime events
+		// Report Runtime events
         
 		attribute "auxHeat1RuntimeInPeriod", "string"
 		attribute "auxHeat2RuntimeInPeriod", "string"
@@ -123,13 +122,26 @@ metadata {
 
 		// Report Sensor Data & Stats
 		        
-		attribute "sensorMetadata", "string"
-		attribute "sensorData", "string"
-		attribute "sensorAvgInPeriod", "string"
-		attribute "sensorMinInPeriod", "string"
-		attribute "sensorMaxInPeriod", "string"
-		attribute "sensorTotalInPeriod", "string"
+		attribute "reportSensorMetadata", "string"
+		attribute "reportSensorData", "string"
+		attribute "reportSensorAvgInPeriod", "string"
+		attribute "reportSensorMinInPeriod", "string"
+		attribute "reportSensorMaxInPeriod", "string"
+		attribute "reportSensorTotalInPeriod", "string"
         
+		// Remote Sensor Data & Stats
+
+		attribute "remoteSensorData", "string"
+		attribute "remoteSensorTmpData", "string"
+		attribute "remoteSensorHumData", "string"
+		attribute "remoteSensorOccData", "string"
+		attribute "remoteSensorAvgTemp", "string"
+		attribute "remoteSensorAvgHumidity", "string"
+		attribute "remoteSensorMinTemp", "string"
+		attribute "remoteSensorMinHumidity", "string"
+		attribute "remoteSensorMaxTemp", "string"
+		attribute "remoteSensorMaxHumidity", "string"
+
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
@@ -191,17 +203,17 @@ metadata {
 		command "followMeComfort"
 		command "getReportData"
 		command "generateReportRuntimeEvents"
-		command "generateSensorStatsEvents"
+		command "generateReportSensorStatsEvents"
 		command "getThermostatRevision"
-}        
-
+		command "generateRemoteSensorEvents"
+	}        
 simulator {
 		// TODO: define status and reply messages here
 	}
 	tiles {
 		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 1,
 			height: 1, decoration: "flat") {
-			state "default", label: '${currentValue}'
+			state "default", label: '${currentValue}\n'
 		}
 		valueTile("groups", "device.groups", inactiveLabel: false, width: 1, 
 			height: 1, decoration: "flat") {
@@ -224,7 +236,7 @@ simulator {
 //					[value: 36, color: "#bc2323"]
 //				])
 //		}
-			state("temperature", label:'${currentValue}', unit:"F",
+			state("temperature", label:'${currentValue}°', unit:"F",
 			backgroundColors:[
 					[value: 31, color: "#153591"],
 					[value: 44, color: "#1e9cbb"],
@@ -241,10 +253,10 @@ simulator {
 				icon: "st.Weather.weather14", backgroundColor: "#ffffff"
 			state "off", label: '${name}', action: "thermostat.cool", 
 				icon: "st.Outdoor.outdoor19"
-			state "cool", label: '${name}', action: "thermostat.auto", 
+			state "cool", label: '${name}', action: "thermostat.heat", 
 				icon: "st.Weather.weather7"
-			state "auto", action: "thermostat.heat", 
-				icon: "st.thermostat.auto"
+			state("auto", action:"thermostat.auto", 
+				icon: "st.thermostat.auto")
 		}
 		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
 			decoration: "flat") {
@@ -270,17 +282,17 @@ simulator {
 		}
 		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false,
 			decoration: "flat") {
-			state "heat", label: '${currentValue} heat', unit: "F", 
+			state "heat", label: '${currentValue}° heat', unit: "F", 
 			backgroundColor: "#ffffff"
 		}
 		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false,
 			decoration: "flat") {
-			state "cool", label: '${currentValue} cool', unit: "F", 
+			state "cool", label: '${currentValue}° cool', unit: "F", 
 			backgroundColor: "#ffffff"
 		}
 		valueTile("humidity", "device.humidity", inactiveLabel: false, 
 			decoration: "flat") {
-			state "default", label: 'Humidity ${currentValue}%', unit: "humidity"
+			state "default", label: 'Humidity\n${currentValue}%', unit: "humidity"
 		}
 		standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false,
 			inactiveLabel: false, decoration: "flat") {
@@ -320,7 +332,7 @@ simulator {
 		}
 		valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false,
 			decoration: "flat", width: 1, height: 1) {
-			state "default", label: 'FanMin ${currentValue}'
+			state "default", label: 'FanMin\n${currentValue}'
 		}
 		valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat",
 			width: 2, height: 1) {
@@ -329,19 +341,19 @@ simulator {
 		// Program Tiles
 		valueTile("programScheduleName", "device.programScheduleName", inactiveLabel:
 			false, width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Mode ${currentValue}'
+			state "default", label: 'Mode\n${currentValue}'
 		}
 		valueTile("programType", "device.programType", inactiveLabel: false, width: 1,
 			height: 1, decoration: "flat") {
-			state "default", label: 'ProgType ${currentValue}'
+			state "default", label: 'Prog Type\n${currentValue}'
 		}
 		valueTile("programCoolTemp", "device.programCoolTemp", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'ProgCool ${currentValue}'
+			state "default", label: 'Prog Cool\n${currentValue}°'
 		}
 		valueTile("programHeatTemp", "device.programHeatTemp", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'ProgHeat ${currentValue}'
+			state "default", label: 'Prog Heat\n${currentValue}°'
 		}
 		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
@@ -349,7 +361,6 @@ simulator {
             		icon: "st.Office.office7", backgroundColor: "#ffffff"
 		}
 		// Weather Tiles
-        
 		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
 			decoration: "flat") {
 			state "-2",			label: 'updating...',		icon: "st.unknown.unknown.unknown"
@@ -375,51 +386,47 @@ simulator {
 			state "19",			label: 'Hazy',			icon: "st.Weather.weather13"
 			state "20",			label: 'Smoke',			icon: "st.Weather.weather13"
 			state "21",			label: 'Dust',			icon: "st.Weather.weather13"
-		}        
+		}
 		valueTile("weatherDateTime", "device.weatherDateTime", inactiveLabel: false,
 			width: 2, height: 1, decoration: "flat") {
 			state "default", label: '${currentValue}'
 		}
-       
 		valueTile("weatherConditions", "device.weatherCondition", 
 			inactiveLabel: false, width: 2, height: 1, decoration: "flat") {
-			state "default", label: '${currentValue}'
+			state "default", label: 'Forecast\n${currentValue}'
 		}
-        
 		valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel:
-			false, width: 1, height: 1) {
-			state "default", label: 'OutTemp ${currentValue}', unit: "C"
+			false, width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'Out Temp\n${currentValue}°', unit: "C"
 		}
 		valueTile("weatherRelativeHumidity", "device.weatherRelativeHumidity",
 			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'OutHum ${currentValue}%', unit: "humidity"
+			state "default", label: 'Out Hum\n${currentValue}%', unit: "humidity"
 		}
-
 		valueTile("weatherTempHigh", "device.weatherTempHigh", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Fcast High ${currentValue}', unit: "C"
+			state "default", label: 'FcastHigh\n${currentValue}°', unit: "C"
 		}
 		valueTile("weatherTempLow", "device.weatherTempLow", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Fcast Low ${currentValue}', unit: "C"
-		}        
+			state "default", label: 'FcastLow\n${currentValue}°', unit: "C"
+		}
 		valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'Pressure ${currentValue}', unit: "hpa"
+			state "default", label: 'Pressure\n${currentValue}', unit: "hpa"
 		}
 		valueTile("weatherWindDirection", "device.weatherWindDirection",
 			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'W.Dir ${currentValue}'
+			state "default", label: 'W.Dir\n${currentValue}'
 		}
 		valueTile("weatherWindSpeed", "device.weatherWindSpeed", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'W.Speed ${currentValue}'
+			state "default", label: 'W.Speed\n${currentValue}'
 		}
 		valueTile("weatherPop", "device.weatherPop", inactiveLabel: false, width: 1,
 			height: 1, decoration: "flat") {
-			state "default", label: 'ProbPrecip ${currentValue}%', unit: "%"
-		}       
-        
+			state "default", label: 'PoP\n${currentValue}%', unit: "%"
+		}
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
 			state "default", action: "polling.poll", icon: "st.secondary.refresh"
@@ -431,17 +438,14 @@ simulator {
 			"equipStatus", "programEndTimeMsg", "humidity", "alerts",
 			"fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
 			"programHeatTemp", "resProgram",
-			"weatherIcon", "weatherConditions",            
-			"weatherDateTime",             
-			"weatherTemperature", "weatherRelativeHumidity", 
-			"weatherTempHigh",
-			"weatherTempLow", "weatherPressure", 
-			"weatherWindDirection",
-			"weatherWindSpeed", "weatherPop",            
-			"refresh"
+			"weatherIcon", "weatherDateTime", "weatherConditions",
+			"weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
+			"weatherTempLow", "weatherPressure", "weatherWindDirection",
+			"weatherWindSpeed", "weatherPop", "refresh",
 		])
 	}
 }
+
 void coolLevelUp() {
 	int nextLevel = device.currentValue("coolingSetpoint") + 1
 	def scale = getTemperatureScale()
@@ -823,7 +827,7 @@ void poll() {
 		weatherStation:data.thermostatList[0].weather.weatherStation,
 		weatherSymbol:data.thermostatList[0].weather.forecasts[0].weatherSymbol.toString(),
 		weatherTemperature:data.thermostatList[0].weather.forecasts[0].temperature,
-		weatherDateTime:"Weather as of ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}",
+		weatherDateTime:"Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}",
 		weatherCondition:data.thermostatList[0].weather.forecasts[0].condition,
 		weatherTemp: data.thermostatList[0].weather.forecasts[0].temperature,
 		weatherTempHigh: data.thermostatList[0].weather.forecasts[0].tempHigh, 
@@ -868,7 +872,6 @@ void poll() {
 	}
     
 }
-
 
 private void generateEvent(Map results)
 {
@@ -924,6 +927,8 @@ private void generateEvent(Map results)
 
 
 
+
+
 private def getCurrentProgName() {
 	def AWAY_PROG = 'Away'
 	def SLEEP_PROG = 'Sleep'
@@ -950,12 +955,12 @@ private def getAlerts() {
 	if (data.thermostatList[0].alerts.size() > 0) {
 		alerts = 'Alert(s) '
 		for (i in 0..data.thermostatList[0].alerts.size() - 1) {
-			alerts = (i > 0) ? ' ' + alerts + data.thermostatList[0].alerts[i].notificationType :
+			alerts = (i > 0) ? ' \n' + alerts + data.thermostatList[0].alerts[i].notificationType :
 				alerts +
 				data.thermostatList[0].alerts[i].notificationType
 		}
 	}
-	alerts = (alerts != null) ? alerts + ' go to ecobee portal' : 'No alerts'
+	alerts = (alerts != null) ? alerts + '\ngo to ecobee portal' : 'No alerts'
 	return alerts
 }
 
@@ -968,7 +973,7 @@ private def getThermostatGroups(thermostatId) {
 		def j=0
 		for (i in 0..data.groups.size() - 1) {
 			if (data.groups[i].groupName != '') {
-				groupList = (j > 0) ? ' ' + groupList + data.groups[i].groupName :
+				groupList = (j > 0) ? ' \n' + groupList + data.groups[i].groupName :
 					groupList + data.groups[i].groupName
 				j++    
 			}        
@@ -982,7 +987,7 @@ private def getTemperature(value) {
 	if(getTemperatureScale() == "F"){
 		return farenheits
 	} else {
-		return fToC(farenheits) 
+		return fToC(farenheits)
 	}
 }
 
@@ -991,7 +996,7 @@ private def getSpeed(value) {
 	if(getTemperatureScale() == "F"){
 		return miles
 	} else {
-		return milesToKm(miles) 
+		return milesToKm(miles)
 	}
 }
 
@@ -1044,6 +1049,7 @@ private def getClimateList(thermostatId) {
 }
 
 
+
 void refresh() {
 	poll()
 }
@@ -1066,7 +1072,7 @@ private void api(method, args, success = {}) {
 			login()
 		}
 	}
-	def args_encoded = URLEncoder.encode(args.toString(), "UTF-8")
+	def args_encoded = java.net.URLEncoder.encode(args.toString(), "UTF-8")
 	def methods = [
 		'thermostatSummary': 
 			[uri:"${URI_ROOT}/thermostatSummary?format=json&body=${args_encoded}", 
@@ -1149,7 +1155,7 @@ private void doRequest(uri, args, type, success) {
 //		managementSet is for EMS thermostat
 //		may also be set to a specific locationSet (ex. /Toronto/Campus/BuildingA)
 //		may be set to null if not relevant for the given method
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
 private def build_body_request(method, tstatType="registered", thermostatId, tstatParams = [],
 	tstatSettings = []) {
 	def selectionJson = null
@@ -1163,7 +1169,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 		} else {
 			// If tstatType is different than managementSet, it is assumed to be locationSet specific (ex./Toronto/Campus/BuildingA)
 			selection = (tstatType.trim().toUpperCase() == 'MANAGEMENTSET') ? 
-            	// get all EMS thermostats from the root
+				// get all EMS thermostats from the root
 				[selection: [selectionType: 'managementSet', selectionMatch: '/',
 					includeEquipmentStatus: 'true']
 				] : // Or Specific to a location
@@ -1171,7 +1177,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 					includeEquipmentStatus: 'true']
 				]
 		}
-		selectionJson = new JsonBuilder(selection)
+		selectionJson = new groovy.json.JsonBuilder(selection)
 		return selectionJson
 	} else if (method == 'thermostatInfo') {
 		selection = [selection: [selectionType: 'thermostats',
@@ -1182,15 +1188,16 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 			includeWeather: 'true',
 			includeAlerts: 'true',
 			includeEvents: 'true',
-			includeEquipmentStatus: 'true'
+			includeEquipmentStatus: 'true',
+			includeSensors: 'true'
 			]
 		]
-		selectionJson = new JsonBuilder(selection)
+		selectionJson = new groovy.json.JsonBuilder(selection)
 		return selectionJson
 	} else {
 		selection = [selectionType: 'thermostats', selectionMatch: thermostatId]
 	}
-	selectionJson = new JsonBuilder(selection)
+	selectionJson = new groovy.json.JsonBuilder(selection)
 	if ((method != 'setThermostatSettings') && (tstatSettings != null) && (tstatSettings != [])) {
 		def function_clause = ((tstatParams != null) && (tsatParams != [])) ? 
 			[type:method, params: tstatParams] : 
@@ -1198,22 +1205,22 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 		def bodyWithSettings = [functions: [function_clause], selection: selection,
 				thermostat: [settings: tstatSettings]
 			]
-		def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
+		def bodyWithSettingsJson = new groovy.json.JsonBuilder(bodyWithSettings)
 		return bodyWithSettingsJson
 	} else if (method == 'setThermostatSettings') {
 		def bodyWithSettings = [selection: selection,thermostat: [settings: tstatSettings]
 			]
-		def bodyWithSettingsJson = new JsonBuilder(bodyWithSettings)
+		def bodyWithSettingsJson = new groovy.json.JsonBuilder(bodyWithSettings)
 		return bodyWithSettingsJson
 	} else if ((tstatParams != null) && (tsatParams != [])) {
 		def function_clause = [type: method, params: tstatParams]
 		def simpleBody = [functions: [function_clause], selection: selection]
-		def simpleBodyJson = new JsonBuilder(simpleBody)
+		def simpleBodyJson = new groovy.json.JsonBuilder(simpleBody)
 		return simpleBodyJson
 	} else {
 		def function_clause = [type: method]
 		def simpleBody = [functions: [function_clause], selection: selection]
-		def simpleBodyJson = new JsonBuilder(simpleBody)
+		def simpleBodyJson = new groovy.json.JsonBuilder(simpleBody)
 		return simpleBodyJson
     }    
 }
@@ -1264,8 +1271,8 @@ void iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 	}
 }
 
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 void setThermostatSettings(thermostatId,tstatSettings = []) {
     
@@ -1359,8 +1366,8 @@ void setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 }
 
 // New version of setHold with access to extra setHold params when needed (ex. to set ventilator event's properties).
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 // extraHoldParams may be any other sethold or events properties  
 //		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml
@@ -1474,8 +1481,8 @@ void iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 	}
 }
 
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 	targetStartDateTime, targetEndDateTime) {
     
@@ -1501,7 +1508,7 @@ void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 		startTime: vacationStartTime,
 		endDate: vacationEndDate,
 		endTime: vacationEndTime
-		]
+	]
 	def bodyReq = build_body_request('createVacation',null,thermostatId,vacationParams)
 	if (settings.trace) {
 		log.debug "createVacation> about to call api with body = ${bodyReq} for ${thermostatId} "
@@ -1567,8 +1574,8 @@ void iterateDeleteVacation(tstatType, vacationName) {
 	}
 }
 
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 void deleteVacation(thermostatId, vacationName) {
   
 	thermostatId = determine_tstat_id(thermostatId)
@@ -1631,8 +1638,8 @@ void iterateResumeProgram(tstatType) {
 	}
 }
 
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 void resumeProgram(thermostatId=settings.thermostatId) {
   
 	thermostatId = determine_tstat_id(thermostatId)
@@ -1740,7 +1747,7 @@ def getGroups(thermostatId) {
 // iterateUpdateGroup: iterate thru all the Groups under a specific account and update their settings
 // Get all groups related to a thermostatId and update them with the groupSettings
 // thermostatId may only be 1 thermostat (not a list), if null or empty, then defaulted to this thermostatId (settings)
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // groupSettings may be a map of settings separated by ",", no spaces; 
 // 	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 void iterateUpdateGroup(thermostatId, groupSettings = []) {
@@ -1779,13 +1786,13 @@ void iterateUpdateGroup(thermostatId, groupSettings = []) {
 
 // Only valid for Smart and ecobee3 thermostats (not for EMS)
 // If groupRef is not provided, it is assumed that a group creation needs to be done
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // groupSettings could be a map of settings separated by ",", no spaces; 
 //	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	String updateGroupParams
-	def groupSettingsJson = new JsonBuilder(groupSettings)
+	def groupSettingsJson = new groovy.json.JsonBuilder(groupSettings)
 	def groupSet = groupSettingsJson.toString().minus('{').minus('}')
 
 	thermostatId = determine_tstat_id(thermostatId)
@@ -1870,8 +1877,8 @@ void deleteGroup(groupRef, groupName) {
 }
 
 // Only valid for Smart and ecobee3 thermostats (not for EMS)
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // groupSettings could be a map of settings separated by ",", no spaces; 
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 void createGroup(groupName, thermostatId, groupSettings = []) {
@@ -1899,6 +1906,7 @@ void deleteClimate(thermostatId, climateName, substituteClimateName) {
 // iterateSetClimate: iterate thru all the thermostats under a specific account and set their Climate
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // climate name is the name of the climate bet set to(ex. "Home", "Away").
+
 void iterateSetClimate(tstatType, climateName) {
 	Integer MAX_TSTAT_BATCH = 25
 	def tstatlist = null
@@ -1923,7 +1931,7 @@ void iterateSetClimate(tstatType, climateName) {
 			}
 			if ((nTstats > MAX_TSTAT_BATCH) || (i == (data.thermostatCount - 1))) { 
 				// process a batch of maximum 25 thermostats according to API doc
-				setClimate("${tstatlist}", climateName)
+				setClimate("${tstatlist}", climateName, sensors)
 				tstatlist = Id
 				nTstats = 1
 			} else {
@@ -1933,11 +1941,11 @@ void iterateSetClimate(tstatType, climateName) {
 		}
 	}
 }
-
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 //	The settings.thermostatId (input) is the default one
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
+
 void setClimate(thermostatId, climateName) {
 	def climateRef = null
 	def tstatParams
@@ -1966,6 +1974,7 @@ void setClimate(thermostatId, climateName) {
 			] :
 			[holdClimateRef:"${climateRef}"
 			]
+           	
 		def bodyReq = build_body_request('setHold',null, data.thermostatList[i].identifier,tstatParams)	
 		def statusCode=true
 		int j=0        
@@ -1996,7 +2005,6 @@ void setClimate(thermostatId, climateName) {
     
 
 }
-
 // iterateUpdateClimate: iterate thru all the thermostats under a specific account and update their Climate
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
@@ -2033,7 +2041,7 @@ void iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 }
 
 // thermostatId may only be 1 thermostat (not a list) 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // climate name is the name of the climate to be updated (ex. "Home", "Away").
 // deleteClimateFlag is set to 'true' if the climate needs to be deleted (should not be part of any schedule beforehand)
 // substituteClimateName is the climateName that will replace the original climateName in the schedule (can be null when not needed)
@@ -2190,14 +2198,13 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 		} /* end api call */               
 	} /* end for */
 }
-
 // thermostatId may only be 1 thermostat (not a list) 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // plugName is the name of the plug name to be controlled 
 // plugState is the state to be set
 // plugSettings are the different settings at https://www.ecobee.com/home/developer/api/documentation/v1/functions/ControlPlug.shtml
 void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
-	def plugSettingsJson = new JsonBuilder(plugSettings)
+	def plugSettingsJson = new groovy.json.JsonBuilder(plugSettings)
 	def plugSet = plugSettingsJson.toString().minus('{').minus('}')
 
 	thermostatId = determine_tstat_id(thermostatId)
@@ -2218,7 +2225,6 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 	if ((settings.holdType != null) && (settings.holdType.trim() != "")) {
 		bodyReq = bodyReq + '"holdType":"' + settings.holdType.trim() + '"'
 	} else {
-    
 		bodyReq = bodyReq + '"holdType":"indefinite"'
 	}
 	// add the plugSettings if any
@@ -2241,11 +2247,15 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 						"controlPlug>done for thermostatId =${thermostatId},plugName =${plugName}"
 				}
 				// post plug values 
-				sendEvent name: "plugName", value: "${plugName}"
-				sendEvent name: "plugState", value: "${plugState}"
+ 				def plugEvents = [
+					plugName: plugName, 
+ 					plugState: plugState
+ 				]
+                
 				if ((plugSettings != null) && (plugSettings != '')) {
-					sendEvent name: "plugSettings", value: "${plugSettings}"
+					plugEvents = plugEvents + [plugSettings: plugSettings]
 				}
+				generateEvent(plugEvents)
 			} else {
 				log.error "controlPlug>error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
@@ -2254,15 +2264,14 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 		} /* end api call */               
 	} /* end while */
 }
-
-
-
 // thermostatId shall refer to a single thermostat to avoid processing too much data
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // reportColumn shall be 1 component only (ex. auxHeat1, coolComp1, fan, ventilator, humidifier, dehumidifier)
 // startDateTime and endDateTime should be in UTC timezone format
 // startInterval & endInterval may be null. In that case, the intervals are calculated using the startDateTime and endDateTime
 // includeSensorData may be 'true' or 'false'
+// postData may be 'true' or 'false', by default the latter
+
 // See https://www.ecobee.com/home/developer/api/documentation/v1/operations/get-runtime-report.shtml for more details
 // If you want to retrieve the data, then set postData to 'true', by default, reportdata and sensorData are not posted
 //
@@ -2271,22 +2280,26 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 //		def reportData = ecobee.currentReportData.toString().split(",,")
 //            
 //		for (i in 0..reportData.size()-1) {
-//			def rowDetails = reportData[i].split(',')
-//			def dateReportData = rowDetails[0]
-//			def timeReportData = rowDetails[1]
-//			def valueReportData = rowDetails[2]
-//		}    
-            
-
+//			def rowDetails
+//			try {
+//				rowDetails = reportData[i].split(',')
+//				def dateReportData = rowDetails[0]
+//				def timeReportData = rowDetails[1]
+//				def valueReportData = rowDetails[2]
+//			
+//			} catch (any)
+//				log.error "no values ($rowDetails) for $component at $i"  // values are not always provided
+//				continue
+//			} 
+//		}
 
 void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endInterval, reportColumn, includeSensorData, postData='false') {
 	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
 	int beginInt, endInt
-    
-	thermostatId = determine_tstat_id(thermostatId)
 
+	thermostatId = determine_tstat_id(thermostatId)
 	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
         
 	if (nbDaysInPeriod > 2) {  // Report period should not be bigger than 2 days to avoid summarizing too much data.
@@ -2346,7 +2359,6 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 					sendEvent name: "verboseTrace", value:"getReportData> done for thermostatId ${thermostatId}"
 					log.debug "getReportData> done for thermostatId ${thermostatId}"
 				}
-
 				data.reportList = resp.data.reportList
 				data.startDate = resp.data.startDate
 				data.endDate = resp.data.endDate
@@ -2354,24 +2366,24 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 				data.endInterval = resp.data.endInterval
 				data.columns = resp.data.columns
 				if (includeSensorData=='true') {
-	        		data.sensorList =  resp.data.sensorList
-				}                
+					data.sensorList =  resp.data.sensorList
+				}  
+				def reportData = ""
+				def reportSensorMetadata=""
+				def reportSensorData =""
+                
 				if (postData=='true') {
 					if (settings.trace) {
 						log.debug "getReportData>about to post reportData = $data.reportList.rowList[0].toString()"
 					}
-					sendEvent name: "reportData", value: data.reportList.rowList[0].toString().minus('[').minus(']')
+					reportData = data.reportList?.rowList[0].toString().minus('[').minus(']')
 					if (includeSensorData=='true') {
-						sendEvent name: "sensorMetadata", value: data.sensorList.sensors[0].toString()
- 						sendEvent name: "sensorData", value: data.sensorList.data[0].toString().minus('[').minus(']')
-					}                        
-				} else { // reinitialize data (empty the variables)
-            
-					sendEvent name: "reportData", value: ''
-					sendEvent name: "sensorMetadata", value: ''
- 					sendEvent name: "sensorData", value: ''
-				}                
-            
+						reportSensorMetadata = new groovy.json.JsonBuilder(data.sensorList?.sensors[0])  // metadata is in Json format
+						reportSensorData = data.sensorList?.data[0].toString().minus('[').minus(']')
+					}   
+				}   
+				generateEvent(['reportData':reportData,'reportSensorMetadata':reportSensorMetadata,
+					'reportSensorData':reportSensorData])
 				if (settings.trace) {
 					log.debug "getReportData> startDate= ${data.startDate}"
 					log.debug "getReportData> endDate= ${data.endDate}"
@@ -2436,7 +2448,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 		log.debug "generateReportRuntimeEvents> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
 	if (component.contains('auxHeat1')) {
-		totalRuntime = calculate_stats('auxHeat1', beginInt, endInt, 'report')
+		totalRuntime = calculate_report_stats('auxHeat1', beginInt, endInt, 'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
  			sendEvent name: "auxHeat1RuntimeDaily", value: runtimeInMin.toString() 
@@ -2446,7 +2458,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	}
 
 	if (component.contains('auxHeat2')) {
-		totalRuntime = calculate_stats('auxHeat2', beginInt, endInt,'report')
+		totalRuntime = calculate_report_stats('auxHeat2', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "auxHeat2RuntimeDaily", value: runtimeInMin.toString()
@@ -2456,7 +2468,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	}
 
 	if (component.contains('auxHeat3')) {
-		totalRuntime = calculate_stats('auxHeat3', beginInt, endInt,'report')
+		totalRuntime = calculate_report_stats('auxHeat3', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "auxHeat3RuntimeDaily", value: runtimeInMin.toString()
@@ -2466,7 +2478,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	}
 
 	if (component.contains('compCool1')) {
-		totalRuntime = calculate_stats('coolComp1', beginInt, endInt,'report')
+		totalRuntime = calculate_report_stats('coolComp1', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "compCool1RuntimeDaily", value: runtimeInMin.toString()
@@ -2476,7 +2488,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	}
 
 	if (component.contains('compCool2')) {
-		totalRuntime = calculate_stats('coolComp2', beginInt, endInt,'report')
+		totalRuntime = calculate_report_stats('coolComp2', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "coolComp2RuntimeDaily", value: runtimeInMin.toString()
@@ -2486,7 +2498,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	}
 
 	if (component.contains('fan')) {
-		totalRuntime = calculate_stats('fan', beginInt, endInt,'report')
+		totalRuntime = calculate_report_stats('fan', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "fanRuntimeDaily", value: runtimeInMin.toString()
@@ -2496,7 +2508,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	}
 
 	if (component.contains('ventilator')) {
- 		totalRuntime = calculate_stats('ventilator', beginInt, endInt,'report')
+ 		totalRuntime = calculate_report_stats('ventilator', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "ventilatorRuntimeDaily", value: runtimeInMin.toString()
@@ -2506,7 +2518,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	}
     
 	if (component.contains('dehumidifier')) {
-		totalRuntime = calculate_stats('dehumidifier', beginInt, endInt,'report')
+		totalRuntime = calculate_report_stats('dehumidifier', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "dehumidifierRuntimeDaily", value: runtimeInMin.toString()
@@ -2515,7 +2527,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 		}
                 
 	} else if (component.contains('humidifier')) {
-		totalRuntime = calculate_stats('humidifier', beginInt, endInt,'report')
+		totalRuntime = calculate_report_stats('humidifier', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
 		if (typeEvent== 'daily') {
 			sendEvent name: "humidifierRuntimeDaily", value: runtimeInMin.toString()
@@ -2525,16 +2537,14 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 		}
 	}
 }
-
-
-// getReportData() must be called prior to calling the generateSensorRuntimeEvents
+// getReportData() must be called prior to calling the generateReportSensorStatsEvents
 // sensorId may be null or a specific sensorId as specified in the sensor metadata
 //	see https://www.ecobee.com/home/developer/api/documentation/v1/objects/RuntimeSensorMetadata.shtml
 // startInterval & endInterval may be null. 
 //	Intervals will be then defaulted to the ones used to generate the report
 // operation may be one or several stats separated by comma (ex. avg, min, max, total)
 
-void generateSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterval, endInterval, operation) {
+void generateReportSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterval, endInterval, operation) {
 	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
@@ -2561,36 +2571,34 @@ void generateSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterv
     	}
 	if (!foundSensor) {
 		if (settings.trace) {
-			log.error "generateSensorStatsEvents> sensor ${sensorId} not found in last sensor data from getReportData()"
+			log.error "generateReportSensorStatsEvents> sensor ${sensorId} not found in last sensor data from getReportData()"
 		}
 		return
 	}
     
 	if (operation.contains('avg')) {
-		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor', 'avg')
- 		sendEvent name: "sensorAvgInPeriod", value: runtimeSensorStat.round(2).toString() 
+		runtimeSensorStat = calculate_report_stats(sensorId, beginInt, endInt, 'sensor', 'avg')
+ 		sendEvent name: "reportSensorAvgInPeriod", value: runtimeSensorStat.round(2).toString() 
 	}
 	if (operation.contains('min')) {
-		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor', 'min')
- 		sendEvent name: "sensorMinInPeriod", value: runtimeSensorStat.round(2).toString()
+		runtimeSensorStat = calculate_report_stats(sensorId, beginInt, endInt, 'sensor', 'min')
+ 		sendEvent name: "reportSensorMinInPeriod", value: runtimeSensorStat.round(2).toString()
 	}
 	if (operation.contains('max')) {
-		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor', 'max')
- 		sendEvent name: "sensorMaxInPeriod", value: runtimeSensorStat.round(2).toString()
+		runtimeSensorStat = calculate_report_stats(sensorId, beginInt, endInt, 'sensor', 'max')
+ 		sendEvent name: "reportSensorMaxInPeriod", value: runtimeSensorStat.round(2).toString()
 	}
 	if (operation.contains('total')) {
-		runtimeSensorStat = calculate_stats(sensorId, beginInt, endInt, 'sensor')
- 		sendEvent name: "sensorTotalInPeriod", value: runtimeSensorStat.round(2).toString()
+		runtimeSensorStat = calculate_report_stats(sensorId, beginInt, endInt, 'sensor')
+ 		sendEvent name: "reportSensorTotalInPeriod", value: runtimeSensorStat.round(2).toString()
 	}
-    
-
 }
 
-private float calculate_stats(component, startInterval, endInterval, typeData, operation='total') {
+private float calculate_report_stats(component, startInterval, endInterval, typeData, operation='total') {
 	int total=0	
 	int nbRows=0
 	int max=0
-	def min = nul
+	def min = null
 	int rowValue
     
 	int startRow = (startInterval != null) ? startInterval: data.startInterval.toInteger()
@@ -2598,12 +2606,12 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 	int lastRow =  Math.min(endInterval,rowCount)
 
 	if (settings.trace) {
-		log.debug "calculate_stats> about to process rowCount= ${rowCount},startRow=${startRow},lastRow=${lastRow}"
+		log.debug "calculate_report_stats> about to process rowCount= ${rowCount},startRow=${startRow},lastRow=${lastRow}"
 	}
 	if (lastRow <= startRow) {
     
 		if (settings.trace) {
-			log.error "calculate_stats>lastRow=${lastRow} is not greater than startRow=${startRow}"
+			log.error "calculate_report_stats>lastRow=${lastRow} is not greater than startRow=${startRow}"
 		}
 		return null
 	}
@@ -2616,18 +2624,18 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 			max = Math.max(rowValue,max)
 			min = (min==null) ? rowValue : Math.min(rowValue,min)
 		} catch (any) {
-			log.debug "calculate_stats> no values ($rowDetails) for $component at $i"
+			log.debug "calculate_report_stats> no values ($rowDetails) for $component at $i"
 			continue
 		}	
 	}
     
 	int avg = ((nbRows >1) ? total/nbRows:total)
 	if (settings.trace) {
-		log.debug "calculate_stats> total= ${total} for $component component"
-		log.debug "calculate_stats> nbRows with value= ${nbRows} for $component component"
-		log.debug "calculate_stats> avg= ${avg} for $component component"
-		log.debug "calculate_stats> max= ${max} for $component component"
-		log.debug "calculate_stats> min= ${min} for $component component"
+		log.debug "calculate_report_stats> total= ${total} for $component component"
+		log.debug "calculate_report_stats> nbRows with value= ${nbRows} for $component component"
+		log.debug "calculate_report_stats> avg= ${avg} for $component component"
+		log.debug "calculate_report_stats> max= ${max} for $component component"
+		log.debug "calculate_report_stats> min= ${min} for $component component"
 	}
 	if (operation == 'avg') {
 		return avg    
@@ -2640,9 +2648,182 @@ private float calculate_stats(component, startInterval, endInterval, typeData, o
 	}
 	return total
 }
+
+// getThermostatInfo() should be called prior to calling generateRemoteSensorEvents() method to get the latest data
+// thermostatId shall refer to a single thermostat to avoid processing too much data
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
+// postData may be 'true' or 'false', by default the latter
+
+void generateRemoteSensorEvents(thermostatId,postData='false') {
+	def REMOTE_SENSOR_TYPE="ecobee3_remote_sensor"
+	def REMOTE_SENSOR_OCCUPANCY='occupancy'
+	def REMOTE_SENSOR_TEMPERATURE='temperature'
+	def REMOTE_SENSOR_HUMIDITY='humidity'
     
-// thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"') 
-//	if no thermostatId is provided, it is defaulted to the thermostatId specified in the settings (input)
+	int nbTempSensorInUse=0
+	int nbHumSensorInUse=0
+	float totalTemp=0,totalHum=0, avgTemp=0, avgHum=0
+	int maxTemp=0, maxHum=0
+	def minTemp=null
+	def minHum=null
+    
+	if ((thermostatId != null) && (thermostatId != "")) {
+		if (thermostatId.contains(",")) {
+        
+			if (settings.trace) {
+				sendEvent name: "verboseTrace", value:"generateRemoteSensorEvents>thermostatId ${thermostatId} is not valid"
+				log.error "generateRemoteSensorEvents>thermostatId ${thermostatId} is not valid"
+				return
+			}                
+		}
+		getThermostatInfo(thermostatId)    
+    }
+	thermostatId = determine_tstat_id(thermostatId)
+    
+/*    
+	def testData = [
+    
+ 			[id: "rs01", name: "My RSensor", type: "ecobee3_remote_sensor", 
+				capability:[[id: "rs01", type: "temperature", value: "720" ],
+ 			[id: "rs01", type: "occupancy", value: "true"]]
+        	],
+ 			[id: "rs02", name: "My RSensor2", type: "ecobee3_remote_sensor", 
+				capability:[[id: "rs02", type: "temperature", value: "750" ],
+			[id: "rs02", type: "occupancy", value: "false"]]
+		]
+	]
+	data.thermostatList[0].remoteSensors=testData
+*/    
+	/* Reset all remote sensor data values */
+	def remoteData = []
+	def remoteTempData = ""
+	def remoteHumData = ""
+	def remoteOccData = ""
+    
+	if (data.thermostatList[0].remoteSensors?.size() > 0) {
+		for (i in 0..data.thermostatList[0].remoteSensors.size() - 1) {
+			if (settings.trace) {
+				log.debug "generateRemoteSensorEvents>found sensor ${data.thermostatList[0].remoteSensors[i]} at (${i})"
+			}
+			if (data.thermostatList[0].remoteSensors[i]?.type != REMOTE_SENSOR_TYPE) {
+                
+				if (settings.trace) {
+					log.debug "generateRemoteSensorEvents>found sensor type ${data.thermostatList[0].remoteSensors[i].type} at (${i}, skipping it)"
+				}
+ 				// not a remote sensor
+ 				continue
+			}
+ 			if (data.thermostatList[0].remoteSensors[i]?.capability?.size() <1) {
+				if (settings.trace) {
+					log.debug "generateRemoteSensorEvents>capability size is wrong (${data.thermostatList[0].remoteSensors[i]?.size()}) at (${i})"
+				}
+                
+				// problem with the data
+				continue
+			}
+            
+			if (postData == 'true') {
+				if (settings.trace) {
+					log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i]} to remoteData"
+				}
+				remoteData << data.thermostatList[0].remoteSensors[i]  // to be transformed into Json later
+			} 
+			int valueInt
+			for (j in 0..data.thermostatList[0].remoteSensors[i].capability.size()-1) {
+        		    
+				if (settings.trace) {
+					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.thermostatList[0].remoteSensors[i].capability[j]} at j=${j}"
+				}
+				if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
+					// Divide the sensor temperature by 10 
+					valueInt =data.thermostatList[0].remoteSensors[i].capability[j].value.toInteger()/10
+					if (postData == 'true') {
+						if (settings.trace) {
+							log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i].capability[j]} to remoteTempData"
+						}
+ 						remoteTempData = remoteTempData + data.thermostatList[0].remoteSensors[i].id + "," +
+							data.thermostatList[0].remoteSensors[i].name + "," +
+							data.thermostatList[0].remoteSensors[i].capability[j].type + "," + valueInt.toString() + ",,"
+					}                        
+					totalTemp = totalTemp + valueInt
+					maxTemp = Math.max(valueInt,maxTemp)
+					minTemp = (minTemp==null)? valueInt: Math.min(valueInt,minTemp)
+					nbTempSensorInUse++
+				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
+					if (postData == 'true') {
+						if (settings.trace) {
+							log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i].capability[j]} to remoteHumData"
+						}
+						remoteHumData = remoteHumData + data.thermostatList[0].remoteSensors[i].id + "," + 
+							data.thermostatList[0].remoteSensors[i].name + "," +
+							data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
+					}                        
+					valueInt =data.thermostatList[0].remoteSensors[i].capability[j].value.toInteger()
+					totalHum = totalHum + valueInt
+					maxHum = Math.max(valueInt,maxHum)
+					minHum = (minHum==null)? valueInt: Math.min(valueInt,minHum)
+					nbHumSensorInUse++
+				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_OCCUPANCY) {
+					if (postData == 'true') {
+						if (settings.trace) {
+							log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i].capability[j]} to remoteOccData"
+						}
+						remoteOccData = remoteOccData + data.thermostatList[0].remoteSensors[i].id + "," + 
+							data.thermostatList[0].remoteSensors[i].name + "," +
+							data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
+					}                        
+				} 
+				                        
+			} /* end for remoteSensor Capabilites */
+		} /* end for remoteSensor data */
+        
+	}                        
+
+	def remoteDataJson=""
+ 
+ 	if (remoteData != []) {
+    
+		remoteDataJson = new groovy.json.JsonBuilder(remoteData)
+	}
+	
+	if (settings.trace) {
+		log.debug "generateRemoteSensorEvents>remoteDataJson=${remoteDataJson}"
+	}
+	if (nbTempSensorInUse >0) {
+		avgTemp = totalTemp / nbTempSensorInUse
+		if (settings.trace) {
+			log.debug "generateRemoteSensorEvents>avgTemp for remote sensors= ${avgTemp},totalTemp=${totalTemp},nbTempSensors=${nbTempSensorInUse}"
+		}
+	}                        
+	def remoteSensorEvents = [
+		remoteSensorData: "${remoteDataJson.toString()}",
+		remoteSensorOccData: "${remoteOccData.toString()}",
+		remoteSensorAvgTemp: avgTemp,
+ 		remoteSensorTmpData: "${remoteTempData.toString()}",
+		remoteSensorMinTemp: ((minTemp!=null)?minTemp:0),
+		remoteSensorMaxTemp: maxTemp
+	]
+
+    
+	if (nbHumSensorInUse >0) {
+		avgHum = totalHum / nbHumSensorInUse
+		if (settings.trace) {
+			log.debug "generateRemoteSensorEvents>avgHum for remote sensors= ${avgHum},totalTemp=${totalHum},nbHumSensors=${nbHumSensorInUse}"
+		}
+		remoteSensorEvents = remoteSensorEvents + [remoteSensorHumData: "${remoteHumData.toString()}",remoteSensorAvgHumidity: avgHum,	
+			remoteSensorMinHumidity: ((minHum!=null)?minHum:0),	remoteSensorMaxHumidity: maxHum]
+        
+	}                        
+	if (settings.trace) {
+		log.debug "generateRemoteSensorEvents>remoteSensorEvents to be sent= ${remoteSensorEvents}"
+	}
+
+	generateEvent(remoteSensorEvents)
+
+}
+    
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
 void getThermostatInfo(thermostatId=settings.thermostatId) {
 
 	if (settings.trace) {
@@ -2660,7 +2841,7 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				data.thermostatList = resp.data.thermostatList
+				data?.thermostatList = resp.data.thermostatList
 				def thermostatName = data.thermostatList[0].name
 				// divide the temperature by 10 before for display or calculations later.
 				data.thermostatList[0].runtime.actualTemperature = data.thermostatList[0].runtime
@@ -2690,21 +2871,18 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 						}                                    
 					}
 				}                        
-				if (settings.trace) {
-					log.debug "getTstatInfo> got info for ${thermostatId} name=${thermostatName}, features=${resp.data}"
-				}
 				def runtimeSettings = data.thermostatList[0].runtime
 				def thermostatSettings = data.thermostatList[0].settings
 				if (settings.trace) {
 					sendEvent name: "verboseTrace", value:
-						"getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," +
-						"fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
-						"current Humidity = ${runtimeSettings.actualHumidity}, desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
-						"desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
-					log.debug "getTstatInfo> thermostatId = ${thermostatId}, name = ${thermostatName},  hvacMode = ${thermostatSettings.hvacMode}," +
-						"fan = ${runtimeSettings.desiredFanMode},fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
-						"current Humidity = ${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
-						"desiredDehumidity =  ${runtimeSettings.desiredDehumidity} dehumidifierMode= ${thermostatSettings.dehumidifierMode}"
+						"getTstatInfo> thermostatId=${thermostatId},name=${thermostatName},hvacMode=${thermostatSettings.hvacMode}," +
+						"fan=${runtimeSettings.desiredFanMode},fanMinOnTime=${thermostatSettings.fanMinOnTime},desiredHeat=${runtimeSettings.desiredHeat},desiredCool=${runtimeSettings.desiredCool}," +
+						"current Humidity= ${runtimeSettings.actualHumidity},desiredHumidity=${runtimeSettings.desiredHumidity},humidifierMode=${thermostatSettings.humidifierMode}," +
+						"desiredDehumidity= ${runtimeSettings.desiredDehumidity},dehumidifierMode=${thermostatSettings.dehumidifierMode}"
+					log.debug "getTstatInfo> thermostatId=${thermostatId},name=${thermostatName},hvacMode=${thermostatSettings.hvacMode}," +
+						"fan=${runtimeSettings.desiredFanMode},fanMinOnTime=${thermostatSettings.fanMinOnTime},desiredHeat=${runtimeSettings.desiredHeat},desiredCool=${runtimeSettings.desiredCool}," +
+						"current Humidity=${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode=${thermostatSettings.humidifierMode}," +
+						"desiredDehumidity=${runtimeSettings.desiredDehumidity},dehumidifierMode=${thermostatSettings.dehumidifierMode}"
 				}
 			} else {
 				log.error "getThermostatInfo> error=${statusCode.toString()}, message = ${message}"
@@ -2758,9 +2936,9 @@ void getThermostatSummary(tstatType) {
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				data.revisionList = resp.data.revisionList
-				data.statusList = resp.data.statusList
-				data.thermostatCount = data.revisionList.size()
+				data?.revisionList = resp.data.revisionList
+				data?.statusList = resp.data.statusList
+				data?.thermostatCount = data.revisionList.size()
 				for (i in 0..data.thermostatCount - 1) {
 					def thermostatDetails = data.revisionList[i].split(':')
 					def thermostatId = thermostatDetails[0]
@@ -2875,7 +3053,7 @@ private void refreshParentTokens() {
 		log.debug "refreshParentTokens>begin data.auth = ${data.auth}"
 	}
 	if (settings.trace) {
-		log.debug "refreshParentTokens>auth=$auth, about to call parent.setParentAuthTokens"
+		log.debug "refreshParentTokens>about to call parent.setParentAuthTokens"
 	}         
 	parent.setParentAuthTokens(data.auth)
 	if (settings.trace) {
@@ -2921,7 +3099,7 @@ void getEcobeePinAndAuth() {
 		if (settings.trace) {
 			log.debug "getEcobeePinAndAuth> response = ${resp.data}"
 		}
-		data.auth = resp.data
+		data?.auth = resp.data
 		data.auth.code = resp.data.code
 		data.auth.expires_in = resp.data.expires_in
 		data.auth.interval = resp.data.interval
@@ -2972,7 +3150,7 @@ void setAuthTokens() {
 		"code=${data.auth.code}&" +
 		"client_id=${get_appKey()}"
 	]
-	if (data.auth.access_token == null) {
+	if (data?.auth?.access_token == null) {
 		def successTokens = {resp ->
 			data.auth.access_token = resp.data.access_token
 			data.auth.refresh_token = resp.data.refresh_token
