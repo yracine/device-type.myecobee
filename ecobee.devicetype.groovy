@@ -2677,23 +2677,9 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 			}                
 		}
 		getThermostatInfo(thermostatId)    
-    }
+	}
 	thermostatId = determine_tstat_id(thermostatId)
     
-/*    
-	def testData = [
-    
- 			[id: "rs01", name: "My RSensor", type: "ecobee3_remote_sensor", 
-				capability:[[id: "rs01", type: "temperature", value: "720" ],
- 			[id: "rs01", type: "occupancy", value: "true"]]
-        	],
- 			[id: "rs02", name: "My RSensor2", type: "ecobee3_remote_sensor", 
-				capability:[[id: "rs02", type: "temperature", value: "750" ],
-			[id: "rs02", type: "occupancy", value: "false"]]
-		]
-	]
-	data.thermostatList[0].remoteSensors=testData
-*/    
 	/* Reset all remote sensor data values */
 	def remoteData = []
 	def remoteTempData = ""
