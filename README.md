@@ -141,9 +141,9 @@ a) ecobee3RemoteSensorInit
 This smartapp will expose your ecobee3's remote sensors as Motion and Temperature Sensors in SmartThings, so
 that you can use them in your automation scenarios.
 
-See the following readme file for instructions (code is still in beta branch)
+See the following readme file for instructions 
 
-https://github.com/yracine/device-type.myecobee/blob/beta/smartapps/readme.ecobee3RemoteSensor
+https://github.com/yracine/device-type.myecobee/blob/master/smartapps/readme.ecobee3RemoteSensor
 
 
 /****************************************************
