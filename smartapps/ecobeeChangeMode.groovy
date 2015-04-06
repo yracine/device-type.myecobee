@@ -100,6 +100,12 @@ def changeMode(evt) {
 
 		} else thermostats?.setThisTstatClimate(givenClimate)
 
+	} else if (newMode == "Night") {
+		if (givenClimate.trim().toUpperCase() == 'SLEEP') {
+			thermostats?.sleep()
+
+		} else thermostats?.setThisTstatClimate(givenClimate)
+    
 	} else {
 		if (givenClimate.trim().toUpperCase() == 'HOME') {
 			thermostats?.present()
