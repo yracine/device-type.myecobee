@@ -43,25 +43,26 @@ preferences {
 	section("Create this Vacation Name") {
 		input "vacationName", "text", title: "Vacation Name"
 	}
-	section("Or delete the vacation (By default=false)") {
+    
+	section("Or delete the vacation [default=false]") {
 		input "deleteVacation", "Boolean", title: "delete?", metadata: [values: ["true", "false"]], required: false
 	}
-	section("Cool Temp for vacation, default = 80°F/27°C") {
+	section("Cool Temp for vacation, [default = 80°F/27°C]") {
 		input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
 	}
-	section("Heat Temp for vacation, default= 60°F/14°C") {
+	section("Heat Temp for vacation [default= 60°F/14°C]") {
 		input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
 	}
-	section("Start date for the vacation, format = DD-MM-YYYY") {
+	section("Start date for the vacation, [format = DD-MM-YYYY]") {
 		input "givenStartDate", "text", title: "Beginning Date"
 	}
-	section("Start time for the vacation HH:MM (24HR)") {
+	section("Start time for the vacation [HH:MM 24HR]") {
 		input "givenStartTime", "text", title: "Beginning time"
 	}
-	section("End date for the vacation format = DD-MM-YYYY") {
+	section("End date for the vacation [format = DD-MM-YYYY]") {
 		input "givenEndDate", "text", title: "End Date"
 	}
-	section("End time for the vacation HH:MM (24HR)") {
+	section("End time for the vacation [HH:MM 24HR]") {
 		input "givenEndTime", "text", title: "End time"
 	}
 
