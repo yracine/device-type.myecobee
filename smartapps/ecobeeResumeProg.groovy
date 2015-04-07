@@ -39,13 +39,13 @@ preferences {
 	section("When one of these people arrive at home") {
 		input "people", "capability.presenceSensor", multiple: true
 	}
-	section("Or when the mode change to this mode (optional)") {
+	section("Or when the mode change to this mode [optional]") {
 		input "newMode", "mode", title: "Mode?", required: false
 	}
-	section("Or there is motion at home on these sensors (optional)") {
+	section("Or there is motion at home on these sensors [optional]") {
 		input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
 	}
-	section("False alarm threshold (defaults = 3 min)") {
+	section("False alarm threshold [defaults = 3 minutes]") {
 		input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
 	}
 	section("Resume Program at the ecobee thermostat(s)") {
