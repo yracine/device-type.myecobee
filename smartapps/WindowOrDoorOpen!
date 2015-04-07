@@ -31,7 +31,7 @@ preferences {
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-			description: "http://github.com/yracine"
+		description: "http://github.com/yracine"
 	}
 	section("Notify me when the following door or window contact...") {
 		input "theSensor", "capability.contactSensor", required: true
@@ -42,7 +42,7 @@ preferences {
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", required: false, multiple: true
 	}
-	section("What do I use as the Master on/off switch for voice notifications? (optional)") {
+	section("What do I use as the Master on/off switch for voice notifications? [optional]") {
 		input "powerSwitch", "capability.switch", required: false
 	}
 	section("Turn off the thermostat(s) after delay [optional]") {
