@@ -40,13 +40,13 @@ preferences {
 	section("When all of these people leave home") {
 		input "people", "capability.presenceSensor", multiple: true
 	}
-	section("And there is no motion at home on these sensors (optional)") {
+	section("And there is no motion at home on these sensors [optional]") {
 		input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
 	}
 	section("Turn off these lights") {
 		input "switches", "capability.switch", title: "Switch", multiple: true, required: optional
 	}
-	section("And activate the alarm system (optional)") {
+	section("And activate the alarm system [optional]") {
 		input "alarmSwitch", "capability.contactSensor", title: "Alarm Switch", required: false
 	}
 	section("Set the ecobee thermostat(s)") {
@@ -67,7 +67,7 @@ preferences {
 	section("Arm this(ese) camera(s) (optional)") {
 		input "cameras", "capability.imageCapture", title: "Cameras", multiple: true, required: false
 	}
-	section("Trigger these actions when home has been quiet for (default=3 minutes)") {
+	section("Trigger these actions when home has been quiet for [default=3 minutes]") {
 		input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
 	}
 	section("Notifications") {
