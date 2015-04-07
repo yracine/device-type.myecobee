@@ -36,29 +36,29 @@ preferences {
 	section("For this ecobee thermostat") {
 		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
 	}
-	section("Create this group or update all groups (empty for all groups)") {
+	section("Create this group or update all groups [empty for all group]") {
 		input "groupName", "text", title: "Group Name", required: false
 	}
-	section("Or delete the group (By default=false)") {
+	section("Or delete the group [default=false]") {
 		input "deleteGroup", "Boolean", title: "delete?", metadata: [values: ["true", "false"]], required: false
 	}
 	section("Synchronize Vacation") {
-		input "synchronizeVacation", "Boolean", title: "synchronize Vacation (default=false)?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeVacation", "Boolean", title: "synchronize Vacation [default=false]?", metadata: [values: ["true", "false"]], required: false
 	}
 	section("Synchronize Schedule") {
-		input "synchronizeSchedule", "Boolean", title: "synchronize Schedule(default=false)?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeSchedule", "Boolean", title: "synchronize Schedule [default=false]?", metadata: [values: ["true", "false"]], required: false
 	}
 	section("Synchronize SystemMode") {
-		input "synchronizeSystemMode", "Boolean", title: "synchronize SystemMode (default=false)?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeSystemMode", "Boolean", title: "synchronize SystemMode [default=false]?", metadata: [values: ["true", "false"]], required: false
 	}
 	section("Synchronize Alerts") {
-		input "synchronizeAlerts", "Boolean", title: "synchronize Alerts (default=false)?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeAlerts", "Boolean", title: "synchronize Alerts [default=false]?", metadata: [values: ["true", "false"]], required: false
 	}
 	section("Synchronize QuickSave") {
-		input "synchronizeQuickSave", "Boolean", title: "synchronize QuickSave (default=false)?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeQuickSave", "Boolean", title: "synchronize QuickSave [default=false]?", metadata: [values: ["true", "false"]], required: false
 	}
 	section("Synchronize User Preferences") {
-		input "synchronizeUserPreferences", "Boolean", title: "synchronize User Preferences (default=false)?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeUserPreferences", "Boolean", title: "synchronize User Preferences [default=false]?", metadata: [values: ["true", "false"]], required: false
 	}
 
 	section("Notifications") {
