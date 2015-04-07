@@ -57,30 +57,30 @@ def humiditySettings() {
 			input "givenInterval", "number", title: "Interval", required: false
 		}
 		section("Humidity differential for adjustments") {
-			input "givenHumidityDiff", "number", title: "Humidity Differential (default=5%)", required: false
+			input "givenHumidityDiff", "number", title: "Humidity Differential [default=5%]", required: false
 		}
 		section("Frost control for humidifier") {
-			input "frostControl", "Boolean", title: "Frost control (default=false)?", metadata: [values: ["true", "false"]], required: false
+			input "frostControl", "Boolean", title: "Frost control [default=false]?", metadata: [values: ["true", "false"]], required: false
 		}
 		section("Minimum fan runtime per hour in minutes") {
-			input "givenFanMinTime", "number", title: "Minimum fan runtime (default=20)", required: false
+			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
 		}
 		section("Minimum HRV/ERV runtime per hour in minutes") {
-			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime (default=20)", required: false
+			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime [default=20]", required: false
 		}
 		section("Use Dehumidifier as HRV (By default=false)") {
 			input "useDehumidifierAsHRV", "Boolean", title: "Use Dehumidifier as HRV?", metadata: [values: ["true", "false"]], required: false
 		}
 		section("Minimum temperature for dehumidification (in Farenheits/Celsius)") {
-			input "givenMinTemp", "decimal", title: "Min Temp (default=10°F/-15°C)", required: false
+			input "givenMinTemp", "decimal", title: "Min Temp [default=10°F/-15°C]", required: false
 		}
-		section("Use free cooling using HRV/Dehumidifier (By default=false)") {
+		section("Use free cooling using HRV/Dehumidifier [By default=false]") {
 			input "freeCooling", "Boolean", title: "Free Cooling?", metadata: [values: ["true", "false"]], required: false
 		}
-		section("Check energy consumption at (optional)") {
+		section("Check energy consumption at [optional]") {
 			input "ted", "capability.powerMeter", title: "Power meter?", required: false
 		}
-		section("Do not run any devices above this power consumption level at a given time (default=3000W)") {
+		section("Do not run any devices above this power consumption level at a given time [default=3000W]") {
 			input "givenPowerLevel", "number", title: "power?", required: false
 		}
 	}
@@ -497,7 +497,7 @@ def setHumidityLevel() {
 		def newRevision = ecobee.currentThermostatRevision
 		if ((state.currentRevision == null) || (state ?.currentRevision != newRevision)) {
 			// Get the dehumidifier's runtime 
-			ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier", 'false')
+			ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier", 'false', 'true')
 			ecobee.generateReportRuntimeEvents("dehumidifier", oneHourAgo, now, 0, null, 'lastHour')
 			if (detailedNotif == 'true') {
 				send "MonitorEcobeeHumidity> just got report data, new thermostatRevision= ${newRevision},old revision=${state.currentRevision}"
@@ -506,14 +506,15 @@ def setHumidityLevel() {
 				log.trace("new thermostatRevision= ${newRevision}, oldRevision = ${state.currentRevision}")
 			}
 			state.currentRevision = newRevision // For further checks later
-				/*          Example of how to loop thru the reportData, not required here, need to call getReportData() with postData='true' beforehand.            
-				        	def reportData = ecobee.currentReportData.toString().split(",,")
-				            for (i in 0..reportData.size()-1) {
-				                def rowDetails = reportData[i].split(',')
-				                def rowValue =rowDetails[2] 
-				                log.trace("Report data, row no $i= $rowDetails")
-				            }    
-				*/
+
+/*          Example of how to loop thru the reportData, not required here, need to call getReportData() with postData='true' beforehand.            
+			def reportData = ecobee.currentReportData.toString().split(",,")
+			for (i in 0..reportData.size()-1) {
+				def rowDetails = reportData[i].split(',')
+				def rowValue =rowDetails[2] 
+				log.trace("Report data, row no $i= $rowDetails")
+			}    
+*/
 		} else {
 			if (detailedNotif == 'true') {
 				send "MonitorEcobeeHumidity>revision has not changed: new thermostatRevision= ${newRevision} vs. oldRevision =  ${state.currentRevision}"
