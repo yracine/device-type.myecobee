@@ -54,7 +54,7 @@ preferences {
 		}
         section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
-			mode title: "Set for specific mode(s)", required: false
+			mode title: "Set for specific mode(s)", required: true
 		}
 	}
 }
