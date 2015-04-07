@@ -41,28 +41,28 @@ preferences {
 	section("Create (if not present) or update this climate") {
 		input "climateName", "text", title: "Climate Name"
 	}
-	section("Or delete the Climate (by default=false)") {
+	section("Or delete the Climate [default=false]") {
 		input "deleteClimate", "Boolean", title: "delete?", metadata: [values: ["true", "false"]], required: false
 	}
 	section("Substitute Climate name in schedule (used for delete)") {
 		input "subClimateName", "text", title: "Climate Name", required: false
 	}
-	section("Cool Temp, default = 75°F/23°C)") {
+	section("Cool Temp [default = 75°F/23°C]") {
 		input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
 	}
-	section("Heat Temp, default=72°F/21°C)") {
+	section("Heat Temp [default=72°F/21°C]") {
 		input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
 	}
-	section("isOptimized (default=false)") {
+	section("isOptimized [default=false]") {
 		input "isOptimizedFlag", "Boolean", title: "isOptimized?", metadata: [values: ["true", "false"]], required: false
 	}
-	section("isOccupied (default=false)") {
+	section("isOccupied [default=false]") {
 		input "isOccupiedFlag", "Boolean", title: "isOccupied?", metadata: [values: ["true", "false"]], required: false
 	}
-	section("Cool Fan Mode (default=auto)") {
+	section("Cool Fan Mode [default=auto]") {
 		input "givenCoolFanMode", "enum", title: "Cool Fan Mode ?", metadata: [values: ["auto", "on"]], required: false
 	}
-	section("Heat Fan Mode (default=auto)") {
+	section("Heat Fan Mode [default=false]") {
 		input "givenHeatFanMode", "enum", title: "Heat Fan Mode ?", metadata: [values: ["auto", "on"]], required: false
 	}
 	section("Notifications") {
