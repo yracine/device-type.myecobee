@@ -49,19 +49,19 @@ def thresholdSettings() {
 		section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
 			input "ecobee", "capability.thermostat", title: "Which Ecobee?"
 		}
-		section("For more heating in cold season, outdoor temp's threshold (default <= 10°F/-17°C)") {
+		section("For more heating in cold season, outdoor temp's threshold [default <= 10°F/-17°C]") {
 			input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
 		}
-		section("For less heating in cold season, outdoor temp's threshold (default >= 50°F/10°C)") {
+		section("For less heating in cold season, outdoor temp's threshold [default >= 50°F/10°C]") {
 			input "givenLessHeatThreshold", "decimal", title: "Outdoor temp's threshold for less heating", required: false
 		}
-		section("For more cooling in hot season, outdoor temp's threshold (default >= 85°F/30°C)") {
+		section("For more cooling in hot season, outdoor temp's threshold [default >= 85°F/30°C]") {
 			input "givenMoreCoolThreshold", "decimal", title: "Outdoor temp's threshold for more cooling", required: false
 		}	
-		section("For less cooling in hot season, outdoor temp's threshold (default <= 75°F/22°C)") {
+		section("For less cooling in hot season, outdoor temp's threshold [default <= 75°F/22°C]") {
 			input "givenLessCoolThreshold", "decimal", title: "Outdoor temp's threshold for less cooling", required: false
 		}
-		section("For more cooling/heating, outdoor humidity's threshold (default >= 85%)") {
+		section("For more cooling/heating, outdoor humidity's threshold [default >= 85%]") {
 			input "givenHumThreshold", "number", title: "Outdoor Relative humidity's threshold for more cooling/heating",
 				required: false
 		}
@@ -69,7 +69,7 @@ def thresholdSettings() {
 			input "givenInterval", "number", title:"Interval", required: false
 		}
 		section("Maximum Temp adjustment in Farenheits/Celsius") {
-			input "givenTempDiff", "decimal", title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false
+			input "givenTempDiff", "decimal", title: "Max Temp adjustment [default= +/-5°F/2°C]", required: false
 		}
 	}
 }
@@ -80,17 +80,17 @@ def sensorSettings() {
 		section("Choose outdoor Temperature & Humidity sensor to be used for temp adjustment") {
 			input "outdoorSensor", "capability.temperatureMeasurement", title: "Outdoor Temperature Sensor"
 		}
-		section("Choose indoor sensor(s) with both Motion & Temp capabilities to be used for dynamic temp adjustment when occupied (optional)") {
+		section("Choose indoor sensor(s) with both Motion & Temp capabilities to be used for dynamic temp adjustment when occupied [optional]") {
 			input "indoorSensors", "capability.motionSensor", title: "Which Indoor Motion/Temperature Sensor(s)", required: false, multiple:true
 		}
-		section("Choose any other indoor temp sensors for avg temp adjustment (optional)") {
+		section("Choose any other indoor temp sensors for avg temp adjustment [optional]") {
 			input "tempSensors", "capability.temperatureMeasurement", title: "Any other temp sensors?",  multiple: true, required: false
 			
 		}
-		section("Choose any other indoor motion sensors for setting climate to [Away, Home] (optional)") {
+		section("Choose any other indoor motion sensors for setting climate to [Away, Home] [optional]") {
 			input "motions", "capability.motionSensor", title: "Any other motion sensors?",  multiple: true, required: false
 		}
-		section("Trigger climate/temp adjustment when motion or no motion has been detected for (default=15 minutes)") {	
+		section("Trigger climate/temp adjustment when motion or no motion has been detected for [default=15 minutes]") {	
 			input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
 		}
 	}        
@@ -100,7 +100,7 @@ def sensorSettings() {
 def otherSettings() {
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
     
-		section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
+		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
 			input "powerSwitch", "capability.switch", required: false
 		}
 		section("Notifications") {
