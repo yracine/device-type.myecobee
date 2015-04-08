@@ -72,7 +72,7 @@ def selectProgram() {
 		section("Select Program") {
 			input "givenClimate", "enum", title: "Change to this program?", options: ecobeePrograms, required: true
 		}
-		section("When SmartThings' hello home mode change to [ex. 'Away', 'Home']") {
+		section("When SmartThings' hello home mode changes to [ex. 'Away', 'Home']") {
 			input "newMode", "enum", options: enumModes, multiple:true, required:true
 		}
 
