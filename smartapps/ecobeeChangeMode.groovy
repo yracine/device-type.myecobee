@@ -54,7 +54,6 @@ preferences {
 		}
         section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
-			mode title: "Set for specific mode(s)", required: true
 		}
 	}
 }
@@ -74,7 +73,7 @@ def selectProgram() {
 			input "givenClimate", "enum", title: "Change to this program?", options: ecobeePrograms, required: true
 		}
 		section("When SmartThings' hello home mode change to [ex. 'Away', 'Home']") {
-			input "selectedModes", "enum", options: enumModes, multiple:true
+			input "newMode", "enum", options: enumModes, multiple:true, required:true
 		}
 
         
@@ -98,16 +97,16 @@ def changeMode(evt) {
 	def message
 
 	Boolean foundMode=false        
-	selectedModes.each {
+	newMode.each {
         
 		if (it==location.mode) {
 			foundMode=true            
 		}            
 	}        
         
-	if ((selectedModes != null) && (!foundMode)) {
+	if ((newMode != null) && (!foundMode)) {
         
-		log.debug "changeMode>location.mode= $location.mode, selectedModes=${selectedModes},foundMode=${foundMode}, not doing anything"
+		log.debug "changeMode>location.mode= $location.mode, newMode=${newMode},foundMode=${foundMode}, not doing anything"
 		return			
 	}
 
