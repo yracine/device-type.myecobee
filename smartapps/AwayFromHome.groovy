@@ -61,10 +61,10 @@ preferences {
 	section("Or set the ecobee to this Climate Name (ex. Away)") {
 		input "givenClimateName", "text", title: "Climate Name", required: false
 	}
-	section("Lock these locks (optional)") {
+	section("Lock these locks [optional]") {
 		input "locks", "capability.lock", title: "Locks?", required: false, multiple: true
 	}
-	section("Arm this(ese) camera(s) (optional)") {
+	section("Arm this(ese) camera(s) [optional]") {
 		input "cameras", "capability.imageCapture", title: "Cameras", multiple: true, required: false
 	}
 	section("Trigger these actions when home has been quiet for [default=3 minutes]") {
