@@ -69,6 +69,7 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 3) Use SmartSetup and execute My ecobee Init
 /*********************************************************************************************
+
 From your phone or tablet, within the smarttings app and on the main screen, 
 click on '+' at the bottom, scroll right to to My Apps, execute My ecobee Init
 
