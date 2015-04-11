@@ -153,7 +153,7 @@ def getEcobeeThermostats(String type="") {
 	log.debug "device list params: $deviceListParams"
 
 	def stats = [:]
-    try {
+	try {
 		httpGet(deviceListParams) { resp ->
 
 			if(resp.status == 200) {
