@@ -41,7 +41,7 @@ def actionsSettings() {
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-				description: "http://github.com/yracine"
+			description: "http://github.com/yracine"
 		}
 		section("When these smoke/CO2 detector trigger, the following actions will be taken...") {
 			input "smoke_detectors", "capability.smokeDetector", title: "Which Smoke/CO2 detector(s)?", multiple: true
@@ -372,7 +372,7 @@ private takeActions(String alert) {
 			theVoice.speak(msg)
 		}
 	}
-	if (location.mode != 'Away') {
+	if (!location.mode.contains('Away')) {
 		if (locks) {
 			locks.unlock() // Unlock the locks if mode is not 'Away'
 			msg = "unlocked the doors"
