@@ -72,6 +72,8 @@ i) Click save and publish
 4) Kill your smartThings app, clean the cache under your OS (android or iOS) and reload 
 the app (as the old device is cached)
 /*********************************************************************************************
+For iOS devices, in order to clear the cache, you'd need to reinstall the smartThings app,
+otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSensor smartapp.
 
 /*********************************************************************************************
 5) Enable tracing and activate live Logging
@@ -90,14 +92,14 @@ g) Run ecobee3RemoteSensorInit on your smartphone/tablet
 h) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
 
 
-BTW, If you have the following error msg in the logs:
+BTW, If you have a blank page in ecobee3RemoteSensorInit and/or the following error msg in the logs:
 https://graph.api.smartthings.com/ide/logs
 
 'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
 
 This means that the old Device Type is still in the cache..
 
-You may have to redo the cache cleaning another time.
+You may have to redo the cache cleaning another time (go back to step 4).
 
 
 /*********************************************************************************************
