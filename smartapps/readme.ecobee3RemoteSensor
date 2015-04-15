@@ -50,7 +50,7 @@ Click "Save" & Publish"
 3) Prior to calling ecobee3RemoteSensorInit, you need to create 2 additional generic device types in your IDE:
 /*********************************************************************************************
 
-- Motion Sensor
+- Motion Detector
 
 - Temperature Sensor
 
@@ -64,7 +64,7 @@ c) On the new SmartDevice page, click on the "From Template" tab
 d) Scroll down to Temperature Sensor
 e) Click "create" at the bottom of the page
 f) Click Save and publish on the next page
-g) Do the same for Motion Sensor
+g) Do the same for Motion Detector
 h) Click "create" at the bottom of the page
 i) Click save and publish
 
