@@ -58,7 +58,7 @@ def actionsSettings() {
 		section("Turn off the thermostat(s) [optional]") {
 			input "tstat", "capability.thermostat", title: "Thermostat(s)", multiple: true, required: false
 		}
-		section("Dismarm the alarm system if armed [optional]") {
+		section("Disarm the alarm system if armed [optional]") {
 			input "alarmSwitch", "capability.contactSensor", title: "Alarm System", required: false
 		}
 		section("Flash/turn on the lights...") {
