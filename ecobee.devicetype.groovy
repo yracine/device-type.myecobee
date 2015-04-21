@@ -766,8 +766,7 @@ void poll() {
 
 	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
 	def progDisplayName = getCurrentProgName()
-	def currentClimateTemplate = device.currentValue("setClimate")
-	currentClimateTemplate= (currentClimateTemplate)? currentClimateTemplate: progDisplayName  // if not climate template set, then use current program
+	def currentClimateTemplate= (data.thermostatList[0].program.currentClimateRef)? data.thermostatList[0].program.currentClimateRef: progDisplayName  // if not climate template set, then use current program
 	if (settings.trace) {
 		log.debug "poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef},currentClimateTemplate=${currentClimateTemplate}"
 		sendEvent name: "verboseTrace", value:
@@ -2679,8 +2678,8 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 		getThermostatInfo(thermostatId)    
 	}
 	thermostatId = determine_tstat_id(thermostatId)
-    
-	/* Reset all remote sensor data values */
+
+/* Reset all remote sensor data values */
 	def remoteData = []
 	def remoteTempData = ""
 	def remoteHumData = ""
