@@ -110,7 +110,6 @@ def changeMode(evt) {
 		return			
 	}
 
-	log.info message
 	message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
 	send(message)
 
