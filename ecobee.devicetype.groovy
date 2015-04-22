@@ -1944,10 +1944,10 @@ void iterateSetClimate(tstatType, climateName) {
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
 //	The settings.thermostatId (input) is the default one
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
-// holdType is the type of hold to be created, 
+// paramsMap: parameters Map, ex. [holdType:'nextTransition']  
 //	see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml 
 
-void setClimate(thermostatId, climateName, holdType='') {
+void setClimate(thermostatId, climateName, paramsMap=[]) {
 	def climateRef = null
 	def tstatParams
 
@@ -1971,14 +1971,13 @@ void setClimate(thermostatId, climateName, holdType='') {
 			continue
 		}
         
-		tstatParams =((holdType != null) && (holdType.trim() != "")) ?
-				[holdClimateRef:"${climateRef}", holdType:"${holdType}"] :
-        		((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+		tstatParams = ((settings.holdType != null) && (settings.holdType.trim() != "")) ?
 				[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
 				] :
 				[holdClimateRef:"${climateRef}"
 				]
            	
+		tstatParams = tstatParams + paramsMap            
 		def bodyReq = build_body_request('setHold',null, data.thermostatList[i].identifier,tstatParams)	
 		def statusCode=true
 		int j=0        
