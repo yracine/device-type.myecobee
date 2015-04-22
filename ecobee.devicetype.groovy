@@ -1407,7 +1407,7 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 
 	}
 	// Add the extraHoldParams if any
-    	if ((extraHoldParams != null) && (extraHoldParams != [])) {
+    if ((extraHoldParams != null) && (extraHoldParams != [])) {
 		tstatParams = tstatParams + extraHoldParams
     		
 	}
@@ -1944,8 +1944,10 @@ void iterateSetClimate(tstatType, climateName) {
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
 //	The settings.thermostatId (input) is the default one
 // climate name is the name of the climate to be set to (ex. "Home", "Away").
+// holdType is the type of hold to be created, 
+//	see https://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml 
 
-void setClimate(thermostatId, climateName) {
+void setClimate(thermostatId, climateName, holdType='') {
 	def climateRef = null
 	def tstatParams
 
@@ -1968,11 +1970,14 @@ void setClimate(thermostatId, climateName) {
 			}        
 			continue
 		}
-		tstatParams =((settings.holdType != null) && (settings.holdType.trim() != "")) ?
-			[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
-			] :
-			[holdClimateRef:"${climateRef}"
-			]
+        
+		tstatParams =((holdType != null) && (holdType.trim() != "")) ?
+				[holdClimateRef:"${climateRef}", holdType:"${holdType}"] :
+        		((settings.holdType != null) && (settings.holdType.trim() != "")) ?
+				[holdClimateRef:"${climateRef}", holdType:"${settings.holdType.trim()}"
+				] :
+				[holdClimateRef:"${climateRef}"
+				]
            	
 		def bodyReq = build_body_request('setHold',null, data.thermostatList[i].identifier,tstatParams)	
 		def statusCode=true
