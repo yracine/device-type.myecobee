@@ -34,8 +34,8 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
-                		" based on ST hello mode."
-			paragraph "Version 1.9\n\n" +
+                		" based on ST hello mode (optional). It can also triggers some actions based on ecobee's program changes (setFanMinOnTime) "
+			paragraph "Version 1.9.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -68,15 +68,12 @@ def selectProgram() {
 	}    
 
 	return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage:
-		"Notifications") {
+			"Notifications") {
 		section("Select Program") {
 			input "givenClimate", "enum", title: "Change to this program?", options: ecobeePrograms, required: true
 		}
-		section("When SmartThings' hello home mode changes to [ex. 'Away', 'Home']") {
-			input "newMode", "enum", options: enumModes, multiple:true, required:true
-		}
-		section("Minimum fan runtime per hour [optional] for this program") {
-			input "givenFanMinTime", "number", title: "Minimum fan runtime in minutes", required: false
+		section("When SmartThings' hello home mode changes to (ex. 'Away', 'Home')[optional]") {
+			input "newMode", "enum", options: enumModes, multiple:true, required: true
 		}
 
         
@@ -120,14 +117,8 @@ def changeMode(evt) {
 
 
 
-	if (givenFanMinTime) { // set fanMinOnTime if not null
-    
-		message = "ecobeeChangeMode>changing fanMinOnTime to ${givenFanMinTime}.."
-		send(message)
-
-		thermostats?.setThermostatSettings("", ['fanMinOnTime': "${givenFanMinTime}"])
-	}        
 }
+
 
 private send(msg) {
 	if (sendPushMessage != "No") {
