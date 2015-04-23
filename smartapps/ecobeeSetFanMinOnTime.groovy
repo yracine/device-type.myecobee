@@ -18,7 +18,7 @@ definition(
     name: "ecobeeSetFanMinOnTime",
     namespace: "yracine",
     author: "Yves Racine",
-    description: "ecobeeSetFanMinOnTime",
+    description: "ecobeeSetFanMinOnTime, the smartapp that sets your ecobee's fan to circulate for a minimum time (in minutes) per hour",
     category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
@@ -28,7 +28,7 @@ preferences {
 
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
 		section("About") {
-			paragraph "ecobeeSetFanMinOnTime, the smartapp that sets your ecobee's fan to circulate for a minimum time (in minutes) per hour" 
+			paragraph "ecobeeSetFanMinOnTime, the smartapp that sets your ecobee's fan to circulate for a minimum time (in minutes) per hour." 
 			paragraph "Version 0.9\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
@@ -86,13 +86,13 @@ def updated() {
 def changeFanMinOnTime(evt) {
 
 
-	if (evt.value != givenClimate) {
+	if ((evt.value != givenClimate) && (evt.value != 'touch')) {
 		log.debug ("changeFanMinOnTime>not right climate (${evt.value}), doing nothing...")
 		return
 	}    
 	Integer min_fan_time = (givenFanMinTime != null) ? givenFanMinTime : 10 //  10 min. fan time per hour by default
     
-	message = "ecobeeSetFanMinOnTime>changing fanMinOnTime to ${min_fan_time}.."
+	def message = "ecobeeSetFanMinOnTime>changing fanMinOnTime to ${min_fan_time}.."
 	send(message)
 
 	thermostats?.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}"])
