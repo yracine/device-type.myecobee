@@ -75,6 +75,9 @@ def selectProgram() {
 		section("When SmartThings' hello home mode changes to [ex. 'Away', 'Home']") {
 			input "newMode", "enum", options: enumModes, multiple:true, required:true
 		}
+		section("Minimum fan runtime per hour [optional] for this program") {
+			input "givenFanMinTime", "number", title: "Minimum fan runtime in minutes", required: false
+		}
 
         
 	}
@@ -110,10 +113,20 @@ def changeMode(evt) {
 		return			
 	}
 
-	message = "ecobeeChangeMode>Setting the thermostat(s) to $givenClimate.."
+	message = "ecobeeChangeMode>setting the thermostat(s) to $givenClimate.."
 	send(message)
 
 	thermostats?.setThisTstatClimate(givenClimate)
+
+
+
+	if (givenFanMinTime) { // set fanMinOnTime if not null
+    
+		message = "ecobeeChangeMode>changing fanMinOnTime to ${givenFanMinTime}.."
+		send(message)
+
+		thermostats?.setThermostatSettings("", ['fanMinOnTime': "${givenFanMinTime}"])
+	}        
 }
 
 private send(msg) {
