@@ -52,10 +52,10 @@ preferences {
 	section("Set the ecobee thermostat(s)") {
 		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple: true
 	}
-	section("Heating set Point for ecobee, default = 60°F/14°C") {
+	section("Heating set Point for ecobee [default = 60°F/14°C]") {
 		input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
 	}
-	section("Cooling set Point for ecobee, default = 80°F/27°C") {
+	section("Cooling set Point for ecobee [default = 80°F/27°C]") {
 		input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
 	}
 	section("Or set the ecobee to this Climate Name (ex. Away)") {
