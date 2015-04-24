@@ -46,7 +46,7 @@ preferences {
 				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
 		}
-        section([mobileOnly:true]) {
+        	section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
 		}
 	}
