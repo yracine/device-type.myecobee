@@ -875,7 +875,7 @@ void poll() {
 private void generateEvent(Map results)
 {
 	if (settings.trace) {
-		log.debug "generateEvents>parsing data $results"
+		log.debug "generateEvent>parsing data $results"
 	}
     
 	if(results)
@@ -3063,9 +3063,9 @@ private void login() {
 	} else { 
 		setAuthTokens()
 	}    
-	if (!isLoggedIn) {
+	if (!isLoggedIn()) {
 		if (settings.trace) {
-			log.debug "login> no access_token..., failed"
+			log.error "login> no auth_token..., failed"
 		}
 		return
 	}
