@@ -900,9 +900,6 @@ private void generateEvent(Map results)
 				}                
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
                 
-/*                
- //             11:01:32: error org.springframework.beans.factory.BeanCreationNotAllowedException: Error creating bean with name 'capabilityService': Singleton bean creation not allowed while the singletons of this factory are in destruction (Do not request a bean from a BeanFactory in a destroy method implementation!) @ line 901
-*/ 
 				isDisplayed = isChange
 				sendEvent(name: name, value: tempValueString, unit: scale, displayed: isDisplayed)                                     									 
 			} else if (name.toUpperCase().contains("SPEED")) { // Temperature variable names contain 'temp' or 'setpoint'
