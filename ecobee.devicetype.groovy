@@ -899,6 +899,10 @@ private void generateEvent(Map results)
 					tempValueString = String.format('%2.1f', tempValue)
 				}                
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
+                
+/*                
+ //             11:01:32: error org.springframework.beans.factory.BeanCreationNotAllowedException: Error creating bean with name 'capabilityService': Singleton bean creation not allowed while the singletons of this factory are in destruction (Do not request a bean from a BeanFactory in a destroy method implementation!) @ line 901
+*/ 
 				isDisplayed = isChange
 				sendEvent(name: name, value: tempValueString, unit: scale, displayed: isDisplayed)                                     									 
 			} else if (name.toUpperCase().contains("SPEED")) { // Temperature variable names contain 'temp' or 'setpoint'
@@ -2659,6 +2663,7 @@ private float calculate_report_stats(component, startInterval, endInterval, type
 
 void generateRemoteSensorEvents(thermostatId,postData='false') {
 	def REMOTE_SENSOR_TYPE="ecobee3_remote_sensor"
+	def REMOTE_THERMOSTAT_TYPE="thermostat"
 	def REMOTE_SENSOR_OCCUPANCY='occupancy'
 	def REMOTE_SENSOR_TEMPERATURE='temperature'
 	def REMOTE_SENSOR_HUMIDITY='humidity'
@@ -2694,7 +2699,8 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 			if (settings.trace) {
 				log.debug "generateRemoteSensorEvents>found sensor ${data.thermostatList[0].remoteSensors[i]} at (${i})"
 			}
-			if (data.thermostatList[0].remoteSensors[i]?.type != REMOTE_SENSOR_TYPE) {
+			if ((data.thermostatList[0].remoteSensors[i]?.type != REMOTE_SENSOR_TYPE) &&
+			 (data.thermostatList[0].remoteSensors[i]?.type != REMOTE_THERMOSTAT_TYPE)) {
                 
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>found sensor type ${data.thermostatList[0].remoteSensors[i].type} at (${i}, skipping it)"
