@@ -291,19 +291,6 @@ def initialize() {
 	schedule("0 0/${delay} * * * ?", takeAction) 
 
 
-/* 
-	if (delay >= 5 && delay <10) {
-		runEvery5Minutes(takeAction)
-	} else if (delay >= 10 && delay <15) {
-		runEvery10Minutes(takeAction)
-	} else if (delay >= 15 && delay <30) {
-		runEvery15Minutes(takeAction)
-	} else if (delay >= 30 && delay <60) {
-		runEvery30Minutes(takeAction)
-	} else {        
-		runEvery1Hour(takeAction)
-	}
-*/
 
 	log.debug "initialize>end"
 }
@@ -313,8 +300,8 @@ def takeAction() {
 	ecobee.poll()
 	log.trace "takeAction>about to call generateRemoteSensorEvents()"
 	ecobee.generateRemoteSensorEvents("", 'true')
-	updateTempSensors()
 	updateMotionSensors()
+	updateTempSensors()
 	log.trace "takeAction>end"
 }
 
