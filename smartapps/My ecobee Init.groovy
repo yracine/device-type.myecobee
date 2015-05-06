@@ -215,7 +215,7 @@ def getEcobeeThermostats(String type="") {
 	} catch (java.net.NoRouteToHostException t) {
 		log.error "getEcobeeThermostats> No route to host - check the URL " + deviceListParams.uri
 	} catch (java.io.IOException e) {
-		log.error "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
+		log.debug "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
 			deviceListParams
     	}
 
