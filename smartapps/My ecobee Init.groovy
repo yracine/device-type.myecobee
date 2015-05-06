@@ -203,7 +203,7 @@ def getEcobeeThermostats(String type="") {
 				{
 					log.debug "Storing the failed action to try later"
 					data.action = "getEcobeeThermostats"
-					log.debug "Need to Refresh your auth_token!"
+					log.debug "Refreshing your auth_token!"
 				} else {
 					log.error "Authentication error, invalid authentication method, lack of credentials, etc."
 				}
@@ -215,9 +215,9 @@ def getEcobeeThermostats(String type="") {
 	} catch (java.net.NoRouteToHostException t) {
 		log.error "getEcobeeThermostats> No route to host - check the URL " + deviceListParams.uri
 	} catch (java.io.IOException e) {
-		log.debug "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
+		log.error "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
 			deviceListParams
-    	}
+    }
 
 	log.debug "thermostats: $stats"
 
@@ -510,7 +510,7 @@ def swapToken() {
 </head>
 <body>
 	<div class="container">
-		<img src="https://s3.amazonaws.com/smartapp-icons/Partner/ecobee%402x.png" alt="ecobee icon" />
+		<img src="https://s3.amazonaws.com/smartapp-icons/Partner/ecobee%402x.png" width="216" height="216" alt="ecobee icon" />
 		<img src="https://s3.amazonaws.com/smartapp-icons/Partner/support/connected-device-icn%402x.png" alt="connected device icon" />
 		<img src="https://s3.amazonaws.com/smartapp-icons/Partner/support/st-logo%402x.png" alt="SmartThings logo" />
 		<p>Your ecobee Account is now connected to SmartThings!</p>
