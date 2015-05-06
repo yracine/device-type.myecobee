@@ -23,7 +23,8 @@ definition(
 preferences {
 	page(name: "about", title: "About", nextPage: "auth")
 	page(name: "auth", title: "ecobee", content:"authPage", nextPage:"deviceList")
-	page(name: "deviceList", title: "ecobee", content:"ecobeeDeviceList", install:true)
+	page(name: "deviceList", title: "ecobee", content:"ecobeeDeviceList", nextPage: "deviceList2")
+	page(name: "deviceList2", title: "ecobee", content:"ecobeeDeviceList2", install:true)
 }
 
 mappings {
@@ -120,9 +121,9 @@ def ecobeeDeviceList() {
 
 	stats = stats + ems
     
-	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", uninstall: true) {
+	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", nextPage: deviceList2) {
 		section(""){
-			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings."
+			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings (3 max per page)."
 			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
 		}
 	}
@@ -130,6 +131,32 @@ def ecobeeDeviceList() {
 	log.debug "list p: $p"
 	return p
 }
+
+
+def ecobeeDeviceList2() {
+	log.debug "ecobeeDeviceList2()"
+
+	def stats = getEcobeeThermostats()
+
+	log.debug "device list: $stats"
+
+	def ems = getEcobeeThermostats("ems")
+
+	log.debug "device list: $ems"
+
+	stats = stats + ems
+    
+	def p = dynamicPage(name: "deviceList2", title: "Select Your Thermostats", uninstall: true) {
+		section(""){
+			paragraph "page 2: select the ones you want to connect to SmartThings (3 max per page due to ST execution time constraints)."
+			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
+		}
+	}
+
+	log.debug "list p: $p"
+	return p
+}
+
 
 def getEcobeeThermostats(String type="") {
 	log.debug "getting device list"
@@ -384,7 +411,7 @@ def oauthInitUrl() {
 }
 
 def buildRedirectUrl() {
-	log.debug "buildRedirectUrl"
+	log.debug "buildRedirectUrl: ${serverUrl}/api/token/${atomicState.accessToken}/smartapps/installations/${app.id}/swapToken"
 	return serverUrl + "/api/token/${atomicState.accessToken}/smartapps/installations/${app.id}/swapToken"
 }
 
