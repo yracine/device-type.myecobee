@@ -121,7 +121,7 @@ def ecobeeDeviceList() {
 
 	stats = stats + ems
     
-	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", nextPage: deviceList2) {
+	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", nextPage: "deviceList2") {
 		section(""){
 			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings (3 max per page)."
 			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
