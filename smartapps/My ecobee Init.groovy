@@ -203,7 +203,7 @@ def getEcobeeThermostats(String type="") {
 				{
 					log.debug "Storing the failed action to try later"
 					data.action = "getEcobeeThermostats"
-					log.debug "Refreshing your auth_token!"
+					log.debug "Need to Refresh your auth_token!"
 				} else {
 					log.error "Authentication error, invalid authentication method, lack of credentials, etc."
 				}
@@ -217,7 +217,7 @@ def getEcobeeThermostats(String type="") {
 	} catch (java.io.IOException e) {
 		log.error "getEcobeeThermostats> Probable cause: not the right account for this type (${type}) of thermostat " +
 			deviceListParams
-    }
+    	}
 
 	log.debug "thermostats: $stats"
 
