@@ -314,18 +314,23 @@ def updated() {
 private def delete_child_devices() {
 	def delete
 	// Delete any that are no longer in settings
-	if(!thermostats)
-	{
-		log.debug "delete thermostats"
+
+	if(!thermostats) {
+		log.debug "delete_child_devices>delete all thermostats"
 		delete = getAllChildDevices()
 	}
-	else
-	{
+	else {
 		delete = getChildDevices().findAll { !thermostats.contains(it.deviceNetworkId) }
 	}
 
-	log.debug "deleting ${delete.size()} thermostats"
-	delete.each { deleteChildDevice(it.deviceNetworkId) }
+
+	try { 
+		delete.each { deleteChildDevice(it.deviceNetworkId) }
+		log.debug "delete_child_devices>deleting ${delete.size()} thermostats"  
+	} catch (e) {
+		log.debug "delete_child_devices>exception $e while deleting ${delete.size()} Neurio Sensors"
+	}
+
 
 }
 
@@ -335,11 +340,10 @@ private def create_child_devices() {
 	def devices = thermostats.collect { dni ->
 
 		def d = getChildDevice(dni)
-		log.debug "Looping thru thermostats, found id $dni"
+		log.debug "create_child_devices>looping thru thermostats, found id $dni"
 
 		if(!d)
 		{
-			log.debug "atomicState (i=$i) $atomicState "
 			def tstat_info  = dni.tokenize('.')
 			def thermostatId = tstat_info.last()
  			def name = tstat_info[1]
@@ -348,20 +352,20 @@ private def create_child_devices() {
 			def labelName = 'My ecobee ' + "${name}_${i}"
 */                    
 			def labelName = 'My ecobee ' + "${name}"
-			log.debug "About to create child device with id $dni, thermostatId = $thermostatId, name=  ${name}"
+			log.debug "create_child_devices>about to create child device with id $dni, thermostatId = $thermostatId, name=  ${name}"
 			d = addChildDevice(getChildNamespace(), getChildName(), dni, null,
 				[label: "${labelName}"]) 
 			d.initialSetup( getSmartThingsClientId(), atomicState, thermostatId ) 	// initial setup of the Child Device
-			log.debug "created ${d.displayName} with id $dni"
+			log.debug "create_child_devices>created ${d.displayName} with id $dni"
 		}
 		else
 		{
-			log.debug "found ${d.displayName} with id $dni already exists"
+			log.debug "create_child_devices>found ${d.displayName} with id $dni already exists"
 		}
 
 	}
 
-	log.debug "created ${devices.size()} thermostats"
+	log.debug "create_child_devices>created ${devices.size()} thermostats"
 
 
 
