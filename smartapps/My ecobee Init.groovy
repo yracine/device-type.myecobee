@@ -316,7 +316,7 @@ private def delete_child_devices() {
 	// Delete any that are no longer in settings
 
 	if(!thermostats) {
-		log.debug "delete_child_devices>delete all thermostats"
+		log.debug "delete_child_devices>delete all ecobee thermostats"
 		delete = getAllChildDevices()
 	}
 	else {
@@ -326,9 +326,9 @@ private def delete_child_devices() {
 
 	try { 
 		delete.each { deleteChildDevice(it.deviceNetworkId) }
-		log.debug "delete_child_devices>deleting ${delete.size()} thermostats"  
+		log.debug "delete_child_devices>deleting ${delete.size()} ecobee thermostats"  
 	} catch (e) {
-		log.debug "delete_child_devices>exception $e while deleting ${delete.size()} Neurio Sensors"
+		log.debug "delete_child_devices>exception $e while deleting ${delete.size()} ecobee thermostats"
 	}
 
 
