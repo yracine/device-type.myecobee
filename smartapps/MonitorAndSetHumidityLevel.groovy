@@ -74,7 +74,7 @@ def humiditySettings() {
 		section("Minimum temperature for dehumidification (in Farenheits/Celsius)") {
 			input "givenMinTemp", "decimal", title: "Min Temp [default=10°F/-15°C]", required: false
 		}
-		section("Use free cooling using HRV/Dehumidifier [By default=false]") {
+		section("Free cooling using HRV/Dehumidifier [By default=false]") {
 			input "freeCooling", "Boolean", title: "Free Cooling?", metadata: [values: ["true", "false"]], required: false
 		}
 		section("Check energy consumption at [optional]") {
