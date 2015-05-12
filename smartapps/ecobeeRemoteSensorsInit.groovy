@@ -47,7 +47,7 @@ preferences {
 
 	}
 	page(name: "selectMotionSensors", title: "Ecobee Motion Sensors", content: "selectMotionSensors", nextPage: "selectTempSensors")
-	page(name: "selectTempSensors", title: "Ecobee Temperature Sensors", content: "selectTempSensors", nextPage: "Notifications")
+	page(name: "selectTempSensors", title: "Ecobee Temperature/Humidity Sensors", content: "selectTempSensors", nextPage: "Notifications")
 	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: true) {
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
@@ -64,6 +64,7 @@ preferences {
 
 
 def selectMotionSensors() {
+	def REMOTE_OCCUPANCY_TYPE='occupancy'
 
 	/* Get the list of remote sensors available 
 	 */
@@ -87,7 +88,7 @@ def selectMotionSensors() {
 
 			for (j in 0..ecobeeSensors[i].capability.size() - 1) {
 
-				if (ecobeeSensors[i].capability[j].type == 'occupancy') {
+				if (ecobeeSensors[i].capability[j].type == REMOTE_OCCUPANCY_TYPE) {
 
 					if (settings.trace) {
 						log.debug "selectMotionSensors>>looping at i=${i},found occupancy sensor ${ecobeeSensors[i].capability[j]} at j=${j}"
@@ -116,6 +117,8 @@ def selectMotionSensors() {
 
 def selectTempSensors() {
 	def ecobeeSensors
+	def REMOTE_TEMPERATURE_TYPE='temperature'
+    
     
 	String remoteSensorData=ecobee.currentRemoteSensorData.toString()
 	if (remoteSensorData != null) {    
@@ -132,7 +135,7 @@ def selectTempSensors() {
 
 			for (j in 0..ecobeeSensors[i].capability.size() - 1) {
 
-				if (ecobeeSensors[i].capability[j].type == 'temperature') {
+				if (ecobeeSensors[i].capability[j].type == REMOTE_TEMPERATURE_TYPE) {
 
 					if (settings.trace) {
 						log.debug "selectTempSensors>>looping at i=${i},found temperature sensor ${ecobeeSensors[i].capability[j]} at j=${j}"
@@ -248,7 +251,7 @@ private def deleteSensors() {
 
 
 	if (!tempSensors) {
-		log.debug "delete all Temp Sensors"
+		log.debug "delete all Temp/Humidity Sensors"
 		delete = getChildDevices().findAll {
 			(it.device.deviceNetworkId.contains(getTempSensorChildName()))
 		}
@@ -271,6 +274,7 @@ def initialize() {
     
 	subscribe(ecobee, "remoteSensorOccData", updateMotionSensors)
 	subscribe(ecobee, "remoteSensorTmpData", updateTempSensors)
+	subscribe(ecobee, "remoteSensorHumData", updateHumiditySensors)
 
 	deleteSensors()
 	createMotionSensors()
@@ -302,6 +306,9 @@ def takeAction() {
 	ecobee.generateRemoteSensorEvents("", 'true')
 	updateMotionSensors()
 	updateTempSensors()
+/*
+	updateHumiditySensors()
+*/    
 	log.trace "takeAction>end"
 }
 
@@ -429,6 +436,64 @@ private updateTempSensors() {
 }
 
 
+private updateHumiditySensors(evt) {	
+	log.debug "updateHumiditySensors>evt name=$evt.name, evt.value= $evt.value"
+	updateHumiditySensors()
+}
+
+private updateHumiditySensors() {
+
+
+	def ecobeeSensors = ecobee.currentRemoteSensorHumData.toString().split(",,")
+
+	log.debug "updateHumiditySensors>ecobeeRemoteSensorHumData= $ecobeeSensors"
+
+	if (ecobeeSensors.size() < 1) {
+
+		log.debug "updateHumiditySensors>no values found"
+		return
+	}
+
+	for (i in 0..ecobeeSensors.size() - 1) {
+
+		def ecobeeSensorDetails = ecobeeSensors[i].split(',')
+		def ecobeeSensorId = ecobeeSensorDetails[0]
+		def ecobeeSensorName = ecobeeSensorDetails[1]
+		def ecobeeSensorType = ecobeeSensorDetails[2]
+		int ecobeeSensorValue = ecobeeSensorDetails[3].toInteger()
+
+
+		def dni = [app.id, ecobeeSensorName, getTempSensorChildName(), ecobeeSensorId].join('.')
+
+		log.debug "updateHumiditySensors>looking for $dni"
+
+		def device = getChildDevice(dni)
+
+		if (device) {
+
+			log.debug "updateHumiditySensors>ecobeeSensorId= $ecobeeSensorId"
+			log.debug "updateHumiditySensors>ecobeeSensorName= $ecobeeSensorName"
+			log.debug "updateHumiditySensors>ecobeeSensorType= $ecobeeSensorType"
+			log.debug "updateHumiditySensors>ecobeeSensorValue= $ecobeeSensorValue"
+            
+            
+			Double humValue = ecobeeSensorValue.toDouble().round()
+			String humValueString=humValue.toString()             
+
+			def isChange = device.isStateChange(device, "humidity", humValueString)
+			def isDisplayed = isChange
+			log.debug "device $device, found $dni,statusChanged=${isChange}, value= ${humValue}"
+
+			device.sendEvent(name: "humidity", value: humValueString, unit: '%', isStateChange: isChange, displayed: isDisplayed)
+		} else {
+			log.debug "updateHumiditySensors>couldn't find Humidity Sensor device $ecobeeSensorName with dni $dni, probably not selected originally"
+		}
+
+	}
+
+}
+
+
 private send(msg) {
 	if (sendPushMessage != "No") {
 		log.debug("sending push message")
@@ -476,3 +541,4 @@ def getMotionSensorChildName() {
 def getTempSensorChildName() {
 	"Temperature Sensor"
 }
+
