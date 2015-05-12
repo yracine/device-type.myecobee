@@ -72,7 +72,7 @@ i) Click save and publish
 4) Kill your smartThings app, clean the cache under your OS (android or iOS) and reload 
 the app (as the old device is cached)
 /*********************************************************************************************
-For iOS devices, in order to clear the cache, you'd need to reinstall the smartThings app,
+For iOS devices, in order to clear the cache, you'd need to uninstall & reinstall the smartThings app,
 otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSensor smartapp.
 
 /*********************************************************************************************
