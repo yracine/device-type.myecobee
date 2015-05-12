@@ -186,7 +186,7 @@ e) AwayFromHome and ecobeeResumeProg
 
 /****************************************************
 
-Use presence sensors to set a target climate or heatin/cooling setpoints based on your presence/absence.
+Use presence sensors to set a target climate or heating/cooling setpoints based on your presence/absence.
 
 /****************************************************
 
