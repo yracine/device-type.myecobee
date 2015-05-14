@@ -42,7 +42,7 @@ Create a new Smartapp, click on new Smartapp on the right
 
 From there, use the "From code" tab, and grab the code at:
 
-https://github.com/yracine/device-type.myecobee/blob/beta/smartapps/ecobeeRemoteSensorsInit.groovy
+https://github.com/yracine/device-type.myecobee/blob/master/smartapps/ecobeeRemoteSensorsInit.groovy
 
 Click "Save" & Publish"
 
