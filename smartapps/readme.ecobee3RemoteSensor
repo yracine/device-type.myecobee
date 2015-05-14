@@ -82,14 +82,9 @@ otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSe
 for better support, just active the live logging and get more tracing
 in the IDE by following these steps:
 
-a) Go to https://graph.api.smartthings.com/device/list, 
-b) Click on My Ecobee device, 
-c) Edit the preferences (middle of the page)
-d) Set verboseTrace to true (as long as there is a value)
-e) Click Save at the bottom of the page
-f) Go to https://graph.api.smartthings.com/ide/logs
-g) Run ecobee3RemoteSensorInit on your smartphone/tablet
-h) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
+a) Go to https://graph.api.smartthings.com/ide/logs
+b) Run ecobee3RemoteSensorInit on your smartphone/tablet
+c) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
 
 
 BTW, If you have a blank page in ecobee3RemoteSensorInit and/or the following error msg in the logs:
