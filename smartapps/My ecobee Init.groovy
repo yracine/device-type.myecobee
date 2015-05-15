@@ -1,4 +1,4 @@
-  /**
+ /**
  *	My ecobee Init (Service Manager)
  *
  *	Author: scott
