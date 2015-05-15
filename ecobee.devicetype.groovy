@@ -1065,8 +1065,8 @@ private void api(method, args, success = {}) {
 		}
 		if (!refresh_tokens()) {
 			log.error ("api>not able to refresh_tokens due to some connection issues, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
-			sendEvent (name: "verboseTrace", 
-            	value: "api>not able to refresh_tokens due to some connection issues, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+			sendEvent (name: "verboseTrace",
+				value: "api>not able to refresh_tokens due to some connection issues, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
 			return		
 		}
 		/* Reset Exceptions counter as the refresh_tokens() call has been successful */    
@@ -1075,8 +1075,8 @@ private void api(method, args, success = {}) {
 	if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
 
 		log.error ("api>found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
-		sendEvent (name: "verboseTrace", 
-        	value: "api>found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+		sendEvent (name: "verboseTrace",
+			value: "api>found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
 		return		
 	}    
 	def args_encoded = java.net.URLEncoder.encode(args.toString(), "UTF-8")
