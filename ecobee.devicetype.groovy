@@ -207,7 +207,7 @@ metadata {
 		command "getThermostatRevision"
 		command "generateRemoteSensorEvents"
 	}        
-simulator {
+	simulator {
 		// TODO: define status and reply messages here
 	}
 	tiles {
@@ -732,8 +732,6 @@ def parse(String description) {
 
 }
 
-
-
 void poll() {
 	def tstatId,ecobeeType
     
@@ -851,7 +849,6 @@ void poll() {
 	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type == 'quickSave')) {
 		dataEvents.programEndTimeMsg ="Quicksave running"
 	}
-
 	generateEvent(dataEvents)
 	if (data.thermostatList[0].settings.hasHumidifier) {
 		sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
@@ -924,10 +921,6 @@ private void generateEvent(Map results)
 		}
 	}
 }
-
-
-
-
 
 private def getCurrentProgName() {
 	def AWAY_PROG = 'Away'
@@ -1048,8 +1041,6 @@ private def getClimateList(thermostatId) {
 	return climateList
 }
 
-
-
 void refresh() {
 	poll()
 }
@@ -1060,18 +1051,34 @@ void resumeThisTstat() {
 	poll()
 }
 private void api(method, args, success = {}) {
+	def MAX_EXCEPTION_COUNT=5
 	String URI_ROOT = "${get_URI_ROOT()}/1"
 	if (!isLoggedIn()) {
 		login()
-	}
+		
+	}    
+	/* If the number of exception count is greater than MAX_EXCEPTION_COUNT, try to reconnect to ecobee */
+    
 	if (isTokenExpired()) {
 		if (settings.trace) {
 			log.debug "api> need to refresh tokens"
 		}
 		if (!refresh_tokens()) {
-			login()
+			log.error ("api>not able to refresh_tokens due to some connection issues, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+			sendEvent (name: "verboseTrace", 
+            	value: "api>not able to refresh_tokens due to some connection issues, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+			return		
 		}
+		/* Reset Exceptions counter as the refresh_tokens() call has been successful */    
+		state.exceptionCount=0    
 	}
+	if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
+
+		log.error ("api>found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+		sendEvent (name: "verboseTrace", 
+        	value: "api>found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+		return		
+	}    
 	def args_encoded = java.net.URLEncoder.encode(args.toString(), "UTF-8")
 	def methods = [
 		'thermostatSummary': 
@@ -1140,13 +1147,16 @@ private void doRequest(uri, args, type, success) {
 	} catch (java.net.UnknownHostException e) {
 		log.error "doRequest> Unknown host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> Unknown host"
+		state.exceptionCount++        
 	} catch (java.net.NoRouteToHostException e) {
 		log.error "doRequest> No route to host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> No route to host"
+		state.exceptionCount++        
 	} catch (java.io.IOException e) {
 		log.error "doRequest> general or malformed request error " + params.body
 		sendEvent name: "verboseTrace", value:
 			"doRequest> general or malformed request body error " + params.body
+		state.exceptionCount++        
 	}
 }
 
@@ -1159,8 +1169,7 @@ private void doRequest(uri, args, type, success) {
 private def build_body_request(method, tstatType="registered", thermostatId, tstatParams = [],
 	tstatSettings = []) {
 	def selectionJson = null
-	def selection = null
-    
+	def selection = null  
 	if (method == 'thermostatSummary') {
 		if (tstatType.trim().toUpperCase() == 'REGISTERED') {
 			selection = [selection: [selectionType: 'registered', selectionMatch: '',
@@ -1275,8 +1284,7 @@ void iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // settings can be anything supported by ecobee at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
 void setThermostatSettings(thermostatId,tstatSettings = []) {
-    
-	thermostatId= determine_tstat_id(thermostatId) 	    
+   	thermostatId= determine_tstat_id(thermostatId) 	    
 	if (settings.trace) {
 		log.debug
 			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
@@ -1284,7 +1292,6 @@ void setThermostatSettings(thermostatId,tstatSettings = []) {
 			"setThermostatSettings>called with values ${tstatSettings} for ${thermostatId}"
 	}
 	def bodyReq = build_body_request('setThermostatSettings',null,thermostatId,null,tstatSettings)
-
 	def statusCode=true
 	int j=0        
 	while ((statusCode) && (j++ <2)) { // retries once if api call fails
@@ -1316,7 +1323,6 @@ void iterateSetHold(tstatType, coolingSetPoint, heatingSetPoint, fanMode,
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
@@ -1372,8 +1378,7 @@ void setHold(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 // extraHoldParams may be any other sethold or events properties  
 //		see https://www.ecobee.com/home/developer/api/documentation/v1/objects/Event.shtml
 void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
-	tstatSettings = [], extraHoldParams=[]) {
-    
+	tstatSettings = [], extraHoldParams=[]) {    
 	Integer targetCoolTemp = null,targetHeatTemp = null
 	def tstatParams = null
 	thermostatId = determine_tstat_id(thermostatId)
@@ -1413,7 +1418,6 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
     		
 	}
 	def bodyReq = build_body_request('setHold',null,thermostatId,tstatParams,tstatSettings)
-
 	def statusCode=true
 	int j=0        
 	while ((statusCode) && (j++ <2)) { // retries once if api call fails
@@ -1443,7 +1447,6 @@ void iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
-
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
@@ -1484,8 +1487,7 @@ void iterateCreateVacation(tstatType, vacationName, targetCoolTemp,
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
 void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
-	targetStartDateTime, targetEndDateTime) {
-    
+	targetStartDateTime, targetEndDateTime) {    
 	thermostatId = determine_tstat_id(thermostatId)
 	def vacationStartDate = String.format('%tY-%<tm-%<td', targetStartDateTime)
 	def vacationStartTime = String.format('%tH:%<tM:%<tS', targetStartDateTime)
@@ -1640,8 +1642,7 @@ void iterateResumeProgram(tstatType) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
-void resumeProgram(thermostatId=settings.thermostatId) {
-  
+void resumeProgram(thermostatId=settings.thermostatId) {  
 	thermostatId = determine_tstat_id(thermostatId)
 	def bodyReq = build_body_request('resumeProgram',null,thermostatId,null)
 	if (settings.trace) {
@@ -1684,7 +1685,6 @@ void resumeProgram(thermostatId=settings.thermostatId) {
 // Get all groups related to a thermostatId or all groups
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 def getGroups(thermostatId) {
-
 	thermostatId = determine_tstat_id(thermostatId)
 	def ecobeeType = determine_ecobee_type_or_location("")
 	if (settings.trace) {
@@ -1751,7 +1751,6 @@ def getGroups(thermostatId) {
 // groupSettings may be a map of settings separated by ",", no spaces; 
 // 	For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 void iterateUpdateGroup(thermostatId, groupSettings = []) {
-
 	thermostatId = determine_tstat_id(thermostatId)
 	getGroups(thermostatId)
 	if (settings.trace) {
@@ -1815,8 +1814,7 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 	if (settings.trace) {
 		log.debug "updateGroup> about to call api with body = ${bodyReq} for groupName =${groupName},thermostatId = ${thermostatId}..."
 	}
-	def statusCode=true
-        
+	def statusCode=true        
 	int j=0        
 	while ((statusCode) && (j++ <2)) { // retries once if api call fails
 		api('updateGroup', bodyReq) {resp ->
@@ -1911,7 +1909,6 @@ void iterateSetClimate(tstatType, climateName) {
 	Integer MAX_TSTAT_BATCH = 25
 	def tstatlist = null
 	Integer nTstats = 0
-
 	def ecobeeType = determine_ecobee_type(tsatType)
 	getThermostatSummary(ecobeeType)
 	if (settings.trace) {
@@ -2004,10 +2001,7 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 				} /* end if statusCode */
 			} /* end api call */                   
 		} /* end while */               
-	} /* end for */
-    
-    
-
+	} /* end for */    
 }
 // iterateUpdateClimate: iterate thru all the thermostats under a specific account and update their Climate
 // tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
@@ -2053,7 +2047,6 @@ void iterateUpdateClimate(tstatType, climateName, deleteClimateFlag,
 // coolFan & heatFan's mode is 'auto' or 'on'
 void updateClimate(thermostatId, climateName, deleteClimateFlag,
 		substituteClimateName, coolTemp, heatTemp, isOptimized, isOccupied, coolFan, heatFan) {
-  
 	Integer targetCoolTemp,targetHeatTemp
 	def foundClimate = null, foundSubstituteClimate =null
 	String scheduleAsString
@@ -2235,9 +2228,7 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 	if ((plugSettings != null) && (plugSettings != [])) {
 		bodyReq = bodyReq + ',' + plugSet
 	}
-
 	bodyReq = bodyReq + '}}]}'
-
 	def statusCode=true
 	int j=0        
 	while ((statusCode) && (j++ <2)) { // retries once if api call fails
@@ -2354,7 +2345,6 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 	def statusCode=true
 	int j=0        
 	while ((statusCode) && (j++ <2)) { // retries once if api call fails
-
 		api('runtimeReport', bodyReq) {resp ->
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
@@ -2460,7 +2450,6 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
  			sendEvent name: "auxHeat1RuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
-
 	if (component.contains('auxHeat2')) {
 		totalRuntime = calculate_report_stats('auxHeat2', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2470,7 +2459,6 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 			sendEvent name: "auxHeat2RuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
-
 	if (component.contains('auxHeat3')) {
 		totalRuntime = calculate_report_stats('auxHeat3', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2480,7 +2468,6 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 			sendEvent name: "auxHeat3RuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
-
 	if (component.contains('compCool1')) {
 		totalRuntime = calculate_report_stats('coolComp1', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2490,7 +2477,6 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 			sendEvent name: "compCool1RuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
-
 	if (component.contains('compCool2')) {
 		totalRuntime = calculate_report_stats('coolComp2', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2500,7 +2486,6 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 			sendEvent name: "coolComp2RuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
-
 	if (component.contains('fan')) {
 		totalRuntime = calculate_report_stats('fan', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2510,7 +2495,6 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 			sendEvent name: "fanRuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
-
 	if (component.contains('ventilator')) {
  		totalRuntime = calculate_report_stats('ventilator', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2520,7 +2504,6 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 			sendEvent name: "ventilatorRuntimeInPeriod", value: runtimeInMin.toString()
 		}
 	}
-    
 	if (component.contains('dehumidifier')) {
 		totalRuntime = calculate_report_stats('dehumidifier', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2528,8 +2511,7 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 			sendEvent name: "dehumidifierRuntimeDaily", value: runtimeInMin.toString()
 		} else {            
 			sendEvent name: "dehumidifierRuntimeInPeriod", value: runtimeInMin.toString()
-		}
-                
+		}                
 	} else if (component.contains('humidifier')) {
 		totalRuntime = calculate_report_stats('humidifier', beginInt, endInt,'report')
 		runtimeInMin = (totalRuntime >60) ? (totalRuntime / 60).round(2) :0
@@ -2569,7 +2551,6 @@ void generateReportSensorStatsEvents(sensorId, startDateTime, endDateTime, start
 	if (settings.trace) {
 		log.debug "generateSensorRuntimeEvents> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
-
 	if (sensorId != null) {
 		foundSensor = data.sensorList.sensors[0].find{ it.sensorId == sensorId }
     	}
@@ -2578,8 +2559,7 @@ void generateReportSensorStatsEvents(sensorId, startDateTime, endDateTime, start
 			log.error "generateReportSensorStatsEvents> sensor ${sensorId} not found in last sensor data from getReportData()"
 		}
 		return
-	}
-    
+	}    
 	if (operation.contains('avg')) {
 		runtimeSensorStat = calculate_report_stats(sensorId, beginInt, endInt, 'sensor', 'avg')
  		sendEvent name: "reportSensorAvgInPeriod", value: runtimeSensorStat.round(2).toString() 
@@ -2612,8 +2592,7 @@ private float calculate_report_stats(component, startInterval, endInterval, type
 	if (settings.trace) {
 		log.debug "calculate_report_stats> about to process rowCount= ${rowCount},startRow=${startRow},lastRow=${lastRow}"
 	}
-	if (lastRow <= startRow) {
-    
+	if (lastRow <= startRow) {    
 		if (settings.trace) {
 			log.error "calculate_report_stats>lastRow=${lastRow} is not greater than startRow=${startRow}"
 		}
@@ -2698,7 +2677,6 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 			}
 			if ((data.thermostatList[0].remoteSensors[i]?.type != REMOTE_SENSOR_TYPE) &&
 			 (data.thermostatList[0].remoteSensors[i]?.type != REMOTE_THERMOSTAT_TYPE)) {
-                
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>found sensor type ${data.thermostatList[0].remoteSensors[i].type} at (${i}, skipping it)"
 				}
@@ -2709,12 +2687,10 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>capability size is wrong (${data.thermostatList[0].remoteSensors[i]?.size()}) at (${i})"
 				}
-                
 				// problem with the data
 				continue
 			}
-            
-			if (postData == 'true') {
+         	if (postData == 'true') {
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i]} to remoteData"
 				}
@@ -2722,62 +2698,41 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 			} 
 			int valueInt
 			for (j in 0..data.thermostatList[0].remoteSensors[i].capability.size()-1) {
-        		    
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.thermostatList[0].remoteSensors[i].capability[j]} at j=${j}"
 				}
 				if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
 					// Divide the sensor temperature by 10 
 					valueInt =data.thermostatList[0].remoteSensors[i].capability[j].value.toInteger()/10
-					if (postData == 'true') {
-						if (settings.trace) {
-							log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i].capability[j]} to remoteTempData"
-						}
- 						remoteTempData = remoteTempData + data.thermostatList[0].remoteSensors[i].id + "," +
-							data.thermostatList[0].remoteSensors[i].name + "," +
-							data.thermostatList[0].remoteSensors[i].capability[j].type + "," + valueInt.toString() + ",,"
-					}                        
+ 					remoteTempData = remoteTempData + data.thermostatList[0].remoteSensors[i].id + "," +
+						data.thermostatList[0].remoteSensors[i].name + "," +
+						data.thermostatList[0].remoteSensors[i].capability[j].type + "," + valueInt.toString() + ",,"
 					totalTemp = totalTemp + valueInt
 					maxTemp = Math.max(valueInt,maxTemp)
 					minTemp = (minTemp==null)? valueInt: Math.min(valueInt,minTemp)
 					nbTempSensorInUse++
 				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
-					if (postData == 'true') {
-						if (settings.trace) {
-							log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i].capability[j]} to remoteHumData"
-						}
-						remoteHumData = remoteHumData + data.thermostatList[0].remoteSensors[i].id + "," + 
-							data.thermostatList[0].remoteSensors[i].name + "," +
-							data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
-					}                        
+					remoteHumData = remoteHumData + data.thermostatList[0].remoteSensors[i].id + "," + 
+						data.thermostatList[0].remoteSensors[i].name + "," +
+						data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
 					valueInt =data.thermostatList[0].remoteSensors[i].capability[j].value.toInteger()
 					totalHum = totalHum + valueInt
 					maxHum = Math.max(valueInt,maxHum)
 					minHum = (minHum==null)? valueInt: Math.min(valueInt,minHum)
 					nbHumSensorInUse++
 				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_OCCUPANCY) {
-					if (postData == 'true') {
-						if (settings.trace) {
-							log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i].capability[j]} to remoteOccData"
-						}
-						remoteOccData = remoteOccData + data.thermostatList[0].remoteSensors[i].id + "," + 
-							data.thermostatList[0].remoteSensors[i].name + "," +
-							data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
-					}                        
+					remoteOccData = remoteOccData + data.thermostatList[0].remoteSensors[i].id + "," + 
+						data.thermostatList[0].remoteSensors[i].name + "," +
+						data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
 				} 
 				                        
 			} /* end for remoteSensor Capabilites */
 		} /* end for remoteSensor data */
-        
 	}                        
-
 	def remoteDataJson=""
- 
  	if (remoteData != []) {
-    
 		remoteDataJson = new groovy.json.JsonBuilder(remoteData)
 	}
-	
 	if (settings.trace) {
 		log.debug "generateRemoteSensorEvents>remoteDataJson=${remoteDataJson}"
 	}
@@ -2794,30 +2749,24 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
  		remoteSensorTmpData: "${remoteTempData.toString()}",
 		remoteSensorMinTemp: ((minTemp!=null)?minTemp:0),
 		remoteSensorMaxTemp: maxTemp
-	]
-
-    
+	]    
 	if (nbHumSensorInUse >0) {
 		avgHum = totalHum / nbHumSensorInUse
 		if (settings.trace) {
 			log.debug "generateRemoteSensorEvents>avgHum for remote sensors= ${avgHum},totalTemp=${totalHum},nbHumSensors=${nbHumSensorInUse}"
 		}
 		remoteSensorEvents = remoteSensorEvents + [remoteSensorHumData: "${remoteHumData.toString()}",remoteSensorAvgHumidity: avgHum,	
-			remoteSensorMinHumidity: ((minHum!=null)?minHum:0),	remoteSensorMaxHumidity: maxHum]
-        
+			remoteSensorMinHumidity: ((minHum!=null)?minHum:0),	remoteSensorMaxHumidity: maxHum]        
 	}                        
 	if (settings.trace) {
 		log.debug "generateRemoteSensorEvents>remoteSensorEvents to be sent= ${remoteSensorEvents}"
 	}
-
 	generateEvent(remoteSensorEvents)
-
 }
     
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
 void getThermostatInfo(thermostatId=settings.thermostatId) {
-
 	if (settings.trace) {
 		log.debug "getThermostatInfo> about to call build_body_request for thermostatId = ${thermostatId}..."
 	}
@@ -2828,7 +2777,6 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 	def statusCode=true
 	int j=0    
 	while ((statusCode) && (j++ <2)) { // retries once if api call fails
-
 		api('thermostatInfo', bodyReq) {resp ->
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
@@ -2994,19 +2942,23 @@ private def refresh_tokens() {
 	} catch (java.net.UnknownHostException e) {
 		log.error "refresh_tokens> Unknown host - check the URL " + method.uri
 		sendEvent name: "verboseTrace", value: "refresh_tokens> Unknown host"
+		state.exceptionCount++        
 		return false
 	} catch (java.net.NoRouteToHostException t) {
 		log.error "refresh_tokens> No route to host - check the URL " + method.uri
 		sendEvent name: "verboseTrace", value: "refresh_tokens> No route to host"
+		state.exceptionCount++        
 		return false
 	} catch (java.io.IOException e) {
 		log.error "refresh_tokens> Authentication error, ecobee site cannot be reached"
 		sendEvent name: "verboseTrace", value: "refresh_tokens> Auth error"
+		state.exceptionCount++        
 		return false
-	} catch (any) {
-		log.error "refresh_tokens> general error " + method.uri
+	} catch (e) {
+		log.error "refresh_tokens> general error $e" + method.uri
 		sendEvent name: "verboseTrace", value:
-			"refresh_tokens> general error at ${method.uri}"
+			"refresh_tokens> general error $e at ${method.uri}"
+		state.exceptionCount++                    
 		return false
 	}
 	// determine token's expire time
