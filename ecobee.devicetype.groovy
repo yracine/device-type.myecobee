@@ -1058,10 +1058,10 @@ private void api(method, args, success = {}) {
 	}    
 	if (isTokenExpired()) {
 		if (settings.trace) {
-			log.debug "api> need to refresh tokens"
+			log.debug "api>need to refresh tokens"
 		}
 		if (!refresh_tokens()) {
-        	login()
+			login()
 			if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
 				log.error ("api>not able to refresh the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
 				sendEvent (name: "verboseTrace", 
