@@ -27,35 +27,59 @@ definition(
 )
 
 preferences {
-	section("About") {
-		paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home"
-		paragraph "Version 1.9\n\n" +
-			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
-			"Copyright©2014 Yves Racine"
-		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-		description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+
+	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
+		section("About") {
+			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home"
+			paragraph "Version 2.0\n\n" +
+				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
+				"Copyright©2014 Yves Racine"
+			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
+			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+		}
+	}        
+	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: false, nextPage: "selectModes") {
+		section("Resume Program at the ecobee thermostat(s)") {
+			input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple: true
+		}
+		section("When one of these people arrive at home") {
+			input "people", "capability.presenceSensor", multiple: true
+		}
+		section("Or there is motion at home on these sensors [optional]") {
+			input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
+		}
+		section("False alarm threshold [defaults = 3 minutes]") {
+			input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
+		}
+	}        
+	page(name: "selectModes", title: "Select Hello ST modes", content: "selectModes")
+	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: false) {
+		section("Notifications") {
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
+				false
+			input "phone", "phone", title: "Send a Text Message?", required: false
+		}
+        section([mobileOnly:true]) {
+			label title: "Assign a name for this SmartApp", required: false
+		}
 	}
 
-	section("When one of these people arrive at home") {
-		input "people", "capability.presenceSensor", multiple: true
-	}
-	section("Or when the mode change to this mode [optional]") {
-		input "newMode", "mode", title: "Mode?", required: false
-	}
-	section("Or there is motion at home on these sensors [optional]") {
-		input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
-	}
-	section("False alarm threshold [defaults = 3 minutes]") {
-		input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
-	}
-	section("Resume Program at the ecobee thermostat(s)") {
-		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple: true
-	}
-	section("Notifications") {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
-		input "phone", "phone", title: "Send a Text Message?", required: false
-	}
+}
 
+
+
+def selectModes() {
+	def enumModes=[]
+	location.modes.each {
+		enumModes << it.name
+	}    
+
+	return dynamicPage(name: "selectModes", title: "Select Modes", install: false, uninstall: false, nextPage:
+			"Notifications") {
+		section("Or when SmartThings' hello home mode changes to (ex.'Home')[optional]") {
+			input "newMode", "enum", options: enumModes, multiple:true, required: false
+		}
+	}
 }
 
 
@@ -75,6 +99,7 @@ def updated() {
 def initialize() {
 	subscribe(people, "presence", presence)
 	subscribe(motions, "motion", motionEvtHandler)
+	subscribe(location, changeMode)
 
 }
 
@@ -102,6 +127,24 @@ private residentsHaveJustBeenActive() {
 	return result
 }
 
+def changeMode(evt) {
+	def message
+
+	Boolean foundMode=false        
+	newMode.each {
+        
+		if (it==location.mode) {
+			foundMode=true            
+		}            
+	}        
+        
+	if (!foundMode) {
+        
+		log.debug "changeMode>location.mode= $location.mode, newMode=${newMode},foundMode=${foundMode}, not doing anything"
+		return			
+	}
+	takeActions()
+}
 
 def presence(evt) {
 	log.debug "evt.name: $evt.value"
@@ -138,10 +181,7 @@ def presence(evt) {
 }
 
 def takeActions() {
-
-
 	ecobee.resumeProgram("")
-
 }
 
 
