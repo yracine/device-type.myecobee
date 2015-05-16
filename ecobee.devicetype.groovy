@@ -1159,9 +1159,9 @@ private void doRequest(uri, args, type, success) {
 		sendEvent name: "verboseTrace", value: "doRequest> No route to host"
 		state.exceptionCount++        
 	} catch (e) {
-		log.debug "doRequest>exception $e for " + params.body
+		log.debug "doRequest>exception $e, ${e.getMessage()} for " + params.body
 		sendEvent name: "verboseTrace", value:
-			"doRequest>exception $e for " + params.body
+			"doRequest>exception $e, ${e.getMessage()} for " + params.body
 		state.exceptionCount++    
 	}
 }
@@ -2956,9 +2956,9 @@ private def refresh_tokens() {
 		state.exceptionCount++        
 		return false
 	} catch (e) {
-		log.debug "refresh_tokens> $e at" + method.uri
+		log.debug "refresh_tokens>exception $e, ${e.getMessage()} at " + method.uri
 		sendEvent name: "verboseTrace", value:
-			"refresh_tokens>$e at ${method.uri}"
+			"refresh_tokens>exception $e, ${e.getMessage()} at " + method.uri
 		state.exceptionCount++                    
 		return false
 	}
