@@ -1061,13 +1061,18 @@ private void api(method, args, success = {}) {
 			log.debug "api> need to refresh tokens"
 		}
 		if (!refresh_tokens()) {
-			log.error ("api>not able to refresh_tokens due to some connection issues, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
-			sendEvent (name: "verboseTrace", 
-				value: "api>not able to refresh_tokens due to some connection issues, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
-			return		
-		}
-		/* Reset Exceptions counter as the refresh_tokens() call has been successful */    
-		state.exceptionCount=0    
+        	login()
+			if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
+				log.error ("api>not able to refresh the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
+				sendEvent (name: "verboseTrace", 
+					value: "api>not able to refresh the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
+				return		
+			}
+		} else {
+        
+			/* Reset Exceptions counter as the refresh_tokens() call has been successful */    
+			state.exceptionCount=0
+		}            
 	}
 	if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
 
@@ -3260,6 +3265,7 @@ void initialSetup(device_client_id, auth_data, device_tstat_id) {
 	getThermostatInfo(thermostatId)
 	def ecobeeType=determine_ecobee_type_or_location("")
 	data.auth.ecobeeType = ecobeeType
+	state.exceptionCount=0    
 }
 
 def toQueryString(Map m) {
