@@ -1057,8 +1057,6 @@ private void api(method, args, success = {}) {
 		login()
 		
 	}    
-	/* If the number of exception count is greater than MAX_EXCEPTION_COUNT, try to reconnect to ecobee */
-    
 	if (isTokenExpired()) {
 		if (settings.trace) {
 			log.debug "api> need to refresh tokens"
