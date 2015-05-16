@@ -1063,9 +1063,9 @@ private void api(method, args, success = {}) {
 		if (!refresh_tokens()) {
 			login()
 			if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
-				log.error ("api>not able to refresh the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
+				log.error ("api>not able to renew the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
 				sendEvent (name: "verboseTrace", 
-					value: "api>not able to refresh the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
+					value: "api>not able to renew the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
 				return		
 			}
 		} else {
@@ -1142,10 +1142,14 @@ private void doRequest(uri, args, type, success) {
 		}
 		if (type == 'post') {
 			httpPostJson(params, success)
+
 		} else if (type == 'get') {
 			params.body = null // parameters already in the URL request
 			httpGet(params, success)
 		}
+		/* when success, reset the exception counter */
+		state.exceptionCount=0
+
 	} catch (java.net.UnknownHostException e) {
 		log.error "doRequest> Unknown host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> Unknown host"
@@ -1154,11 +1158,11 @@ private void doRequest(uri, args, type, success) {
 		log.error "doRequest> No route to host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> No route to host"
 		state.exceptionCount++        
-	} catch (java.io.IOException e) {
-		log.error "doRequest> general or malformed request error " + params.body
+	} catch (e) {
+		log.debug "doRequest>exception $e for " + params.body
 		sendEvent name: "verboseTrace", value:
-			"doRequest> general or malformed request body error " + params.body
-		state.exceptionCount++        
+			"doRequest>exception $e for " + params.body
+		state.exceptionCount++    
 	}
 }
 
@@ -2951,15 +2955,10 @@ private def refresh_tokens() {
 		sendEvent name: "verboseTrace", value: "refresh_tokens> No route to host"
 		state.exceptionCount++        
 		return false
-	} catch (java.io.IOException e) {
-		log.error "refresh_tokens> Authentication error, ecobee site cannot be reached"
-		sendEvent name: "verboseTrace", value: "refresh_tokens> Auth error"
-		state.exceptionCount++        
-		return false
 	} catch (e) {
-		log.error "refresh_tokens> general error $e" + method.uri
+		log.debug "refresh_tokens> $e at" + method.uri
 		sendEvent name: "verboseTrace", value:
-			"refresh_tokens> general error $e at ${method.uri}"
+			"refresh_tokens>$e at ${method.uri}"
 		state.exceptionCount++                    
 		return false
 	}
