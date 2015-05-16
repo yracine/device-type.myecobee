@@ -2735,13 +2735,6 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 			} /* end for remoteSensor Capabilites */
 		} /* end for remoteSensor data */
 	}                        
-	def remoteDataJson=""
- 	if (remoteData != []) {
-		remoteDataJson = new groovy.json.JsonBuilder(remoteData)
-	}
-	if (settings.trace) {
-		log.debug "generateRemoteSensorEvents>remoteDataJson=${remoteDataJson}"
-	}
 	if (nbTempSensorInUse >0) {
 		avgTemp = totalTemp / nbTempSensorInUse
 		if (settings.trace) {
@@ -2749,7 +2742,6 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 		}
 	}                        
 	def remoteSensorEvents = [
-		remoteSensorData: "${remoteDataJson.toString()}",
 		remoteSensorOccData: "${remoteOccData.toString()}",
 		remoteSensorAvgTemp: avgTemp,
  		remoteSensorTmpData: "${remoteTempData.toString()}",
@@ -2764,7 +2756,13 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 		remoteSensorEvents = remoteSensorEvents + [remoteSensorHumData: "${remoteHumData.toString()}",remoteSensorAvgHumidity: avgHum,	
 			remoteSensorMinHumidity: ((minHum!=null)?minHum:0),	remoteSensorMaxHumidity: maxHum]        
 	}                        
+	def remoteDataJson=""
+ 	if (remoteData != []) {
+		remoteDataJson = new groovy.json.JsonBuilder(remoteData)
+		remoteSensorEvents = remoteSensorEvents + [remoteSensorData: "${remoteDataJson.toString()}"]
+	}
 	if (settings.trace) {
+		log.debug "generateRemoteSensorEvents>remoteDataJson=${remoteDataJson}"
 		log.debug "generateRemoteSensorEvents>remoteSensorEvents to be sent= ${remoteSensorEvents}"
 	}
 	generateEvent(remoteSensorEvents)
@@ -2956,9 +2954,9 @@ private def refresh_tokens() {
 		state.exceptionCount++        
 		return false
 	} catch (e) {
-		log.debug "refresh_tokens>exception $e, ${e.getMessage()} at " + method.uri
+		log.debug "refresh_tokens>exception $e, ${e.getMessage()} at" + method.uri
 		sendEvent name: "verboseTrace", value:
-			"refresh_tokens>exception $e, ${e.getMessage()} at " + method.uri
+			"refresh_tokens>exception $e, ${e.getMessage()} at" + method.uri
 		state.exceptionCount++                    
 		return false
 	}
