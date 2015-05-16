@@ -179,7 +179,9 @@ def presence(evt) {
 }
 
 def takeActions() {
+	def message = "EcobeeResumeProg>resumed program at ecobee..."
 	ecobee.resumeProgram("")
+	send(message)
 }
 
 
