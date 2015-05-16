@@ -1,4 +1,424 @@
+/***
+ *  My Ecobee Device
+ *  Copyright 2014 Yves Racine
+ *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *
+ *  Code: https://github.com/yracine/device-type.myecobee
+ *  Refer to readme file for installation instructions.
+ *
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ * 
+ */
 
+// for the UI
+preferences {
+	input("thermostatId", "text", title: "Serial #", description:
+		"The serial number of your thermostat (no spaces)")
+	input("appKey", "text", title: "App Key", description:
+		"The application key given by Ecobee (no spaces)")
+	input("trace", "text", title: "trace", description:
+		"Set it to true to enable tracing (no spaces) or leave it empty (no tracing)"
+	)
+	input("holdType", "text", title: "holdType", description:
+		"Set it to nextTransition or indefinite (latter by default)")
+	input("ecobeeType", "text", title: "ecobee Tstat Type", description:
+		"Set it to registered (by default) or managementSet (no spaces)")
+}
+metadata {
+	// Automatically generated. Make future change here.
+	definition(name: "My Ecobee Device", author: "Yves Racine",  namespace: "yracine") {
+		capability "Relative Humidity Measurement"
+		capability "Temperature Measurement"
+		capability "Polling"
+		capability "Thermostat"
+		capability "Refresh"
+		capability "Presence Sensor"
+		capability "Actuator"
+
+		attribute "thermostatName", "string"
+		attribute "heatLevelUp", "string"
+		attribute "heatLevelDown", "string"
+		attribute "coolLevelUp", "string"
+		attribute "coolLevelDown", "string"
+		attribute "verboseTrace", "string"
+		attribute "fanMinOnTime", "string"
+		attribute "humidifierMode", "string"
+		attribute "dehumidifierMode", "string"
+		attribute "humidifierLevel", "string"
+		attribute "dehumidifierLevel", "string"
+		attribute "condensationAvoid", "string"
+		attribute "groups", "string"
+		attribute "equipmentStatus", "string"
+		attribute "alerts", "string"
+		attribute "programScheduleName", "string"
+		attribute "programFanMode", "string"
+		attribute "programType", "string"
+		attribute "programCoolTemp", "string"
+		attribute "programHeatTemp", "string"
+		attribute "programEndTimeMsg", "string"
+		attribute "weatherDateTime", "string"
+		attribute "weatherSymbol", "string"
+		attribute "weatherStation", "string"
+		attribute "weatherCondition", "string"
+		attribute "weatherTemperature", "string"
+		attribute "weatherPressure", "string"
+		attribute "weatherRelativeHumidity", "string"
+		attribute "weatherWindSpeed", "string"
+		attribute "weatherWindDirection", "string"
+		attribute "weatherPop", "string"
+		attribute "weatherTempHigh", "string"
+		attribute "weatherTempLow", "string"
+		attribute "plugName", "string"
+		attribute "plugState", "string"
+		attribute "plugSettings", "string"
+		attribute "hasHumidifier", "string"
+		attribute "hasDehumidifier", "string"
+		attribute "hasErv", "string"
+		attribute "hasHrv", "string"
+		attribute "ventilatorMinOnTime", "string"
+		attribute "ventilatorMode", "string"
+		attribute "programDisplayName", "string"
+		attribute "thermostatOperatingState", "string"        
+		attribute "climateList", "string"	
+		attribute "modelNumber", "string"
+		attribute "followMeComfort", "string"
+		attribute "autoAway", "string"
+		attribute "thermostatRevision", "string"
+		attribute "heatStages", "string"
+		attribute "coolStages", "string"
+		attribute "climateName", "string"
+		attribute "setClimate", "string"
+        
+		// Report Runtime events
+        
+		attribute "auxHeat1RuntimeInPeriod", "string"
+		attribute "auxHeat2RuntimeInPeriod", "string"
+		attribute "auxHeat3RuntimeInPeriod", "string"
+		attribute "compCool1RuntimeInPeriod", "string"
+		attribute "compCool2RuntimeInPeriod", "string"
+		attribute "dehumidifierRuntimeInPeriod", "string"
+		attribute "humidifierRuntimeInPeriod", "string"
+		attribute "ventilatorRuntimeInPeriod", "string"
+		attribute "fanRuntimeInPeriod", "string"
+
+		attribute "auxHeat1RuntimeDaily", "string"
+		attribute "auxHeat2RuntimeDaily", "string"
+		attribute "auxHeat3RuntimeDaily", "string"
+		attribute "compCool1RuntimeDaily", "string"
+		attribute "compCool2RuntimeDaily", "string"
+		attribute "dehumidifierRuntimeDaily", "string"
+		attribute "humidifierRuntimeDaily", "string"
+		attribute "ventilatorRuntimeDaily", "string"
+		attribute "fanRuntimeDaily", "string"
+		attribute "reportData", "string"
+
+		// Report Sensor Data & Stats
+		        
+		attribute "reportSensorMetadata", "string"
+		attribute "reportSensorData", "string"
+		attribute "reportSensorAvgInPeriod", "string"
+		attribute "reportSensorMinInPeriod", "string"
+		attribute "reportSensorMaxInPeriod", "string"
+		attribute "reportSensorTotalInPeriod", "string"
+        
+		// Remote Sensor Data & Stats
+
+		attribute "remoteSensorData", "string"
+		attribute "remoteSensorTmpData", "string"
+		attribute "remoteSensorHumData", "string"
+		attribute "remoteSensorOccData", "string"
+		attribute "remoteSensorAvgTemp", "string"
+		attribute "remoteSensorAvgHumidity", "string"
+		attribute "remoteSensorMinTemp", "string"
+		attribute "remoteSensorMinHumidity", "string"
+		attribute "remoteSensorMaxTemp", "string"
+		attribute "remoteSensorMaxHumidity", "string"
+
+		command "setFanMinOnTime"
+		command "setCondensationAvoid"
+		command "createVacation"
+		command "deleteVacation"
+		command "getEcobeePinAndAuth"
+		command "getThermostatInfo"
+		command "getThermostatSummary"
+		command "iterateCreateVacation"
+		command "iterateDeleteVacation"
+		command "iterateResumeProgram"
+		command "iterateSetHold"
+		command "resumeProgram"
+		command "resumeThisTstat"        
+		command "setAuthTokens"
+		command "setHold"
+		command "setHoldExtraParams"
+		command "heatLevelUp"
+		command "heatLevelDown"
+		command "coolLevelUp"
+		command "coolLevelDown"
+		command "auxHeatOnly"
+		command "setThermostatFanMode"
+		command "dehumidifierOff"
+		command "dehumidifierOn"
+		command "humidifierOff"
+		command "humidifierAuto"
+		command "humidifierManual"
+		command "setHumidifierLevel"
+		command "setDehumidifierLevel"
+		command "updateGroup"
+		command "getGroups"
+		command "iterateUpdateGroup"
+		command "createGroup"
+		command "deleteGroup"
+		command "updateClimate"
+		command "iterateUpdateClimate"
+		command "createClimate"
+		command "deleteClimate"
+		command "setClimate"
+		command "iterateSetClimate"
+		command "controlPlug" // not tested as I don't own a smartplug
+		command "ventilatorOn"
+		command "ventilatorAuto"
+		command "ventilatorOff"
+		command "ventilatorAuto"
+		command "setVentilatorMinOnTime"
+		command "awake"
+		command "away"
+		command "present"
+		command "home"
+		command "sleep"
+		command "quickSave"
+		command "setThisTstatClimate"
+		command "setThermostatSettings"
+		command "iterateSetThermostatSettings"
+		command "getEquipmentStatus"
+		command "refreshChildTokens" 
+		command "autoAway"
+		command "followMeComfort"
+		command "getReportData"
+		command "generateReportRuntimeEvents"
+		command "generateReportSensorStatsEvents"
+		command "getThermostatRevision"
+		command "generateRemoteSensorEvents"
+	}        
+	simulator {
+		// TODO: define status and reply messages here
+	}
+	tiles {
+		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 1,
+			height: 1, decoration: "flat") {
+			state "default", label: '${currentValue}\n'
+		}
+		valueTile("groups", "device.groups", inactiveLabel: false, width: 1, 
+			height: 1, decoration: "flat") {
+			state "default", label: '${currentValue}'
+		}
+		valueTile("temperature", "device.temperature", width: 2, height: 2,
+			canChangeIcon: false) {
+//		If one prefers Celsius over Farenheits, just comment out the temperature in Farenheits 
+//		and remove the comment below to have the right color scale in Celsius.
+//		This issue will be solved as soon as Smartthings supports dynamic tiles
+//		valueTile("temperature", "device.temperature", width: 2, height: 2) {
+//			state("temperature", label: '${currentValue}°', unit: "C", 
+//            		backgroundColors: [
+//					[value: 0, color: "#153591"],
+//					[value: 8, color: "#1e9cbb"],
+//					[value: 14, color: "#90d2a7"],
+//					[value: 20, color: "#44b621"],
+//					[value: 24, color: "#f1d801"],
+//					[value: 29, color: "#d04e00"],
+//					[value: 36, color: "#bc2323"]
+//				])
+//		}
+			state("temperature", label:'${currentValue}°', unit:"F",
+			backgroundColors:[
+					[value: 31, color: "#153591"],
+					[value: 44, color: "#1e9cbb"],
+					[value: 59, color: "#90d2a7"],
+					[value: 74, color: "#44b621"],
+					[value: 84, color: "#f1d801"],
+					[value: 95, color: "#d04e00"],
+					[value: 96, color: "#bc2323"]
+				])
+		}
+		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
+			decoration: "flat") {
+			state "heat", label: '${name}', action: "thermostat.off", 
+				icon: "st.Weather.weather14", backgroundColor: "#ffffff"
+			state "off", label: '${name}', action: "thermostat.cool", 
+				icon: "st.Outdoor.outdoor19"
+			state "cool", label: '${name}', action: "thermostat.auto", 
+				icon: "st.Weather.weather7"
+			state "auto", action: "thermostat.heat", 
+				icon: "st.thermostat.auto"
+		}
+		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
+			decoration: "flat") {
+			state "auto", label: '${name}', action: "thermostat.fanOn", 
+				icon: "st.Appliances.appliances11"
+			state "on", label: '${name}', action: "thermostat.fanAuto", 
+				icon: "st.Appliances.appliances11"
+		}
+		standardTile("switchProgram", "device.programDisplayName", 
+			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
+			state "Home", label: '${name}', action: "sleep", 
+				icon: "st.Home.home4"
+			state "Sleep", label: '${name}', action: "awake", 
+ 				icon: "st.Bedroom.bedroom2"
+			state "Awake", label: '${name}', action: "away", 
+				icon: "st.Outdoor.outdoor20"
+			state "Away", label: '${name}', action: "quickSave", 
+				icon: "st.presence.car.car"
+			state "QuickSave", label: '${name}', action: "present", 
+				icon: "st.Home.home1"
+			state "Custom", label: 'Custom', action: "resumeThisTstat", 
+				icon: "st.Office.office6"
+		}
+		valueTile("heatingSetpoint", "device.heatingSetpoint", inactiveLabel: false,
+			decoration: "flat") {
+			state "heat", label: '${currentValue}° heat', unit: "F", 
+			backgroundColor: "#ffffff"
+		}
+		valueTile("coolingSetpoint", "device.coolingSetpoint", inactiveLabel: false,
+			decoration: "flat") {
+			state "cool", label: '${currentValue}° cool', unit: "F", 
+			backgroundColor: "#ffffff"
+		}
+		valueTile("humidity", "device.humidity", inactiveLabel: false, 
+			decoration: "flat") {
+			state "default", label: 'Humidity\n${currentValue}%', unit: "humidity"
+		}
+		standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false,
+			inactiveLabel: false, decoration: "flat") {
+			state "heatLevelUp", label: '  ', action: "heatLevelUp", 
+			icon: "st.thermostat.thermostat-up"
+		}
+		standardTile("heatLevelDown", "device.heatingSetpoint", canChangeIcon: false,
+			inactiveLabel: false, decoration: "flat") {
+			state "heatLevelDown", label: '  ', action: "heatLevelDown", 
+ 			icon:"st.thermostat.thermostat-down"
+		}
+		standardTile("coolLevelUp", "device.coolingSetpoint", canChangeIcon: false,
+			inactiveLabel: false, decoration: "flat") {
+			state "coolLevelUp", label: '  ', action: "coolLevelUp", 
+			icon: "st.thermostat.thermostat-up"
+		}
+		standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false,
+			inactiveLabel: false, decoration: "flat") {
+			state "coolLevelDown", label: '  ', action: "coolLevelDown", 
+			icon: "st.thermostat.thermostat-down"
+		}
+		valueTile("equipStatus", "device.equipmentStatus", inactiveLabel: false,
+			decoration: "flat", width: 3, height: 1) {
+			state "default", label: '${currentValue}'
+		}
+//		One could also use thermostatOperatingState as display value for equipStatus (in line with default ecobee device's status)
+//		However, it does not contain humidifier/dehumidifer/HRV/ERV/aux heat
+//		components' running states, just the basic thermostat states (heating, cooling, fan only).
+//		To use this tile instead of the above, just comment out the above tile, and remove comments below.
+//		valueTile("equipStatus", "device.thermostatOperatingState", inactiveLabel: false,
+//			decoration: "flat", width: 3, height: 1) {
+//			state "default", label: '${currentValue}'
+//		}
+		valueTile("programEndTimeMsg", "device.programEndTimeMsg", inactiveLabel:
+			false, decoration: "flat", width: 3, height: 1) {
+			state "default", label: '${currentValue}'
+		}
+		valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false,
+			decoration: "flat", width: 1, height: 1) {
+			state "default", label: 'FanMin\n${currentValue}'
+		}
+		valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat",
+			width: 2, height: 1) {
+			state "default", label: '${currentValue}'
+		}
+		// Program Tiles
+		valueTile("programScheduleName", "device.programScheduleName", inactiveLabel:
+			false, width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'Mode\n${currentValue}'
+		}
+		valueTile("programType", "device.programType", inactiveLabel: false, width: 1,
+			height: 1, decoration: "flat") {
+			state "default", label: 'Prog Type\n${currentValue}'
+		}
+		valueTile("programCoolTemp", "device.programCoolTemp", inactiveLabel: false,
+			width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'Prog Cool\n${currentValue}°'
+		}
+		valueTile("programHeatTemp", "device.programHeatTemp", inactiveLabel: false,
+			width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'Prog Heat\n${currentValue}°'
+		}
+		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false,
+			decoration: "flat") {
+			state "default", label: 'ResumeProg', action: "resumeThisTstat", 
+            		icon: "st.Office.office7", backgroundColor: "#ffffff"
+		}
+		// Weather Tiles
+		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
+			decoration: "flat") {
+			state "-2",			label: 'updating...',		icon: "st.unknown.unknown.unknown"
+			state "0",			label: 'Sunny',			icon: "st.Weather.weather14"
+			state "1",			label: 'FewClouds',		icon: "st.Weather.weather15"
+			state "2",			label: 'PartlyCloudy',		icon: "st.Weather.weather15"
+			state "3",			label: 'MostlyCloudy',		icon: "st.Weather.weather15"
+			state "4",			label: 'Overcast',		icon: "st.Weather.weather13"
+			state "5",			label: 'Drizzle',		icon: "st.Weather.weather9"
+			state "6",			label: 'Rain',			icon: "st.Weather.weather10"
+			state "7",			label: 'FreezingRain',		icon: "st.Weather.weather10"
+			state "8",			label: 'Showers',		icon: "st.Weather.weather10"
+			state "9",			label: 'Hail',			icon: "st.custom.wuk.sleet"
+			state "10",			label: 'Snow',			icon: "st.Weather.weather6"
+			state "11",			label: 'Flurries',		icon: "st.Weather.weather6"
+			state "12",			label: 'Sleet',			icon: "st.Weather.weather6"
+			state "13",			label: 'Blizzard',		icon: "st.Weather.weather7"
+			state "14",			label: 'Pellets',		icon: "st.custom.wuk.sleet"
+			state "15",			label: 'ThunderStorms',		icon: "st.custom.wuk.tstorms"
+			state "16",			label: 'Windy',			icon: "st.Transportation.transportation5"
+			state "17",			label: 'Tornado',		icon: "st.Weather.weather1"
+			state "18",			label: 'Fog',			icon: "st.Weather.weather13"
+			state "19",			label: 'Hazy',			icon: "st.Weather.weather13"
+			state "20",			label: 'Smoke',			icon: "st.Weather.weather13"
+			state "21",			label: 'Dust',			icon: "st.Weather.weather13"
+		}
+		valueTile("weatherDateTime", "device.weatherDateTime", inactiveLabel: false,
+			width: 2, height: 1, decoration: "flat") {
+			state "default", label: '${currentValue}'
+		}
+		valueTile("weatherConditions", "device.weatherCondition", 
+			inactiveLabel: false, width: 2, height: 1, decoration: "flat") {
+			state "default", label: 'Forecast\n${currentValue}'
+		}
+		valueTile("weatherTemperature", "device.weatherTemperature", inactiveLabel:
+			false, width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'Out Temp\n${currentValue}°', unit: "C"
+		}
+		valueTile("weatherRelativeHumidity", "device.weatherRelativeHumidity",
+			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'Out Hum\n${currentValue}%', unit: "humidity"
+		}
+		valueTile("weatherTempHigh", "device.weatherTempHigh", inactiveLabel: false,
+			width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'FcastHigh\n${currentValue}°', unit: "C"
+		}
+		valueTile("weatherTempLow", "device.weatherTempLow", inactiveLabel: false,
+			width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'FcastLow\n${currentValue}°', unit: "C"
+		}
+		valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false,
+			width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'Pressure\n${currentValue}', unit: "hpa"
+		}
+		valueTile("weatherWindDirection", "device.weatherWindDirection",
+			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
+			state "default", label: 'W.Dir\n${currentValue}'
+		}
 		valueTile("weatherWindSpeed", "device.weatherWindSpeed", inactiveLabel: false,
 			width: 1, height: 1, decoration: "flat") {
 			state "default", label: 'W.Speed\n${currentValue}'
