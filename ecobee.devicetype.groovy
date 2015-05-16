@@ -2948,15 +2948,15 @@ private def refresh_tokens() {
 		sendEvent name: "verboseTrace", value: "refresh_tokens> Unknown host"
 		state.exceptionCount++        
 		return false
-	} catch (java.net.NoRouteToHostException t) {
+	} catch (java.net.NoRouteToHostException e) {
 		log.error "refresh_tokens> No route to host - check the URL " + method.uri
 		sendEvent name: "verboseTrace", value: "refresh_tokens> No route to host"
 		state.exceptionCount++        
 		return false
 	} catch (e) {
-		log.debug "refresh_tokens>exception $e, ${e.getMessage()} at" + method.uri
+		log.debug "refresh_tokens>exception $e, ${e.getMessage()} at " + method.uri
 		sendEvent name: "verboseTrace", value:
-			"refresh_tokens>exception $e, ${e.getMessage()} at" + method.uri
+			"refresh_tokens>exception $e, ${e.getMessage()} at " + method.uri
 		state.exceptionCount++                    
 		return false
 	}
