@@ -85,21 +85,21 @@ def selectModes() {
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
-	log.debug "Current mode = ${location.mode}, people = ${people.collect{it.label + ': ' + it.currentPresence}}"
 	initialize()
 }
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
-	log.debug "Current mode = ${location.mode}, people = ${people.collect{it.label + ': ' + it.currentPresence}}"
 	unsubscribe()
 	initialize()
 }
 
 def initialize() {
+	log.debug "Current mode = ${location.mode}, people = ${people.collect{it.label + ': ' + it.currentPresence}}"
+	subscribe(location, changeMode)
+	subscribe(app, changeMode)
 	subscribe(people, "presence", presence)
 	subscribe(motions, "motion", motionEvtHandler)
-	subscribe(location, changeMode)
 
 }
 
@@ -128,7 +128,6 @@ private residentsHaveJustBeenActive() {
 }
 
 def changeMode(evt) {
-	def message
 
 	Boolean foundMode=false        
 	newMode.each {
@@ -139,8 +138,7 @@ def changeMode(evt) {
 	}        
         
 	if (!foundMode) {
-        
-		log.debug "changeMode>location.mode= $location.mode, newMode=${newMode},foundMode=${foundMode}, not doing anything"
+		log.debug "changeMode>location.mode= $location.mode, newMode=${newMode},foundMode=${foundMode}, not resuming program"
 		return			
 	}
 	takeActions()
