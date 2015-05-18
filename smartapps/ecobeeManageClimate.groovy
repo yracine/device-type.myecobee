@@ -36,7 +36,7 @@ preferences {
 	}
 
 	section("For this ecobee thermostat") {
-		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
 	}
 	section("Create (if not present) or update this climate") {
 		input "climateName", "text", title: "Climate Name"
