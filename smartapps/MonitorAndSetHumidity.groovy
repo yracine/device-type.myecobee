@@ -48,7 +48,7 @@ def humiditySettings() {
 			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Monitor & set the ecobee thermostat's dehumidifer/humidifier/HRV/ERV") {
-			input "ecobee", "capability.thermostat", title: "Ecobee?"
+			input "ecobee", "device.myEcobeeDevice", title: "Ecobee?"
 		}
 		section("To this humidity level") {
 			input "givenHumidityLevel", "number", title: "Humidity level (default=calculated based on outside temp)", required: false
