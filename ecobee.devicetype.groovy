@@ -961,7 +961,7 @@ private def getCurrentProgName() {
 	def progCurrentName = device.currentValue("programScheduleName")
 	def progType = device.currentValue("programType")
 	progType = (progType == null) ? "": progType.trim().toUpperCase()	
-	progCurrentName = (progCurrentName == null) ? "": progCurrentName.trim().toUpperCase()
+	progCurrentName = (progCurrentName == null) ? "": progCurrentName.trim()
 	if ((progCurrentName != AWAY_PROG) && (progCurrentName != SLEEP_PROG) && (
 		progCurrentName != AWAKE_PROG) &&
 		(progCurrentName != HOME_PROG) && (progCurrentName != QUICKSAVE)) {
