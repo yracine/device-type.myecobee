@@ -36,7 +36,7 @@ preferences {
 	}
 
 	section("For this Ecobee thermostat") {
-		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
 	}
 	section("Control this SmartPlug Name") {
 		input "plugName", "text", title: "SmartPlug Name"
