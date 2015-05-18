@@ -40,7 +40,7 @@ preferences {
 	}        
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: false, nextPage: "selectModes") {
 		section("Resume Program at the ecobee thermostat(s)") {
-			input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple: true
+			input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat(s)", multiple: true
 		}
 		section("When one of these people arrive at home") {
 			input "people", "capability.presenceSensor", multiple: true
