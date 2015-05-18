@@ -41,7 +41,7 @@ preferences {
 			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Set the ecobee thermostat(s)") {
-			input "ecobee", "capability.thermostat", title: "Which ecobee thermostat(s)?", multiple: true
+			input "ecobee", "device.myEcobeeDevice", title: "Which ecobee thermostat(s)?", multiple: true
 
 		}
 		section("Configuration") {
