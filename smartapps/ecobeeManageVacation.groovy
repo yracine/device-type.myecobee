@@ -38,7 +38,7 @@ preferences {
 	}
 
 	section("For the Ecobee thermostat(s)") {
-		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
 	}
 	section("Create this Vacation Name") {
 		input "vacationName", "text", title: "Vacation Name"
