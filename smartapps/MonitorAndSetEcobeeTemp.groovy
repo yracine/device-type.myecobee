@@ -47,7 +47,7 @@ def thresholdSettings() {
 			description: "http://github.com/yracine/device-type.myecobee"
 		}
 		section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
-			input "ecobee", "capability.thermostat", title: "Which Ecobee?"
+			input "ecobee", "device.myEcobeeDevice", title: "Which Ecobee?"
 		}
 		section("For more heating in cold season, outdoor temp's threshold [default <= 10°F/-17°C]") {
 			input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
