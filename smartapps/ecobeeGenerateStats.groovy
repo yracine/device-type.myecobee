@@ -35,7 +35,7 @@ preferences {
 	}
 
 	section("Generate daily stats for this ecobee thermostat") {
-		input "ecobee", "capability.thermostat", title: "Ecobee?"
+		input "ecobee", "device.myEcobeeDevice", title: "Ecobee?"
 
 	}
 	section("Start date for the initial run, format = DD-MM-YYYY") {
