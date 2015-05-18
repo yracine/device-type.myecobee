@@ -38,7 +38,7 @@ preferences {
 	section("Log devices...") {
 		input "temperatures", "capability.temperatureMeasurement", title: "Temperatures", required: false, multiple: true
 		input "thermostats", "capability.thermostat", title: "Thermostats", required: false, multiple: true
-		input "ecobees", "capability.thermostat", title: "Ecobees", required: false, multiple: true
+		input "ecobees", "device.myEcobeeDevice", title: "Ecobees", required: false, multiple: true
 		input "detectors", "capability.smokeDetector", title: "Smoke/CarbonMonoxide Detectors", required: false, multiple: true
 		input "humidities", "capability.relativeHumidityMeasurement", title: "Humidity sensors", required: false, multiple: true
 		input "waters", "capability.waterSensor", title: "Water sensors", required: false, multiple: true
