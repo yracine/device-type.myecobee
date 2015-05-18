@@ -34,7 +34,7 @@ preferences {
 		description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 	section("For this ecobee thermostat") {
-		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat"
+		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
 	}
 	section("Create this group or update all groups [empty for all group]") {
 		input "groupName", "text", title: "Group Name", required: false
