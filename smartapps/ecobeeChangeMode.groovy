@@ -42,7 +42,7 @@ preferences {
 			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Change the following ecobee thermostat(s)...") {
-			input "thermostats", "capability.thermostat", title: "Which thermostat(s)", multiple: true
+			input "thermostats", "device.myEcobeeDevice", title: "Which thermostat(s)", multiple: true
 		}
 	}
 	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
