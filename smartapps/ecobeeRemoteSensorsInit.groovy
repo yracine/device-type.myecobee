@@ -306,9 +306,9 @@ def takeAction() {
 	ecobee.generateRemoteSensorEvents("", 'false')
 	updateMotionSensors()
 	updateTempSensors()
-/*
+/*    
 	updateHumiditySensors()
-*/    
+*/   
 	log.trace "takeAction>end"
 }
 
@@ -471,7 +471,7 @@ private updateHumiditySensors() {
             
             
 			Double humValue = ecobeeSensorValue.toDouble().round()
-			String humValueString=humValue.toString()             
+			String humValueString = String.format('%2d', humValue.intValue())
 
 			def isChange = device.isStateChange(device, "humidity", humValueString)
 			def isDisplayed = isChange
