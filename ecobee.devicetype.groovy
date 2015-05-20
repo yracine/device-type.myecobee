@@ -2764,7 +2764,7 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 		} /* end for remoteSensor data */
 	}                        
 	if (nbTempSensorInUse >0) {
-		avgTemp = totalTemp / nbTempSensorInUse
+		avgTemp = (totalTemp / nbTempSensorInUse).round(1)
 		if (settings.trace) {
 			log.debug "generateRemoteSensorEvents>avgTemp for remote sensors= ${avgTemp},totalTemp=${totalTemp},nbTempSensors=${nbTempSensorInUse}"
 		}
@@ -2777,7 +2777,7 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 		remoteSensorMaxTemp: maxTemp
 	]    
 	if (nbHumSensorInUse >0) {
-		avgHum = totalHum / nbHumSensorInUse
+		avgHum = (totalHum / nbHumSensorInUse).round()
 		if (settings.trace) {
 			log.debug "generateRemoteSensorEvents>avgHum for remote sensors= ${avgHum},totalHum=${totalHum},nbHumSensors=${nbHumSensorInUse}"
 		}
@@ -2945,6 +2945,19 @@ def getModelNumber() {
 }
 
 private def refresh_tokens() {
+
+
+	if (!isTokenExpired()) {
+
+		if (settings.trace) {
+			log.debug "refresh_tokens>token not expired, workaround to avoid unauthorized exception, returning..."
+			sendEvent name: "verboseTrace", value:
+					"refresh_tokens>token not expired, workaround to avoid unauthorized exception, returning..."
+		}
+		return true        
+		
+	}    
+    
 	def method = 
 	[
 		headers: [
