@@ -305,10 +305,9 @@ def takeAction() {
 	log.trace "takeAction>about to call generateRemoteSensorEvents()"
 	ecobee.generateRemoteSensorEvents("", 'false')
 	updateMotionSensors()
-	updateTempSensors()
-/*    
+	updateTempSensors()    
 	updateHumiditySensors()
-*/   
+
 	log.trace "takeAction>end"
 }
 
