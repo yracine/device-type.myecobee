@@ -41,7 +41,7 @@ preferences {
 			input "ecobee", "device.myEcobeeDevice", title: "Which ecobee thermostat?"
 
 		}
-		section("Polling ecobee3's remote3 sensor(s) at which interval in minutes (range=[5..59],default =30 min.)?") {
+		section("Polling ecobee3's remote3 sensor(s) at which interval in minutes (range=[15..59],default =30 min.)?") {
 			input "givenInterval", "number", title: "Interval", required: false
 		}
 
@@ -64,41 +64,37 @@ preferences {
 
 
 def selectMotionSensors() {
-	def REMOTE_OCCUPANCY_TYPE='occupancy'
 
-	/* Get the list of remote sensors available 
+	/* Generate the list of all remote sensors available 
 	 */
-	ecobee.generateRemoteSensorEvents("", 'true')
-	def ecobeeSensors
+	ecobee.generateRemoteSensorEvents("", 'false')
     
-	String remoteSensorData=ecobee.currentRemoteSensorData.toString()
-	if (remoteSensorData != null) {    
-		ecobeeSensors = new JsonSlurper().parseText(remoteSensorData)
-	} else {
-		log.error("selectMotionSensors>sensorRemoteData is empty, exiting")
-		return        
-	}    
-	log.debug "selectMotionSensors>ecobeeSensors data = $ecobeeSensors"
 	def sensors = [: ]
 
-	if (ecobeeSensors?.size() > 0) {
+	/* Get only the list of all occupancy remote sensors available 
+	 */
 
-		for (i in 0..ecobeeSensors.size() - 1) {
+	def ecobeeSensors = ecobee.currentRemoteSensorOccData.toString().split(",,")
 
+	log.debug "selectMotionSensors>ecobeeSensors= $ecobeeSensors"
 
-			for (j in 0..ecobeeSensors[i].capability.size() - 1) {
+	if (ecobeeSensors.size() < 1) {
 
-				if (ecobeeSensors[i].capability[j].type == REMOTE_OCCUPANCY_TYPE) {
+		log.debug "selectMotionSensors>no values found"
+		return sensors
 
-					if (settings.trace) {
-						log.debug "selectMotionSensors>>looping at i=${i},found occupancy sensor ${ecobeeSensors[i].capability[j]} at j=${j}"
-					}
+	}
 
-					def dni = [app.id, ecobeeSensors[i].name, getMotionSensorChildName(), ecobeeSensors[i].id].join('.')
-					sensors[dni] = ecobeeSensors[i].name
-				}
-			}
-		}
+	for (i in 0..ecobeeSensors.size() - 1) {
+
+		def ecobeeSensorDetails = ecobeeSensors[i].split(',')
+		def ecobeeSensorId = ecobeeSensorDetails[0]
+		def ecobeeSensorName = ecobeeSensorDetails[1]
+		def ecobeeSensorType = ecobeeSensorDetails[2]
+
+		def dni = [app.id, ecobeeSensorName, getMotionSensorChildName(), ecobeeSensorId].join('.')
+
+		sensors[dni] = ecobeeSensorName
 
 	}
 
@@ -116,36 +112,31 @@ def selectMotionSensors() {
 
 
 def selectTempSensors() {
-	def ecobeeSensors
-	def REMOTE_TEMPERATURE_TYPE='temperature'
     
-    
-	String remoteSensorData=ecobee.currentRemoteSensorData.toString()
-	if (remoteSensorData != null) {    
-		ecobeeSensors = new JsonSlurper().parseText(remoteSensorData)
-	} else {
-		log.error("selectMotionSensors>sensorRemoteData is empty, exiting")
-		return        
-	}    
-	log.debug "selectTempSensors>ecobeeSensors data = $ecobeeSensors"
-
 	def sensors = [: ]
-	if (ecobeeSensors?.size() > 0) {
-		for (i in 0..ecobeeSensors.size() - 1) {
+	/* Get only the list of all temperature remote sensors available 
+	 */
+	def ecobeeSensors = ecobee.currentRemoteSensorTmpData.toString().split(",,")
 
-			for (j in 0..ecobeeSensors[i].capability.size() - 1) {
+	log.debug "selectTempSensors>ecobeeSensors= $ecobeeSensors"
 
-				if (ecobeeSensors[i].capability[j].type == REMOTE_TEMPERATURE_TYPE) {
+	if (ecobeeSensors.size() < 1) {
 
-					if (settings.trace) {
-						log.debug "selectTempSensors>>looping at i=${i},found temperature sensor ${ecobeeSensors[i].capability[j]} at j=${j}"
-					}
+		log.debug "selectTempSensors>no values found"
+		return sensors
+	}
 
-					def dni = [app.id, ecobeeSensors[i].name, getTempSensorChildName(), ecobeeSensors[i].id].join('.')
-					sensors[dni] = ecobeeSensors[i].name
-				}
-			}
-		}
+	for (i in 0..ecobeeSensors.size() - 1) {
+
+		def ecobeeSensorDetails = ecobeeSensors[i].split(',')
+		def ecobeeSensorId = ecobeeSensorDetails[0]
+		def ecobeeSensorName = ecobeeSensorDetails[1]
+		def ecobeeSensorType = ecobeeSensorDetails[2]
+
+
+		def dni = [app.id, ecobeeSensorName, getTempSensorChildName(), ecobeeSensorId].join('.')
+
+		sensors[dni] = ecobeeSensorName
 
 	}
 
@@ -285,7 +276,7 @@ def initialize() {
 
 
 	Integer delay = givenInterval ?: 30 // By default, do it every 30 min.
-	if ((delay < 5) || (delay > 59)) {
+	if ((delay < 15) || (delay > 59)) {
 		log.error "Scheduling delay not in range (${delay} min.), exiting"
 		runIn(30, "sendNotifDelayNotInRange")
 		return
@@ -534,4 +525,3 @@ def getMotionSensorChildName() {
 def getTempSensorChildName() {
 	"Temperature Sensor"
 }
-
