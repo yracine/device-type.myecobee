@@ -66,13 +66,13 @@ preferences {
 def selectMotionSensors() {
 
 	/* Generate the list of all remote sensors available 
-	 */
+	*/
 	ecobee.generateRemoteSensorEvents("", 'false')
     
 	def sensors = [: ]
 
 	/* Get only the list of all occupancy remote sensors available 
-	 */
+	*/
 
 	def ecobeeSensors = ecobee.currentRemoteSensorOccData.toString().split(",,")
 
@@ -292,7 +292,6 @@ def initialize() {
 
 def takeAction() {
 	log.trace "takeAction>begin"
-	ecobee.poll()
 	log.trace "takeAction>about to call generateRemoteSensorEvents()"
 	ecobee.generateRemoteSensorEvents("", 'false')
 	updateMotionSensors()
