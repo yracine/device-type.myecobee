@@ -99,6 +99,7 @@ metadata {
 		attribute "followMeComfort", "string"
 		attribute "autoAway", "string"
 		attribute "thermostatRevision", "string"
+		attribute "runtimeRevision", "string"
 		attribute "heatStages", "string"
 		attribute "coolStages", "string"
 		attribute "climateName", "string"
@@ -742,7 +743,19 @@ void poll() {
 	def tstatId,ecobeeType
     
 	def thermostatId= determine_tstat_id("") 	    
+
+	def poll_interval=3   // set a 3 min. poll interval to avoid unecessary load on ecobee (and auth exceptions)
+	def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
 	
+	if ((state?.lastPollTimestamp != null) && (state?.lastPollTimestamp > time_check_for_poll)) {
+		if (settings.trace) {
+			log.debug "poll>thermostatId = ${thermostatId},time_check_for_poll (${time_check_for_poll}) < state.lastPollTimestamp (${state.lastPollTimestamp}), not refreshing data..."
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},time_check_for_poll (${time_check_for_poll} < state.lastPollTimeStamp (${state.lastPollTimestamp}), not refreshing data..."
+    	}
+		return
+	}
+	state.lastPollTimestamp = now()
 	getThermostatInfo(thermostatId)
 
 	// determine if there is an event running
@@ -2879,11 +2892,13 @@ def getThermostatRevision(tstatType, thermostatId) {
 		def id = thermostatDetails[0]
 		def thermostatName = thermostatDetails[1]
 		def connected = thermostatDetails[2]
+		def runtimeRevision = thermostatDetails[5]
 		def internalRevision = thermostatDetails[6]
 		if (thermostatId == id) {
+			sendEvent name: "runtimeRevision", value: runtimeRevision
 			sendEvent name: "thermostatRevision", value: internalRevision
 			if (settings.trace) {	
-				log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision"
+				log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision, runtimeRevision=$runtimeRevision"
 			}
 			return
 		}
@@ -2945,8 +2960,6 @@ def getModelNumber() {
 }
 
 private def refresh_tokens() {
-
-
 	if (!isTokenExpired()) {
 
 		if (settings.trace) {
@@ -3304,6 +3317,7 @@ void initialSetup(device_client_id, auth_data, device_tstat_id) {
 	def ecobeeType=determine_ecobee_type_or_location("")
 	data.auth.ecobeeType = ecobeeType
 	state.exceptionCount=0    
+	state.lastPollTimestamp = now()
 }
 
 def toQueryString(Map m) {
