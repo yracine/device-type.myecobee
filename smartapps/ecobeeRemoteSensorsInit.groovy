@@ -292,8 +292,10 @@ def initialize() {
 
 def takeAction() {
 	log.trace "takeAction>begin"
+	ecobee.poll()
 	log.trace "takeAction>about to call generateRemoteSensorEvents()"
 	ecobee.generateRemoteSensorEvents("", 'false')
+	    
 	updateMotionSensors()
 	updateTempSensors()    
 /*	
