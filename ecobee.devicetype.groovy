@@ -2705,8 +2705,8 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 			if (settings.trace) {
 				sendEvent name: "verboseTrace", value:"generateRemoteSensorEvents>thermostatId ${thermostatId} is not valid"
 				log.error "generateRemoteSensorEvents>thermostatId ${thermostatId} is not valid"
-				return
 			}                
+			return
 		}
 		getThermostatInfo(thermostatId)    
 	}
