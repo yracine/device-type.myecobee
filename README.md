@@ -127,7 +127,7 @@ You only need to edit the following parameters
 8) Use some of the Smartapps available (optional)
 /*********************************************************************************************
 
-You can also use some of my smartapps that I've developed and adapt them according to your needs
+You can also use some of my smartapps that I've developed.
 
 http://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
