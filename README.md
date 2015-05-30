@@ -25,7 +25,7 @@ INSTALLATION STEPS
 
 /*********************************************************************************************
 
-1) Create a new device type (My Ecobee Device)
+<b>1) Create a new device type (My Ecobee Device)</b>
 /*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/devices
@@ -43,7 +43,7 @@ f) Hit the "publish/for me" button at the top right corner (in the code window)
 
 /*********************************************************************************************
 
-2) Create a new smartapp (My ecobee Init)
+<b>2) Create a new smartapp (My ecobee Init)</b>
 /*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/apps
@@ -67,7 +67,7 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 /*********************************************************************************************
 
-3) Use SmartSetup and execute My ecobee Init
+<b>3) Use SmartSetup and execute My ecobee Init</b>
 /*********************************************************************************************
 
 From your phone or tablet, within the smarttings app and on the main screen, 
@@ -75,7 +75,7 @@ click on '+' at the bottom, scroll right to to My Apps, execute My ecobee Init
 
 /*********************************************************************************************
 
-4) Connect Smartthings to the Ecobee portal
+<b>4) Connect Smartthings to the Ecobee portal</b>
 /*********************************************************************************************
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
@@ -92,21 +92,21 @@ that you want to control from Smartthings.
 
 /*********************************************************************************************
 
-5) Your device(s) should now be ready to process your commands
+<b>5) Your device(s) should now be ready to process your commands</b>
 /*********************************************************************************************
 
 /*********************************************************************************************
 
-6) To populate the UI fields for your newly created device(s)
+<b>6) To populate the UI fields for your newly created device(s)</b>
 /*********************************************************************************************
 
-Hit the 'refresh' button several times as the smartthings UI is not always responsive. 
+You may have to hit the 'refresh' button several times as the smartthings UI is not always responsive. 
 You may want to stop and restart your smartthings app if needed.
 
 
 /*********************************************************************************************
 
-7) Update device's preferences (optional, input parameters)
+<b>7) Update device's preferences (optional, input parameters)</b>
 /*********************************************************************************************
 Go to https://graph.api.smartthings.com/device/list
 
@@ -124,7 +124,7 @@ You only need to edit the following parameters
 
 /*********************************************************************************************
 
-8) Use some of the Smartapps available (optional)
+<b>8) Use some of the Smartapps available (optional)</b>
 /*********************************************************************************************
 
 You can also use some of my smartapps that I've developed.
@@ -135,7 +135,7 @@ Amongst others:
 
 /****************************************************
 
-a) ecobee3RemoteSensorInit
+<b>a) ecobee3RemoteSensorInit</b>
 
 /****************************************************
 
@@ -149,7 +149,7 @@ http://github.com/yracine/device-type.myecobee/blob/master/smartapps/readme.ecob
 
 /****************************************************
 
-b) Monitor And Set Ecobee Temp
+<b>b) Monitor And Set Ecobee Temp</b>
 
 /****************************************************
 
@@ -166,15 +166,17 @@ to get the oudoor temperature and humidity.
 
 /****************************************************
 
-c) Monitor And Set Ecobee Humidity
+<b>c) Monitor And Set Ecobee Humidity</b>
 
 /****************************************************
 
 Monitor humidity level indoor vs. outdoor at regular intervals (in minutes) and set the humidifier/dehumidifier/HRV/ERV to a target humidity level.
 
+P.S. Your humidifier/dehumidifier/HRV/ERV needs to be physically connected to ecobee.
+
 /****************************************************
 
-d) ecobeeChangeMode
+<b>d) ecobeeChangeMode</b>
 
 /****************************************************
 
@@ -182,7 +184,7 @@ Change your ecobee climate (Away,Home) according to your hello home mode.
 
 /****************************************************
 
-e) AwayFromHome and ecobeeResumeProg
+<b>e) AwayFromHome and ecobeeResumeProg</b>
 
 /****************************************************
 
@@ -190,7 +192,7 @@ Use presence sensors to set a target climate or heating/cooling setpoints based 
 
 /****************************************************
 
-f) ecobeeSetClimate
+<b>f) ecobeeSetClimate</b>
 
 /****************************************************
 
