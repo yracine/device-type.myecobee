@@ -50,7 +50,7 @@ preferences {
 		input "alarmSwitch", "capability.contactSensor", title: "Alarm Switch", required: false
 	}
 	section("Set the ecobee thermostat(s)") {
-		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat(s)", multiple: true
+		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat(s)", multiple: true
 	}
 	section("Heating set Point for the thermostat [default = 60°F/14°C]") {
 		input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
