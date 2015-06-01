@@ -47,7 +47,7 @@ def thresholdSettings() {
 			description: "http://github.com/yracine/device-type.myecobee"
 		}
 		section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
-			input "ecobee", "device.myEcobeeDevice", title: "Which Ecobee?"
+			input "ecobee", "capability.thermostat", title: "Which Ecobee?"
 		}
 		section("For more heating in cold season, outdoor temp's threshold [default <= 10°F/-17°C]") {
 			input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
@@ -153,20 +153,7 @@ def initialize() {
 	subscribe(indoorSensors, "motion",motionEvtHandler, [filterEvents: false])
 	subscribe(motions, "motion", motionEvtHandler, [filterEvents: false])
     
-/*    
-	subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
-	subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
-	subscribe(ecobee, "humidity", ecobeeHumidityHandler)
-	subscribe(ecobee, "temperature", ecobeeTempHandler)
-	subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
-	subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
-	subscribe(outdoorSensor, "temperature", outdoorTempHandler)
-    
-    
-	subscribe(ecobee, "programType", ecobeeProgramTypeHandler)
-	subscribe(ecobee, "programCoolTemp", ecobeeProgramCoolHandler)
-	subscribe(ecobee, "programHeatTemp", ecobeeProgramHeatHandler)
-*/
+
 	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
 		subscribe(powerSwitch, "switch.on", onHandler, [filterEvents: false])
