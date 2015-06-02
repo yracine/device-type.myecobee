@@ -493,34 +493,9 @@ def setHumidityLevel() {
 			"oneHourAgo's date/time in UTC= ${String.format('%tF %<tT',oneHourAgo)}")
 
 
-		ecobee.getThermostatRevision("", "")
-		def newRevision = ecobee.currentThermostatRevision
-		if ((state.currentRevision == null) || (state ?.currentRevision != newRevision)) {
-			// Get the dehumidifier's runtime 
-			ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier", 'false', 'true')
-			ecobee.generateReportRuntimeEvents("dehumidifier", oneHourAgo, now, 0, null, 'lastHour')
-			if (detailedNotif == 'true') {
-				send "MonitorEcobeeHumidity> just got report data, new thermostatRevision= ${newRevision},old revision=${state.currentRevision}"
-			}
-			if (state.currentRevision) {
-				log.trace("new thermostatRevision= ${newRevision}, oldRevision = ${state.currentRevision}")
-			}
-			state.currentRevision = newRevision // For further checks later
-
-/*          Example of how to loop thru the reportData, not required here, need to call getReportData() with postData='true' beforehand.            
-			def reportData = ecobee.currentReportData.toString().split(",,")
-			for (i in 0..reportData.size()-1) {
-				def rowDetails = reportData[i].split(',')
-				def rowValue =rowDetails[2] 
-				log.trace("Report data, row no $i= $rowDetails")
-			}    
-*/
-		} else {
-			if (detailedNotif == 'true') {
-				send "MonitorEcobeeHumidity>revision has not changed: new thermostatRevision= ${newRevision} vs. oldRevision =  ${state.currentRevision}"
-			}
-
-		}
+		// Get the dehumidifier's runtime 
+		ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier", 'false', 'true')
+		ecobee.generateReportRuntimeEvents("dehumidifier", oneHourAgo, now, 0, null, 'lastHour')
 		float dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
 		if (detailedNotif == 'true') {
 			send "MonitorEcobeeHumidity>dehumidifier runtime in the last hour is ${dehumidifierRunInMin.toString()} min. vs. desired ventilatorMinOnTime =${min_vent_time.toString()} minutes"
