@@ -2372,6 +2372,20 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
         	"endDate in UTC timezone =${String.format('%tF %<tT',endDateTime)}"
 	}
 
+	// Check the thermostat Revision in order to avoid polling ecobee servers unnecessarily 
+    
+	getThermostatRevision("", thermostatId)
+	def newRevision = device.currentValue('thermostatRevision')
+	if (settings.trace) {
+		log.debug ("getReportData>thermostatRevision=${state?.thermostatRevision},newRevision=${newRevision}...")
+	}
+	if ((state?.thermostatRevision != null) && (state?.thermostatRevision == newRevision)) {
+
+		return
+	
+	}
+	state?.thermostatRevision = newRevision
+    
 	beginInt = (startInterval == null)? get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
 	Calendar startCalendar = startDateTime.toCalendar()
