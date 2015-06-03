@@ -573,6 +573,7 @@ def fanCirculate() {
 }
 void setThermostatFanMode(mode) {
 	def thermostatId= determine_tstat_id("") 	    
+	mode = (mode == 'off') ? 'auto' : mode
 	setHold(thermostatId, device.currentValue("coolingSetpoint"), device
 		.currentValue("heatingSetpoint"),
 		mode, null)
@@ -2371,6 +2372,8 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 		log.debug "getReportData> startDate in UTC timezone =${String.format('%tF %<tT',startDateTime)}," +
         	"endDate in UTC timezone =${String.format('%tF %<tT',endDateTime)}"
 	}
+    
+
 
 	// Check the thermostat Revision in order to avoid polling ecobee servers unnecessarily 
     
