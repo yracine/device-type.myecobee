@@ -2380,14 +2380,19 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 	getThermostatRevision("", thermostatId)
 	def newRevision = device.currentValue('thermostatRevision')
 	if (settings.trace) {
-		log.debug ("getReportData>thermostatRevision=${state?.thermostatRevision},newRevision=${newRevision}...")
+		log.debug ("getReportData>thermostatRevision=${state?.thermostatRevision},newRevision=${newRevision}, component=$reportColumn...")
 	}
-	if ((state?.thermostatRevision != null) && (state?.thermostatRevision == newRevision)) {
-
+	if ((state?.thermostatRevision) && (state?.thermostatRevision == newRevision) && 
+    	((state?.componentReport) && (state?.componentReport==reportColumn))) {
+		// Trying to produce report data on same component with same thermostatRevision
+		if (settings.trace) {
+			log.debug ("getReportData>called in a very short time with same component=${state.componentReport}, exiting...")
+		}
 		return
 	
 	}
 	state?.thermostatRevision = newRevision
+	state?.componentReport = reportColumn
     
 	beginInt = (startInterval == null)? get_interval(startDateTime): startInterval.toInteger()
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
@@ -2492,6 +2497,14 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 	int beginInt, endInt
     
 	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
+        
+	if (nbDaysInPeriod > 2) {  // Report period should not be bigger than 2 days to avoid summarizing too much data.
+		if (settings.trace) {
+			sendEvent name: "verboseTrace", value:"generateReportRuntimeEvents> report's period too big (${nbDaysInPeriod.toString()} > 2)"
+			log.error "generateReportRuntimeEvents> report's period too big (${nbDaysInPeriod.toString()} >1)"
+			return
+		}
+	} 
 
 	float totalRuntime
 	float runtimeInMin   // Calculations are done in minutes
