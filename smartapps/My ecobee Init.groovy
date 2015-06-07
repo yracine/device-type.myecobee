@@ -51,8 +51,7 @@ def about() {
 def authPage() {
 	log.debug "authPage()"
 
-	if(!atomicState.accessToken)
-	{
+	if (!atomicState.accessToken) {
 		log.debug "about to create access token"
 		createAccessToken()
 		atomicState.accessToken = state.accessToken
@@ -63,17 +62,13 @@ def authPage() {
 	def uninstallAllowed = false
 	def oauthTokenProvided = false
 
-	if(atomicState.authToken)
-	{
+	if (atomicState.authToken) {
 		// TODO: Check if it's valid
-		if(true)
-		{
+		if(true) {
 			description = "You are connected."
 			uninstallAllowed = true
 			oauthTokenProvided = true
-		}
-		else
-		{
+		} else {
 			description = "Required" // Worth differentiating here vs. not having atomicState.authToken? 
 			oauthTokenProvided = false
 		}
@@ -183,7 +178,7 @@ def getEcobeeThermostats(String type="") {
 	try {
 		httpGet(deviceListParams) { resp ->
 
-			if(resp.status == 200) {
+			if (resp.status == 200) {
 /*        
         		int i=0    // Used to simulate many thermostats
 */
@@ -199,8 +194,7 @@ def getEcobeeThermostats(String type="") {
 				log.debug "http status: ${resp.status}"
 
 				//refresh the auth token
-				if (resp.status == 500 && resp.data.status.code == 14)
-				{
+				if (resp.status == 500 && resp.data.status.code == 14) {
 					log.debug "Storing the failed action to try later"
 					data.action = "getEcobeeThermostats"
 					log.debug "Need to refresh your auth_token!"
@@ -279,8 +273,7 @@ def refreshThisChildAuthTokens(child) {
 
 def getThermostatDisplayName(stat) {
 	log.debug "getThermostatDisplayName"
-	if(stat?.name)
-	{
+	if(stat?.name) {
 		return stat.name.toString()
 	}
 
@@ -342,8 +335,7 @@ private def create_child_devices() {
 		def d = getChildDevice(dni)
 		log.debug "create_child_devices>looping thru thermostats, found id $dni"
 
-		if(!d)
-		{
+		if(!d) {
 			def tstat_info  = dni.tokenize('.')
 			def thermostatId = tstat_info.last()
  			def name = tstat_info[1]
@@ -357,9 +349,7 @@ private def create_child_devices() {
 				[label: "${labelName}"]) 
 			d.initialSetup( getSmartThingsClientId(), atomicState, thermostatId ) 	// initial setup of the Child Device
 			log.debug "create_child_devices>created ${d.displayName} with id $dni"
-		}
-		else
-		{
+		} else {
 			log.debug "create_child_devices>found ${d.displayName} with id $dni already exists"
 		}
 
