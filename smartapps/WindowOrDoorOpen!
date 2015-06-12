@@ -84,7 +84,7 @@ def initialize() {
 
 def sensorTriggered(evt) {
 	def freq = (frequency) ? (frequency * 60) : 60
-    def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
+	def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
 
 	if (evt.value == "closed") {
 		log.debug "$theSensor is now closed..."
