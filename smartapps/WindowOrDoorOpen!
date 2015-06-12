@@ -112,7 +112,7 @@ def takeAction() {
 		state.count = state.count + 1
 		log.debug "$theSensor was open too long, sending message (count=$state.count)"
 		def openMinutesCount = (state.count * freq) /60
-		def msg = "your $theSensor has been open for more than ${openMinutesCount} minutes!"
+		def msg = "your $theSensor has been open for more than ${openMinutesCount} minute(s)!"
 		send("WindowOrDoorOpen>${msg}")
 		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
 			theVoice.setLevel(30)
