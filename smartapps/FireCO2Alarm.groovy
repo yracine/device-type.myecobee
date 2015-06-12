@@ -263,7 +263,7 @@ def clearAlert() {
 			def lastThermostatMode = state.lastThermostatMode.toString().split(',')
 			int i = 0
 			tstat.each {
-				def lastSavedMode = lastThermostatMode[i]
+				def lastSavedMode = lastThermostatMode[i].trim()
 
 				if (lastSavedMode) {
 					log.debug "About to set ${it}, back to saved thermostatMode=${lastSavedMode}"
