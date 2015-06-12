@@ -97,7 +97,7 @@ def sensorTriggered(evt) {
     	save_tstats_mode()
 		runIn(freq, takeAction, [overwrite: false])
 		state.status = "scheduled"
-		log.debug "$theSensor will be checked every ${freq} minute(s)"
+		log.debug "$theSensor will be checked every ${(freq/60)} minute(s)"
 	}
 }
 
@@ -112,7 +112,7 @@ def takeAction() {
 		state.count = state.count + 1
 		log.debug "$theSensor was open too long, sending message (count=$state.count)"
 		def openMinutesCount = (state.count * freq) /60
-		def msg = "Your $theSensor has been open for more than ${openMinutesCount} minutes!"
+		def msg = "your $theSensor has been open for more than ${openMinutesCount} minutes!"
 		send("WindowOrDoorOpen>${msg}")
 		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
 			theVoice.setLevel(30)
@@ -173,7 +173,7 @@ private void restore_tstats_mode() {
 			def lastThermostatMode = state.lastThermostatMode.toString().split(',')
 			int i = 0
 			tstats.each {
-				def lastSavedMode = lastThermostatMode[i]
+				def lastSavedMode = lastThermostatMode[i].trim()
 
 				if (lastSavedMode) {
 					log.debug "restore_tstats_mod>about to set ${it}, back to saved thermostatMode=${lastSavedMode}"
@@ -183,9 +183,11 @@ private void restore_tstats_mode() {
 						it.heat()
 					} else if (lastSavedMode == 'auto') {
 						it.auto()
+					} else {
+						it.off()
 					}
 					msg = "thermostat ${it}'s mode is now set back to ${lastSavedMode}"
-					send("WindowOrDoorOpen>contact closed, ${msg}")
+					send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
 					if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
 						theVoice.speak(msg)
 					}
