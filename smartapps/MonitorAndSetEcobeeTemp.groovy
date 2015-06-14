@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9\n\n" +
+			paragraph "Version 1.9.1\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -241,54 +241,6 @@ def motionEvtHandler(evt) {
 }
 
 
-def ecobeeHeatTempHandler(evt) {
-	log.debug "ecobee's heating setpoint: $evt.value"
-}
-
-def ecobeeCoolTempHandler(evt) {
-	log.debug "ecobee's cooling setpoint: $evt.value"
-}
-
-def ecobeeProgramCoolHandler(evt) {
-	log.debug "ecobee's program Cool temp: $evt.value"
-}
-def ecobeeProgramHeatHandler(evt) {
-	log.debug "ecobee's progran Heat temp: $evt.value"
-}
-
-def ecobeeHumidityHandler(evt) {
-	log.debug "ecobee's humidity level: $evt.value"
-}
-
-def ecobeeTempHandler(evt) {
-	log.debug "ecobee's temperature level: $evt.value"
-}
-
-def tempSensorHandler(evt) {
-	log.debug "indoor Sensor's temperature level: $evt.value"
-}
-
-
-def ecobeeModeHandler(evt) {
-	log.debug "ecobee's mode: $evt.value"
-}
-
-def indoorEvtHandler(evt) {
-	log.debug "indoor $evt.name is: $evt.value"
-}
-
-def outdoorSensorHumHandler(evt) {
-	log.debug "outdoor Sensor's humidity level: $evt.value"
-}
-
-
-def outdoorTempHandler(evt) {
-	log.debug "outdoor temperature is: $evt.value"
-}
-
-def ecobeeProgramTypeHandler(evt) {
-	log.debug "ecobee's program type: $evt.value"
-}
 def offHandler(evt) {
 	log.debug "$evt.name: $evt.value"
 }
