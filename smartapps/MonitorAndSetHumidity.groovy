@@ -24,7 +24,7 @@ definition(
 	name: "MonitorAndSetEcobeeHumidity",
 	namespace: "yracine",
 	author: "Yves Racine",
-	description: "Monitor And set Ecobee's humidity",
+	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV",
 	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
@@ -40,7 +40,7 @@ preferences {
 def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
-			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your humidifier/dehumidifier/HRV/ERV"
+			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
 			paragraph "Version 1.9.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
