@@ -37,7 +37,7 @@ def actionsSettings() {
 	dynamicPage(name: "actionsSettings", install: false, uninstall: true, nextPage: "otherSettings") {
 		section("About") {
 			paragraph "FireCO2Alarm, the smartapp that executes a series of actions when a Fire or CO2 alarm is triggerred"
-			paragraph "Version 1.1\n\n" +
+			paragraph "Version 1.2\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -70,7 +70,7 @@ def actionsSettings() {
 			input "givenOffFor", "number", title: "Off for (default 1000)", required: false
 		}
 		section("And activate the siren [optional]") {
-			input "securityAlert", "capability.alarm", title: "Security Alert", required: false
+			input "securityAlert", "capability.alarm", title: "Security Alert", required: false, multiple:true
 		}
 		section("Clear alarm threshold (default = 1 min) to revert actions[optional]") {
 			input "clearAlarmThreshold", "decimal", title: "Number of minutes after clear alarm", required: false
