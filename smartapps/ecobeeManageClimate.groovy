@@ -28,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeManageClimate, the smartapp that manages your ecobee climates ['creation', 'update', 'delete']" 
-		paragraph "Version 1.9\n\n" +
+		paragraph "Version 1.9.1\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -86,6 +86,7 @@ def updated() {
 
 
 	ecobee.poll()
+	unsubscribe()    
 	subscribe(app, appTouch)
 
 
