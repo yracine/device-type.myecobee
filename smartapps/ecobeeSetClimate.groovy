@@ -34,7 +34,7 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeSetClimate, the smartapp that sets your ecobee thermostat to a given climate at a given day & time"
-			paragraph "Version 1.1\n\n" +
+			paragraph "Version 1.1.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -104,7 +104,8 @@ def installed() {
 def updated() {
 	// we have had an update
 	// remove everything and reinstall
-	unschedule()
+	unsubscribe()
+	unschedule()    
 	initialize()
 }
 
