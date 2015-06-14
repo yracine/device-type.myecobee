@@ -1,4 +1,4 @@
- /**
+/**
  *	My ecobee Init (Service Manager)
  *
  *	Author: scott
@@ -39,7 +39,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 1.9\n\n" +
+			paragraph "Version 1.9.1\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -300,6 +300,7 @@ def updated() {
 	log.debug "Updated with settings: ${settings}"
 
 	unsubscribe()
+	unschedule()    
 	initialize()
 }
 
