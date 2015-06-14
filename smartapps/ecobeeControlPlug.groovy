@@ -28,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeControlPlug, the smartapp that control your ecobee connected sensor or plug"
-		paragraph "Version 1.1\n\n" +
+		paragraph "Version 1.1.1\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -74,7 +74,7 @@ def installed() {
 
 def updated() {
 
-
+	unsubscribe()	
 	ecobee.poll()
 	subscribe(app, appTouch)
 
