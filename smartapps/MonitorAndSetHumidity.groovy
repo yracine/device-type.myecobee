@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 1.9\n\n" +
+			paragraph "Version 1.9.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine/device-type.myecobee", style: "embedded", required: false, title: "More information...",
@@ -136,23 +136,10 @@ def updated() {
 def initialize() {
 	state.currentRevision = null // for further check with thermostatRevision later
 
-	subscribe(ted, "power", tedPowerHandler)
-	subscribe(ecobee, "heatingSetpoint", ecobeeHeatTempHandler)
-	subscribe(ecobee, "coolingSetpoint", ecobeeCoolTempHandler)
-	subscribe(ecobee, "humidity", ecobeeHumidityHandler)
-	subscribe(ecobee, "temperature", ecobeeTempHandler)
-	subscribe(ecobee, "thermostatMode", ecobeeModeHandler)
-	subscribe(outdoorSensor, "humidity", outdoorSensorHumHandler)
-	if (indoorSensor) {
-		subscribe(indoorSensor, "humidity", indoorSensorHumHandler)
-		subscribe(indoorSensor, "temperature", indoorTempHandler)
-
-	}
 	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler)
 		subscribe(powerSwitch, "switch.on", onHandler)
 	}
-	subscribe(outdoorSensor, "temperature", outdoorTempHandler)
 	Integer delay = givenInterval ?: 59 // By default, do it every hour
 	if ((delay < 10) || (delay > 59)) {
 		log.error "Scheduling delay not in range (${delay} min.), exiting"
@@ -172,46 +159,6 @@ private def sendNotifDelayNotInRange() {
 
 }
 
-def tedPowerHandler(evt) {
-	log.debug "Power usage: $evt.value"
-}
-
-def ecobeeHeatTempHandler(evt) {
-	log.debug "ecobee's heating temp: $evt.value"
-}
-
-def ecobeeCoolTempHandler(evt) {
-	log.debug "ecobee's cooling temp: $evt.value"
-}
-
-def ecobeeHumidityHandler(evt) {
-	log.debug "ecobee's humidity level: $evt.value"
-}
-
-def ecobeeTempHandler(evt) {
-	log.debug "ecobee's temperature level: $evt.value"
-}
-
-def ecobeeModeHandler(evt) {
-	log.debug "ecobee's mode: $evt.value"
-}
-
-
-def outdoorSensorHumHandler(evt) {
-	log.debug "outdoor Sensor's humidity level: $evt.value"
-}
-
-def indoorSensorHumHandler(evt) {
-	log.debug "indoor Sensor's humidity level: $evt.value"
-}
-
-def indoorTempHandler(evt) {
-	log.debug "Indoor Temperature is: $evt.value"
-}
-
-def outdoorTempHandler(evt) {
-	log.debug "outdoor temperature is: $evt.value"
-}
 
 def offHandler(evt) {
 	log.debug "$evt.name: $evt.value"
