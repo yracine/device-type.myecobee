@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.1\n\n" +
+			paragraph "Version 1.1.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -159,6 +159,7 @@ def installed() {
 def updated() {
 	log.debug "Updated with settings: ${settings}"
 	unsubscribe()
+	unschedule()
 	initialize()
 }
 
