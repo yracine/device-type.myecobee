@@ -28,7 +28,7 @@ preferences {
 	section("About") {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
         "it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed"
-		paragraph "Version 1.9\n\n" +
+		paragraph "Version 1.9.1\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -72,6 +72,7 @@ def updated() {
 	log.debug "Updated with settings: ${settings}"
 
 	unsubscribe()
+	unschedule()    
 	initialize()
 }
 
