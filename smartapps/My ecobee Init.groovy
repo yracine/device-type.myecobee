@@ -23,8 +23,11 @@ definition(
 preferences {
 	page(name: "about", title: "About", nextPage: "auth")
 	page(name: "auth", title: "ecobee", content:"authPage", nextPage:"deviceList")
-	page(name: "deviceList", title: "ecobee", content:"ecobeeDeviceList", nextPage: "deviceList2")
+	page(name: "deviceList", title: "ecobee", content:"ecobeeDeviceList", install:true)
+/*
+	Remove the 2nd page as this is not efficient workaround for the ST max execution time constraint
 	page(name: "deviceList2", title: "ecobee", content:"ecobeeDeviceList2", install:true)
+*/
 }
 
 mappings {
@@ -39,7 +42,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 1.9.1\n\n" +
+			paragraph "Version 1.9.2\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -115,8 +118,10 @@ def ecobeeDeviceList() {
 	log.debug "device list: $ems"
 
 	stats = stats + ems
-    
+/*    
 	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", nextPage: "deviceList2") {
+*/    
+	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", uninstall: true) {
 		section(""){
 			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings (3 max per page)."
 			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
