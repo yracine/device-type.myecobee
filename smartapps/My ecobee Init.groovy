@@ -23,9 +23,10 @@ definition(
 preferences {
 	page(name: "about", title: "About", nextPage: "auth")
 	page(name: "auth", title: "ecobee", content:"authPage", nextPage:"deviceList")
-	page(name: "deviceList", title: "ecobee", content:"ecobeeDeviceList", install:true)
+	page(name: "deviceList", title: "ecobee", content:"ecobeeDeviceList",nextPage: "otherSettings")
+	page(name: "otherSettings", title: "Other Settings", content:"otherSettings", install:true)
 /*
-	Remove the 2nd page as this is not efficient workaround for the ST max execution time constraint
+	Removed the 2nd page as this is not efficient workaround for the ST max execution time constraint
 	page(name: "deviceList2", title: "ecobee", content:"ecobeeDeviceList2", install:true)
 */
 }
@@ -42,13 +43,26 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 1.9.2\n\n" +
+			paragraph "Version 1.9.3\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
 			description: "http://github.com/yracine/device-type.myecobee"
 		}
 	}        
+}
+
+def otherSettings() {
+	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
+		section("Notifications") {
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
+				false
+			input "phoneNumber", "phone", title: "Send a text message?", required: false
+		}
+		section([mobileOnly:true]) {
+			label title: "Assign a name for this SmartApp", required: false
+		}
+	}
 }
 
 def authPage() {
@@ -85,7 +99,7 @@ def authPage() {
 
 	if (!oauthTokenProvided) {
 
-		return dynamicPage(name: "auth", title: "Login", nextPage:null, uninstall:uninstallAllowed) {
+		return dynamicPage(name: "auth", title: "Login", nextPage:null, uninstall:uninstallAllowed, submitOnChange: true) {
 			section(){
 				paragraph "Tap below to log in to the ecobee portal and authorize SmartThings access. Be sure to scroll down on page 2 and press the 'Allow' button."
 				href url:redirectUrl, style:"embedded", required:true, title:"ecobee", description:description
@@ -94,7 +108,7 @@ def authPage() {
 
 	} else {
 
-		return dynamicPage(name: "auth", title: "Log In", nextPage:"deviceList", uninstall:uninstallAllowed) {
+		return dynamicPage(name: "auth", title: "Log In", nextPage:"deviceList", uninstall:uninstallAllowed,submitOnChange: true) {
 			section(){
 				paragraph "Tap Next to continue to setup your thermostats."
 				href url:redirectUrl, style:"embedded", state:"complete", title:"ecobee", description:description
@@ -123,7 +137,7 @@ def ecobeeDeviceList() {
 */    
 	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", uninstall: true) {
 		section(""){
-			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings (3 max per page)."
+			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings (3 max)."
 			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
 		}
 	}
@@ -160,6 +174,8 @@ def ecobeeDeviceList2() {
 
 def getEcobeeThermostats(String type="") {
 	log.debug "getting device list"
+	def msg
+    
 	def requestBody
     
 	if ((type == "") || (type == null)) {
@@ -202,20 +218,32 @@ def getEcobeeThermostats(String type="") {
 				if (resp.status == 500 && resp.data.status.code == 14) {
 					log.debug "Storing the failed action to try later"
 					data.action = "getEcobeeThermostats"
-					log.debug "Need to refresh your auth_token!"
+					log.error "getEcobeeThermostats>Need to refresh your auth_token!"
+					state?.msg ="Need to refresh your authorization token!" 		                    
+					log.error state.msg        
+					runIn(30, "sendMsgWithDelay")
+					atomicState.authToken= null                    
 				} else {
-					log.error "Authentication error, invalid authentication method, lack of credentials, etc."
+					log.error "getEcobeeThermostats>Authentication error, invalid authentication method, lack of credentials, etc."
 				}
 			}
             
     	}        
 	} catch (java.net.UnknownHostException e) {
-		log.error "getEcobeeThermostats> Unknown host - check the URL " + deviceListParams.uri
+		state?.msg ="Unknown host - check the URL " + deviceListParams.uri
+		log.error state.msg        
+		runIn(30, "sendMsgWithDelay")
 	} catch (java.net.NoRouteToHostException t) {
-		log.error "getEcobeeThermostats> No route to host - check the URL " + deviceListParams.uri
+		state?.msg= "No route to host - check the URL " + deviceListParams.uri
+		log.error state.msg        
+		runIn(30, "sendMsgWithDelay")
 	} catch (java.io.IOException e) {
 		log.debug "getEcobeeThermostats> error getting list of thermostats, probable cause: not the right account for this type (${type}) of thermostat " +
 			deviceListParams
+	} catch (e) {
+		state?.msg= "exception $e while getting list of thermostats" 
+		log.error state.msg        
+		runIn(30, "sendMsgWithDelay")
     }
 
 	log.debug "thermostats: $stats"
@@ -312,6 +340,7 @@ def updated() {
 
 private def delete_child_devices() {
 	def delete
+    
 	// Delete any that are no longer in settings
 
 	if(!thermostats) {
@@ -370,7 +399,9 @@ private def create_child_devices() {
 def initialize() {
     
 	log.debug "initialize"
-
+	state?.exceptionCount=0    
+	state?.msg=null
+    
 	delete_child_devices()	
 	create_child_devices()
     
@@ -384,12 +415,52 @@ def initialize() {
 
 def takeAction() {
 	log.trace "takeAction>begin"
+	def msg    
+	def MAX_EXCEPTION_COUNT=5
+
 	def devices = thermostats.collect { dni ->
 		def d = getChildDevice(dni)
 		log.debug "takeAction>Looping thru thermostats, found id $dni, about to poll"
-		d.poll()
+		try {        
+			d.poll()
+			// reset exception counter            
+			state?.exceptionCount=0       
+		} catch (e) {
+			state.exceptionCount=state.exceptionCount+1    
+			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
+    	}
 	}
+	if (state?.exceptionCount==MAX_EXCEPTION_COUNT) {
+		// need to authenticate again    
+		atomicState.authToken= null                    
+		msg="too many exceptions ($MAX_EXCEPTION_COUNT), need to re-authenticate at ecobee..." 
+		send "MyEcobeeInit> ${msg}"
+		log.error msg
+	}    
 	log.trace "takeAction>end"
+
+}
+
+private void sendMsgWithDelay() {
+
+	if (state?.msg) {
+		send "MyEcobeeInit> ${state.msg}"
+	}
+}
+
+private send(msg) {
+	if (sendPushMessage != "No") {
+		log.debug("sending push message")
+		sendPush(msg)
+
+	}
+
+	if (phoneNumber) {
+		log.debug("sending text message")
+		sendSms(phoneNumber, msg)
+	}
+
+	log.debug msg
 }
 
 
