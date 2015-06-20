@@ -28,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeControlPlug, the smartapp that control your ecobee connected sensor or plug"
-		paragraph "Version 1.1.1\n\n" +
+		paragraph "Version 1.1.2\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -66,19 +66,28 @@ preferences {
 
 def installed() {
 
-	ecobee.poll()
-	subscribe(app, appTouch)
-
+	initialize()
 }
 
 
 def updated() {
 
 	unsubscribe()	
+	initialize()
+
+
+}
+
+def initialize() {
 	ecobee.poll()
 	subscribe(app, appTouch)
+}
 
+private void sendMsgWithDelay() {
 
+	if (state?.msg) {
+		send state.msg
+	}
 }
 
 def appTouch(evt) {
@@ -88,15 +97,16 @@ def appTouch(evt) {
 
 	if (givenHoldType == "dateTime") {
 
-		if ((givenStartDate == null) || (givenEndDate == null) || (givenStartTime == null) || (givenEndTime == null)) {
-
-			send("ecobeeControlPlug>holdType=dateTime and dates/times are not valid for controlling plugName ${plugName}")
+		if ((!givenStartDate) || (!givenEndDate) || (!givenStartTime) || (!givenEndTime)) {
+			state?.msg="ecobeeControlPlug>holdType=dateTime and dates/times are not valid for controlling plugName ${plugName}"
+			log.error state.msg
+			runIn(30, "sendMsgWithDelay")
 			return
 		}
 		plugSettings = [holdType: "dateTime", startDate: "${givenStartDate}", startTime: "${givenStartTime}", endDate: "${givenEndDate}", endTime: "${givenEndTime}"]
 	}
 	log.debug("About to call controlPlug for thermostatId=${thermostatId}, plugName=${plugName}")
-	ecobee.controlPlug(null, plugName, plugState, plugSettings)
+	ecobee.controlPlug("", plugName, plugState, plugSettings)
 }
 
 
