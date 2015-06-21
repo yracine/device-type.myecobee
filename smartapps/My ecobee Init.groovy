@@ -158,11 +158,11 @@ def ecobeeDeviceList2() {
 
 	log.debug "device list: $ems"
 
-	stats = stats + ems
-    
-	def p = dynamicPage(name: "deviceList2", title: "Select Your Thermostats", uninstall: true) {
-		section(""){
-			paragraph "page 2: select the ones you want to connect to SmartThings (3 max per page due to ST execution time constraints)."
+        stats = stats + ems
+
+        def p = dynamicPage(name: "deviceList2", title: "Select Your Thermostats", uninstall: true) {
+            section(""){
+                paragraph "page 2: select the ones you want to connect to SmartThings (3 max per page due to ST execution time constraints)."
 			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
 		}
 	}
@@ -254,7 +254,7 @@ def getEcobeeThermostats(String type="") {
 def setParentAuthTokens(auth_data) {
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("setParentAuthTokens>begin auth_data: $auth_data")
+	send("setParentAuthTokens>begin auth_data: $auth_data")
 */
 
 	atomicState.refreshToken = auth_data?.refresh_token
@@ -265,26 +265,26 @@ def setParentAuthTokens(auth_data) {
 	refreshAllChildAuthTokens()
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("setParentAuthTokens>New atomicState: $atomicState")
+	send("setParentAuthTokens>New atomicState: $atomicState")
 */
 }
 
 def refreshAllChildAuthTokens() {
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("refreshAllChildAuthTokens>begin updating children with $atomicState")
+	send("refreshAllChildAuthTokens>begin updating children with $atomicState")
 */
 
 	def children= getChildDevices()
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("refreshAllChildAuthtokens> refreshing ${children.size()} thermostats")
+	send("refreshAllChildAuthtokens> refreshing ${children.size()} thermostats")
 */
 
 	children.each { 
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-		sendPush("refreshAllChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
+		send("refreshAllChildAuthTokens>begin updating $it.deviceNetworkId with $atomicState")
 */
     	it.refreshChildTokens(atomicState) 
 	}
@@ -293,13 +293,13 @@ def refreshAllChildAuthTokens() {
 def refreshThisChildAuthTokens(child) {
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("refreshThisChildAuthTokens>begin child id: ${child.device.deviceNetworkId}, updating it with ${atomicState}")
+	send("refreshThisChildAuthTokens>begin child id: ${child.device.deviceNetworkId}, updating it with ${atomicState}")
 */
 	child.refreshChildTokens(atomicState)
 
 /*
 	For Debugging purposes, due to the fact that logging is not working when called (separate thread)
-	sendPush("refreshThisChildAuthTokens>end")
+	send("refreshThisChildAuthTokens>end")
 */
 }
 
@@ -346,8 +346,7 @@ private def delete_child_devices() {
 	if(!thermostats) {
 		log.debug "delete_child_devices>delete all ecobee thermostats"
 		delete = getAllChildDevices()
-	}
-	else {
+	} else {
 		delete = getChildDevices().findAll { !thermostats.contains(it.deviceNetworkId) }
 	}
 
@@ -406,7 +405,7 @@ def initialize() {
 	create_child_devices()
     
 	takeAction()
-	// set up internal poll timer
+	// set up internal poll timer (by defaut= polling at 20 min. interval)
 	def pollTimer = 20
 
 	log.trace "setting poll to ${pollTimer}"
