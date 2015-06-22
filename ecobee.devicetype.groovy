@@ -454,7 +454,7 @@ metadata {
 			"weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
 			"weatherTempLow", "weatherPressure", "weatherWindDirection",
 			"weatherWindSpeed", "weatherPop", 
-            "refresh",
+			"refresh"
 		])
 	}
 }
