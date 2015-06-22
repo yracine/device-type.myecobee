@@ -43,7 +43,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 1.9.3\n\n" +
+			paragraph "Version 1.9.4\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -158,11 +158,11 @@ def ecobeeDeviceList2() {
 
 	log.debug "device list: $ems"
 
-        stats = stats + ems
-
-        def p = dynamicPage(name: "deviceList2", title: "Select Your Thermostats", uninstall: true) {
-            section(""){
-                paragraph "page 2: select the ones you want to connect to SmartThings (3 max per page due to ST execution time constraints)."
+	stats = stats + ems
+    
+	def p = dynamicPage(name: "deviceList2", title: "Select Your Thermostats", uninstall: true) {
+		section(""){
+			paragraph "page 2: select the ones you want to connect to SmartThings (3 max per page due to ST execution time constraints)."
 			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
 		}
 	}
@@ -429,10 +429,10 @@ def takeAction() {
 			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
     	}
 	}
-	if (state?.exceptionCount==MAX_EXCEPTION_COUNT) {
+	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
 		atomicState.authToken= null                    
-		msg="too many exceptions ($MAX_EXCEPTION_COUNT), need to re-authenticate at ecobee..." 
+		msg="too many exceptions ({state?.exceptionCount}), need to re-authenticate at ecobee..." 
 		send "MyEcobeeInit> ${msg}"
 		log.error msg
 	}    
