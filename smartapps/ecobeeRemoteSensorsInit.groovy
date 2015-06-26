@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.1.2\n\n" +
+			paragraph "Version 1.1.4\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -76,7 +76,7 @@ def selectMotionSensors() {
 
 	log.debug "selectMotionSensors>ecobeeSensors= $ecobeeSensors"
 
-	if (ecobeeSensors.size() < 1) {
+	if ((!ecobeeSensors)  || (ecobeeSensors.size() < 1)) {
 
 		log.debug "selectMotionSensors>no values found"
 		return sensors
@@ -118,10 +118,11 @@ def selectTempSensors() {
 
 	log.debug "selectTempSensors>ecobeeSensors= $ecobeeSensors"
 
-	if (ecobeeSensors.size() < 1) {
+	if ((!ecobeeSensors)  || (ecobeeSensors.size() < 1)) {
 
 		log.debug "selectTempSensors>no values found"
 		return sensors
+
 	}
 
 	for (i in 0..ecobeeSensors.size() - 1) {
@@ -261,6 +262,8 @@ private def deleteSensors() {
 def initialize() {
 	log.debug "initialize>begin"
 	state.msg=""
+	state?.exceptionCount=0       
+	state?.runtimeRevision=null
     
 	subscribe(ecobee, "remoteSensorOccData", updateMotionSensors)
 	subscribe(ecobee, "remoteSensorTmpData", updateTempSensors)
@@ -290,8 +293,32 @@ def initialize() {
 }
 
 def takeAction() {
+	def MAX_EXCEPTION_COUNT=10	
+	def msg
+    
 	log.trace "takeAction>begin"
-	ecobee.poll()
+	try {
+		ecobee.poll()
+		// reset exception counter            
+		state?.exceptionCount=0       
+	} catch (e) {
+		state.exceptionCount=state.exceptionCount+1    
+		log.error "ecobee3RemoteSensorInit>exception $e while trying to poll $ecobee, exceptionCount= ${state?.exceptionCount}" 
+	}
+	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+		msg="warning: too many exceptions (${state?.exceptionCount}), may need to re-authenticate at ecobee, please check logs..." 
+		send "ecobee3RemoteSensorInit> ${msg}"
+		log.error msg
+	}    
+    
+	def newRuntimeRevision = ecobee.currentRuntimeRevision
+	log.debug ("ecobee3RemoteSensorInit>state.runtimeRevision=${state?.runtimeRevision},newRuntimeRevision=${newRuntimeRevision}")
+	if ((state?.runtimeRevision) && (state?.runtimeRevision == newRuntimeRevision)) { 
+		log.debug ("ecobee3RemoteSensorInit>no runtime revision change since last poll(), no update action required...")
+		return
+	}
+	state?.runtimeRevision = newRuntimeRevision
+    
 	log.trace "takeAction>about to call generateRemoteSensorEvents()"
 	ecobee.generateRemoteSensorEvents("", 'false')
 	    
