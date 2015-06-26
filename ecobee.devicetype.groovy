@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.0.8
+ *  Version 2.0.12
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -102,8 +102,9 @@ metadata {
 		attribute "modelNumber", "string"
 		attribute "followMeComfort", "string"
 		attribute "autoAway", "string"
-		attribute "thermostatRevision", "string"
+		attribute "intervalRevision", "string"
 		attribute "runtimeRevision", "string"
+		attribute "thermostatRevision", "string"
 		attribute "heatStages", "string"
 		attribute "coolStages", "string"
 		attribute "climateName", "string"
@@ -746,7 +747,6 @@ void poll() {
     
 	def thermostatId= determine_tstat_id("") 	    
 
-	getThermostatInfo(thermostatId)
 
 	def poll_interval=0.25   // set a 15 sec. poll interval to avoid unecessary load on ecobee servers
 	def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
@@ -760,6 +760,14 @@ void poll() {
 	}
 	state.lastPollTimestamp = now()
     
+	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
+	if (!getThermostatRevision(ecobeeType,"")) {
+    
+		// if there are no changes in the thermostat, runtime or interval revisions, stop the polling as values at ecobee haven't changed since last poll()
+		return
+	}
+	getThermostatInfo(thermostatId)
+
 	// determine if there is an event running
     
 	Integer indiceEvent = 0    
@@ -783,7 +791,6 @@ void poll() {
 		}
 	}
 
-	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
 	def programScheduleName= (foundEvent)? data.thermostatList[0].events[indiceEvent].name : currentClimate.name
 	def programType= (foundEvent)?data.thermostatList[0].events[indiceEvent].type : currentClimate.type
     
@@ -1994,7 +2001,7 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 	def climateRef = null
 	def tstatParams
 
-	if ((thermostatId != null) && (thermostatId != "")) {
+	if (thermostatId) {
 //		call getThermostatInfo if a value for thermostatId is provided to make sure to have the right thermostat information
 
 		getThermostatInfo(thermostatId) 
@@ -2102,7 +2109,7 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 	def substituteClimateRef = null
 	def climateRefToBeReplaced = null
 
-	if ((thermostatId != null) && (thermostatId != "")) {
+	if (thermostatId) {
 //		call getThermostatInfo if a value for thermostatId is provided to make sure to have the right thermostat information
 
 		getThermostatInfo(thermostatId) 
@@ -2373,23 +2380,22 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
     
 
 
-	// Check the thermostat Revision in order to avoid polling ecobee servers unnecessarily 
+	// Check the interval Revision in order to avoid polling ecobee servers unnecessarily 
     
-	getThermostatRevision("", thermostatId)
-	def newRevision = device.currentValue('thermostatRevision')
+	def hasRevisionChanged=getThermostatRevision("", thermostatId)
+	def newReportRevision = device.currentValue('intervalRevision')
 	if (settings.trace) {
-		log.debug ("getReportData>thermostatRevision=${state?.thermostatRevision},newRevision=${newRevision}, component=$reportColumn...")
+		log.debug ("getReportData>state.reportRevision=${state?.reportRevision},newReportRevision=${newReportRevision}, component=$reportColumn...")
 	}
-	if ((state?.thermostatRevision != null) && (state?.thermostatRevision == newRevision) && 
-    	((state?.componentReport != null) && (state?.componentReport==reportColumn))) {
-		// Trying to produce report data on same component with same thermostatRevision
+	if ((state?.reportRevision == newReportRevision) && (state?.componentReport==reportColumn)) {
+		// Trying to produce report data on same component with same interval Revision
 		if (settings.trace) {
 			log.debug ("getReportData>called in a very short time with same component=${state.componentReport}, exiting...")
 		}
 		return
 	
 	}
-	state?.thermostatRevision = newRevision
+	state?.reportRevision = newReportRevision
 	state?.componentReport = reportColumn
     
 	beginInt = (startInterval == null)? get_interval(startDateTime): startInterval.toInteger()
@@ -2727,7 +2733,7 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 	def minTemp=null
 	def minHum=null
     
-	if ((thermostatId != null) && (thermostatId != "")) {
+	if (thermostatId) {
 		if (thermostatId.contains(",")) {
         
 			if (settings.trace) {
@@ -2772,6 +2778,12 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 				}
 				remoteData << data.thermostatList[0].remoteSensors[i]  // to be transformed into Json later
 			} 
+			if (!data.thermostatList[0].remoteSensors[i].capability) {
+				if (settings.trace) {
+					log.debug "generateRemoteSensorEvents>looping i=${i}, no capability values found..."
+				}
+				continue            
+			}            
 			for (j in 0..data.thermostatList[0].remoteSensors[i].capability.size()-1) {
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.thermostatList[0].remoteSensors[i].capability[j]} at j=${j}"
@@ -2909,9 +2921,11 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 // tstatType =managementSet or registered (no spaces). 
 // May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // thermostatId may be a single thermostat only
+// returns true if intervalRevision, thermostatRevision or runtimeRevision has changed or false otherwise.
 
 def getThermostatRevision(tstatType, thermostatId) {
-
+	def runtimeRevision,intervalRevision,thermostatRevision
+    
 	thermostatId = determine_tstat_id(thermostatId)
 	def ecobeeType = determine_ecobee_type_or_location(tstatType)
 	getThermostatSummary(ecobeeType)
@@ -2920,18 +2934,34 @@ def getThermostatRevision(tstatType, thermostatId) {
 		def id = thermostatDetails[0]
 		def thermostatName = thermostatDetails[1]
 		def connected = thermostatDetails[2]
-		def runtimeRevision = thermostatDetails[5]
-		def internalRevision = thermostatDetails[6]
-		if (thermostatId == id) {
+		thermostatRevision = thermostatDetails[3]
+		runtimeRevision = thermostatDetails[5]
+		intervalRevision = thermostatDetails[6]
+		if ((thermostatId == id) && (connected=='true')) {
 			sendEvent name: "runtimeRevision", value: runtimeRevision
-			sendEvent name: "thermostatRevision", value: internalRevision
+			sendEvent name: "intervalRevision", value: intervalRevision
+			sendEvent name: "thermostatRevision", value: thermostatRevision
 			if (settings.trace) {	
-				log.debug "getThermostatRevision> done for ${thermostatId}, thermostatRevision=$internalRevision, runtimeRevision=$runtimeRevision"
+				log.debug "getThermostatRevision>done for ${thermostatId},intervalRevision=$intervalRevision,runtimeRevision=$runtimeRevision,thermostatRevision=$thermostatRevision," +
+					"state.intervalRevision=${state?.intervalRevision},state.runtimeRevision=${state?.runtimeRevision},state.thermostatRevision=${state?.thermostatRevision}"
 			}
-			return
-		}
-		            
-	}
+			if ((state?.runtimeRevision != runtimeRevision) || 
+				(state?.intervalRevision != intervalRevision) ||
+				(state?.thermostatRevision != thermostatRevision)) {
+				state?.intervalRevision=intervalRevision
+				state?.runtimeRevision=runtimeRevision
+				state?.thermostatRevision=thermostatRevision
+				return true
+			} else {
+				return false
+			}            
+		} else if (connected=='false') {
+			if (settings.trace) {	
+				log.error "getThermostatRevision>thermostatId ${id} not connected" 
+			}
+		}        
+	}    
+	return false
 }
 
 
@@ -3274,7 +3304,7 @@ private def determine_ecobee_type_or_location(tstatType) {
 	} else if ((settings?.ecobeeType != null) && (settings?.ecobeeType != "")) {
 		ecobeeType = settings.ecobeeType.trim()
 		
-	} else if (modelNumber.contains("Ems")) {
+	} else if (modelNumber.toUpperCase().contains("EMS")) {
     
 		ecobeeType = 'managementSet'
 		settings.ecobeeType='managementSet'
