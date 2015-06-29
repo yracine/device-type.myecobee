@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.0.12
+ *  Version 2.0.13
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -525,6 +525,7 @@ void setHeatingSetpoint(temp) {
 	setHold(thermostatId, device.currentValue("coolingSetpoint"), temp,
 		null, null)
 	sendEvent(name: 'heatingSetpoint', value: temp,unit: getTemperatureScale())
+	sendEvent(name: 'heatingSetpointDisplay', value: temp,unit: getTemperatureScale())
 	def currentMode = device.currentValue("thermostatMode")
 	if ((currentMode=='heat') || (currentMode=='auto')) {
 		sendEvent(name: 'thermostatSetpoint', value: temp,unit: getTemperatureScale())     
@@ -2635,7 +2636,7 @@ void generateReportSensorStatsEvents(sensorId, startDateTime, endDateTime, start
 	}
 	if (sensorId != null) {
 		foundSensor = data.sensorList.sensors[0].find{ it.sensorId == sensorId }
-    	}
+	}
 	if (!foundSensor) {
 		if (settings.trace) {
 			log.error "generateReportSensorStatsEvents> sensor ${sensorId} not found in last sensor data from getReportData()"
