@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9.1\n\n" +
+			paragraph "Version 1.9.2\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -263,9 +263,15 @@ def monitorAdjustTemp() {
 		send("MonitorEcobeeTemp>monitoring every ${delay} minute(s)")
 	}
 
-	//  Polling of the latest values at the thermostat
+	//  Polling of the latest values at the thermostat and at the outdoor sensor
 	ecobee.poll()
-
+	try {    
+		outdoorSensor.refresh()
+	} catch (e) {
+		log.debug("MonitorEcobeeTemp>not able to refresh ${outdoorSensor}'s temp value")
+    	
+	}   	 
+    
 	String currentProgType = ecobee.currentProgramType
 	log.trace("MonitorEcobeeTemp> program Type= ${currentProgType}")
 	if (currentProgType.contains("hold")) { 						
@@ -393,6 +399,7 @@ private def check_if_hold_needed() {
 	log.trace "check_if_hold_needed> location.mode = $location.mode"
 	log.trace "check_if_hold_needed> ecobee Mode = $ecobeeMode"
 	log.trace "check_if_hold_needed> currentProgName = $currentProgName"
+/*
 	log.trace "check_if_hold_needed> ecobee's indoorTemp = $ecobeeTemp°"
 	log.trace "check_if_hold_needed> state.tempSensors = $state.tempSensors"
 	log.trace "check_if_hold_needed> indoorTemps = $indoorTemps"
@@ -408,6 +415,7 @@ private def check_if_hold_needed() {
 	log.trace "check_if_hold_needed> programHeatTemp = $programHeatTemp°"
 	log.trace "check_if_hold_needed> programCoolTemp = $programCoolTemp°"
 	log.trace "check_if_hold_needed> state=${state}"
+*/
 	float targetTstatTemp
 
 	if (detailedNotif == 'true') {
@@ -607,7 +615,8 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified> currentProgName = $currentProgName"
 	log.trace "check_if_hold_justified> currentSetClimate = $currentSetClimate"
 	log.trace "check_if_hold_justified> outdoorTemp = $outdoorTemp°"
-	log.trace "check_if_hold_justified> state.tempSensors = $state.tempSensors"
+/*	
+    log.trace "check_if_hold_justified> state.tempSensors = $state.tempSensors"
 	log.trace "check_if_hold_justified> ecobee's indoorTemp = $ecobeeTemp°"
 	log.trace "check_if_hold_justified> indoorTemps = $indoorTemps"
 	log.trace "check_if_hold_justified> avgIndoorTemp = $avg_indoor_temp°"
@@ -621,7 +630,7 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified> programHeatTemp = $programHeatTemp°"
 	log.trace "check_if_hold_justified> programCoolTemp = $programCoolTemp°"
 	log.trace "check_if_hold_justified>state=${state}"
-
+*/
 	if (detailedNotif == 'true') {
 		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,progHeatSetPoint ${programHeatTemp}°,progCoolSetPoint ${programCoolTemp}°")
 		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,heatingSetPoint ${heatTemp}°,coolingSetPoint ${coolTemp}°")
