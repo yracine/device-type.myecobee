@@ -26,34 +26,6 @@ definition(
 	author: "Yves Racine",
 	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV",
 	category: "My Apps",
-/***
- *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *  for the specific language governing permissions and limitations under the License.
- *
- * 
- *
- *  Monitor and set Humidity with Ecobee Thermostat(s):
- *      Monitor humidity level indoor vs. outdoor at a regular interval (in minutes) and 
- *      set the humidifier/dehumidifier  to a target humidity level. 
- *      Use also HRV/ERV/dehumidifier to get fresh air (free cooling) when appropriate based on outdoor temperature.
- *
- */
-// Automatically generated. Make future change here.
-definition(
-	name: "MonitorAndSetEcobeeHumidity",
-	namespace: "yracine",
-	author: "Yves Racine",
-	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV",
-	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
