@@ -464,7 +464,7 @@ def setHumidityLevel() {
 
 		if ((diffVentTimeInMin > 0) && (!equipStatus.contains("dehumidifier"))) {
 			if (detailedNotif == 'true') {
-				send "MonitorEcobeeHumidity>About to turn the dehumidifier on for ${diffVentTimeInMin.toString()} min. within an hour..."
+				send "MonitorEcobeeHumidity>About to turn the dehumidifier on for ${diffVentTimeInMin.toString()} min. within the next hour..."
 			}
 
 			ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': '25',
