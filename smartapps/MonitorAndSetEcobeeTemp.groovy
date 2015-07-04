@@ -14,9 +14,9 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  * The MonitorAndSetEcobeeTemp monitors the outdoor temp and adjusts the heating and cooling set points
- * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
- * It also constantly monitors any 'holds' at the thermostat to make sure that these holds are justified according to
- * the motion sensors at home and the given thresholds.
+     * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
+     * It also constantly monitors any 'holds' at the thermostat to make sure that these holds are justified according to
+     * the motion sensors at home and the given thresholds.
  */
 definition(
 	name: "MonitorAndSetEcobeeTemp",
@@ -82,7 +82,7 @@ def sensorSettings() {
 		}
 		section("Choose indoor sensor(s) with both Motion & Temp capabilities to be used for dynamic temp adjustment when occupied [optional]") {
 			input "indoorSensors", "capability.motionSensor", title: "Which Indoor Motion/Temperature Sensor(s)", required: false, multiple:true
-		}
+		}		
 		section("Choose any other indoor temp sensors for avg temp adjustment [optional]") {
 			input "tempSensors", "capability.temperatureMeasurement", title: "Any other temp sensors?",  multiple: true, required: false
 			
@@ -508,7 +508,7 @@ private def check_if_hold_needed() {
 			targetTstatTemp = (programCoolTemp + max_temp_diff).round(1)
 			ecobee.setCoolingSetpoint(targetTstatTemp)
 			send(
-				"Monitor&SetEcobeeTemp>cooling setPoint now=${targetTstatTemp}°, outdoor temp <=${less_cool_threshold}°"
+				"MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp}°, outdoor temp <=${less_cool_threshold}°"
 			)
 
 		}
