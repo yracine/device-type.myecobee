@@ -28,7 +28,7 @@ preferences {
 	section("About") {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
         "it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed"
-		paragraph "Version 1.9.1\n\n" +
+		paragraph "Version 1.9.2\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -88,11 +88,16 @@ def sensorTriggered(evt) {
 	def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
 
 	if (evt.value == "closed") {
-		log.debug "$theSensor is now closed..."
 		def openMinutesCount = (state.count * freq) /60
 		if ((tstats) && (openMinutesCount > max_open_time_in_min)) {
 			restore_tstats_mode()
 		}		            
+		def msg = "your $theSensor is now closed"
+		send("WindowOrDoorOpen>${msg}")
+		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
+			theVoice.setLevel(30)
+			theVoice.speak(msg)
+		}
 		clearStatus()
 	} else if (evt.value == "open" && state.status != "scheduled") {
     	save_tstats_mode()
@@ -137,9 +142,14 @@ def takeAction() {
 		if ((tstats) && (openMinutesCount > max_open_time_in_min)) {
 			restore_tstats_mode()
 		}		            
-		log.trace "Contact is no longer open"
 		clearStatus()
 		unschedule(takeAction)
+		msg = "your $theSensor has been closed"
+		send("WindowOrDoorOpen>${msg}")
+		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
+			theVoice.setLevel(30)
+			theVoice.speak(msg)
+		}
 	}
 }
 
