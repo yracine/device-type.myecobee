@@ -475,7 +475,7 @@ private def check_if_hold_needed() {
 			if (outdoorTemp >= more_cool_threshold) {
 				targetTstatTemp = (programCoolTemp - max_temp_diff).round(1)
 				ecobee.setCoolingSetpoint(targetTstatTemp)
-				send("MonitorEcobeeTemp>cooling setPoint now =${targetTstatTemp}°,outdooTemp >=${more_cool_threshold}°")
+				send("MonitorEcobeeTemp>cooling setPoint now =${targetTstatTemp}°,outdoorTemp >=${more_cool_threshold}°")
 			} else if (outdoorHumidity >= humidity_threshold) {
 				def extremes = [less_cool_threshold, more_cool_threshold]
 				float median_temp = (extremes.sum() / extremes.size()).round(1) // Increase cooling settings based on median temp
