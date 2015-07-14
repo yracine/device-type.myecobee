@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 1.9.2\n\n" +
+			paragraph "Version 1.9.3\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine/device-type.myecobee", style: "embedded", required: false, title: "More information...",
@@ -149,6 +149,7 @@ def initialize() {
 	log.debug "Scheduling Humidity Monitoring and adjustment every ${delay} minutes"
 
 	schedule("0 0/${delay} * * * ?", setHumidityLevel) // monitor the humidity according to delay specified
+	subscribe(app, appTouch)
 
 }
 
@@ -169,6 +170,10 @@ def onHandler(evt) {
 	setHumidityLevel()
 }
 
+
+def appTouch(evt) {
+	setHumidityLevel()
+}
 
 
 def setHumidityLevel() {
@@ -232,8 +237,8 @@ def setHumidityLevel() {
 				return
 
 			}
-		} catch (any) {
-			log.error "Exception while trying to get power data "
+		} catch (e) {
+			log.error "Exception $e while trying to get power data "
 		}
 	}
 
