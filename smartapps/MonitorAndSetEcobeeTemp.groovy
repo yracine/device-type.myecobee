@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9.4\n\n" +
+			paragraph "Version 1.9.5\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -305,12 +305,6 @@ private def reset_state_program_values() {
  	state.programSetTime = null
  	state.programSetTimestamp = ""
  	state.programHoldSet = ""
-	float programHeatTemp = ecobee.currentProgramHeatTemp.toFloat()
-	float programCoolTemp = ecobee.currentProgramCoolTemp.toFloat()
-
-	state?.scheduleHeatSetpoint=programHeatTemp  // save the current program settings as baseline for adjustment later
-	state?.scheduleCoolSetpoint=programCoolTemp
-
 }
 
 private def reset_state_tempSensors() {
@@ -405,11 +399,6 @@ private def check_if_hold_needed() {
 	Integer ecobeeHumidity = ecobee.currentHumidity
 	float ecobeeTemp = ecobee.currentTemperature.toFloat()
 
-	if (currentProgName.toUpperCase() != 'AUTO') { // save the current program settings as baseline for adjustment later
-		state?.scheduleHeatSetpoint=programHeatTemp  
-		state?.scheduleCoolSetpoint=programCoolTemp
-	}    
-
 	reset_state_tempSensors()
 	if (addIndoorSensorsWhenOccupied()) {
 		log.trace("check_if_hold_needed>some occupied indoor Sensors added for avg calculation")
@@ -461,8 +450,6 @@ private def check_if_hold_needed() {
 		 	/* Get latest heat and cool setting points after climate adjustment */
 			programHeatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 			programCoolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
-			state?.scheduleHeatSetpoint=programHeatTemp  
-			state?.scheduleCoolSetpoint=programCoolTemp
         
 		} else if (((currentProgName.toUpperCase()!='SLEEP') && (currentSetClimate.toUpperCase()!='AWAY'))  && (residentsHaveBeenQuiet())) {
 			// Do not adjust the program when ecobee mode = Sleep or Away    
@@ -475,8 +462,6 @@ private def check_if_hold_needed() {
 		 	/* Get latest heat and cool setting points after climate adjustment */
 			programHeatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 			programCoolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
-			state?.scheduleHeatSetpoint=programHeatTemp  
-			state?.scheduleCoolSetpoint=programCoolTemp
 
 
 		}
@@ -506,7 +491,7 @@ private def check_if_hold_needed() {
 		}
        
 		if (outdoorTemp >= more_cool_threshold) {
-			targetTstatTemp = (state.scheduleCoolSetpoint - max_temp_diff).round(1)
+			targetTstatTemp = (programCoolTemp - max_temp_diff).round(1)
 			ecobee.setCoolingSetpoint(targetTstatTemp)
 			send("MonitorEcobeeTemp>cooling setPoint now =${targetTstatTemp}°,outdoorTemp >=${more_cool_threshold}°")
 		} else if (outdoorHumidity >= humidity_threshold) {
@@ -517,7 +502,7 @@ private def check_if_hold_needed() {
 				send("MonitorEcobeeTemp>eval: cool median temp ${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
 			}
 			if (outdoorTemp > median_temp) { // Only increase cooling settings when outdoorTemp > median_temp
-				targetTstatTemp = (state.scheduleCoolSetpoint - max_temp_diff).round(1)
+				targetTstatTemp = (programCoolTemp - max_temp_diff).round(1)
 				ecobee.setCoolingSetpoint(targetTstatTemp)
 				send("MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp}°, outdoorHum >=${humidity_threshold}%")
 
@@ -526,7 +511,7 @@ private def check_if_hold_needed() {
 			float temp_diff = (ecobee_temp - avg_indoor_temp).round(1) // adjust the coolingSetPoint at the ecobee tstat according to the avg indoor temp measured
                 
 			temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
-			targetTstatTemp = (state.scheduleCoolSetpoint - temp_diff).round(1)
+			targetTstatTemp = (programCoolTemp - temp_diff).round(1)
 			if (temp_diff.abs() > 0.5) {  // adust the temp only if temp diff is significant
 				ecobee.setCoolingSetpoint(targetTstatTemp)
 				send("MonitorEcobeeTemp>cooling setPoint now =${targetTstatTemp}°,adjusted by temp diff (${temp_diff}°) between sensors")
@@ -537,7 +522,7 @@ private def check_if_hold_needed() {
 			send("MonitorEcobeeTemp>evaluate: lessCoolThreshold ${less_cool_threshold}° vs. outdoorTemp ${outdoorTemp}°")
 		}
 		if (outdoorTemp <= less_cool_threshold) {
-			targetTstatTemp = (state.scheduleCoolSetpoint + max_temp_diff).round(1)
+			targetTstatTemp = (programCoolTemp + max_temp_diff).round(1)
 			ecobee.setCoolingSetpoint(targetTstatTemp)
 			send(
 				"MonitorEcobeeTemp>cooling setPoint now=${targetTstatTemp}°, outdoor temp <=${less_cool_threshold}°"
@@ -556,7 +541,7 @@ private def check_if_hold_needed() {
 			send("MonitorEcobeeTemp>eval:  programHeatTemp= ${programHeatTemp}° vs. avgIndoorTemp= ${avg_indoor_temp}°")
 		}
 		if (outdoorTemp <= more_heat_threshold) {
-			targetTstatTemp = (state.scheduleHeatSetpoint + max_temp_diff).round(1)
+			targetTstatTemp = (programHeatTemp + max_temp_diff).round(1)
 			ecobee.setHeatingSetpoint(targetTstatTemp)
 			send(
 				"MonitorEcobeeTemp>heating setPoint now= ${targetTstatTemp}°, outdoorTemp <=${more_heat_threshold}°")
@@ -568,14 +553,14 @@ private def check_if_hold_needed() {
 				send("MonitorEcobeeTemp>eval: heat median temp ${medianTempFormat}° vs.outdoorTemp ${outdoorTemp}°")
 			}
 			if (outdoorTemp < median_temp) { // Only increase heating settings when outdoorTemp < median_temp
-				targetTstatTemp = (state.scheduleHeatSetpoint + max_temp_diff).round(1)
+				targetTstatTemp = (programHeatTemp + max_temp_diff).round(1)
 				ecobee.setHeatingSetpoint(targetTstatTemp)
 				send("MonitorEcobeeTemp>heating setPoint now=${targetTstatTemp}°, outdoorHum >=${humidity_threshold}%")
 			}
 		} else if ((state.tempSensors) && (avg_indoor_temp < heatTemp)) {
 			float temp_diff = (ecobeeTemp - avg_indoor_temp).round(1) // adjust the heatingSetPoint at the tstat according to the avg indoor temp measur
 			temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
-			targetTstatTemp = (state.scheduleHeatSetpoint + temp_diff).round(1)
+			targetTstatTemp = (programHeatTemp + temp_diff).round(1)
 			if (temp_diff.abs() > 0.5) {  // adust the temp only if temp diff is significant
 				ecobee.setHeatingSetpoint(targetTstatTemp)
 				send("MonitorEcobeeTemp>heating setPoint now =${targetTstatTemp}°,adjusted by temp diff (${temp_diff}°) between sensors")
@@ -586,7 +571,7 @@ private def check_if_hold_needed() {
 			send("MonitorEcobeeTemp>eval:  lessHeatThreshold ${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
 		}
 		if (outdoorTemp >= less_heat_threshold) {
-			targetTstatTemp = (state.scheduleHeatSetpoint - max_temp_diff).round(1)
+			targetTstatTemp = (programHeatTemp - max_temp_diff).round(1)
 			ecobee.setHeatingSetpoint(targetTstatTemp)
 			send("MonitorEcobeeTemp>heating setPoint now=${targetTstatTemp}°,outdoor temp>= ${less_heat_threshold}°")
 		}
@@ -751,7 +736,7 @@ private def check_if_hold_justified() {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, cooling setPoint=${coolTemp}°")
 			}
-			float actual_temp_diff = (state.scheduleCoolSetpoint - coolTemp).round(1).abs()
+			float actual_temp_diff = (programCoolTemp - coolTemp).round(1).abs()
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>eval: actual_temp_diff ${actual_temp_diff}° vs. Max temp diff ${max_temp_diff}°")
 			}
@@ -787,7 +772,7 @@ private def check_if_hold_justified() {
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
 			}
-			float actual_temp_diff = (heatTemp - state.scheduleHeatSetpoint).round(1).abs()
+			float actual_temp_diff = (heatTemp - programHeatTemp).round(1).abs()
 			if (detailedNotif == 'true') {
 				send("MonitorEcobeeTemp>eval: actualTempDiff ${actual_temp_diff}° vs. Max temp Diff ${max_temp_diff}°")
 			}
