@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9.3\n\n" +
+			paragraph "Version 1.9.4\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -392,7 +392,7 @@ private def check_if_hold_needed() {
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
 
-	String currentProgName = ecobee.currentProgramScheduleName
+	String currentProgName = ecobee.currentClimateName
 	String currentSetClimate = ecobee.currentSetClimate
 
 	Integer outdoorHumidity = outdoorSensor.currentHumidity
@@ -618,7 +618,7 @@ private def check_if_hold_justified() {
 		less_heat_threshold = (givenLessHeatThreshold != null) ? givenLessHeatThreshold : 50 // by default, 50°F is the outdoor temp's threshold for less heating
 		less_cool_threshold = (givenLessCoolThreshold != null) ? givenLessCoolThreshold : 75 // by default, 75°F is the outdoor temp's threshold for less cooling
 	}
-	String currentProgName = ecobee.currentProgramScheduleName
+	String currentProgName = ecobee.currentClimateName
 	String currentSetClimate = ecobee.currentSetClimate
 	float heatTemp = ecobee.currentHeatingSetpoint.toFloat()
 	float coolTemp = ecobee.currentCoolingSetpoint.toFloat()
