@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.0.13
+ *  Version 2.1.2
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -649,11 +649,14 @@ void setHumidifierLevel(level) {
 	setThermostatSettings("", ['humidity': "${level}"])
 	sendEvent(name: 'humidifierLevel', value: level)
 }
+// Only valid for ecobee3 thermostats, not for EMS or Smart, Smart-SI thermostats)
 void followMeComfort(flag) {
 	flag = flag == 'true' ? 'true' : 'false'
 	setThermostatSettings("", ['followMeComfort': "${flag}"])
 	sendEvent(name: 'followMeComfort', value: flag)
 }
+// Only valid for ecobee3 thermostats, not for EMS or Smart, Smart-SI thermostats)
+
 void autoAway(flag) {
 	flag = flag == 'true' ? 'true' : 'false'
 	setThermostatSettings("", ['autoAway': "${flag}"])
@@ -768,6 +771,13 @@ void poll() {
 		return
 	}
 	getThermostatInfo(thermostatId)
+
+	String exceptionCheck = device.currentValue("verboseTrace").toString()
+	if ((exceptionCheck.contains("exception")) || (exceptionCheck.contains("error"))) {  
+	// check if there is any exception or an error reported in the verboseTrace associated to the device 
+		log.error "poll>$exceptionCheck" 
+		return    
+	}
 
 	// determine if there is an event running
     
@@ -916,7 +926,7 @@ void poll() {
 		sendEvent(name: 'ventilatorMode', value: data.thermostatList[0].settings.vent)
 	}
        
-    
+	sendEvent name: "verboseTrace", value: "poll>done for thermostatId =${thermostatId}"
     
 }
 
@@ -951,7 +961,7 @@ private void generateEvent(Map results) {
 
 // 			Temperature variable names contain 'temp' or 'setpoint' (not for display)           
 
-			} else if ((name.toUpperCase().contains("TEMP"))|| (name.toUpperCase().contains("SETPOINT"))) {  
+			} else if ((name.toUpperCase().contains("TEMP")) || (name.toUpperCase().contains("SETPOINT"))) {  
                                 
 				Double tempValue = getTemperature(value).toDouble().round(1)
 				String tempValueString = String.format('%2.1f', tempValue)
@@ -2753,7 +2763,7 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 	def remoteHumData = ""
 	def remoteOccData = ""
     
-	if (data.thermostatList[0].remoteSensors?.size() > 0) {
+	if (data.thermostatList[0].remoteSensors) {
 		for (i in 0..data.thermostatList[0].remoteSensors.size() - 1) {
 			if (settings.trace) {
 				log.debug "generateRemoteSensorEvents>found sensor ${data.thermostatList[0].remoteSensors[i]} at (${i})"
@@ -2766,25 +2776,18 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
  				// not a remote sensor
  				continue
 			}
- 			if (data.thermostatList[0].remoteSensors[i]?.capability?.size() <1) {
-				if (settings.trace) {
-					log.debug "generateRemoteSensorEvents>capability size is wrong (${data.thermostatList[0].remoteSensors[i]?.size()}) at (${i})"
-				}
-				// problem with the data
-				continue
-			}
-			if (postData == 'true') {
-				if (settings.trace) {
-					log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i]} to remoteData"
-				}
-				remoteData << data.thermostatList[0].remoteSensors[i]  // to be transformed into Json later
-			} 
 			if (!data.thermostatList[0].remoteSensors[i].capability) {
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>looping i=${i}, no capability values found..."
 				}
 				continue            
 			}            
+			if (postData == 'true') {
+				if (settings.trace) {
+					log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i]} to remoteData"
+				}
+				remoteData << data.thermostatList[0].remoteSensors[i]  // to be transformed into Json later
+			} 
 			for (j in 0..data.thermostatList[0].remoteSensors[i].capability.size()-1) {
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.thermostatList[0].remoteSensors[i].capability[j]} at j=${j}"
@@ -3018,7 +3021,10 @@ def getModelNumber() {
 	return ((data.thermostatList[0].identifier)? data.thermostatList[0].modelNumber: "")
 }
 
-private def refresh_tokens() {
+private def refresh_tokens() 
+	throws javax.net.ssl.SSLHandshakeException,groovyx.net.http.HttpResponseException,IOException,
+    	java.net.UnknownHostException,java.net.NoRouteToHostException {
+    
 	if (!isTokenExpired()) {
 
 		if (settings.trace) {
