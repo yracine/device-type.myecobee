@@ -43,7 +43,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 1.9.4\n\n" +
+			paragraph "Version 1.9.7\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -422,8 +422,16 @@ def takeAction() {
 		log.debug "takeAction>Looping thru thermostats, found id $dni, about to poll"
 		try {        
 			d.poll()
-			// reset exception counter            
-			state?.exceptionCount=0       
+			String exceptionCheck = d.currentVerboseTrace.toString()
+			if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+				(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+			// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
+				state.exceptionCount=state.exceptionCount+1    
+				log.error "found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
+			} else {             
+				// reset exception counter            
+				state?.exceptionCount=0       
+			}                
 		} catch (e) {
 			state.exceptionCount=state.exceptionCount+1    
 			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
@@ -432,7 +440,7 @@ def takeAction() {
 	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
 		atomicState.authToken= null                    
-		msg="too many exceptions ({state?.exceptionCount}), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors ({state?.exceptionCount}), need to re-authenticate at ecobee..." 
 		send "MyEcobeeInit> ${msg}"
 		log.error msg
 	}    
@@ -623,3 +631,4 @@ def debugEvent(message, displayEvent) {
 	log.debug "Generating AppDebug Event: ${results}"
 	sendEvent (results)
 }
+
