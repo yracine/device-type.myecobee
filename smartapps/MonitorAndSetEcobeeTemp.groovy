@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9.5\n\n" +
+			paragraph "Version 1.9.6\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -439,7 +439,7 @@ private def check_if_hold_needed() {
 	reset_state_motions()
 	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
     
-		if ((currentSetClimate.toUpperCase()=='AWAY') && (!residentsHaveBeenQuiet())) {
+		if ((currentSetClimate.toUpperCase()=='AWAY' &&  (currentProgName.toUpperCase() !='HOME')) && (!residentsHaveBeenQuiet())) {
 
 			ecobee.present()            
 			send("MonitorEcobeeTemp>Program now set to Home, motion detected")
@@ -451,7 +451,8 @@ private def check_if_hold_needed() {
 			programHeatTemp = ecobee.currentHeatingSetpoint.toFloat() // This is the heat temp associated to the current program
 			programCoolTemp = ecobee.currentCoolingSetpoint.toFloat() // This is the cool temp associated to the current program
         
-		} else if (((currentProgName.toUpperCase()!='SLEEP') && (currentSetClimate.toUpperCase()!='AWAY'))  && (residentsHaveBeenQuiet())) {
+		} else if (((currentProgName.toUpperCase()!='SLEEP') && (currentProgName.toUpperCase()!='AWAY') && (currentSetClimate.toUpperCase() =='HOME')) 
+        	&& (residentsHaveBeenQuiet())) {
 			// Do not adjust the program when ecobee mode = Sleep or Away    
                 
 			ecobee.away()          
