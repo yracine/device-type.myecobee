@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.1.4
+ *  Version 2.1.5
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -693,15 +693,15 @@ void quickSave() {
 	float quickSaveSetBack, quickSaveSetForw, quickSaveHeating, quickSaveCooling
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
-		quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack / 2 // approximate conversion of differential to celcius
-		quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward / 2
-		quickSaveCooling = fToC(data.thermostatList[0].runtime.desiredCool)
-		quickSaveHeating = fToC(data.thermostatList[0].runtime.desiredHeat)
+		quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack.toFloat() / 2 // approximate conversion of differential to celcius
+		quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward.toFloat() / 2
+		quickSaveCooling = fToC(data.thermostatList[0].runtime.desiredCool.toFloat())
+		quickSaveHeating = fToC(data.thermostatList[0].runtime.desiredHeat.toFloat())
 	} else {
-		quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack
-		quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward
-		quickSaveCooling = data.thermostatList[0].runtime.desiredCool
-		quickSaveHeating = data.thermostatList[0].runtime.desiredHeat
+		quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack.toFloat()
+		quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward.toFloat()
+		quickSaveCooling = data.thermostatList[0].runtime.desiredCool.toFloat()
+		quickSaveHeating = data.thermostatList[0].runtime.desiredHeat.toFloat()
 	}
 	quickSaveCooling = (quickSaveCooling + quickSaveSetForw).round(0)
 	quickSaveHeating = (quickSaveHeating - quickSaveSetBack).round(0)
