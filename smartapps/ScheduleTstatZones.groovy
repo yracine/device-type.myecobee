@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.0\n\n" +
+			paragraph "Version 1.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -136,136 +136,6 @@ def roomsSetupPage() {
 	}
 
 }
-/*
-def roomHrefDescription(i) {
-	def description ="Room no${i} " 
-	if (settings."roomName${i}" !=null) {
-		description += settings."roomName${i}"		    
-    }
-	return description
-}
-
-def roomPageState(i) {
-
-	if (settings."roomName${i}" != null) {
-		return 'complete'
-	} else {
-		return 'incomplete'
-	}
-
-}
-
-def roomHrefTitle(i) {
-	def title = "Room ${i}"
-	return title
-}
-
-def parse(description) {
-    ...
-    def msg = parseLanMessage(description)
-
-    def headersAsString = msg.header // => headers as a string
-    def headerMap = msg.headers      // => headers as a Map
-    def body = msg.body              // => request body as a string
-    def status = msg.status          // => http status code of the response
-    def json = msg.json              // => any JSON included in response body, as a data structure of lists and maps
-    def xml = msg.xml                // => any XML included in response body, as a document tree structure
-    def data = msg.data              // => either JSON or XML in response body (whichever is specified by content-type header in response)
-}
-
-def roomsSetupPage() {
-
-
-	def host = getHostAddress()
-	def port = host.split(":")[1]
-	def path = "/idHashString/devices"
-
-	def hubAction = new physicalgraph.device.HubAction(
-		method: "GET",
-		path: path,
-		headers: [HOST:host]
-	)
-	hubAction.options = [outputMsgToS3:true]
-	hubAction
-    
-	dynamicPage(name: "roomsSetupPage", title: "Rooms Setup",nextPage: zonesSetupPage) {
-		section("Rooms") {
-			for (int i = 1; i <= settings.roomsCount; i++) {
-				href(name: "toRoomPage$i", page: "roomsSetup", params: [indiceRoom: i],  description: roomHrefDescription(i), title: roomHrefTitle(i), state: roomPageState(i) )
-			}		
-		}
-		
-		section {
-			href(name: "toGeneralSetupPage", title: "Back to General Setup Page", page: "generalSetupPage")
-		}
-        
-	}        
-}        
-
-def roomsSetup(params) {
-	def indiceRoom = params?.indiceRoom?.intValue()
-	log.debug "roomsSetup> indiceRoom=${indiceRoom}"
-    
-	dynamicPage(name: "roomsSetup", title: "Rooms Setup") {
-		section("Room ${indiceRoom} Setup") {
-			input (name: "roomName${indiceRoom}", title: "Room Name",  type: "text",  
-				defaultValue:settings."roomName${indiceRoom}")
-		}
-        
-		section("Room ${indiceRoom}-Thermostat [optional]") {
-			input (name: "roomTstat${indiceRoom}", title: "Room thermostat to be set", type: "capability.thermostat", 
-				required: false, defaultValue:settings."roomTstat${indiceRoom}")
-                
-                
-		}
-		section("Room ${indiceRoom}-TempSensor [optional]") {
-			input (name: "tempSensor${indiceRoom}", title: "Temp sensor to be used for better temp adjustment",  
-				type: "capability.temperatureMeasurement", defaultValue:settings."tempSensor${indiceRoom}", required:false)
-		}
-            
-		section("Room ${indiceRoom}-Vent Switches [optional]") {
-			input (name: "ventSwitch1${indiceRoom}" ,title: "Vent switch no1 in room",  
-					type: "capability.switch", defaultValue: settings."ventSwitch1${indiceRoom}", required: false)
-			input (name: "ventSwitch2${indiceRoom}" ,title: "Vent switch no2 in room",  
-					type: "capability.switch", defaultValue: settings."ventSwitch2${indiceRoom}", required: false)
-
-			input (name: "ventSwitch3${indiceRoom}" ,title: "Vent switch no3 in room",  
-					type: "capability.switch", defaultValue: settings."ventSwitch3${indiceRoom}", required: false)
-
-			input (name: "ventSwitch4${indiceRoom}" ,title: "Vent switch no4 in room",  
-					type: "capability.switch", defaultValue: settings."ventSwitch4${indiceRoom}", required: false)
-			input (name: "ventSwitch5${indiceRoom}" ,title: "Vent switch no5 in room",  
-					type: "capability.switch", defaultValue: settings."ventSwitch5${indiceRoom}", required: false)
-                    
-		}
-        
-		section("Room ${indiceRoom}-MotionSensor [optional]") {
-			input (name: "motionSensor${indiceRoom}", title: "Motion sensor to be used to detect if room is occupied", 
-				type: "capability.motionSensor", defaultValue:settings."motionSensor${indiceRoom}",required: false)
-		}
-        
-		section("Room ${indiceRoom}-Do temp adjustment based on avg temp calculation when occupied room only") {
-			input (name: "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", 
-				type: "Boolean",metadata: [values: ["true", "false"]],  
-				defaultValue:settings."needOccupiedFlag${indiceRoom}",required: false)
-                
-		}
-		section("Room ${indiceRoom}-Do temp adjustment with this occupied's threshold") {
-			input (name: "residentsQuietThresh${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]",
-				type: "number",required: false,
- 				defaultValue: settings."residentsQuietThresh${indiceRoom}")
-                
-		}                
-		
-		section {
-			href(name: "toRoomsSetupPage", title: "Back to Rooms Setup Page", page: "roomsSetupPage")
-		}
-
-	}
-
-}
-
-*/
 
 def zoneHrefDescription(i) {
 	def description ="Zone no ${i} "
