@@ -2002,7 +2002,7 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 	for (i in 0..data.thermostatList.size() - 1) {
 		def foundClimate = data.thermostatList[i].program.climates.find{ it.name.toUpperCase() == climateName.toUpperCase() }
 		if (foundClimate) {
-        	climateRef = foundClimate.climateRef
+			climateRef = foundClimate.climateRef
 			if (settings.trace) {
 				log.debug "setClimate>climateRef ${climateRef} found for thermostatId =${data.thermostatList[i].identifier}"
 				sendEvent name: "verboseTrace", value:
