@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.1.2
+ *  Version 2.1.4
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -1376,10 +1376,8 @@ void setThermostatSettings(thermostatId,tstatSettings = []) {
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				if (settings.trace) {
-					sendEvent name: "verboseTrace", value:
+				sendEvent name: "verboseTrace", value:
 						"setThermostatSettings>done for ${thermostatId}"
-				}
 			} else {
 				log.error "setThermostatSettings> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
@@ -1502,10 +1500,8 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				if (settings.trace) {
-					sendEvent name: "verboseTrace", value:
+				sendEvent name: "verboseTrace", value:
 						"setHold>done for ${thermostatId}"
-				}
 			} else {
 				log.error "setHold> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
@@ -1596,11 +1592,8 @@ void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
 		if (!statusCode) {
-			log.debug "${vacationName} created for ${thermostatId}"
-			if (settings.trace) {
-				sendEvent name: "verboseTrace", value:
+			sendEvent name: "verboseTrace", value:
 					"createVacation>done for ${thermostatId}"
-			}
 		} else {
 			log.error "createVacation>error=${statusCode.toString()}, message = ${message}"
 			sendEvent name: "verboseTrace", value:
@@ -1664,11 +1657,8 @@ void deleteVacation(thermostatId, vacationName) {
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
 		if (!statusCode) {
-			if (settings.trace) {
-				log.debug "deleteVacation>${vacationName} deleted done for ${thermostatId}"
-				sendEvent name: "verboseTrace", value:
+			sendEvent name: "verboseTrace", value:
 					"deleteVacation>done for ${thermostatId}"
-			}
 		} else {
 			log.error "deleteVacation> error= ${statusCode.toString()}, message = ${message}"
 			sendEvent name: "verboseTrace", value:
@@ -1731,11 +1721,8 @@ void resumeProgram(thermostatId=settings.thermostatId) {
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
 		if (!statusCode) {
-			if (settings.trace) {
-				log.debug "resumeProgram>done for ${thermostatId}"
-				sendEvent name: "verboseTrace", value:
+			sendEvent name: "verboseTrace", value:
 					"resumeProgram>resume done for ${thermostatId}"
-			}
 		} else {
 			log.error "resumeProgram>error=${statusCode.toString()}, message = ${message}"
 			sendEvent name: "verboseTrace", value:
@@ -1884,11 +1871,8 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-					if (settings.trace) {
-					log.debug "updateGroup>done for groupName =${groupName}, ${thermostatId}"
-					sendEvent name: "verboseTrace", value:
+				sendEvent name: "verboseTrace", value:
 						"updateGroup>done for groupName =${groupName}, ${thermostatId}"
-				}
 			} else {
 				log.error "updateGroup> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
@@ -1924,11 +1908,8 @@ void deleteGroup(groupRef, groupName) {
 		def statusCode = resp.data.status.code
 		def message = resp.data.status.message
 		if (!statusCode) {
-			if (settings.trace) {
-				log.debug "deleteGroup>done for groupName =${groupName}, groupRef = ${groupRef}"
-				sendEvent name: "verboseTrace", value:
+			sendEvent name: "verboseTrace", value:
 					"deleteGroup>done for groupName =${groupName},groupRef = ${groupRef}"
-			}
 		} else {
 			log.error "deleteGroup> error=  ${statusCode.toString()}, message = ${message}"
 			sendEvent name: "verboseTrace", value:
@@ -2021,7 +2002,7 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 	for (i in 0..data.thermostatList.size() - 1) {
 		def foundClimate = data.thermostatList[i].program.climates.find{ it.name.toUpperCase() == climateName.toUpperCase() }
 		if (foundClimate) {
-        		climateRef = foundClimate.climateRef
+        	climateRef = foundClimate.climateRef
 			if (settings.trace) {
 				log.debug "setClimate>climateRef ${climateRef} found for thermostatId =${data.thermostatList[i].identifier}"
 				sendEvent name: "verboseTrace", value:
@@ -2052,19 +2033,14 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 				statusCode = resp.data.status.code
 				def message = resp.data.status.message
 				if (!statusCode) {
-					if (settings.trace) {
-						log.debug "setClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
-						sendEvent name: "verboseTrace", value:
-							"setClimate>done for thermostatId =${data.thermostatList[i].identifier},climateName =${climateName}"
-
-						/* Post the setClimate value */    
-                        
-						sendEvent(name: 'setClimate', value: climateName)
-					}
-				} else {
-					log.error "setClimate>error=${statusCode.toString()}, message = ${message}"
+					/* Post the setClimate value */    
+					sendEvent(name: 'setClimate', value: climateName)
 					sendEvent name: "verboseTrace", value:
-						"setClimate>error ${statusCode.toString()} for ${climateName}"
+							"setClimate>done for thermostatId =${data.thermostatList[i].identifier},climateName =${climateName}"
+				} else {
+					log.error "setClimate>error ${statusCode.toString()} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
+					sendEvent name: "verboseTrace", value:
+						"setClimate>error ${statusCode.toString()} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
 				} /* end if statusCode */
 			} /* end api call */                   
 		} /* end while */               
@@ -2253,11 +2229,8 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				if (settings.trace) {
-					log.debug "updateClimate>done for thermostatId =${thermostatId}, climateName =${climateName}"
-					sendEvent name: "verboseTrace", value:
+				sendEvent name: "verboseTrace", value:
 						"updateClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
-				}
 			} else {
 				log.error "updateClimate>error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:"updateClimate>error ${statusCode.toString()} for ${climateName}"
@@ -2301,11 +2274,8 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				if (settings.trace) {
-					log.debug "controlPlug>done for thermostatId =${thermostatId}, plugName =${plugName}"
-					sendEvent name: "verboseTrace", value:
+				sendEvent name: "verboseTrace", value:
 						"controlPlug>done for thermostatId =${thermostatId},plugName =${plugName}"
-				}
 				// post plug values 
  				def plugEvents = [
 					plugName: plugName, 
@@ -2434,10 +2404,6 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				if (settings.trace) {
-					sendEvent name: "verboseTrace", value:"getReportData> done for thermostatId ${thermostatId}"
-					log.debug "getReportData> done for thermostatId ${thermostatId}"
-				}
 				data.reportList = resp.data.reportList
 				data.startDate = resp.data.startDate
 				data.endDate = resp.data.endDate
@@ -2473,6 +2439,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 					log.debug "getReportData> sensorList= ${data.sensorList}"
 					log.debug "getReportData> postData= ${postData}"
 				}
+				sendEvent name: "verboseTrace", value:"getReportData> done for thermostatId ${thermostatId}"
         	        
 			} else {
 				log.error "getReportData> error=${statusCode.toString()}, message = ${message}"
@@ -2913,6 +2880,8 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 						"current Humidity=${runtimeSettings.actualHumidity} desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode=${thermostatSettings.humidifierMode}," +
 						"desiredDehumidity=${runtimeSettings.desiredDehumidity},dehumidifierMode=${thermostatSettings.dehumidifierMode}"
 				}
+				sendEvent name: "verboseTrace", value:
+					"getTstatInfo>done for ${thermostatId}"
 			} else {
 				log.error "getThermostatInfo> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
@@ -3002,6 +2971,8 @@ void getThermostatSummary(tstatType) {
 							"getTstatSummary> found ${thermostatId},name=${thermostatName},connected=${connected}"
 					}
 				} /* end for */                        
+				sendEvent name: "verboseTrace", value:
+					"getTstatSummary>done"
 			} else {
 				log.error "getThermostatSummary> error=${statusCode.toString()}, message = ${message}"
 				sendEvent name: "verboseTrace", value:
