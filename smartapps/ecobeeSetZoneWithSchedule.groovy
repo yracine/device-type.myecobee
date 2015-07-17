@@ -393,7 +393,7 @@ def initialize() {
 	state.lastScheduleLastName=""
 	state.scheduleHeatSetpoint=0  
 	state.scheduleCoolSetpoint=0    
-	state.setPresentOrAway='present'
+	state.setPresentOrAway=''
 	reset_state_program_values()    
 
 	Integer delay =5 				// wake up every 5 minutes to apply zone settings if any
