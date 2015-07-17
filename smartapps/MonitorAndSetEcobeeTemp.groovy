@@ -296,7 +296,7 @@ def monitorAdjustTemp() {
 	} catch (e) {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "monitorAdjustTemp>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
-    }
+	}
 	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
 		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
