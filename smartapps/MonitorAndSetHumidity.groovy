@@ -216,7 +216,7 @@ def setHumidityLevel() {
 	String exceptionCheck, msg 
 	try {        
 		ecobee.poll()
-		exceptionCheck= thermostat.currentVerboseTrace.toString()
+		exceptionCheck= ecobee.currentVerboseTrace.toString()
 		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
 		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
@@ -229,7 +229,7 @@ def setHumidityLevel() {
 	} catch (e) {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "setHumidityLevel>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
-	}
+    }
 	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
 		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
