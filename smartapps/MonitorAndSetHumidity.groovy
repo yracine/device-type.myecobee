@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 1.9.3\n\n" +
+			paragraph "Version 1.9.4\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine/device-type.myecobee", style: "embedded", required: false, title: "More information...",
@@ -212,7 +212,32 @@ def setHumidityLevel() {
 
 	//  Polling of all devices
 
-	ecobee.poll()
+	def MAX_EXCEPTION_COUNT=5
+	String exceptionCheck, msg 
+	try {        
+		ecobee.poll()
+		exceptionCheck= thermostat.currentVerboseTrace.toString()
+		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
+			state?.exceptionCount=state.exceptionCount+1    
+			log.error "setHumidityLevel>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
+		} else {             
+			// reset exception counter            
+			state?.exceptionCount=0       
+		}                
+	} catch (e) {
+		state.exceptionCount=state.exceptionCount+1    
+		log.error "setHumidityLevel>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
+    }
+	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+		// need to authenticate again    
+		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		send "MonitorEcobeeHumidity> ${msg}"
+		log.error msg
+		return        
+	}    
+
 	try {    
 		outdoorSensor.refresh()
 	} catch (e) {
