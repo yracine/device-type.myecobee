@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9.6\n\n" +
+			paragraph "Version 1.9.7\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -279,7 +279,31 @@ def monitorAdjustTemp() {
 	}
 
 	//  Polling of the latest values at the thermostat and at the outdoor sensor
-	ecobee.poll()
+	def MAX_EXCEPTION_COUNT=5
+	String exceptionCheck, msg 
+	try {        
+		ecobee.poll()
+		exceptionCheck= thermostat.currentVerboseTrace.toString()
+    	if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
+			state?.exceptionCount=state.exceptionCount+1    
+			log.error "monitorAdjustTemp>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
+		} else {             
+			// reset exception counter            
+			state?.exceptionCount=0       
+		}                
+	} catch (e) {
+		state.exceptionCount=state.exceptionCount+1    
+		log.error "monitorAdjustTemp>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
+    }
+	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+		// need to authenticate again    
+		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		send "MonitorEcobeeTemp> ${msg}"
+		log.error msg
+		return        
+	}    
 	try {    
 		outdoorSensor.refresh()
 	} catch (e) {
