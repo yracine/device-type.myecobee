@@ -610,9 +610,7 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
 			thermostat.present()
 		}
             
-		if (detailedNotif == 'true') {
-			send("ecobeeSetZoneWithSchedule>set main thermostat ${thermostat} to ${mode} mode based on motion in all rooms")
-		}
+		send("ecobeeSetZoneWithSchedule>set main thermostat ${thermostat} to ${mode} mode based on motion in all rooms")
 		state?.programHoldSet=(mode=='present')?'Home': 'Away'    // set a state for further checking later
  		state?.programSetTime = now()
  		state?.programSetTimestamp = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
