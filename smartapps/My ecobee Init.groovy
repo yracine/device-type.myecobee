@@ -43,7 +43,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 1.9.7\n\n" +
+			paragraph "Version 1.9.8\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -414,7 +414,7 @@ def initialize() {
 
 def takeAction() {
 	log.trace "takeAction>begin"
-	def msg    
+	def msg, exceptionCheck    
 	def MAX_EXCEPTION_COUNT=5
 
 	def devices = thermostats.collect { dni ->
@@ -422,7 +422,7 @@ def takeAction() {
 		log.debug "takeAction>Looping thru thermostats, found id $dni, about to poll"
 		try {        
 			d.poll()
-			String exceptionCheck = d.currentVerboseTrace.toString()
+			exceptionCheck = d.currentVerboseTrace.toString()
 			if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 				(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
 			// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
@@ -440,7 +440,7 @@ def takeAction() {
 	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
 		atomicState.authToken= null                    
-		msg="too many exceptions/errors ({state?.exceptionCount}), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
 		send "MyEcobeeInit> ${msg}"
 		log.error msg
 	}    
