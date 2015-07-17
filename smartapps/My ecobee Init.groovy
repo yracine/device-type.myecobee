@@ -435,7 +435,7 @@ def takeAction() {
 		} catch (e) {
 			state.exceptionCount=state.exceptionCount+1    
 			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
-    	}
+		}
 	}
 	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
