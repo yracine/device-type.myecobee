@@ -283,7 +283,7 @@ def monitorAdjustTemp() {
 	String exceptionCheck, msg 
 	try {        
 		ecobee.poll()
-		exceptionCheck= thermostat.currentVerboseTrace.toString()
+		exceptionCheck= ecobee.currentVerboseTrace.toString()
 		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
 		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
