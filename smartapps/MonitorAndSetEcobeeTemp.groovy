@@ -284,7 +284,7 @@ def monitorAdjustTemp() {
 	try {        
 		ecobee.poll()
 		exceptionCheck= thermostat.currentVerboseTrace.toString()
-    	if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
 		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
 			state?.exceptionCount=state.exceptionCount+1    
@@ -655,7 +655,7 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified> currentProgName = $currentProgName"
 	log.trace "check_if_hold_justified> currentSetClimate = $currentSetClimate"
 	log.trace "check_if_hold_justified> outdoorTemp = $outdoorTemp°"
-/*	
+	
     log.trace "check_if_hold_justified> state.tempSensors = $state.tempSensors"
 	log.trace "check_if_hold_justified> ecobee's indoorTemp = $ecobeeTemp°"
 	log.trace "check_if_hold_justified> indoorTemps = $indoorTemps"
@@ -670,7 +670,7 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified> programHeatTemp = $programHeatTemp°"
 	log.trace "check_if_hold_justified> programCoolTemp = $programCoolTemp°"
 	log.trace "check_if_hold_justified>state=${state}"
-*/
+
 	if (detailedNotif == 'true') {
 		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,progHeatSetPoint ${programHeatTemp}°,progCoolSetPoint ${programCoolTemp}°")
 		send("MonitorEcobeeTemp>Hold justified? currentProgName ${currentProgName},indoorTemp ${ecobeeTemp}°,heatingSetPoint ${heatTemp}°,coolingSetPoint ${coolTemp}°")
