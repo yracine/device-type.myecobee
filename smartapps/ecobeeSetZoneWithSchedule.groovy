@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.1\n\n" +
+			paragraph "Version 1.2\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -410,7 +410,6 @@ def appTouch(evt) {
 
 
 def setZoneSettings() {
-
     
 	if (powerSwitch?.currentSwitch == "off") {
 		if (detailedNotif == 'true') {
@@ -418,8 +417,32 @@ def setZoneSettings() {
 		}
 		return
 	}
+	def MAX_EXCEPTION_COUNT=5
+	String exceptionCheck, msg 
+	try {        
+		thermostat.poll()
+		exceptionCheck= thermostat.currentVerboseTrace.toString()
+		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
+			state?.exceptionCount=state.exceptionCount+1    
+			log.error "setZoneSettings>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
+		} else {             
+			// reset exception counter            
+			state?.exceptionCount=0       
+		}                
+	} catch (e) {
+		state.exceptionCount=state.exceptionCount+1    
+		log.error "setZoneSettings>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
+	}
+	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+		// need to authenticate again    
+		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		send "ecobeeSetZoneWithSchedule> ${msg}"
+		log.error msg
+		return        
+	}    
 
-	thermostat.poll()
 	def scheduleProgramName = thermostat.currentClimateName
 
 	Boolean foundSchedule=false
