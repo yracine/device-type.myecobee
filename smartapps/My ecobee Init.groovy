@@ -43,7 +43,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 1.9.8\n\n" +
+			paragraph "Version 1.9.9\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -54,6 +54,9 @@ def about() {
 
 def otherSettings() {
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
+		section("Polling at which interval in minutes (range=[5..59],default=10 min.)?") {
+			input "givenInterval", "number", title:"Interval", required: false
+		}
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
 				false
@@ -66,7 +69,7 @@ def otherSettings() {
 }
 
 def authPage() {
-	log.debug "authPage()"
+	log.debug "authPage(),state.oauthTokenProvided=${state?.oauthTokenProvided}"
 
 	if (!atomicState.accessToken) {
 		log.debug "about to create access token"
@@ -74,30 +77,28 @@ def authPage() {
 		atomicState.accessToken = state.accessToken
 	}
 
-
 	def description = "Required"
 	def uninstallAllowed = false
-	def oauthTokenProvided = false
 
 	if (atomicState.authToken) {
+
 		// TODO: Check if it's valid
-		if(true) {
+		if (true) {
 			description = "You are connected."
 			uninstallAllowed = true
-			oauthTokenProvided = true
+			state?.oauthTokenProvided=true            
 		} else {
 			description = "Required" // Worth differentiating here vs. not having atomicState.authToken? 
-			oauthTokenProvided = false
 		}
 	}
 
 	def redirectUrl = oauthInitUrl()
+	log.debug "authPage>atomicState.authToken=${atomicState.authToken},state.oauthTokenProvided=${state?.oauthTokenProvided}, RedirectUrl = ${redirectUrl}"
 
-	log.debug "RedirectUrl = ${redirectUrl}"
 
 	// get rid of next button until the user is actually auth'd
 
-	if (!oauthTokenProvided) {
+	if (!state?.oauthTokenProvided) {
 
 		return dynamicPage(name: "auth", title: "Login", nextPage:null, uninstall:uninstallAllowed, submitOnChange: true) {
 			section(){
@@ -405,11 +406,16 @@ def initialize() {
 	create_child_devices()
     
 	takeAction()
-	// set up internal poll timer (by defaut= polling at 20 min. interval)
-	def pollTimer = 20
+	Integer delay = givenInterval ?: 10 // By default, do it every 10 min.
+	if ((delay < 5) || (delay>59)) {
+		state?.msg= "MyEcobeeInit>scheduling interval not in range (${delay} min), exiting..."
+		log.debug state.msg
+		runIn(30, "sendMsgWithDelay")
+ 		return
+	}
 
-	log.trace "setting poll to ${pollTimer}"
-	schedule("0 0/${pollTimer.toInteger()} * * * ?", takeAction)
+	log.trace "initialize>setting poll to ${delay}"
+	schedule("0 0/${delay} * * * ?", takeAction)
 }
 
 def takeAction() {
@@ -439,8 +445,9 @@ def takeAction() {
 	}
 	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
-		atomicState.authToken= null                    
-		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		atomicState.authToken=null                    
+		state?.oauthTokenProvided=false
+		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), press on 'ecobee' and re-login..." 
 		send "MyEcobeeInit> ${msg}"
 		log.error msg
 	}    
