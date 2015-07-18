@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.1.5
+ *  Version 2.1.6
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -948,10 +948,10 @@ private void generateEvent(Map results) {
 				String tempValueString 
 				Double tempValue 
 				if (scale == "F") {
-					tempValue = getTemperature(value).toDouble().round()
+					tempValue = getTemperature(value.toDouble()).round()
 					tempValueString = String.format('%2d', tempValue.intValue())            
 				} else {
-					tempValue = getTemperature(value).toDouble().round(1)
+					tempValue = getTemperature(value.toDouble()).round(1)
 					tempValueString = String.format('%2.1f', tempValue)
 				}
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
@@ -963,17 +963,17 @@ private void generateEvent(Map results) {
 
 			} else if ((name.toUpperCase().contains("TEMP")) || (name.toUpperCase().contains("SETPOINT"))) {  
                                 
-				Double tempValue = getTemperature(value).toDouble().round(1)
+				Double tempValue = getTemperature(value.toDouble()).round(1)
 				String tempValueString = String.format('%2.1f', tempValue)
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
                 
 				isDisplayed = isChange
 				sendEvent(name: name, value: tempValueString, unit: scale, displayed: isDisplayed)                                     									 
-			} else if (name.toUpperCase().contains("SPEED")) { // Temperature variable names contain 'temp' or 'setpoint'
+			} else if (name.toUpperCase().contains("SPEED")) {
 
 // 			Speed variable names contain 'speed'
 
- 				float speedValue = getSpeed(value).toFloat().round(1)
+ 				float speedValue = getSpeed(value.toFloat()).round(1)
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
@@ -1131,9 +1131,9 @@ private void api(method, args, success = {}) {
 		if (!refresh_tokens()) {
 			login()
 			if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
-				log.error ("api>not able to renew the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
+				log.error ("api>error: Unauthorized exception, not able to renew the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
 				sendEvent (name: "verboseTrace", 
-					value: "api>not able to renew the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
+					value: "api>error: Unauthorized exception, not able to renew the refresh token, need to re-authenticate with ecobee, run MyEcobeeInit....")         
 				return		
 			}
 		} else {
@@ -1144,9 +1144,9 @@ private void api(method, args, success = {}) {
 	}
 	if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
 
-		log.error ("api>found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+		log.error ("api>error: found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
 		sendEvent (name: "verboseTrace", 
-			value: "api>found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
+			value: "api>error: found a high number of exceptions since last refresh_tokens() call, probably need to re-authenticate with ecobee, run MyEcobeeInit....")         
 		state.exceptionCount=0
 	}    
 	def args_encoded = java.net.URLEncoder.encode(args.toString(), "UTF-8")
