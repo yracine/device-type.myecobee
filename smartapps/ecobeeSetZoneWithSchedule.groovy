@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.4\n\n" +
+			paragraph "Version 1.5\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -601,9 +601,16 @@ private void reset_state_program_values() {
 
 private def set_main_tstat_to_AwayOrPresent(mode) {
 
+	String currentProgName = thermostat.currentClimateName
+	if (((mode == 'away') && (currentProgName.toUpperCase()=='AWAY')) ||
+		((mode == 'present') && (currentProgName.toUpperCase()=='HOME')))  {
+		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode;the default program mode is already ${currentProgName}")
+		return    
+	}    
 	try {
     
 		if  (mode == 'away') {
+        
 			thermostat.away()
             
 		} else if (mode == 'present') {	
@@ -664,7 +671,7 @@ private void check_if_hold_justified() {
 		}    
 	}
 	if ((state?.programHoldSet == 'Home') && (!verify_presence_based_on_motion_in_rooms())) {
-		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()!='HOME')) {       
+		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()=='AWAY')) {       
 			log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
 			send("ecobeeSetZoneWithSchedule>resumed program, no motion detected")
