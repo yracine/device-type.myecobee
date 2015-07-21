@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.8\n\n" +
+			paragraph "Version 1.9\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -68,6 +68,10 @@ def generalSetupPage() {
 		section("Outdoor temp Sensor used for adjustment [optional]") {
 			input (name:"outTempSensor", type:"capability.temperatureMeasurement", required: false,
 					description:"optional")				            
+		}
+		section("Enable vent settings [optional, default=false]") {
+			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
+				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
 			input (name:"powerSwitch", type:"capability.switch", required: false)
@@ -450,6 +454,8 @@ def setZoneSettings() {
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 	def ventSwitchesOn = []
 
+	def setVentSettings = (setVentSettingsFlag) ?: 'false'
+    
 	for (int i = 1;((i <= settings.schedulesCount) && (i <= 12)); i++) {
 		def key = "scheduleName$i"
 		def scheduleName = settings[key]
@@ -529,9 +535,9 @@ def setZoneSettings() {
 			}        
             
 			// let's adjust the vent settings according to desired Temp
-            
-			adjust_vent_settings_in_zone(i)
-            
+			if (setVentSettings=='true') {            
+				adjust_vent_settings_in_zone(i)
+    		}        
 		}
 
 	} /* end for */ 	
@@ -542,7 +548,7 @@ def setZoneSettings() {
 		}
 		log.debug "setZoneSettings>No schedule applicable at this time ${nowInLocalTime}"
         
-	} else {
+	} else if (ventSettings == 'true') {
     
 		if (ventSwitchesOn != []) {
 			log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
