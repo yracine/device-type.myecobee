@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9.7\n\n" +
+			paragraph "Version 1.9.8\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -297,9 +297,9 @@ def monitorAdjustTemp() {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "monitorAdjustTemp>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
 		// need to authenticate again    
-		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
 		send "MonitorEcobeeTemp> ${msg}"
 		log.error msg
 		return        
