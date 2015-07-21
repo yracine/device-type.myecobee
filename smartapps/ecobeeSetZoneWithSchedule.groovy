@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.9\n\n" +
+			paragraph "Version 1.9.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -534,7 +534,7 @@ def setZoneSettings() {
             
 			}        
             
-			// let's adjust the vent settings according to desired Temp
+			// If required, let's adjust the vent settings according to desired Temp
 			if (setVentSettings=='true') {            
 				adjust_vent_settings_in_zone(i)
 			}        
@@ -656,7 +656,7 @@ private void check_if_hold_justified() {
 			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>resumed current program, motion detected")
+				send("ecobeeSetZoneWithSchedule>resumed default program as motion has been detected")
 			}
 			reset_state_program_values()
 		}                
@@ -666,7 +666,7 @@ private void check_if_hold_justified() {
 	} else if (state?.programHoldSet == 'Away') {
 		if (currentProgName.toUpperCase() == 'AWAY') {
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>hold no longer needed, program already in Away mode")
+				send("ecobeeSetZoneWithSchedule>'Away' hold no longer needed, program already in Away mode")
 			}
 			thermostat.resumeProgram("")
 			reset_state_program_values()
@@ -689,12 +689,12 @@ private void check_if_hold_justified() {
 			reset_state_program_values()
 		}
 	} else if (state?.programHoldSet == 'Home')  { 
-		if (currentProgName.toUpperCase() == 'HOME') {
-			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>hold no longer needed, program already in Home mode")
-			}
+		if (currentProgName.toUpperCase() != 'AWAY') {
 			reset_state_program_values()
 			thermostat.resumeProgram("")
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>'Home' hold no longer needed, resumed default program as motion has been detected")
+			}
 		} else {
 			log.trace("check_if_hold_justified>not quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Home' hold justified")
 			if (detailedNotif == 'true') {
