@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.5\n\n" +
+			paragraph "Version 1.6\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -641,17 +641,16 @@ private void check_if_hold_justified() {
 	log.trace "check_if_hold_justified> currentSetClimate = $currentSetClimate"
 	log.trace "check_if_hold_justified>state=${state}"
 	
-	if (detailedNotif == 'true') {
-		if (state?.programHoldSet) {
-        
-			send("ecobeeSetZoneWithSchedule>Hold ${state.programHoldSet} has been set")
-		}
+	if ((detailedNotif == 'true') && (state?.programHoldSet)) {
+		send("ecobeeSetZoneWithSchedule>Hold ${state.programHoldSet} has been set")
 	}
 	if ((state?.programHoldSet == 'Away') && (verify_presence_based_on_motion_in_rooms())) {
 		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()!='AWAY')) {       
 			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
-			send("ecobeeSetZoneWithSchedule>resumed current program, motion detected")
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>resumed current program, motion detected")
+			}
 			reset_state_program_values()
 		}                
  		else {	/* Climate was changed since the last climate set, just reset state program values */
@@ -674,7 +673,9 @@ private void check_if_hold_justified() {
 		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()=='AWAY')) {       
 			log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
-			send("ecobeeSetZoneWithSchedule>resumed program, no motion detected")
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>resumed program, no motion detected")
+			}                
 			reset_state_program_values()
 		}                	
 		else {	/* Climate was changed since the last climate set, just reset state program values */
@@ -764,7 +765,9 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 			}
 			log.debug("setRoomTstatSettings>in room ${roomName},${roomTstat}'s desiredHeat=${desiredHeat}")
 			roomTstat.setHeatingSetpoint(desiredHeat)
-			send("ecobeeSetZoneWithSchedule>in room ${roomName}, ${roomTstat}'s heating setPoint now =${desiredHeat}°")
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>in room ${roomName}, ${roomTstat}'s heating setPoint now =${desiredHeat}°")
+			}                
 		}
 	} else if (mode == 'cool') {
 
@@ -791,7 +794,9 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 			}
 			log.debug("setRoomTstatSettings>in room ${roomName}, ${roomTstat}'s desiredCool=${desiredCool}")
 			roomTstat.setCoolingSetpoint(desiredCool)
-			send("ecobeeSetZoneWithSchedule>in room ${roomName}, ${roomTstat}'s cooling setPoint now =${desiredCool}°")
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>in room ${roomName}, ${roomTstat}'s cooling setPoint now =${desiredCool}°")
+			}                
 		}
 	}
 }
@@ -903,9 +908,7 @@ private def set_fan_mode(indiceSchedule) {
 	def fanMode = settings[key]
 	key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
-    
-    
-    
+        
 	if (fanMode == null) {
 		return     
 	}
@@ -937,9 +940,7 @@ private def set_fan_mode(indiceSchedule) {
 		if (outdoorTemp < moreFanThreshold.toFloat()) {
 			fanMode='off'	// fan mode should be set then at 'off'			
 		}
-		if (detailedNotif == 'true') {
-			send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},outdoorTemp=$outdoorTemp, about to set fan mode to ${fanMode} at thermostat ${thermostat} as requested")
-		}
+		send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},outdoorTemp=$outdoorTemp, about to set fan mode to ${fanMode} at thermostat ${thermostat} as requested")
 	}    
 
 	try {
@@ -1136,7 +1137,9 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 
 		float targetTstatTemp = (desiredHeat - temp_diff).round(1)
 		thermostat?.setHeatingSetpoint(targetTstatTemp)
-		send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
+		}            
 		state.scheduleHeatSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
         
 	} else if (mode == 'cool') {
@@ -1146,7 +1149,9 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		log.debug("ecobeeSetZoneWithSchedule>schedule ${scheduleName}:max_temp_diff= ${max_temp_diff},temp_diff=${temp_diff} for cooling")
 		float targetTstatTemp = (desiredCool - temp_diff).round(1)
 		thermostat?.setCoolingSetpoint(targetTstatTemp)
-		send("ecobeeSetZoneWithSchedule>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
+		}            
 		state.scheduleCoolSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
 	}
 
