@@ -537,7 +537,7 @@ def setZoneSettings() {
 			// let's adjust the vent settings according to desired Temp
 			if (setVentSettings=='true') {            
 				adjust_vent_settings_in_zone(i)
-    		}        
+			}        
 		}
 
 	} /* end for */ 	
