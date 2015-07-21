@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.3\n\n" +
+			paragraph "Version 1.4\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -419,14 +419,23 @@ def onHandler(evt) {
 }
 
 
+def heatingSetpointHandler(evt) {
+	log.debug "heating Setpoint now: $evt.value"
+}
+def coolingSetpointHandler(evt) {
+	log.debug "cooling Setpoint now: $evt.value"
+}
+
 def initialize() {
 
 	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
 		subscribe(powerSwitch, "switch.on", onHandler, [filterEvents: false])
 	}
+	subscribe(thermostat, "heatingSetpoint", heatingSetpointHandler)    
+	subscribe(thermostat, "coolingSetpoint", coolingSetpointHandler)    
+
 	// Initialize state variables
-    
 	state.lastScheduleLastName=""
 	state.lastStartTime=null 
 	state.scheduleHeatSetpoint=0  
@@ -543,8 +552,6 @@ def setZoneSettings() {
 			if (doChange) {
             
 				foundSchedule=true
-				state.lastScheduleName = scheduleName
-				state.lastStartTime = startTimeToday.time
                 
 				if (detailedNotif == 'true') {
 					send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
@@ -557,6 +564,8 @@ def setZoneSettings() {
 				adjust_thermostat_setpoint_in_zone(i)
 				set_fan_mode(i)
  				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
+				state.lastScheduleName = scheduleName
+				state.lastStartTime = startTimeToday.time
 			} else {
 				if (detailedNotif == 'true') {
 					send("ScheduleTstatZones>schedule: ${scheduleName},change not scheduled at this time ${nowInLocalTime}...")
@@ -681,7 +690,6 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
 private def getSensorTempForAverage(indiceRoom, typeSensor='tempSensor') {
 	def key 
 	def currentTemp=null
-    
 	    
 	if (typeSensor == 'tempSensor') {
 		key = "tempSensor$indiceRoom"
@@ -1130,7 +1138,6 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			if (detailedNotif == 'true') {
 				send("ScheduleTstatZones>schedule ${scheduleName},zone ${zoneName}: all room Tstats set and setRoomThermostatsOnlyFlag= true, continue...")
 			}
-            
 		} else {
 
 			def indoorTemps = getAllTempsForAverage(indiceZone)
@@ -1197,8 +1204,10 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		thermostat?.setHeatingSetpoint(targetTstatTemp)
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
-		}            
-		state.scheduleHeatSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
+		}
+        if (scheduleName != state.lastScheduleLastName) {
+			state.scheduleHeatSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
+		}        
         
 	} else if (mode == 'cool') {
 
@@ -1233,7 +1242,9 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
 		}            
-		state.scheduleCoolSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
+        if (scheduleName != state.lastScheduleLastName) {
+			state.scheduleCoolSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
+		}        
 	}
 
 }
@@ -1324,9 +1335,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 					nbVents++                    
 				}
 			} /* end for ventSwitch */                    
-         
 		} /* end for rooms */
-		
 	} /* end for zones */
 
 
@@ -1429,7 +1438,6 @@ private def control_vent_switches_in_zone(indiceSchedule, switchLevel=100) {
 			def roomDetails=room.split(':')
 			def indiceRoom = roomDetails[0]
 			def roomName = roomDetails[1]
-
 
 			for (int j = 1;(j <= 5); j++)  {
 	                
