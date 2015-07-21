@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.1.7\n\n" +
+			paragraph "Version 1.1.8\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -316,9 +316,9 @@ def takeAction() {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "takeAction>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
 		// need to authenticate again    
-		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
 		send "ecobee3RemoteSensorInit> ${msg}"
 		log.error msg
 		return        
