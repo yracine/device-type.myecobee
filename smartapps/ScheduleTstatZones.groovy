@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.2\n\n" +
+			paragraph "Version 1.3\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -669,9 +669,7 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
 			thermostat.present()
 		}
             
-		if (detailedNotif == 'true') {
-			send("ScheduleTstatZones>set main thermostat ${thermostat} to ${mode} mode based on motion in all rooms")
-		}
+		send("ScheduleTstatZones>set main thermostat ${thermostat} to ${mode} mode based on motion in all rooms")
 		state.setPresentOrAway=mode    // set a state for further checking later
 	}    
 	catch (e) {
@@ -746,7 +744,9 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 			}
 			log.debug("setRoomTstatSettings>in room ${roomName},${roomTstat}'s desiredHeat=${desiredHeat}")
 			roomTstat.setHeatingSetpoint(desiredHeat)
-			send("ScheduleTstatZones>in room ${roomName}, ${roomTstat}'s heating setPoint now =${desiredHeat}°")
+			if (detailedNotif == 'true') {
+				send("ScheduleTstatZones>in room ${roomName}, ${roomTstat}'s heating setPoint now =${desiredHeat}°")
+			}                
 		}
 	} else if (mode == 'cool') {
 
@@ -773,7 +773,9 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 			}
 			log.debug("setRoomTstatSettings>in room ${roomName}, ${roomTstat}'s desiredCool=${desiredCool}")
 			roomTstat.setCoolingSetpoint(desiredCool)
-			send("ScheduleTstatZones>in room ${roomName}, ${roomTstat}'s cooling setPoint now =${desiredCool}°")
+			if (detailedNotif == 'true') {
+				send("ScheduleTstatZones>in room ${roomName}, ${roomTstat}'s cooling setPoint now =${desiredCool}°")
+			}                
 		}
 	}
 }
@@ -887,9 +889,7 @@ private def set_fan_mode(indiceSchedule) {
 	def fanMode = settings[key]
 	key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
-    
-    
-    
+
 	if (fanMode == null) {
 		return     
 	}
@@ -1024,8 +1024,6 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 		log.debug("setFanMode>not able to do a refresh() on $outTempSensor")
 	}
 	float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
-      
-
 	String currentMode = thermostat.currentThermostatMode.toString()
 	float currentHeatPoint = thermostat.currentHeatingSetpoint.toFloat().round(1)
 	float currentCoolPoint = thermostat.currentCoolingSetpoint.toFloat().round(1)
@@ -1197,7 +1195,9 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
 		float targetTstatTemp = (desiredHeat - temp_diff).round(1)
 		thermostat?.setHeatingSetpoint(targetTstatTemp)
-		send("ScheduleTstatZones>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
+		if (detailedNotif == 'true') {
+			send("ScheduleTstatZones>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
+		}            
 		state.scheduleHeatSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
         
 	} else if (mode == 'cool') {
@@ -1230,7 +1230,9 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
 		float targetTstatTemp = (desiredCool - temp_diff).round(1)
 		thermostat?.setCoolingSetpoint(targetTstatTemp)
-		send("ScheduleTstatZones>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
+		if (detailedNotif == 'true') {
+			send("ScheduleTstatZones>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
+		}            
 		state.scheduleCoolSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
 	}
 
