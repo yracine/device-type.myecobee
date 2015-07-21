@@ -1205,7 +1205,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
 		}
-        if (scheduleName != state.lastScheduleLastName) {
+		if (scheduleName != state.lastScheduleLastName) {
 			state.scheduleHeatSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
 		}        
         
@@ -1242,7 +1242,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
 		}            
-        if (scheduleName != state.lastScheduleLastName) {
+		if (scheduleName != state.lastScheduleLastName) {
 			state.scheduleCoolSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
 		}        
 	}
