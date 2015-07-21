@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.9.1\n\n" +
+			paragraph "Version 1.9.2\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -653,37 +653,37 @@ private void check_if_hold_justified() {
 	}
 	if ((state?.programHoldSet == 'Away') && (verify_presence_based_on_motion_in_rooms())) {
 		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()!='AWAY')) {       
-			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume program...")
+			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume ecobee program...")
 			thermostat.resumeProgram("")
-			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>resumed default program as motion has been detected")
-			}
 			reset_state_program_values()
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>resumed program to ecobee ${currentProgName} schedule as motion has been detected")
+			}
 		}                
  		else {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
 		}
 	} else if (state?.programHoldSet == 'Away') {
 		if (currentProgName.toUpperCase() == 'AWAY') {
-			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>'Away' hold no longer needed, program already in Away mode")
-			}
 			thermostat.resumeProgram("")
 			reset_state_program_values()
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>'Away' hold no longer needed, resumed program to ecobee ${currentProgName} schedule")
+			}
                 
 		} else {
-			log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, current program= ${currentProgName},'Away' hold justified")
-			send("ecobeeSetZoneWithSchedule>quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Away' hold justified")
+			log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName},'Away' hold justified")
+			send("ecobeeSetZoneWithSchedule>quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Away' hold justified")
 		}    
 	}
 	if ((state?.programHoldSet == 'Home') && (!verify_presence_based_on_motion_in_rooms())) {
 		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()=='AWAY')) {       
 			log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
-			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>resumed program, no motion detected")
-			}                
 			reset_state_program_values()
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>'Home' hold no longer needed, resumed ecobee program to ${currentProgName} schedule, no motion detected")
+			}                
 		}                	
 		else {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
@@ -693,12 +693,12 @@ private void check_if_hold_justified() {
 			reset_state_program_values()
 			thermostat.resumeProgram("")
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>'Home' hold no longer needed, resumed default program as motion has been detected")
+				send("ecobeeSetZoneWithSchedule>'Home' hold no longer needed, resumed ecobee program to ${currentProgName} schedule as motion has been detected")
 			}
 		} else {
-			log.trace("check_if_hold_justified>not quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Home' hold justified")
+			log.trace("check_if_hold_justified>not quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Home' hold justified")
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>not quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Home' hold justified")
+				send("ecobeeSetZoneWithSchedule>not quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Home' hold justified")
 			}
 		}
 	}   
@@ -1376,7 +1376,7 @@ private send(msg) {
 	if (sendPushMessage != "No") {
 		sendPush(msg)
 	}
-
+	
 	if (phone) {
 		log.debug("sending text message")
 		sendSms(phone, msg)
