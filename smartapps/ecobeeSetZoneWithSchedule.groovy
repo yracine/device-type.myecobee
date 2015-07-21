@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.7\n\n" +
+			paragraph "Version 1.8\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -436,9 +436,9 @@ def setZoneSettings() {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "setZoneSettings>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
 		// need to authenticate again    
-		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
 		send "ecobeeSetZoneWithSchedule> ${msg}"
 		log.error msg
 		return        
@@ -603,8 +603,9 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
 
 	String currentProgName = thermostat.currentClimateName
 	if (((mode == 'away') && (currentProgName.toUpperCase()=='AWAY')) ||
-		((mode == 'present') && (currentProgName.toUpperCase()=='HOME')))  {
-		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode;the default program mode is already ${currentProgName}")
+		((mode == 'present') && (currentProgName.toUpperCase()=='HOME')) || 
+		(currentProgName.toUpperCase()=='SLEEP'))  {
+		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode;the default program mode is ${currentProgName}")
 		return    
 	}    
 	try {
@@ -1001,7 +1002,8 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 	float currentCoolPoint = thermostat.currentCoolingSetpoint.toFloat().round(1)
 	float currentScheduleHeat = thermostat.currentProgramHeatTemp.toFloat().round(1)
 	float currentScheduleCool = thermostat.currentProgramCoolTemp.toFloat().round(1)
-	float targetTstatTemp    
+	float targetTstatTemp 
+    
 	log.debug "adjust_tstat_for_more_less_heat_cool>currentMode=$currentMode,outdoorTemp=$outdoorTemp,moreCoolThreshold=$moreCoolThreshold,  moreHeatThreshold=$moreHeatThreshold," +
 		"coolModeThreshold=$coolModeThreshold,heatModeThreshold=$heatModeThreshold,currentHeatSetpoint=$currentHeatPoint,currentCoolSetpoint=$currentCoolPoint"
 
@@ -1141,9 +1143,6 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		if (detailedNotif == 'true') {
 			send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
 		}            
-		if (scheduleName != state.lastScheduleName) {         
-			state.scheduleHeatSetpoint=targetTstatTemp // save the value for later processing 
-		}            
         
 	} else if (mode == 'cool') {
 
@@ -1155,9 +1154,6 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		if (detailedNotif == 'true') {
 			send("ecobeeSetZoneWithSchedule>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
 		}            
-		if (scheduleName != state.lastScheduleName) {         
-			state.scheduleCoolSetpoint=targetTstatTemp // save the value for later processing
-		}
 	}
 }
 
