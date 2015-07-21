@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 1.9.4\n\n" +
+			paragraph "Version 1.9.5\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine/device-type.myecobee", style: "embedded", required: false, title: "More information...",
@@ -230,9 +230,9 @@ def setHumidityLevel() {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "setHumidityLevel>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
 		// need to authenticate again    
-		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
 		send "MonitorEcobeeHumidity> ${msg}"
 		log.error msg
 		return        
