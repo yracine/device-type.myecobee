@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.4\n\n" +
+			paragraph "Version 1.5\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -1206,7 +1206,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			send("ScheduleTstatZones>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff.abs()}°) between all temp sensors in zone")
 		}
 		if (scheduleName != state.lastScheduleLastName) {
-			state.scheduleHeatSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
+			state.scheduleHeatSetpoint=desiredHeat // save the value for later processing in adjust_more_less_heat_cool()
 		}        
         
 	} else if (mode == 'cool') {
@@ -1243,7 +1243,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			send("ScheduleTstatZones>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${targetTstatTemp}°,adjusted by avg temp diff (${temp_diff}°) between all temp sensors in zone")
 		}            
 		if (scheduleName != state.lastScheduleLastName) {
-			state.scheduleCoolSetpoint=targetTstatTemp // save the value for later processing in adjust_more_less_heat_cool()
+			state.scheduleCoolSetpoint=desiredCool // save the value for later processing in adjust_more_less_heat_cool()
 		}        
 	}
 
