@@ -155,7 +155,7 @@ def initialize() {
     
 	subscribe(ecobee, "programHeatTemp", programHeatEvtHandler)
 	subscribe(ecobee, "programCoolTemp", programCoolEvtHandler)
-	subscribe(ecobee, "programCoolTemp", setClimateEvtHandler)
+	subscribe(ecobee, "setClimate", setClimateEvtHandler)
 
 	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
