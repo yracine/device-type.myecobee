@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.6\n\n" +
+			paragraph "Version 1.7\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -72,6 +72,10 @@ def generalSetupPage() {
 		}
 		section("Enable vent settings [optional, default=false]") {
 			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
+				description:"optional", metadata: [values: ["true", "false"]],required:false)
+		}
+		section("Enable fan/temp adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
+			input (name:"setAdjustmentFlag", title: "Enable fan/temp adjustment based on sensors?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
@@ -505,6 +509,7 @@ def setZoneSettings() {
 	def ventSwitchesOn = []
 
 	def setVentSettings = (setVentSettingsFlag) ?: 'false'
+	def adjustmentFlag = (setAdjustmentFlag)?: 'false'
     
 	for (int i = 1;((i <= settings.schedulesCount) && (i <= 12)); i++) {
         
@@ -568,8 +573,11 @@ def setZoneSettings() {
 				def ventSwitchesZoneSet= control_vent_switches_in_zone(i)
 				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 				// adjust the temperature at the thermostat(s) based on temp sensor if any
-				adjust_thermostat_setpoint_in_zone(i)
-				set_fan_mode(i)
+
+				if (adjustmentFlag == 'true') {                
+					adjust_thermostat_setpoint_in_zone(i)
+					set_fan_mode(i)
+				}                    
  				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 				state.lastScheduleName = scheduleName
 				state.lastStartTime = startTimeToday.time
@@ -602,13 +610,15 @@ def setZoneSettings() {
 			}            
 			if (isResidentPresent) {
             
-				// adjust the temperature at the thermostat(s) based on temp sensor if any
-				adjust_thermostat_setpoint_in_zone(i)
+				if (adjustmentFlag =='true') {            	
+					// adjust the temperature at the thermostat(s) based on temp sensor if any
+					adjust_thermostat_setpoint_in_zone(i)
                 
-				// let's adjust the thermostat's temp & mode settings according to outdoor temperature            
-				adjust_tstat_for_more_less_heat_cool(i)
-				// will override the fan settings if required (ex. more Fan Threshold is set)
-				set_fan_mode(i)
+					// let's adjust the thermostat's temp & mode settings according to outdoor temperature            
+					adjust_tstat_for_more_less_heat_cool(i)
+					// will override the fan settings if required (ex. more Fan Threshold is set)
+					set_fan_mode(i)
+				}                    
             
 			}        
 			// let's adjust the vent settings according to desired Temp
@@ -935,6 +945,12 @@ private def set_fan_mode(indiceSchedule) {
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>schedule ${scheduleName},outdoorTemp=$outdoorTemp, about to set fan mode to ${fanMode} at thermostat ${thermostat} as requested")
 		}
+	}    
+
+	def currentFanMode=thermostat.currentThermostatFanMode()
+	if ((fanMode == currentFanMode) || ((fanMode=='off') && (currentFanMode=='auto'))) {
+		log.debug("set_fan_mode>schedule ${scheduleName},fan already in $fanMode at thermostat ${thermostat}, exiting...")
+		return
 	}    
 
 	try {
