@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.7\n\n" +
+			paragraph "Version 1.8\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -569,12 +569,12 @@ def setZoneSettings() {
 					send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
 				}
         
-				// set the zoned vent switches to 'on'
-				def ventSwitchesZoneSet= control_vent_switches_in_zone(i)
-				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
-				// adjust the temperature at the thermostat(s) based on temp sensor if any
 
 				if (adjustmentFlag == 'true') {                
+					// set the zoned vent switches to 'on'
+					def ventSwitchesZoneSet= control_vent_switches_in_zone(i)
+					log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
+					// adjust the temperature at the thermostat(s) based on temp sensor if any
 					adjust_thermostat_setpoint_in_zone(i)
 					set_fan_mode(i)
 				}                    
