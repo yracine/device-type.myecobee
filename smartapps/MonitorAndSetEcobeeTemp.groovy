@@ -155,6 +155,7 @@ def initialize() {
     
 	subscribe(ecobee, "programHeatTemp", programHeatEvtHandler)
 	subscribe(ecobee, "programCoolTemp", programCoolEvtHandler)
+	subscribe(ecobee, "programCoolTemp", setClimateEvtHandler)
 
 	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
@@ -174,6 +175,9 @@ private def sendNotifDelayNotInRange() {
 	send "MonitorEcobeeTemp>scheduling delay (${givenInterval} min.) not in range, please restart..."    
 }
 
+def setClimateEvtHandler(evt) {
+	log.debug "SetClimateEvtHandler>$evt.name: $evt.value"
+}
 
 def programHeatEvtHandler(evt) {
 	log.debug "programHeatEvtHandler>$evt.name = $evt.value"
