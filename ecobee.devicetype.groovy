@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.1.6
+ *  Version 2.1.7
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -709,14 +709,14 @@ void quickSave() {
 	def quickSaveMap = ['coolingSetpoint': quickSaveCooling,		
 		'heatingSetpoint': quickSaveHeating,
 		'programScheduleName': "QuickSave",
-		'programDisplayName': "QuickSave"
+		'programNameForUI': "QuickSave"
 	]        
 	generateEvent(quickSaveMap)    
 }
   
 void setThisTstatClimate(climateName) {
 	def thermostatId= determine_tstat_id("") 	    
-	def currentProgram = device.currentValue("programScheduleName")
+	def currentProgram = device.currentValue("climateName")
 	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
 	if (currentProgramType == 'VACATION') {
 		if (settings.trace) {
@@ -731,11 +731,16 @@ void setThisTstatClimate(climateName) {
     
 		resumeProgram("")
 		setClimate(thermostatId, climateName)
-		sendEvent(name: 'programScheduleName', value: climateName)
-		if (climateName.toUpperCase().contains('AWAY')) { 
-			sendEvent(name: "presence", value: "non present")
-		} else {        
-			sendEvent(name: "presence", value: "present")
+		def exceptionCheck=device.currentValue("verboseTrace")
+		if (exceptionCheck.contains("done")) {
+        
+			sendEvent(name: 'programScheduleName', value: climateName)
+			sendEvent(name: 'programNameForUI', value: climateName)
+			if (climateName.toUpperCase().contains('AWAY')) { 
+				sendEvent(name: "presence", value: "non present")
+			} else {        
+				sendEvent(name: "presence", value: "present")
+			}
 		}            
 		poll() // to refresh the values in the UI
 	}
@@ -901,8 +906,7 @@ void poll() {
 		presence: (currentClimateTemplate.toUpperCase()!='AWAY')? "present":"not present",
 		heatStages:data.thermostatList[0].settings.heatStages.toString(),
 		coolStages:data.thermostatList[0].settings.coolStages.toString(),
-		climateName: currentClimate.name,
-		setClimate: currentClimateTemplate
+		climateName: currentClimate.name
 	]
          
 	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type.toUpperCase() == 'QUICKSAVE')) {
@@ -948,10 +952,10 @@ private void generateEvent(Map results) {
 				String tempValueString 
 				Double tempValue 
 				if (scale == "F") {
-					tempValue = getTemperature(value.toDouble()).round()
+					tempValue = getTemperature(value).toDouble().round()
 					tempValueString = String.format('%2d', tempValue.intValue())            
 				} else {
-					tempValue = getTemperature(value.toDouble()).round(1)
+					tempValue = getTemperature(value).toDouble().round(1)
 					tempValueString = String.format('%2.1f', tempValue)
 				}
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
@@ -963,7 +967,7 @@ private void generateEvent(Map results) {
 
 			} else if ((name.toUpperCase().contains("TEMP")) || (name.toUpperCase().contains("SETPOINT"))) {  
                                 
-				Double tempValue = getTemperature(value.toDouble()).round(1)
+				Double tempValue = getTemperature(value).toDouble().round(1)
 				String tempValueString = String.format('%2.1f', tempValue)
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
                 
@@ -973,7 +977,7 @@ private void generateEvent(Map results) {
 
 // 			Speed variable names contain 'speed'
 
- 				float speedValue = getSpeed(value.toFloat()).round(1)
+ 				float speedValue = getSpeed(value).toFloat().round(1)
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
