@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.9.2\n\n" +
+			paragraph "Version 1.9.3\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -71,6 +71,10 @@ def generalSetupPage() {
 		}
 		section("Enable vent settings [optional, default=false]") {
 			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
+				description:"optional", metadata: [values: ["true", "false"]],required:false)
+		}
+		section("Enable fan/temp adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
+			input (name:"setAdjustmentFlag", title: "Enable fan/temp adjustment based on sensors?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
@@ -455,6 +459,7 @@ def setZoneSettings() {
 	def ventSwitchesOn = []
 
 	def setVentSettings = (setVentSettingsFlag) ?: 'false'
+	def adjustmentFlag = (setAdjustmentFlag)?: 'false'
     
 	for (int i = 1;((i <= settings.schedulesCount) && (i <= 12)); i++) {
 		def key = "scheduleName$i"
@@ -491,11 +496,17 @@ def setZoneSettings() {
 				send("ecobeeSetZoneWithSchedule>running schedule ${scheduleName},about to set zone settings as requested")
 			}
         
-			// set the zoned vent switches to 'on'
-			def ventSwitchesZoneSet= control_vent_switches_in_zone(i)
+			if (setVentSettings=='true') {            
+				// set the zoned vent switches to 'on'
+				def ventSwitchesZoneSet= control_vent_switches_in_zone(i)
 			log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
-			// adjust the temperature at the thermostat(s) based on temp sensors if any
-			adjust_thermostat_setpoint_in_zone(i)
+			}				
+
+			if (adjustmentFlag == 'true') {
+				// adjust the temperature at the thermostat(s) based on temp sensors if any
+				adjust_thermostat_setpoint_in_zone(i)
+				set_fan_mode(i)
+			}                
  			ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 			state.lastScheduleName = scheduleName
 		} else if ((selectedClimate==scheduleProgramName) && (state?.lastScheduleName == scheduleName)) {
@@ -525,12 +536,14 @@ def setZoneSettings() {
 			}   
             
 			if (isResidentPresent) {
-				// adjust the temperature at the thermostat(s) based on temp sensors if any
-				adjust_thermostat_setpoint_in_zone(i)            
-				// let's adjust the thermostat's temp & mode settings according to outdoor temperature
-				adjust_tstat_for_more_less_heat_cool(i)
-				// will override the fan settings if required (ex. more Fan Threshold is set)
-				set_fan_mode(i)
+				if (adjustmentFlag == 'true') {
+					// adjust the temperature at the thermostat(s) based on temp sensors if any
+					adjust_thermostat_setpoint_in_zone(i)            
+					// let's adjust the thermostat's temp & mode settings according to outdoor temperature
+					adjust_tstat_for_more_less_heat_cool(i)
+					// will override the fan settings if required (ex. more Fan Threshold is set)
+					set_fan_mode(i)
+				}                    
             
 			}        
             
@@ -608,9 +621,9 @@ private void reset_state_program_values() {
 private def set_main_tstat_to_AwayOrPresent(mode) {
 
 	String currentProgName = thermostat.currentClimateName
-	if (((mode == 'away') && (currentProgName.toUpperCase()=='AWAY')) ||
-		((mode == 'present') && (currentProgName.toUpperCase()=='HOME')) || 
-		(currentProgName.toUpperCase()=='SLEEP'))  {
+	if (((mode == 'away') && (currentProgName.toUpperCase().contains('AWAY'))) ||
+		((mode == 'present') && (!currentProgName.toUpperCase().contains('AWAY'))) || 
+		(currentProgName.toUpperCase().contains('SLEEP')))  {
 		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode;the default program mode is ${currentProgName}")
 		return    
 	}    
@@ -651,8 +664,9 @@ private void check_if_hold_justified() {
 	if ((detailedNotif == 'true') && (state?.programHoldSet)) {
 		send("ecobeeSetZoneWithSchedule>Hold ${state.programHoldSet} has been set")
 	}
-	if ((state?.programHoldSet == 'Away') && (verify_presence_based_on_motion_in_rooms())) {
-		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()!='AWAY')) {       
+	Boolean residentPresent= verify_presence_based_on_motion_in_rooms()   
+	if ((state?.programHoldSet == 'Away') && (residentPresent)) {
+		if ((currentSetClimate.toUpperCase()=='AWAY') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume ecobee program...")
 			thermostat.resumeProgram("")
 			reset_state_program_values()
@@ -663,8 +677,8 @@ private void check_if_hold_justified() {
  		else {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
 		}
-	} else if (state?.programHoldSet == 'Away') {
-		if (currentProgName.toUpperCase() == 'AWAY') {
+	} else if ((state?.programHoldSet == 'Away') && (!residentPresent)) {
+		if ((currentSetClimate.toUpperCase()=='AWAY') && (currentProgName.toUpperCase().contains('AWAY'))) {       
 			thermostat.resumeProgram("")
 			reset_state_program_values()
 			if (detailedNotif == 'true') {
@@ -676,8 +690,8 @@ private void check_if_hold_justified() {
 			send("ecobeeSetZoneWithSchedule>quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Away' hold justified")
 		}    
 	}
-	if ((state?.programHoldSet == 'Home') && (!verify_presence_based_on_motion_in_rooms())) {
-		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase()=='AWAY')) {       
+	if ((state?.programHoldSet == 'Home') && (!residentPresent)) {
+		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase().contains('AWAY'))) {       
 			log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
 			reset_state_program_values()
@@ -688,10 +702,10 @@ private void check_if_hold_justified() {
 		else {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
 		}
-	} else if (state?.programHoldSet == 'Home')  { 
-		if (currentProgName.toUpperCase() != 'AWAY') {
-			reset_state_program_values()
+	} else if ((state?.programHoldSet == 'Home') && (residentPresent)) { 
+		if ((currentSetClimate.toUpperCase() == 'AWAY') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 			thermostat.resumeProgram("")
+			reset_state_program_values()
 			if (detailedNotif == 'true') {
 				send("ecobeeSetZoneWithSchedule>'Home' hold no longer needed, resumed ecobee program to ${currentProgName} schedule as motion has been detected")
 			}
@@ -945,11 +959,16 @@ private def set_fan_mode(indiceSchedule) {
 		float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
         
 		if (outdoorTemp < moreFanThreshold.toFloat()) {
-			fanMode='off'	// fan mode should be set then at 'off'			
+			fanMode='auto'	// fan mode should be set then at 'auto'			
 		}
 		send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},outdoorTemp=$outdoorTemp, about to set fan mode to ${fanMode} at thermostat ${thermostat} as requested")
 	}    
 
+	def currentFanMode=thermostat.currentThermostatFanMode()
+	if (fanMode == currentFanMode) {
+		log.debug("set_fan_mode>schedule ${scheduleName},fan already in $fanMode at thermostat ${thermostat}, exiting...")
+		return
+	}    
 	try {
 		thermostat?.setThermostatFanMode(fanMode)
 		if (detailedNotif == 'true') {
