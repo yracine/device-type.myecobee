@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.9.3\n\n" +
+			paragraph "Version 1.9.5\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -73,8 +73,12 @@ def generalSetupPage() {
 			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
-		section("Enable fan/temp adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
-			input (name:"setAdjustmentFlag", title: "Enable fan/temp adjustment based on sensors?", type:"Boolean",
+		section("Enable temp adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
+			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment set in rooms based on sensors?", type:"Boolean",
+				description:"optional", metadata: [values: ["true", "false"]],required:false)
+		}
+		section("Enable fan adjustment based on outdoor temp sensors [optional, default=false]") {
+			input (name:"setAdjustmentFanFlag", title: "Enable fan adjustment set in rooms based on sensors?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
@@ -389,6 +393,9 @@ def onHandler(evt) {
 	setZoneSettings()
 }
 
+def setClimateHandler(evt) {
+	log.debug "SetClimate, $evt.name: $evt.value"
+}
 
 def initialize() {
 
@@ -396,6 +403,7 @@ def initialize() {
 		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
 		subscribe(powerSwitch, "switch.on", onHandler, [filterEvents: false])
 	}
+	subscribe(thermostat, "setClimate", setClimateHandler)
 	// Initialize state variables
     
 	state.lastScheduleLastName=""
@@ -459,7 +467,8 @@ def setZoneSettings() {
 	def ventSwitchesOn = []
 
 	def setVentSettings = (setVentSettingsFlag) ?: 'false'
-	def adjustmentFlag = (setAdjustmentFlag)?: 'false'
+	def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
+	def adjustmentFanFlag = (setAdjustmentFanFlag)?: 'false'
     
 	for (int i = 1;((i <= settings.schedulesCount) && (i <= 12)); i++) {
 		def key = "scheduleName$i"
@@ -499,15 +508,17 @@ def setZoneSettings() {
 			if (setVentSettings=='true') {            
 				// set the zoned vent switches to 'on'
 				def ventSwitchesZoneSet= control_vent_switches_in_zone(i)
-			log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
+				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 			}				
 
-			if (adjustmentFlag == 'true') {
+			if (adjustmentTempFlag == 'true') {
 				// adjust the temperature at the thermostat(s) based on temp sensors if any
 				adjust_thermostat_setpoint_in_zone(i)
-				set_fan_mode(i)
 			}                
- 			ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
+			if (adjustmentFanFlag == 'true') {
+				set_fan_mode(i)
+			}
+			ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 			state.lastScheduleName = scheduleName
 		} else if ((selectedClimate==scheduleProgramName) && (state?.lastScheduleName == scheduleName)) {
 			// We're in the middle of a schedule run
@@ -536,14 +547,16 @@ def setZoneSettings() {
 			}   
             
 			if (isResidentPresent) {
-				if (adjustmentFlag == 'true') {
+				if (adjustmentTempFlag == 'true') {
 					// adjust the temperature at the thermostat(s) based on temp sensors if any
 					adjust_thermostat_setpoint_in_zone(i)            
 					// let's adjust the thermostat's temp & mode settings according to outdoor temperature
 					adjust_tstat_for_more_less_heat_cool(i)
 					// will override the fan settings if required (ex. more Fan Threshold is set)
-					set_fan_mode(i)
 				}                    
+				if (adjustmentFanFlag == 'true') {
+					set_fan_mode(i)
+				}
             
 			}        
             
@@ -621,6 +634,12 @@ private void reset_state_program_values() {
 private def set_main_tstat_to_AwayOrPresent(mode) {
 
 	String currentProgName = thermostat.currentClimateName
+	String currentProgType = thermostat.currentProgramType
+    
+	if (currentProgType.toUpperCase()=='VACATION') {
+		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode;the current program type is ${currentProgType}")
+		return    
+	}    
 	if (((mode == 'away') && (currentProgName.toUpperCase().contains('AWAY'))) ||
 		((mode == 'present') && (!currentProgName.toUpperCase().contains('AWAY'))) || 
 		(currentProgName.toUpperCase().contains('SLEEP')))  {
@@ -961,7 +980,6 @@ private def set_fan_mode(indiceSchedule) {
 		if (outdoorTemp < moreFanThreshold.toFloat()) {
 			fanMode='auto'	// fan mode should be set then at 'auto'			
 		}
-		send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},outdoorTemp=$outdoorTemp, about to set fan mode to ${fanMode} at thermostat ${thermostat} as requested")
 	}    
 
 	def currentFanMode=thermostat.currentThermostatFanMode()
