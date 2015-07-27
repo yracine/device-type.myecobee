@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 1.9.9\n\n" +
+			paragraph "Version 2.0\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -687,7 +687,7 @@ private def check_if_hold_justified() {
 	reset_state_motions()
 	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
   		Boolean residentAway=residentsHaveBeenQuiet()
-		if ((state?.programHoldSet == 'Away') && (!residentAway)) {
+		if (((state?.programHoldSet == 'Away') || (currentSetClimate.toUpperCase()=='AWAY')) && (!residentAway)) {
 			if ((currentSetClimate.toUpperCase()=='AWAY') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 				log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resumed ${currentProgName} program")
 				ecobee.resumeProgram("")
@@ -699,7 +699,7 @@ private def check_if_hold_justified() {
  			else {	/* Climate was changed since the last climate set, just reset state program values */
 				reset_state_program_values()
  			}
-		} else if ((state?.programHoldSet == 'Away') && (residentAway)) {
+		} else if (((state?.programHoldSet == 'Away') || (currentSetClimate.toUpperCase()=='AWAY')) && (residentAway)) {
 			if ((currentSetClimate.toUpperCase()=='AWAY') && (currentProgName.toUpperCase().contains('AWAY'))) {       
 				ecobee.resumeProgram("")
 				reset_state_program_values()
@@ -713,7 +713,7 @@ private def check_if_hold_justified() {
 				return // hold justified, no more adjustments
 			}    
 		}
-		if ((state?.programHoldSet == 'Home') && (residentAway)) {
+		if (((state?.programHoldSet == 'Home') || (currentSetClimate.toUpperCase()=='HOME')) && (residentAway)) {
 			if ((currentSetClimate.toUpperCase()=='HOME') && (currentProgName.toUpperCase().contains('AWAY'))) {       
 				log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
 				ecobee.resumeProgram("")
@@ -725,7 +725,7 @@ private def check_if_hold_justified() {
 			else {	/* Climate was changed since the last climate set, just reset state program values */
 				reset_state_program_values()
 			}
-		} else if ((state?.programHoldSet == 'Home') && (!residentAway)) { 
+		} else if (((state?.programHoldSet == 'Home') || (currentSetClimate.toUpperCase()=='HOME')) && (!residentAway)) { 
 			if ((currentSetClimate.toUpperCase()=='HOME') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 				ecobee.resumeProgram("")
 				reset_state_program_values()
