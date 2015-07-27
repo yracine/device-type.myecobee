@@ -691,7 +691,7 @@ private void check_if_hold_justified() {
 	log.trace "check_if_hold_justified>state=${state}"
 	
 	if ((detailedNotif == 'true') && (state?.programHoldSet)) {
-		send("ecobeeSetZoneWithSchedule>Hold ${state.programHoldSet} has been set")
+		send("ecobeeSetZoneWithSchedule>${state.programHoldSet} hold has been set")
 	}
 	Boolean residentPresent= verify_presence_based_on_motion_in_rooms()   
 	if ((currentSetClimate.toUpperCase()=='AWAY')  && (residentPresent)) {
