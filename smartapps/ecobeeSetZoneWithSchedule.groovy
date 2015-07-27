@@ -634,6 +634,7 @@ private void reset_state_program_values() {
 private def set_main_tstat_to_AwayOrPresent(mode) {
 
 	String currentProgName = thermostat.currentClimateName
+	String currentSetClimate = thermostat.currentSetClimate
 	String currentProgType = thermostat.currentProgramType
     
 	if (currentProgType.toUpperCase()=='VACATION') {
@@ -646,6 +647,15 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
 		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode;the default program mode is ${currentProgName}")
 		return    
 	}    
+    
+	if (((state?.programHoldSet == 'Away') && (currentSetClimate.toUpperCase() == 'AWAY'))  ||
+		((state?.programHoldSet == 'Home') && (currentSetClimate.toUpperCase() == 'HOME'))) {
+    
+		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode; ${currentSetClimate} 'Hold' already set")
+		return    
+    
+	}    
+    
 	try {
     
 		if  (mode == 'away') {
