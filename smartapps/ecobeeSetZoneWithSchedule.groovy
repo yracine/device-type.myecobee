@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.9.7\n\n" +
+			paragraph "Version 1.9.8\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -684,8 +684,8 @@ private void check_if_hold_justified() {
 		send("ecobeeSetZoneWithSchedule>Hold ${state.programHoldSet} has been set")
 	}
 	Boolean residentPresent= verify_presence_based_on_motion_in_rooms()   
-	if (((state?.programHoldSet == 'Away')  || (currentSetClimate.toUpperCase()=='AWAY'))  && (residentPresent)) {
-		if ((currentSetClimate.toUpperCase()=='AWAY') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
+	if ((currentSetClimate.toUpperCase()=='AWAY')  && (residentPresent)) {
+		if ((state?.programHoldSet == 'Away') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume ecobee program...")
 			thermostat.resumeProgram("")
 			reset_state_program_values()
@@ -696,8 +696,8 @@ private void check_if_hold_justified() {
  		else {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
 		}
-	} else if (((state?.programHoldSet == 'Away') || (currentSetClimate.toUpperCase()=='AWAY')) && (!residentPresent)) {
-		if ((currentSetClimate.toUpperCase()=='AWAY') && (currentProgName.toUpperCase().contains('AWAY'))) {       
+	} else if ((currentSetClimate.toUpperCase()=='AWAY') && (!residentPresent)) {
+		if ((state?.programHoldSet == 'Away') && (currentProgName.toUpperCase().contains('AWAY'))) {       
 			thermostat.resumeProgram("")
 			reset_state_program_values()
 			if (detailedNotif == 'true') {
@@ -709,8 +709,8 @@ private void check_if_hold_justified() {
 			send("ecobeeSetZoneWithSchedule>quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Away' hold justified")
 		}    
 	}
-	if (((state?.programHoldSet == 'Home') || (currentSetClimate.toUpperCase()=='HOME')) && (!residentPresent)) {
-		if ((currentSetClimate.toUpperCase() == 'AWAY') && (currentProgName.toUpperCase().contains('AWAY'))) {       
+	if ((currentSetClimate.toUpperCase()=='HOME') && (!residentPresent)) {
+		if ((state?.programHoldSet == 'Home')  && (currentProgName.toUpperCase().contains('AWAY'))) {       
 			log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
 			reset_state_program_values()
@@ -721,8 +721,8 @@ private void check_if_hold_justified() {
 		else {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
 		}
-	} else if (((state?.programHoldSet == 'Home') || (currentSetClimate.toUpperCase()=='HOME')) && (residentPresent)) { 
-		if ((currentSetClimate.toUpperCase() == 'HOME') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
+	} else if ((currentSetClimate.toUpperCase()=='HOME') && (residentPresent)) { 
+		if ((state?.programHoldSet == 'Home')  && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 			thermostat.resumeProgram("")
 			reset_state_program_values()
 			if (detailedNotif == 'true') {
