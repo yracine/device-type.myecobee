@@ -453,7 +453,6 @@ def initialize() {
 	state.scheduleHeatSetpoint=0  
 	state.scheduleCoolSetpoint=0    
 	state.setPresentOrAway=''
-	reset_state_program_values()  
 
 	Integer delay =5 				// wake up every 5 minutes to apply zone settings if any
 	log.debug "Scheduling setZoneSettings every ${delay} minutes to check for zone settings to be applied"
