@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 2.1\n\n" +
+			paragraph "Version 2.2\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -696,7 +696,7 @@ private def check_if_hold_justified() {
 				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
 				return // no more adjustments
 			}                
- 			else {	/* Climate was changed since the last climate set, just reset state program values */
+ 			else if (state?.programHoldSet == 'Away') {	/* Climate was changed since the last climate set, just reset state program values */
 				reset_state_program_values()
  			}
 		} else if ((currentSetClimate.toUpperCase()=='AWAY') && (residentAway)) {
@@ -706,8 +706,7 @@ private def check_if_hold_justified() {
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>'Away' hold no longer needed, resumed ${currentProgName} program ")
 				}
-        
-			} else {
+			} else if (state?.programHoldSet == 'Away') {
 				log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, current program= ${currentProgName},'Away' hold justified")
 				send("MonitorEcobeeTemp>quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Away' hold justified")
 				return // hold justified, no more adjustments
@@ -721,8 +720,7 @@ private def check_if_hold_justified() {
 				reset_state_program_values()
 				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat b/c of low outdoor temp ) 
 				return // no more adjustments
-			}                	
-			else {	/* Climate was changed since the last climate set, just reset state program values */
+			}  else if (state?.programHoldSet == 'Home') {	/* Climate was changed since the last climate set, just reset state program values */
 				reset_state_program_values()
 			}
 		} else if ((currentSetClimate.toUpperCase()=='HOME') && (!residentAway)) { 
@@ -734,7 +732,7 @@ private def check_if_hold_justified() {
 				}
  				check_if_hold_needed()   // check if another type of hold is now needed (ex. more heat b/c of low outdoor temp ) 
 				return
-			} else {
+			} else if (state?.programHoldSet == 'Home') {
 				log.trace("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Home' hold justified")
 				if (detailedNotif == 'true') {
 					send("MonitorEcobeeTemp>not quiet since ${state.programSetTimestamp}, current program= ${currentProgName}, 'Home' hold justified")
