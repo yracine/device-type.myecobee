@@ -50,7 +50,7 @@ def generalSetupPage() {
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Main ecobee thermostat at home") {
-			input (name:"thermostat", type: "capability.thermostat", title: "Which main ecobee thermostat?")
+			input (name:"thermostat", type: "device.myEcobeeDevice", title: "Which main ecobee thermostat?")
 		}
 		section("Rooms count") {
 			input (name:"roomsCount", title: "Rooms count (max=16)?", type: "number",refreshAfterSelection: true)
