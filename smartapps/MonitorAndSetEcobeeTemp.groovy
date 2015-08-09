@@ -40,14 +40,14 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 2.2\n\n" +
+			paragraph "Version 2.2.1\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
 			description: "http://github.com/yracine/device-type.myecobee"
 		}
 		section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
-			input "ecobee", "capability.thermostat", title: "Which Ecobee?"
+			input "ecobee", "device.myEcobeeDevice", title: "Which Ecobee?"
 		}
 		section("For more heating in cold season, outdoor temp's threshold [default <= 10°F/-17°C]") {
 			input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
