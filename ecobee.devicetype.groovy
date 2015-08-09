@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.1.8
+ *  Version 2.1.9
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -155,6 +155,8 @@ metadata {
 		attribute "remoteSensorMaxTemp", "string"
 		attribute "remoteSensorMaxHumidity", "string"
 
+		command "poll"
+		command "refresh"        
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
