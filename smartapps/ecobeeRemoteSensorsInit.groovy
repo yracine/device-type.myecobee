@@ -29,14 +29,14 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.1.8\n\n" +
+			paragraph "Version 1.1.9\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Select the ecobee thermostat") {
-			input "ecobee", "capability.thermostat", title: "Which ecobee thermostat?"
+			input "ecobee", "device.myEcobeeDevice", title: "Which ecobee thermostat?"
 
 		}
 		section("Polling ecobee3's remote3 sensor(s) at which interval in minutes (range=[15..59],default =30 min.)?") {
