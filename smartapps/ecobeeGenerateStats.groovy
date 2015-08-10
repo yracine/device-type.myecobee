@@ -27,7 +27,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 1.9.1\n\n" +
+		paragraph "Version 1.9.2\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -79,6 +79,12 @@ def initialize() {
 
 	schedule("0 0 1 * * ?", dailyRun)    
 	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
+	subscribe(app, appTouch)
+    
+}
+
+def appTouch(evt) {
+	generateStats()
 }
 
 void dailyRun() {
