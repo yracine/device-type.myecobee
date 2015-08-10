@@ -41,14 +41,14 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 1.9.5\n\n" +
+			paragraph "Version 1.9.6\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine/device-type.myecobee", style: "embedded", required: false, title: "More information...",
 			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Monitor & set the ecobee thermostat's dehumidifer/humidifier/HRV/ERV") {
-			input "ecobee", "device.myEcobeeDevice", title: "Ecobee?"
+			input "ecobee", "capability.thermostat", title: "Ecobee?"
 		}
 		section("To this humidity level") {
 			input "givenHumidityLevel", "number", title: "Humidity level (default=calculated based on outside temp)", required: false
