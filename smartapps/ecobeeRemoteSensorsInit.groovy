@@ -36,7 +36,7 @@ preferences {
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Select the ecobee thermostat") {
-			input "ecobee", "device.myEcobeeDevice", title: "Which ecobee thermostat?"
+			input "ecobee", "capability.thermostat", title: "Which ecobee thermostat?"
 
 		}
 		section("Polling ecobee3's remote3 sensor(s) at which interval in minutes (range=[15..59],default =30 min.)?") {
