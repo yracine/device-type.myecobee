@@ -50,7 +50,7 @@ def generalSetupPage() {
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Main ecobee thermostat at home") {
-			input (name:"thermostat", type: "device.myEcobeeDevice", title: "Which main ecobee thermostat?")
+			input (name:"thermostat", type: "capability.thermostat", title: "Which main ecobee thermostat?")
 		}
 		section("Rooms count") {
 			input (name:"roomsCount", title: "Rooms count (max=16)?", type: "number",refreshAfterSelection: true)
@@ -410,7 +410,8 @@ def initialize() {
 	state.scheduleHeatSetpoint=0  
 	state.scheduleCoolSetpoint=0    
 	state.setPresentOrAway=''
-	reset_state_program_values()    
+	reset_state_program_values()  
+	state?.exceptionCount=0	
 
 	Integer delay =5 				// wake up every 5 minutes to apply zone settings if any
 	log.debug "Scheduling setZoneSettings every ${delay} minutes to check for zone settings to be applied"
@@ -437,7 +438,7 @@ def setZoneSettings() {
 	def MAX_EXCEPTION_COUNT=5
 	String exceptionCheck, msg 
 	try {        
-		thermostat.poll()
+		thermostat.refresh()
 		exceptionCheck= thermostat.currentVerboseTrace.toString()
 		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
