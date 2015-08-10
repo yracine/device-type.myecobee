@@ -40,14 +40,14 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 2.2.1\n\n" +
+			paragraph "Version 2.2.2\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
 			description: "http://github.com/yracine/device-type.myecobee"
 		}
 		section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
-			input "ecobee", "device.myEcobeeDevice", title: "Which Ecobee?"
+			input "ecobee", "device.MyEcobeeDevice", title: "Which Ecobee?"
 		}
 		section("For more heating in cold season, outdoor temp's threshold [default <= 10°F/-17°C]") {
 			input "givenMoreHeatThreshold", "decimal", title: "Outdoor temp's threshold for more heating", required: false
@@ -138,6 +138,7 @@ def initialize() {
  	reset_state_program_values()
 	reset_state_motions()
 	reset_state_tempSensors()
+	state?.exceptionCount=0    
     
 	Integer delay = givenInterval ?: 59 // By default, do it every hour
 	if ((delay < 10) || (delay>59)) {
@@ -298,7 +299,7 @@ def monitorAdjustTemp() {
 			state?.exceptionCount=0       
 		}                
 	} catch (e) {
-		state.exceptionCount=state.exceptionCount+1    
+		state?.exceptionCount=state?.exceptionCount+1    
 		log.error "monitorAdjustTemp>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
 	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
