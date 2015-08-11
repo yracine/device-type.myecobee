@@ -155,8 +155,6 @@ metadata {
 		attribute "remoteSensorMaxTemp", "string"
 		attribute "remoteSensorMaxHumidity", "string"
 
-		command "poll"
-		command "refresh"        
 		command "setFanMinOnTime"
 		command "setCondensationAvoid"
 		command "createVacation"
