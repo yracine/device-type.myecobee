@@ -599,7 +599,7 @@ def setZoneSettings() {
         
 			foundSchedule=true
 			def setAwayOrPresent = (setAwayOrPresentFlag)?:'false'
-			Boolean isResidentPresent=true
+			boolean isResidentPresent=true
             
 			if (setAwayOrPresent=='true') {
 	            
@@ -1293,7 +1293,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 	def indoor_all_zones_temps=[]
 	def indiceRoom
-	Boolean closedAllVentsInZone=true
+	boolean closedAllVentsInZone=true
 	int nbVents=0
 	def switchLevel    
     
