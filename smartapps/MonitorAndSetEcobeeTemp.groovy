@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 2.2.2\n\n" +
+			paragraph "Version 2.2.3\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information...", 
@@ -687,7 +687,7 @@ private def check_if_hold_justified() {
 	}
 	reset_state_motions()
 	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
-  		Boolean residentAway=residentsHaveBeenQuiet()
+  		boolean residentAway=residentsHaveBeenQuiet()
 		if ((currentSetClimate.toUpperCase()=='AWAY') && (!residentAway)) {
 			if ((state?.programHoldSet == 'Away') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 				log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resumed ${currentProgName} program")
