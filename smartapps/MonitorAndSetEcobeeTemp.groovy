@@ -468,7 +468,7 @@ private def check_if_hold_needed() {
 	reset_state_motions()
 	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
   
-  		Boolean residentAway=residentsHaveBeenQuiet()
+  		boolean residentAway=residentsHaveBeenQuiet()
 		if ((!currentProgName.toUpperCase().contains('AWAY')) && (!residentAway)) {
 
 			ecobee.present()            
