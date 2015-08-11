@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.9.4\n\n" +
+			paragraph "Version 1.9.5\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -504,7 +504,7 @@ def setZoneSettings() {
 
 	def currTime = now()
 	String startInLocalTime,nowInLocalTime
-	Boolean foundSchedule=false
+	boolean foundSchedule=false
 
 	/* Poll the thermostat to get latest values */
 	thermostat.poll()
@@ -522,7 +522,7 @@ def setZoneSettings() {
 		key = "scheduleName$i"
 		def scheduleName = settings[key]
 
-		Boolean foundMode=false        
+		boolean foundMode=false        
 		selectedModes.each {
         
 			if (it==location.mode) {
@@ -742,7 +742,7 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 
 	def scale = getTemperatureScale()
 	float desiredHeat, desiredCool
-	Boolean setClimate = false
+	boolean setClimate = false
 	def key = "zoneName$indiceZone"
 	def zoneName = settings[key]
 
@@ -817,7 +817,7 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 }
 
 private def setAllRoomTstatsSettings(indiceZone) {
-	def foundRoomTstat = false
+	boolean foundRoomTstat = false
 
 	def key = "includedRooms$indiceZone"
 	def rooms = settings[key]
