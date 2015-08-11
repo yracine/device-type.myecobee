@@ -20,7 +20,7 @@ definition(
 	name: "ecobeeResumeProg",
 	namespace: "yracine",
 	author: "Yves Racine",
-	description: "resumes your ecobee's scheduled program when a presence is back home",
+	description: "resumes your ecobee's scheduled program when a presence is back home or when motion is detected or when a ST hello mode is changed",
 	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
@@ -30,8 +30,8 @@ preferences {
 
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
-			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home"
-			paragraph "Version 2.0\n\n" +
+			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
+			paragraph "Version 2.1\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -43,7 +43,7 @@ preferences {
 			input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat(s)", multiple: true
 		}
 		section("When one of these people arrive at home") {
-			input "people", "capability.presenceSensor", multiple: true
+			input "people", "capability.presenceSensor", multiple: true, required:false
 		}
 		section("Or there is motion at home on these sensors [optional]") {
 			input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
