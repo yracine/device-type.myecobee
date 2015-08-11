@@ -1,8 +1,8 @@
 /***
- *  My Ecobee Device
+ *  My Ecobee Device (Lite Version)
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.1.9
+ *  Version 2.2
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -38,7 +38,7 @@ preferences {
 }
 metadata {
 	// Automatically generated. Make future change here.
-	definition(name: "My Ecobee Device", author: "Yves Racine",  namespace: "yracine") {
+	definition(name: "My Ecobee Device Lite", author: "Yves Racine",  namespace: "yracine") {
 		capability "Relative Humidity Measurement"
 		capability "Temperature Measurement"
 		capability "Polling"
@@ -226,14 +226,16 @@ metadata {
 		// TODO: define status and reply messages here
 	}
 	tiles {
-		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 1,
+		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 2,
 			height: 1, decoration: "flat") {
 			state "default", label: '${currentValue}\n'
 		}
+/*        
 		valueTile("groups", "device.groups", inactiveLabel: false, width: 1, 
 			height: 1, decoration: "flat") {
 			state "default", label: '${currentValue}'
 		}
+*/        
 		valueTile("temperature", "device.temperatureDisplay", width: 2, height: 2,
 			canChangeIcon: false) {
 //		If one prefers Celsius over Farenheits, just comment out the temperature in Farenheits 
@@ -374,6 +376,7 @@ metadata {
 			state "default", label: 'ResumeProg', action: "resumeThisTstat", 
             		icon: "st.Office.office7", backgroundColor: "#ffffff"
 		}
+/*        
 		// Weather Tiles
 		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
 			decoration: "flat") {
@@ -441,22 +444,24 @@ metadata {
 			height: 1, decoration: "flat") {
 			state "default", label: 'PoP\n${currentValue}%', unit: "%"
 		}
-        
+*/        
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
 			state "default", action: "polling.poll", icon: "st.secondary.refresh"
 		}
 		main "temperature"
-		details(["name", "groups", "mode", "temperature", "fanMode", "switchProgram",
+		details(["name", "mode", "temperature", "fanMode", "switchProgram",
 			"heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown",
 			"coolingSetpoint", "coolLevelUp",
 			"equipStatus", "programEndTimeMsg", "humidity", "alerts",
 			"fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
 			"programHeatTemp", "resProgram",            
+/*            
 			"weatherIcon", "weatherDateTime", "weatherConditions",
 			"weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
 			"weatherTempLow", "weatherPressure", "weatherWindDirection",
 			"weatherWindSpeed", "weatherPop", 
+*/            
 			"refresh"
 		])
 	}
@@ -754,8 +759,7 @@ def parse(String description) {
 }
 
 void poll() {
-	def tstatId,ecobeeType
-    
+	def tstatId,ecobeeType    
 	def thermostatId= determine_tstat_id("") 	    
 
 
@@ -789,7 +793,7 @@ void poll() {
 	// determine if there is an event running
     
 	Integer indiceEvent = 0    
-	Boolean foundEvent = false
+	boolean foundEvent = false
 	if (data.thermostatList[0].events.size > 0) {
 		for (i in 0..data.thermostatList[0].events.size() - 1) {
 			if (data.thermostatList[0].events[i].running) {
@@ -881,6 +885,7 @@ void poll() {
 			data.thermostatList[0].settings.fanMinOnTime.toString(),
 		programFanMode: (data.thermostatList[0].settings.hvacMode == 'cool')? currentClimate.coolFan : currentClimate.heatFan,
 		programNameForUI: progDisplayName,
+/*
 		weatherStation:data.thermostatList[0].weather.weatherStation,
 		weatherSymbol:data.thermostatList[0].weather.forecasts[0].weatherSymbol.toString(),
 		weatherTemperature:data.thermostatList[0].weather.forecasts[0].temperature,
@@ -898,12 +903,13 @@ void poll() {
 		weatherRelativeHumidity:data.thermostatList[0].weather.forecasts[0].relativeHumidity,
 		weatherWindDirection:data.thermostatList[0].weather.forecasts[0].windDirection + " Winds",
 		weatherPop:data.thermostatList[0].weather.forecasts[0].pop.toString(),        
+*/        
 		programCoolTemp:(currentClimate.coolTemp / 10),										// divided by 10 for display
 		programHeatTemp:(currentClimate.heatTemp / 10),
 		programCoolTempDisplay:(currentClimate.coolTemp / 10),								// divided by 10 for display
 		programHeatTempDisplay:(currentClimate.heatTemp / 10),
 		alerts: getAlerts(),
-		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
+//		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
 		climateList: getClimateList(),
 		presence: (currentClimateTemplate.toUpperCase()!='AWAY')? "present":"not present",
 		heatStages:data.thermostatList[0].settings.heatStages.toString(),
@@ -1277,7 +1283,7 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 			includeSettings: 'true',
 			includeRuntime: 'true',
 			includeProgram: 'true',           
-			includeWeather: 'true',            
+//			includeWeather: 'true',            
 			includeAlerts: 'true',
 			includeEvents: 'true',
 			includeEquipmentStatus: 'true',
@@ -2601,7 +2607,7 @@ void generateReportSensorStatsEvents(sensorId, startDateTime, endDateTime, start
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
 	int beginInt, endInt
-	Boolean foundSensor=false
+	boolean foundSensor=false
     
 	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
 
@@ -2852,12 +2858,14 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 					.desiredCool / 10
 				data.thermostatList[0].runtime.desiredHeat = data.thermostatList[0].runtime
 					.desiredHeat / 10
+/*                    
 				data.thermostatList[0].weather.forecasts[0].temperature = data.thermostatList[
 					0].weather.forecasts[0].temperature / 10
 				data.thermostatList[0].weather.forecasts[0].tempLow = data.thermostatList[
 					0].weather.forecasts[0].tempLow / 10
 				data.thermostatList[0].weather.forecasts[0].tempHigh = data.thermostatList[
 					0].weather.forecasts[0].tempHigh / 10
+*/
 				data.thermostatList[0].settings.quickSaveSetBack = data.thermostatList[0].settings
 					.quickSaveSetBack / 10
 				data.thermostatList[0].settings.quickSaveSetForward = data.thermostatList[
