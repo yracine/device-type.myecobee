@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 1.9.9\n\n" +
+			paragraph "Version 2.0\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -463,7 +463,7 @@ def setZoneSettings() {
 
 	def scheduleProgramName = thermostat.currentClimateName
 
-	Boolean foundSchedule=false
+	boolean foundSchedule=false
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 	def ventSwitchesOn = []
 
@@ -478,7 +478,7 @@ def setZoneSettings() {
 		key = "selectedMode$i"
 		def selectedModes = settings[key]
 
-		Boolean foundMode=false        
+		boolean foundMode=false        
 		selectedModes.each {
         
 			if (it==location.mode) {
@@ -526,7 +526,7 @@ def setZoneSettings() {
 
 			foundSchedule=true   
 			def setAwayOrPresent = (setAwayOrPresentFlag)?:'false'
-			Boolean isResidentPresent=true
+			boolean isResidentPresent=true
             
             
 			if (setAwayOrPresent=='true') {
@@ -698,7 +698,7 @@ private void check_if_hold_justified() {
 	if ((detailedNotif == 'true') && (state?.programHoldSet)) {
 		send("ecobeeSetZoneWithSchedule>${state.programHoldSet} hold has been set")
 	}
-	Boolean residentPresent= verify_presence_based_on_motion_in_rooms()   
+	boolean residentPresent= verify_presence_based_on_motion_in_rooms()   
 	if ((currentSetClimate.toUpperCase()=='AWAY')  && (residentPresent)) {
 		if ((state?.programHoldSet == 'Away') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume ecobee program...")
@@ -781,7 +781,7 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 
 	def scale = getTemperatureScale()
 	float desiredHeat, desiredCool
-	Boolean setClimate = false
+	boolean setClimate = false
 	def key = "zoneName$indiceZone"
 	def zoneName = settings[key]
 
@@ -856,7 +856,7 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 }
 
 private def setAllRoomTstatsSettings(indiceZone) {
-	def foundRoomTstat = false
+	boolean foundRoomTstat = false
 
 	def key = "includedRooms$indiceZone"
 	def rooms = settings[key]
@@ -1228,7 +1228,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 	def indoor_all_zones_temps=[]
 	def indiceRoom
-	Boolean closedAllVentsInZone=true
+	boolean closedAllVentsInZone=true
 	int nbVents=0
 	def switchLevel    
     
