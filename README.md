@@ -1,4 +1,4 @@
-# device-type.myecobee           Ecobee-Smartthings integration
+# device-type.myecobee           Ecobee-SmartThings integration
 
 My Ecobee Device:  Custom ecobee device to enable more smart thermostat's capabilities within SmartThings 
 
