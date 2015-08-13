@@ -1,6 +1,6 @@
 # device-type.myecobee           Ecobee-Smartthings integration
 
-My Ecobee Device:  Custom ecobee device to enable more smart thermostat's capabilities within Smartthings 
+My Ecobee Device:  Custom ecobee device to enable more smart thermostat's capabilities within SmartThings 
 
 Author:             Yves Racine
 
