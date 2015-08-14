@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.2
+ *  Version 2.2.1
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -716,7 +716,7 @@ void quickSave() {
   
 void setThisTstatClimate(climateName) {
 	def thermostatId= determine_tstat_id("") 	    
-	def currentProgram = device.currentValue("climateName")
+	def currentProgram = device.currentValue("programScheduleName")
 	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
 	if (currentProgramType == 'VACATION') {
 		if (settings.trace) {
