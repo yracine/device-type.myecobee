@@ -100,7 +100,7 @@ def sensorTriggered(evt) {
 		}
 		clearStatus()
 	} else if (evt.value == "open" && state.status != "scheduled") {
-    	save_tstats_mode()
+		save_tstats_mode()
 		runIn(freq, takeAction, [overwrite: false])
 		state.status = "scheduled"
 		log.debug "$theSensor will be checked every ${(freq/60)} minute(s)"
@@ -110,7 +110,7 @@ def sensorTriggered(evt) {
 def takeAction() {
 	def freq = (frequency) ? (frequency * 60) : 60
 	def maxNotif = (givenMaxNotif) ?: 5
-    def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
+	def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
 	def contactState = theSensor.currentState("contact")
 	def msg
     
