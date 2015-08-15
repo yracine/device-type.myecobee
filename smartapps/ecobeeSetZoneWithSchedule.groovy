@@ -305,7 +305,7 @@ def schedulesSetup(params) {
 	dynamicPage(name: "schedulesSetup", title: "Schedule Setup") {
 		section("Schedule ${indiceSchedule} Setup") {
 			input (name:"scheduleName${indiceSchedule}", title: "Schedule Name", type: "text",
-            	defaultValue:settings."scheduleName${indiceSchedule}")
+				defaultValue:settings."scheduleName${indiceSchedule}")
 		}
 		section("Schedule ${indiceSchedule}-Select the program schedule(s) at ecobee thermostat for the included zone(s)") {
 			input (name:"givenClimate${indiceSchedule}", type:"enum", title: "Which ecobee program? ", options: ecobeePrograms,  
@@ -442,7 +442,7 @@ def setZoneSettings() {
 		exceptionCheck= thermostat.currentVerboseTrace.toString()
 		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
-		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
+			// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
 			state?.exceptionCount=state.exceptionCount+1    
 			log.error "setZoneSettings>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
 		} else {             
@@ -691,7 +691,7 @@ private void check_if_hold_justified() {
 	String ecobeeMode = thermostat.currentThermostatMode.toString()
 	log.trace "check_if_hold_justified> location.mode = $location.mode"
 	log.trace "check_if_hold_justified> ecobee Mode = $ecobeeMode"
-		log.trace "check_if_hold_justified> currentProgName = $currentProgName"
+    log.trace "check_if_hold_justified> currentProgName = $currentProgName"
 	log.trace "check_if_hold_justified> currentSetClimate = $currentSetClimate"
 	log.trace "check_if_hold_justified>state=${state}"
 	
@@ -1167,7 +1167,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 
 	float currentTemp = thermostat?.currentTemperature.toFloat().round(1)
 	String mode = thermostat?.currentThermostatMode.toString()
-	//	This is the avg indoor temp based on indoor temp sensors in all rooms in the zone
+	// This is the avg indoor temp based on indoor temp sensors in all rooms in the zone
 	log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},all temps collected from sensors=${indoor_all_zones_temps}")
 	if (indoor_all_zones_temps != [] ) {
 		avg_indoor_temp = (indoor_all_zones_temps.sum() / indoor_all_zones_temps.size()).round(1)
@@ -1300,10 +1300,8 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 					log.debug "adjust_vent_settings_in_zone>in zone=${zoneName},room ${roomName},set ${ventSwitch} at switchLevel =${switchLevel}%"
 					nbVents++                    
 				}
-			} /* end for ventSwitch */                    
-         
+			} /* end for ventSwitch */                             
 		} /* end for rooms */
-		
 	} /* end for zones */
 
 	if (closedAllVentsInZone) {
@@ -1358,7 +1356,6 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 					}                
 				}
 			} /* end for ventSwitch */                    
-
 		}  /* end for rooms */          
 	} /* end for zones */
 
