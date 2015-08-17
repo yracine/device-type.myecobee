@@ -2671,7 +2671,9 @@ private float calculate_report_stats(component, startInterval, endInterval, type
 			max = Math.max(rowValue,max)
 			min = (min==null) ? rowValue : Math.min(rowValue,min)
 		} catch (any) {
-			log.debug "calculate_report_stats> no values ($rowDetails) for $component at $i"
+			if (settings.trace) {
+				log.debug "calculate_report_stats> no values ($rowDetails) for $component at $i"
+			}
 			continue
 		}	
 	}
