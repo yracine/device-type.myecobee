@@ -98,7 +98,7 @@ void dailyRun() {
 }
 
 
-private String formatDateInLocalTime(dateInString, timezone='') {
+private String formatISODateInLocalTime(dateInString, timezone='') {
 	def myTimezone=(timezone)?TimeZone.getTimeZone(timezone):location.timeZone 
 	if ((dateInString==null) || (dateInString.trim()=="")) {
 		return (new Date().format("yyyy-MM-dd HH:mm:ss", myTimezone))
@@ -124,21 +124,21 @@ void generateStats() {
 	String timezone = new Date().format("zzz", location.timeZone)
 	String dateAtMidnight = dateInLocalTime + " 00:00 " + timezone    
 	if (settings.trace) {
-		log.debug("get_all_detailed_trips_info>date at Midnight in UTC= ${dateAtMidnight}")
+		log.debug("generateStats>date at Midnight= ${dateAtMidnight}")
 	}
 	Date endDate = formatDate(dateAtMidnight) 
 	Date startDate = endDate -1
     
 	if (settings.givenStartDate != null) { 
 		String dateTime = givenStartDate + " " + givenStartTime + " " + timezone
-		log.debug( "Start datetime= ${dateTime}" )
+		log.debug( "generateStats>Start datetime= ${dateTime}" )
  		startDate = formatDate(dateTime)
 		dateTime = givenEndDate  + " " + givenEndTime + " " + timezone
-		log.debug( "End datetime= ${dateTime}" )
+		log.debug( "generateStats>End datetime= ${dateTime}" )
 		endDate = formatDate(dateTime)
 	}
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
-	log.debug("local date/time= ${nowInLocalTime}, date/time startDate in UTC = ${String.format('%tF %<tT',startDate)}," +
+	log.debug("generateStats>local date/time= ${nowInLocalTime}, date/time startDate in UTC = ${String.format('%tF %<tT',startDate)}," +
 		"date/time endDate in UTC= ${String.format('%tF %<tT', endDate)}")
         
  	// Get the auxHeat1's runtime for startDate-endDate period
