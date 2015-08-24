@@ -14,6 +14,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+import java.text.SimpleDateFormat 
 definition(
     name: "ecobeeGenerateStats",
     namespace: "yracine",
@@ -27,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 1.9.2\n\n" +
+		paragraph "Version 1.9.3\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -38,13 +39,13 @@ preferences {
 		input "ecobee", "device.myEcobeeDevice", title: "Ecobee?"
 
 	}
-	section("Start date for the initial run, format = DD-MM-YYYY") {
+	section("Start date for the initial run, format = YYYY-MM-DD") {
 		input "givenStartDate", "text", title: "Beginning Date"
 	}        
 	section("Start time for initial run HH:MM (24HR)") {
 		input "givenStartTime", "text", title: "Beginning time"	
 	}        
-	section("End date for the initial run = DD-MM-YYYY") {
+	section("End date for the initial run = YYYY-MM-DD") {
 		input "givenEndDate", "text", title: "End Date"
 	}        
 	section("End time for the initial run (24HR)" ) {
@@ -95,18 +96,46 @@ void dailyRun() {
 	generateStats()
     
 }
+
+
+private String formatDateInLocalTime(dateInString, timezone='') {
+	def myTimezone=(timezone)?TimeZone.getTimeZone(timezone):location.timeZone 
+	if ((dateInString==null) || (dateInString.trim()=="")) {
+		return (new Date().format("yyyy-MM-dd HH:mm:ss", myTimezone))
+	}    
+	SimpleDateFormat ISODateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+	Date ISODate = ISODateFormat.parse(dateInString)
+	String dateInLocalTime =new Date(ISODate.getTime()).format("yyyy-MM-dd HH:mm:ss", myTimezone)
+	log.debug("formatDateInLocalTime>dateInString=$dateInString, dateInLocalTime=$dateInLocalTime")    
+	return dateInLocalTime
+}
+
+
+private def formatDate(dateString) {
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm zzz")
+	Date aDate = sdf.parse(dateString)
+	return aDate
+}
+
+
 void generateStats() {
     
-	Date endDate = new Date().clearTime()
-	Date startDate = (endDate -1).clearTime()
-
-	if (settings.givenStartDate != null) { // Custom report, not daily one
-		String dateTime = givenStartDate + " " + givenStartTime
+	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
+	String timezone = new Date().format("zzz", location.timeZone)
+	String dateAtMidnight = dateInLocalTime + " 00:00 " + timezone    
+	if (settings.trace) {
+		log.debug("get_all_detailed_trips_info>date at Midnight in UTC= ${dateAtMidnight}")
+	}
+	Date endDate = formatDate(dateAtMidnight) 
+	Date startDate = endDate -1
+    
+	if (settings.givenStartDate != null) { 
+		String dateTime = givenStartDate + " " + givenStartTime + " " + timezone
 		log.debug( "Start datetime= ${dateTime}" )
- 		startDate = new Date().parse('d-M-yyyy H:m', dateTime)
-		dateTime = givenEndDate  + " " + givenEndTime
+ 		startDate = formatDate(dateTime)
+		dateTime = givenEndDate  + " " + givenEndTime + " " + timezone
 		log.debug( "End datetime= ${dateTime}" )
-		endDate = new Date().parse('d-M-yyyy H:m', dateTime)
+		endDate = formatDate(dateTime)
 	}
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 	log.debug("local date/time= ${nowInLocalTime}, date/time startDate in UTC = ${String.format('%tF %<tT',startDate)}," +
