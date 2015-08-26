@@ -938,8 +938,7 @@ private void generateEvent(Map results) {
 	if (settings.trace) {
 		log.debug "generateEvent>parsing data $results"
 	}
-    
-    def scale = getTemperatureScale()
+	def scale = getTemperatureScale()
     
 	if (results) {
 		results.each { name, value ->
