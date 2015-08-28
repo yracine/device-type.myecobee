@@ -45,7 +45,7 @@ preferences {
 		section("When one of these people arrive at home") {
 			input "people", "capability.presenceSensor", multiple: true, required:false
 		}
-		section("And/Or there is motion at home on these sensors [optional]") {
+		section("Or there is motion at home on these sensors [optional]") {
 			input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
 		}
 		section("False alarm threshold [defaults = 3 minutes]") {
@@ -76,7 +76,7 @@ def selectModes() {
 
 	return dynamicPage(name: "selectModes", title: "Select Modes", install: false, uninstall: false, nextPage:
 			"Notifications") {
-		section("And/Or when SmartThings' hello home mode changes to (ex.'Home')[optional]") {
+		section("Or when SmartThings' hello home mode changes to (ex.'Home')[optional]") {
 			input "newMode", "enum", options: enumModes, multiple:true, required: false
 		}
 	}
