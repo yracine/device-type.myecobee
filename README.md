@@ -188,7 +188,7 @@ Change your ecobee climate (Away,Home) according to your hello home mode.
 
 /****************************************************
 
-Use presence sensors to set a target climate or heating/cooling setpoints based on your presence/absence.
+Use presence/motion sensors or ST hello modes to set a target climate or heating/cooling setpoints based on your presence/absence.
 
 /****************************************************
 
