@@ -28,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 1.9.3\n\n" +
+		paragraph "Version 1.9.4\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -40,16 +40,16 @@ preferences {
 
 	}
 	section("Start date for the initial run, format = YYYY-MM-DD") {
-		input "givenStartDate", "text", title: "Beginning Date"
+		input "givenStartDate", "text", title: "Beginning Date [default=yesterday]"
 	}        
 	section("Start time for initial run HH:MM (24HR)") {
-		input "givenStartTime", "text", title: "Beginning time"	
+		input "givenStartTime", "text", title: "Beginning time [default=00:00]"	
 	}        
 	section("End date for the initial run = YYYY-MM-DD") {
-		input "givenEndDate", "text", title: "End Date"
+		input "givenEndDate", "text", title: "End Date [default=today]"
 	}        
 	section("End time for the initial run (24HR)" ) {
-		input "givenEndTime", "text", title: "End time"
+		input "givenEndTime", "text", title: "End time [default=00:00]"
 	}        
 	section( "Notifications" ) {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
@@ -123,25 +123,23 @@ void generateStats() {
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
 	String timezone = new Date().format("zzz", location.timeZone)
 	String dateAtMidnight = dateInLocalTime + " 00:00 " + timezone    
-	if (settings.trace) {
-		log.debug("generateStats>date at Midnight= ${dateAtMidnight}")
-	}
+	log.debug("generateStats>date at Midnight= ${dateAtMidnight}")
 	Date endDate = formatDate(dateAtMidnight) 
 	Date startDate = endDate -1
-    
-	if (settings.givenStartDate != null) { 
-		String dateTime = givenStartDate + " " + givenStartTime + " " + timezone
-		log.debug( "generateStats>Start datetime= ${dateTime}" )
- 		startDate = formatDate(dateTime)
-		dateTime = givenEndDate  + " " + givenEndTime + " " + timezone
-		log.debug( "generateStats>End datetime= ${dateTime}" )
-		endDate = formatDate(dateTime)
-	}
-	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
-	log.debug("generateStats>local date/time= ${nowInLocalTime}, date/time startDate in UTC = ${String.format('%tF %<tT',startDate)}," +
-		"date/time endDate in UTC= ${String.format('%tF %<tT', endDate)}")
         
- 	// Get the auxHeat1's runtime for startDate-endDate period
+	def givenStartDate = (settings.givenStartDate) ?: dateInLocalTime
+	def givenStartTime=(settings.givenStartTime) ?:"00:00"    
+	def dateTime = givenStartDate + " " + givenStartTime + " " + timezone
+	startDate = formatDate(dateTime)
+	log.debug("generateStats>start dateTime = ${dateTime}, startDate in UTC = ${startDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+    
+	def givenEndDate = (settings.givenEndDate) ?: (endDate).format("yyyy-MM-dd", location.timeZone) 
+	def givenEndTime=(settings.givenEndTime) ?:"00:00"    
+	dateTime = givenEndDate + " " + givenEndTime + " " + timezone
+	endDate = formatDate(dateTime)
+	log.debug("generateStats>end dateTime = ${dateTime}, endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+
+	// Get the auxHeat1's runtime for startDate-endDate period
 	def component = "auxHeat1"
 	generateRuntimeReport(component,startDate, endDate)
 	float runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
