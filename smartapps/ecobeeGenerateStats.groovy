@@ -28,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 1.9.4\n\n" +
+		paragraph "Version 1.9.5\n\n" +
 			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 			"Copyright©2014 Yves Racine"
 		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -127,13 +127,13 @@ void generateStats() {
 	Date endDate = formatDate(dateAtMidnight) 
 	Date startDate = endDate -1
         
-	def givenStartDate = (settings.givenStartDate) ?: dateInLocalTime
+	def givenStartDate = (settings.givenStartDate) ?: startDate.format("yyyy-MM-dd", location.timeZone)
 	def givenStartTime=(settings.givenStartTime) ?:"00:00"    
 	def dateTime = givenStartDate + " " + givenStartTime + " " + timezone
 	startDate = formatDate(dateTime)
 	log.debug("generateStats>start dateTime = ${dateTime}, startDate in UTC = ${startDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
     
-	def givenEndDate = (settings.givenEndDate) ?: (endDate).format("yyyy-MM-dd", location.timeZone) 
+	def givenEndDate = (settings.givenEndDate) ?: endDate.format("yyyy-MM-dd", location.timeZone) 
 	def givenEndTime=(settings.givenEndTime) ?:"00:00"    
 	dateTime = givenEndDate + " " + givenEndTime + " " + timezone
 	endDate = formatDate(dateTime)
@@ -247,7 +247,7 @@ void generateStats() {
 
 private void generateRuntimeReport(component, startDate, endDate) {
 
-	ecobee.getReportData("", startDate, endDate, 0, null, component,false)
+	ecobee.getReportData("", startDate, endDate, null, null, component,false)
 	ecobee.generateReportRuntimeEvents(component, startDate,endDate, 0, null,'daily')
 
 }
