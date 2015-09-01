@@ -198,4 +198,15 @@ Use presence/motion sensors or ST hello modes to set a target climate or heating
 
 This smartapp allows a ST user to set the ecobee thermostat(s) to a given climate (Away,Home,Awake,Sleep, other custom programs) at a given day&time.
 
+
+/****************************************************
+
+<b>g) ecobeeSetZoneWithSchedule</b>
+
+/****************************************************
+
+
+The smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
+
+
 And many others...
