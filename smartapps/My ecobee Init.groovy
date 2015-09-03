@@ -201,16 +201,9 @@ def getEcobeeThermostats(String type="") {
 		httpGet(deviceListParams) { resp ->
 
 			if (resp.status == 200) {
-/*        
-        		int i=0    // Used to simulate many thermostats
-*/
 				resp.data.thermostatList.each { stat ->
 					def dni = [ app.id, stat.name, stat.identifier ].join('.')
 					stats[dni] = getThermostatDisplayName(stat)
-/*
-					dni = [ app.id, stat.name, i,stat.identifier ].join('.')    // Used to simulate many thermostats     
-					stats[dni] = getThermostatDisplayName(stat)
-*/
 				}
 			} else {
 				log.debug "http status: ${resp.status}"
