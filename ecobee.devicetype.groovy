@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.2.2
+ *  Version 2.2.3
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -772,7 +772,7 @@ void setThisTstatClimate(climateName) {
 		resumeProgram("")
 		setClimate(thermostatId, climateName)
 		def exceptionCheck=device.currentValue("verboseTrace")
-		if (exceptionCheck.contains("setHold>done")) {
+		if (exceptionCheck.contains("setClimate>done")) {
         
 			sendEvent(name: 'programScheduleName', value: climateName)
 			sendEvent(name: 'programNameForUI', value: climateName)
@@ -1062,7 +1062,7 @@ private def getAlerts() {
 	if (data.thermostatList[0].alerts.size() > 0) {
 		alerts = 'Alert(s) '
 		for (i in 0..data.thermostatList[0].alerts.size() - 1) {
-			alerts = (i > 0) ? ' \n' + alerts + data.thermostatList[0].alerts[i].notificationType :
+			alerts = (i > 0) ? ', \n' + alerts + data.thermostatList[0].alerts[i].notificationType :
 				alerts +
 				data.thermostatList[0].alerts[i].notificationType
 		}
