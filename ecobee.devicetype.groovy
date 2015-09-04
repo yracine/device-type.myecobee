@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.2.3
+ *  Version 2.2.4
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -205,7 +205,7 @@ metadata {
 		command "away"
 		command "present"
 		command "home"
-		command "sleep"
+		command "asleep"
 		command "quickSave"
 		command "setThisTstatClimate"
 		command "setThermostatSettings"
@@ -716,7 +716,7 @@ void home() {
 	setThisTstatClimate("Home")
 
 }
-void sleep() {
+void asleep() {
 	setThisTstatClimate("Sleep")
 }
 void quickSave() {
@@ -752,9 +752,11 @@ void quickSave() {
 		'programNameForUI': "QuickSave"
 	]        
 	generateEvent(quickSaveMap)    
+	    
 }
   
 void setThisTstatClimate(climateName) {
+
 	def thermostatId= determine_tstat_id("") 	    
 	def currentProgram = device.currentValue("programScheduleName")
 	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
