@@ -41,9 +41,11 @@ e) Hit the create button at the bottom
 
 f) Hit the "publish/for me" button at the top right corner (in the code window)
 
+
 /*********************************************************************************************
 
 <b>2) Create a new smartapp (My ecobee Init)</b>
+
 /*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/apps
