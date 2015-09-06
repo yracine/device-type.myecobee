@@ -84,19 +84,21 @@ You should already have an ecobee username and password, if not go to https://ww
 
 Go through the authentication process using My ecobee Init.
 
-If needed, watch "how to setup ecobee" video (but use My ecobee Init instead of the Smarttings labs script) as
-the authentication process is similar.
+If needed, watch "how to setup ecobee" video (but use My ecobee Init instead of the Smarttings labs script) as the authentication process is similar.
 
 http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
 After being connected, click 'Next' and select your ecobee thermostat(s) (SMART, SMART-SI, ecobee3, EMS) 
-that you want to control from Smartthings.
+that you want to control from Smartthings and, then press 'done' when finish.
 
 /*********************************************************************************************
 
 <b>5) Your device(s) should now be ready to process your commands</b>
 /*********************************************************************************************
 
+You should see your device under
+
+Go to https://graph.api.smartthings.com/device/list
 /*********************************************************************************************
 
 <b>6) To populate the UI fields for your newly created device(s)</b>
