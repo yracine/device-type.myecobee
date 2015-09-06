@@ -30,7 +30,7 @@ INSTALLATION STEPS
 
 a) Go to https://graph.api.smartthings.com/ide/devices
 
-b) Hit the "+New SmartDevice" at the top right corner
+b) Hit the "+New Device Type" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
@@ -72,8 +72,8 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 <b>3) Use SmartSetup and execute My ecobee Init</b>
 /*********************************************************************************************
 
-From your phone or tablet, within the smarttings app and on the main screen, 
-click on '+' at the bottom, scroll right to to My Apps, execute My ecobee Init
+From your phone or tablet, within the smartThings app and on the main screen, 
+click on '+' at the bottom, under SmartApps, scroll down to My Apps, execute My ecobee Init
 
 /*********************************************************************************************
 
