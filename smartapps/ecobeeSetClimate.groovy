@@ -34,7 +34,7 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeSetClimate, the smartapp that sets your ecobee thermostat to a given climate at a given day & time"
-			paragraph "Version 1.1.2\n\n" +
+			paragraph "Version 1.1.3\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2014 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -112,30 +112,14 @@ def updated() {
 def initialize() {
 
 	log.debug "Scheduling setClimate for day " + dayOfWeek + " at begin time " + begintime
-	subscribe(ecobee, "heatingSetpoint", heatingSetpointHandler)
-	subscribe(ecobee, "thermostatMode", thermostatModeHandler)
-	subscribe(ecobee, "temperature", temperatureHandler)
 	subscribe(ecobee, "climateList", climateListHandler)
 
 	schedule(begintime, setClimate)
 	subscribe(app, setClimateNow)    
 
 }
-def thermostatModeHandler(evt) {
-	log.debug "thermostat Mode: $evt, $settings"
-}
-
-
-def heatingSetpointHandler(evt) {
-	log.debug "heatingSetpoint: $evt, $settings"
-}
-
-def temperatureHandler(evt) {
-	log.debug "temperatureHandler: $evt, $settings"
-}
-
 def climateListHandler(evt) {
-	log.debug "thermostat's Climates List: $evt, $settings"
+	log.debug "thermostat's Climates List: $evt.value, $settings"
 }
 
 def setClimateNow(evt) {
