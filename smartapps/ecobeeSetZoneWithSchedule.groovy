@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.3\n\n" +
+			paragraph "Version 2.4\n\n" +
 				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
 				"Copyright©2015 Yves Racine"
 			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
@@ -506,9 +506,10 @@ def setZoneSettings() {
 				send("ecobeeSetZoneWithSchedule>running schedule ${scheduleName},about to set zone settings as requested")
 			}
         
+			def ventSwitchesZoneSet = []        
 			if (setVentSettings=='true') {            
 				// set the zoned vent switches to 'on'
-				def ventSwitchesZoneSet= control_vent_switches_in_zone(i)
+				ventSwitchesZoneSet= control_vent_switches_in_zone(i)
 				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 			}				
 
@@ -575,12 +576,10 @@ def setZoneSettings() {
 		}
 		log.debug "setZoneSettings>No schedule applicable at this time ${nowInLocalTime}"
         
-	} else if (ventSettings == 'true') {
+	} else if (setVentSettings == 'true') {
     
-		if (ventSwitchesOn != []) {
-			log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
-			turn_off_all_other_vents(ventSwitchesOn)
-		}
+		log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
+		turn_off_all_other_vents(ventSwitchesOn)
 	}		    
 	log.debug "End of Fcn"
 }
@@ -1370,6 +1369,9 @@ private def setVentSwitchLevel(indiceRoom, ventSwitch, switchLevel=100) {
 	try {
 		ventSwitch.setLevel(switchLevel)
 		log.debug("setVentSwitchLevel>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
+		}
 	} catch (e) {
 		if (switchLevel >0) {
 			ventSwitch.on()        
