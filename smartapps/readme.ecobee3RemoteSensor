@@ -98,12 +98,14 @@ You may have to redo the cache cleaning another time (go back to step 4).
 
 
 /*********************************************************************************************
-6) Under My apps on your smartphone/tablet, use SmartSetup on your tablet/smartphone,
-& execute ecobee3RemoteSensorInit the same way as the My Ecobee Init (service Manager).
+6) Under My apps on your smartphone/tablet, execute ecobee3RemoteSensorInit the same way as the My Ecobee Init (service Manager).
 /*********************************************************************************************
 
-Click on '+' at the bottom of your smartThings dashboard, scroll right till 'My apps'.
+Click on '+' at the bottom of your smartThings dashboard, scroll down till 'My apps'.
 Scroll down to ecobee3RemoteSensorInit and click on it to execute it.
+
+<b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of 
+any of the following screens: Home, Routines & Marketspace, and then MyApps (last item in the list).</b>
 
 The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
 
