@@ -76,8 +76,7 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 From your phone or tablet, within the smartThings app and on the main screen, 
 click on '+' at the bottom, under SmartApps, scroll down to My Apps, execute My ecobee Init
 
-<b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of any of the following
-screens: Home & Marketspace, and then MyApps (last item in the list).</b>
+<b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of any of the following screens: Home & Marketspace, and then MyApps (last item in the list).</b>
 
 /*********************************************************************************************
 
@@ -98,6 +97,7 @@ that you want to control from Smartthings and, then press 'Next' for the Notific
 /*********************************************************************************************
 
 <b>5) Your device(s) should now be ready to process your commands</b>
+
 /*********************************************************************************************
 
 You should see your device under
