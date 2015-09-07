@@ -70,13 +70,14 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 /*********************************************************************************************
 
 <b>3) Execute My ecobee Init</b>
+
 /*********************************************************************************************
 
 From your phone or tablet, within the smartThings app and on the main screen, 
 click on '+' at the bottom, under SmartApps, scroll down to My Apps, execute My ecobee Init
 
 <b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of any of the following
-sections: Home, Routines & Marketspace, and then MyApps.</b>
+screens: Home, Routines & Marketspace, and then MyApps.</b>
 
 /*********************************************************************************************
 
