@@ -102,7 +102,7 @@ that you want to control from Smartthings and, then press 'Next' for the Notific
 
 You should see your device under
 
-Go to https://graph.api.smartthings.com/device/list
+https://graph.api.smartthings.com/device/list
 /*********************************************************************************************
 
 <b>6) To populate the UI fields for your newly created device(s)</b>
