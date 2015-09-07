@@ -28,11 +28,12 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 1.9.5\n\n" +
-			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
-			"Copyright©2014 Yves Racine"
-		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-		description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+		paragraph "Version 1.9.6" 
+		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Next Page link below " 
+		href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest" 
+		paragraph "Copyright©2014 Yves Racine"
+		href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 
 	section("Generate daily stats for this ecobee thermostat") {
