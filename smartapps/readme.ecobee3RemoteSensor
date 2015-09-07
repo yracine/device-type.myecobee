@@ -105,7 +105,7 @@ Click on '+' at the bottom of your smartThings dashboard, scroll down till 'My a
 Scroll down to ecobee3RemoteSensorInit and click on it to execute it.
 
 <b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of 
-any of the following screens: Home, Routines & Marketspace, and then MyApps (last item in the list).</b>
+any of the following screens: Home & Marketspace, and then MyApps (last item in the list).</b>
 
 The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
 
