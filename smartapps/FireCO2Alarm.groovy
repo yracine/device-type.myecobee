@@ -37,11 +37,12 @@ def actionsSettings() {
 	dynamicPage(name: "actionsSettings", install: false, uninstall: true, nextPage: "otherSettings") {
 		section("About") {
 			paragraph "FireCO2Alarm, the smartapp that executes a series of actions when a Fire or CO2 alarm is triggerred"
-			paragraph "Version 1.2\n\n" +
-				"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
-				"Copyright©2014 Yves Racine"
-			href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-			description: "http://github.com/yracine"
+			paragraph "Version 1.3" 
+			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Next Page link below " 
+			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest" 
+			paragraph "Copyright©2014 Yves Racine"
+			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+				description: "http://github.com/yracine"
 		}
 		section("When these smoke/CO2 detector trigger, the following actions will be taken...") {
 			input "smoke_detectors", "capability.smokeDetector", title: "Which Smoke/CO2 detector(s)?", multiple: true
