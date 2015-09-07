@@ -77,7 +77,7 @@ From your phone or tablet, within the smartThings app and on the main screen,
 click on '+' at the bottom, under SmartApps, scroll down to My Apps, execute My ecobee Init
 
 <b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of any of the following
-screens: Home, Routines & Marketspace, and then MyApps.</b>
+screens: Home, Routines & Marketspace, and then MyApps (last item in the list).</b>
 
 /*********************************************************************************************
 
@@ -162,7 +162,7 @@ http://github.com/yracine/device-type.myecobee/blob/master/smartapps/readme.ecob
 /****************************************************
 
 
-In brief, the smartapp allows automatic adjustments of your programmed cooling/heating setpoints according to indoor/outdoor conditions. This is particularly useful in Winter/Summer where outdoor temperature and humidity can vary throughout the day.  It can also set your thermostat to 'Away' or 'Home' based on your indoor motion sensors.  It will ajust your thermostat's programmed or scheduled setpoints based on occupied rooms (similar to ecobee3, but with ST connected sensors).
+In brief, the smartapp allows automatic adjustments of your programmed cooling/heating setpoints according to indoor/outdoor conditions. This is particularly useful in Winter/Summer where outdoor temperature and humidity can vary throughout the day. It can also set your thermostat to 'Away' or 'Home' based on your indoor motion sensors.  It will ajust your thermostat's programmed or scheduled setpoints based on occupied rooms (similar to ecobee3, but with ST connected sensors).
 
 You can enable/disable the smartapp with a button on/off tile (ex.virtual switch).
 
