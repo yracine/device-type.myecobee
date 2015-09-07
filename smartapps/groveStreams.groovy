@@ -29,16 +29,18 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 1.9\n\n" +
-			"If you like this app, please support the developer via PayPal:\n\nyracine@yahoo.com\n\n" +
-			"Copyright©2014 Yves Racine"
-		href url: "http://github.com/yracine", style: "embedded", required: false, title: "More information...",
-		description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+		paragraph "Version 1.9.1" 
+		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Next Page link below " 
+		href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest" 
+		paragraph "Copyright©2014 Yves Racine"
+		href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+			description: "http://github.com/yracine"
 	}
 	section("Log devices...") {
 		input "temperatures", "capability.temperatureMeasurement", title: "Temperatures", required: false, multiple: true
 		input "thermostats", "capability.thermostat", title: "Thermostats", required: false, multiple: true
 		input "ecobees", "device.myEcobeeDevice", title: "Ecobees", required: false, multiple: true
+		input "automatic", "device.myAutomaticDevice", title: "Automatic Connected Device(s)", required: false, multiple: true
 		input "detectors", "capability.smokeDetector", title: "Smoke/CarbonMonoxide Detectors", required: false, multiple: true
 		input "humidities", "capability.relativeHumidityMeasurement", title: "Humidity sensors", required: false, multiple: true
 		input "waters", "capability.waterSensor", title: "Water sensors", required: false, multiple: true
@@ -105,16 +107,29 @@ def initialize() {
 	subscribe(ecobees, "ventilatorMode", handleVentilatorModeEvent)
 	subscribe(ecobees, "ventilatorMinOnTime", handleVentilatorMinOnTimeEvent)
 	subscribe(ecobees, "programScheduleName", handleProgramNameEvent)
-	subscribe(ecobees, "auxHeat1RuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "auxHeat2RuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "auxHeat3RuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "compCool1RuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "compCool2RuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "fanRuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "humidifierRuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "dehumidifierRuntimeDaily", handleEcobeeDailyStats)
-	subscribe(ecobees, "ventilatorRuntimeDaily", handleEcobeeDailyStats)
+	subscribe(ecobees, "auxHeat1RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "auxHeat2RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "auxHeat3RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "compCool1RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "compCool2RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "fanRuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "humidifierRuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "dehumidifierRuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "ventilatorRuntimeDaily", handleDailyStats)
 	subscribe(ecobees, "presence", handlePresenceEvent)
+	subscribe(ecobees, "compCool2RuntimeDaily", handleDailyStats)
+	subscribe(automatic, "yesterdayAvgTripConsumption",handleDailyStats)
+	subscribe(automatic, "yesterdayAvgTripDistance",handleDailyStats)
+	subscribe(automatic, "yesterdayAvgTripDuration",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalDistance",handleDailyStats)
+	subscribe(automatic, "yesterdayAvgTripFuelVolume",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalFuelVolume",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalDuration",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalNbTrip",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalHardAcceleration",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalHardBrake",handleDailyStats)
+	subscribe(automatic, "yesterdayAvgScoreSpeeding",handleDailyStats)
+	subscribe(automatic, "yesterdayAvgScoreEvents",handleDailyStats)
 	state.queue = []
 	Integer delay = (givenInterval) ?: 5
 
@@ -196,7 +211,7 @@ def handleThermostatOperatingStateEvent(evt) {
 	}
 
 }
-def handleEcobeeDailyStats(evt) {
+def handleDailyStats(evt) {
 	queueValue(evt) {
 		it.toString()
 	}
