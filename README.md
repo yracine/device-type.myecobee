@@ -119,6 +119,7 @@ You may want to stop and restart your smartthings app if needed.
 <b>7) Update device's preferences (optional, input parameters)</b>
 
 /*********************************************************************************************
+
 Go to https://graph.api.smartthings.com/device/list
 
 Click on the My ecobee device that you just created
