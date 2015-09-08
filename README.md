@@ -81,6 +81,7 @@ click on '+' at the bottom, under SmartApps, scroll down to My Apps, execute My 
 /*********************************************************************************************
 
 <b>4) Connect Smartthings to the Ecobee portal</b>
+
 /*********************************************************************************************
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
