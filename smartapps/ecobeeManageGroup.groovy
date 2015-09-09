@@ -28,11 +28,12 @@ preferences {
 	section("About") {
 		paragraph "ecobeeManageGroup, the smartapp that manages your ecobee groups ['creation', 'update', 'delete']"
 		paragraph "Version 1.9.2" 
-		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Next Page link below " 
-		href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest" 
+		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
+			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
+				title:"Paypal donation..."
 		paragraph "Copyright©2014 Yves Racine"
-		href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
-			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
  	}
 	section("For this ecobee thermostat") {
 		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
