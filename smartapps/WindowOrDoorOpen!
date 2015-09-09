@@ -18,7 +18,7 @@ definition(
 	name: "WindowOrDoorOpen!",
 	namespace: "yracine",
 	author: "Yves Racine",
-	description: "Choose a contact sensor and get a notification (with voice as an option) when it is left open for too long.",
+	description: "Choose a contact sensor and get a notification (with voice as an option) when it is left open for too long.  Optionally, turn off the HVAC and set it back to cool/heat when window/door is closed",
 	category: "Safety & Security",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
@@ -27,13 +27,14 @@ definition(
 preferences {
 	section("About") {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
-		"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed"
+        "it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed"
 		paragraph "Version 1.9.4" 
-		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Next Page link below " 
-		href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest" 
+		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
+			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
+				title:"Paypal donation..."
 		paragraph "Copyright©2014 Yves Racine"
-		href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
- 			description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+ 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 	section("Notify me when the following door or window contact is left open...") {
 		input "theSensor", "capability.contactSensor", required: true
