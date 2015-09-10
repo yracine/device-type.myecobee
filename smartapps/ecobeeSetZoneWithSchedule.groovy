@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.6" 
+			paragraph "Version 2.6.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -80,14 +80,14 @@ def generalSetupPage() {
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable temp adjustment based on indoor temp sensor(s) [optional, default=false]") {
-			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment set in rooms from avg temp at indoor sensor(s)?", type:"Boolean",
+			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment based on avg temp collected at indoor sensor(s)?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable fan adjustment based on outdoor temp sensors [optional, default=false]") {
 			input (name:"setAdjustmentFanFlag", title: "Enable fan adjustment set in rooms based on sensors?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
-		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
+		section("What do I use for the Master on/off switch to enable/disable smartapp processing? [optional]") {
 			input (name:"powerSwitch", type:"capability.switch", required: false)
 		}
 		if (thermostat) {
@@ -129,7 +129,7 @@ def roomsSetupPage() {
 				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", required: false
 
 			}
-			section("Room ${indiceRoom}-Do temp adjustment based on avg temp calculation when occupied room only [optional]") {
+			section("Room ${indiceRoom}-Do temp adjustment when occupied room only [optional]") {
 				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], required: false
 
 			}
@@ -505,21 +505,17 @@ def setZoneSettings() {
         
 			// let's set the given zone(s) for this program schedule
             
-            
 			log.debug "setZoneSettings>now applying ${scheduleName}, scheduled program is now ${scheduleProgramName}"
 			foundSchedule=true   
 
-                
 			if (detailedNotif == 'true') {
 				send("ecobeeSetZoneWithSchedule>running schedule ${scheduleName},about to set zone settings as requested")
 			}
-        
 			if (setVentSettings=='true') {            
 				// set the zoned vent switches to 'on'
 				ventSwitchesZoneSet= control_vent_switches_in_zone(i)
 				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 			}				
-
 			if (adjustmentTempFlag == 'true') {
 				// adjust the temperature at the thermostat(s) based on avg temp calculated from indoor temp sensors if any
 				adjust_thermostat_setpoint_in_zone(i)
@@ -535,9 +531,8 @@ def setZoneSettings() {
 			foundSchedule=true   
 			def setAwayOrPresent = (setAwayOrPresentFlag)?:'false'
 			boolean isResidentPresent=true
-            
-            
-			if (setAwayOrPresent=='true') {
+
+		if (setAwayOrPresent=='true') {
 	            
 				// Check if current Hold (if any) is justified
 				check_if_hold_justified()
