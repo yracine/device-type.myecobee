@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.0.1" 
+			paragraph "Version 2.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -76,8 +76,12 @@ def generalSetupPage() {
 			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
-		section("Enable temp adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
-			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment set in rooms based on sensors?", type:"Boolean",
+		section("Enable temp adjustment based on outdoor temp sensor [optional, default=false]") {
+			input (name:"setAdjustmentOutdoorTempFlag", title: "Enable temp adjustment set in rooms based on outdoor sensor?", type:"Boolean",
+				description:"optional", metadata: [values: ["true", "false"]],required:false)
+		}
+		section("Enable temp adjustment based on indoor temp sensor(s) [optional, default=false]") {
+			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment set in rooms from avg temp at indoor sensor(s)?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable fan adjustment based on outdoor temp sensors [optional, default=false]") {
@@ -514,6 +518,7 @@ def setZoneSettings() {
 	def ventSwitchesOn = []
 
 	def setVentSettings = (setVentSettingsFlag) ?: 'false'
+	def adjustmentOutdoorTempFlag = (setAdjustmentOutdoorTempFlag)?: 'false'
 	def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
 	def adjustmentFanFlag = (setAdjustmentFanFlag)?: 'false'
     
@@ -556,6 +561,8 @@ def setZoneSettings() {
 		log.debug "setZoneSettings>found schedule ${scheduleName}, startTime=$startTime,endTime=$endTime,nowInLocalTime= ${nowInLocalTime},startInLocalTime=${startInLocalTime},endInLocalTime=${endInLocalTime}," +
         		"currTime=${currTime},begintime=${startTimeToday.time},endTime=${endTimeToday.time},lastScheduleName=$state.lastScheduleName, lastStartTime=$state.lastStartTime"
         
+		def ventSwitchesZoneSet = []        
+        
 		if ((currTime >= startTimeToday.time) && (currTime <= endTimeToday.time) && (state.lastStartTime != startTimeToday.time)) {
         
 			// let's set the given schedule
@@ -575,12 +582,10 @@ def setZoneSettings() {
 					send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
 				}
         
-
 				adjust_thermostat_setpoint_in_zone(i)
 				if (adjustmentFanFlag == 'true') {                
 					set_fan_mode(i)
 				}   
-				def ventSwitchesZoneSet = []                
 				if (setVentSettings=='true') {
 					// set the zoned vent switches to 'on'
 					ventSwitchesZoneSet= control_vent_switches_in_zone(i)
@@ -620,15 +625,18 @@ def setZoneSettings() {
 			}            
 			if (isResidentPresent) {
             
-				// adjust the temperature at the thermostat(s) based on temp sensor if any
-				adjust_thermostat_setpoint_in_zone(i)
 				if (adjustmentTempFlag =='true') {            	
-                
+					// adjust the temperature at the thermostat(s) based on indoor temp sensors
+					adjust_thermostat_setpoint_in_zone(i)
+				}                    
+				if (adjustmentOutdoorTempFlag =='true') {            	
+					// check the thermsostat mode based on outdoor temp's thresholds (heat, cool) if any set                
+					switch_thermostatMode(i) 
 					// let's adjust the thermostat's temp & mode settings according to outdoor temperature            
 					adjust_tstat_for_more_less_heat_cool(i)
-					// will override the fan settings if required (ex. more Fan Threshold is set)
 				}                    
 				if (adjustmentFanFlag == 'true') {                
+					// will override the fan settings if required (ex. more Fan Threshold is set)
 					set_fan_mode(i)
 				}                    
             
@@ -636,7 +644,8 @@ def setZoneSettings() {
 			// let's adjust the vent settings according to desired Temp
             
 			if (setVentSettings=='true') {            
-				adjust_vent_settings_in_zone(i)
+				ventSwitchesZoneSet=adjust_vent_settings_in_zone(i)
+				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 			}                
 		}
 
@@ -759,7 +768,7 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 	String mode = thermostat?.currentThermostatMode.toString() // get the mode at the main thermostat
 	if (mode == 'heat') {
 		roomTstat.heat()
-		if ((climateName != null) && (climateName.trim() != "")) {
+		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
 			try {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
@@ -787,7 +796,7 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 	} else if (mode == 'cool') {
 
 		roomTstat.cool()
-		if ((climateName != null) && (climateName.trim() != "")) {
+		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
 			try {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
@@ -1056,12 +1065,15 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 		return
 	}
 	
-	// do a refresh to get latest temp value
-	try {        
-		outTempSensor.refresh()
-	} catch (e) {
-		log.debug("setFanMode>not able to do a refresh() on $outTempSensor")
-	}
+	if (outTempSensor.hasCapability("Refresh")) {
+    
+		// do a refresh to get latest temp value
+		try {        
+			outTempSensor.refresh()
+		} catch (e) {
+			log.debug("setFanMode>not able to do a refresh() on $outTempSensor")
+		}
+	}        
 	float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
 	String currentMode = thermostat.currentThermostatMode.toString()
 	float currentHeatPoint = thermostat.currentHeatingSetpoint.toFloat().round(1)
@@ -1150,7 +1162,6 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 	def indoor_all_zones_temps=[]
 
-	switch_thermostatMode(indiceSchedule) // check the thermsostat mode based on outdoor temp's thresholds (heat, cool) if any set
 
 	log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: zones= ${zones}")
 
@@ -1163,13 +1174,14 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
         
 		log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: looping thru all zones, now zoneName=${zoneName}, about to apply room Tstat's settings")
 		setAllRoomTstatsSettings(indiceZone) 
+		def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
 
 		if (setRoomThermostatsOnly == 'true') { // Does not want to set the main thermostat, only the room ones
 
 			if (detailedNotif == 'true') {
 				send("ScheduleTstatZones>schedule ${scheduleName},zone ${zoneName}: all room Tstats set and setRoomThermostatsOnlyFlag= true, continue...")
 			}
-		} else {
+		} else if (adjustmentTempFlag == 'true') {
 
 			def indoorTemps = getAllTempsForAverage(indiceZone)
 			indoor_all_zones_temps = indoor_all_zones_temps + indoorTemps
@@ -1185,6 +1197,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	String mode = thermostat?.currentThermostatMode.toString()
 	//	This is the avg indoor temp based on indoor temp sensors in all rooms in the zone
 	log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},all temps collected from sensors=${indoor_all_zones_temps}")
+
 	if (indoor_all_zones_temps != [] ) {
 		avg_indoor_temp = (indoor_all_zones_temps.sum() / indoor_all_zones_temps.size()).round(1)
 	} else {
@@ -1206,15 +1219,14 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def climateName = settings[key]
 	if (mode == 'heat') {
 	
-		if ((climateName == null) || (climateName.trim() == "")) {
-			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:climate for the heating settings to be applied not found")
+		if ((climateName == null) || (climateName.trim() == "") || (!thermostat.hasCommand("setClimate"))) {
+			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:no climate to be applied for heatingSetpoint")
 			key = "desiredHeatTemp$indiceSchedule"
 			def heatTemp = settings[key]
 			if (!heatTemp) {
 				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:about to apply default heat settings")
 				desiredHeat = (scale=='C') ? 21:72 					// by default, 21°C/72°F is the target heat temp
 			} else {
-            
 				desiredHeat = heatTemp.toFloat()
 			}
 			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},desiredHeat=${desiredHeat}")
@@ -1226,7 +1238,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 					send("ScheduleTstatZones>schedule ${scheduleName}:not able to set climate ${climateName} for heating at the thermostat ${thermostat}")
 				}
 				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:not able to set climate  ${climateName} for heating at the thermostat ${thermostat}")
-			}
+			}                
 			desiredHeat = thermostat.currentHeatingSetpoint
 			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},according to climateName ${climateName}, desiredHeat=${desiredHeat}")
 		}
@@ -1242,8 +1254,8 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
         
 	} else if (mode == 'cool') {
 
-		if ((climateName == null) || (climateName.trim() == "")) {
-			log.debug("adjust_thermostat_setpoint_in_zone>${scheduleName},climate associated to the cooling settings to be applied not found")
+		if ((climateName == null) || (climateName.trim() == "") || (!thermostat.hasCommand("setClimate"))) {
+			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:no climate to be applied for coolingSetpoint")
 			key = "desiredCoolTemp$indiceSchedule"
 			def coolTemp = settings[key]
 			if (!coolTemp) {
@@ -1263,7 +1275,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 					send("ScheduleTstatZones>schedule ${scheduleName},not able to set climate ${climateName} for cooling at the thermostat(s) ${thermostat}")
 				}
 				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},not able to set climate ${climateName} associated for cooling at the thermostat ${thermostat}")
-			}
+			}                
 			desiredCool = thermostat.currentCoolingSetpoint
 			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},according to climateName ${climateName}, desiredCool=${desiredCool}")
 		}
@@ -1296,6 +1308,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	boolean closedAllVentsInZone=true
 	int nbVents=0
 	def switchLevel    
+	def ventSwitchesOnSet=[]
     
 	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}: zones= ${zones}")
 
@@ -1362,6 +1375,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 				def ventSwitch = settings[key]
 				if (ventSwitch != null) {
 					setVentSwitchLevel(indiceRoom, ventSwitch, switchLevel)                
+					ventSwitchesOnSet.add(ventSwitch)
 					log.debug "adjust_vent_settings_in_zone>in zone=${zoneName},room ${roomName},set ${ventSwitch} at switchLevel =${switchLevel}%"
 					nbVents++                    
 				}
@@ -1372,19 +1386,14 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 
 	if (closedAllVentsInZone) {
     
-		if (nbVents > 2) {        
-			switchLevel=10        
-			control_vent_switches_in_zone(indiceSchedule, switchLevel)		    
-		} else {
-			switchLevel=25        
-			control_vent_switches_in_zone(indiceSchedule, switchLevel)		    
-	        
-		}
+		switchLevel=(nbVents>2)? 10:15        
+		ventSwitchesOnSet=control_vent_switches_in_zone(indiceSchedule, switchLevel)		    
 		log.debug "adjust_vent_settings_in_zone>schedule ${scheduleName}, set all ventSwitches at ${switchLevel}% to avoid closing all of them"
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>schedule ${scheduleName},set all ventSwitches at ${switchLevel}% to avoid closing all of them")
 		}
 	}    
+	return ventSwitchesOnSet    
 }
 
 private def turn_off_all_other_vents(ventSwitchesOnSet) {
