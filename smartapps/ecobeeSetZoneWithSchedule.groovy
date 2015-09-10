@@ -574,7 +574,7 @@ def setZoneSettings() {
 			// If required, let's adjust the vent settings according to desired Temp
 			if (setVentSettings=='true') {            
 				ventSwitchesZoneSet=adjust_vent_settings_in_zone(i)
-	            ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
+				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 			}        
 
 		}
