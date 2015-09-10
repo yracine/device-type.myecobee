@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.2" 
+			paragraph "Version 2.2.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -77,18 +77,18 @@ def generalSetupPage() {
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable temp adjustment based on outdoor temp sensor [optional, default=false]") {
-			input (name:"setAdjustmentOutdoorTempFlag", title: "Enable temp adjustment set in rooms based on outdoor sensor?", type:"Boolean",
+			input (name:"setAdjustmentOutdoorTempFlag", title: "Enable temp adjustment based on outdoor sensor?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable temp adjustment based on indoor temp sensor(s) [optional, default=false]") {
-			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment set in rooms from avg temp at indoor sensor(s)?", type:"Boolean",
+			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment based on avg temp collected at indoor sensor(s)?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable fan adjustment based on outdoor temp sensors [optional, default=false]") {
 			input (name:"setAdjustmentFanFlag", title: "Enable fan adjustment set in rooms based on sensors?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
-		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
+		section("What do I use for the Master on/off switch to enable/disable smartapp processing? [optional]") {
 			input (name:"powerSwitch", type:"capability.switch", required: false)
 		}
 		if (thermostat) {
@@ -134,7 +134,7 @@ def roomsSetupPage() {
 				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", required: false
 
 			}
-			section("Room ${indiceRoom}-Do temp adjustment based on avg temp calculation when occupied room only [optional]") {
+			section("Room ${indiceRoom}-Do temp adjustment when occupied room only [optional]") {
 				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], required: false
 
 			}
@@ -567,7 +567,6 @@ def setZoneSettings() {
         
 			// let's set the given schedule
             
-            
 			log.debug "setZoneSettings>schedule ${scheduleName},currTime= ${currTime}, current time seems OK for execution, need to check the day of Week"
 			def doChange = IsRightDayForChange(i)
 
@@ -577,11 +576,9 @@ def setZoneSettings() {
 			if (doChange) {
             
 				foundSchedule=true
-                
 				if (detailedNotif == 'true') {
 					send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
 				}
-        
 				adjust_thermostat_setpoint_in_zone(i)
 				if (adjustmentFanFlag == 'true') {                
 					set_fan_mode(i)
@@ -707,10 +704,8 @@ private def verify_presence_based_on_motion_in_rooms() {
 private def set_main_tstat_to_AwayOrPresent(mode) {
 
 	try {
-    
 		if  (mode == 'away') {
 			thermostat.away()
-            
 		} else if (mode == 'present') {	
 			thermostat.present()
 		}
@@ -796,7 +791,6 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 			}                
 		}
 	} else if (mode == 'cool') {
-
 		roomTstat.cool()
 		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
 			try {
@@ -837,7 +831,6 @@ private def setAllRoomTstatsSettings(indiceZone) {
 		def roomDetails=room.split(':')
 		def indiceRoom = roomDetails[0]
 		def roomName = roomDetails[1]
-
 		key = "needOccupiedFlag$indiceRoom"
 		def needOccupied = (settings[key]) ?: 'false'
 		key = "roomTstat$indiceRoom"
@@ -908,9 +901,7 @@ private def getAllTempsForAverage(indiceZone) {
 					}
 				}
 			}
-
 		} else {
-
 			tempAtSensor = getSensorTempForAverage(indiceRoom)
 			if (tempAtSensor != null) {
 				log.debug("getAllTempsForAverage>added ${tempAtSensor.toString()} in room ${roomName}")
@@ -921,7 +912,6 @@ private def getAllTempsForAverage(indiceZone) {
 				indoorTemps = indoorTemps + tempAtSensor.toFloat().round(1)
  				log.debug("getAllTempsForAverage>added ${tempAtSensor.toString()} in room ${roomName}")
 			}
-
 		}
 	} /* end for */
 	return indoorTemps
@@ -1068,7 +1058,6 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 	}
 	
 	if (outTempSensor.hasCapability("Refresh")) {
-    
 		// do a refresh to get latest temp value
 		try {        
 			outTempSensor.refresh()
@@ -1089,7 +1078,6 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 	def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
 
 	float max_temp_diff = input_max_temp_diff.toFloat().round(1)
-    
 	if (currentMode== 'heat') {
 		if ((moreHeatThreshold != null) && (outdoorTemp <= moreHeatThreshold?.toFloat()))  {
 			targetTstatTemp = (currentHeatPoint + max_temp_diff).round(1)
@@ -1167,19 +1155,18 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 
 	log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: zones= ${zones}")
 
+	def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
+
 	for (zone in zones) {
 
 		def zoneDetails=zone.split(':')
 		log.debug("adjust_thermostat_setpoint_in_zone>zone=${zone}: zoneDetails= ${zoneDetails}")
 		def indiceZone = zoneDetails[0]
 		def zoneName = zoneDetails[1]
-        
 		log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: looping thru all zones, now zoneName=${zoneName}, about to apply room Tstat's settings")
 		setAllRoomTstatsSettings(indiceZone) 
-		def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
-
+        
 		if (setRoomThermostatsOnly == 'true') { // Does not want to set the main thermostat, only the room ones
-
 			if (detailedNotif == 'true') {
 				send("ScheduleTstatZones>schedule ${scheduleName},zone ${zoneName}: all room Tstats set and setRoomThermostatsOnlyFlag= true, continue...")
 			}
