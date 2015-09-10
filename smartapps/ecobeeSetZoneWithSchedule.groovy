@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.5" 
+			paragraph "Version 2.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -672,15 +672,12 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
 	}    
     
 	try {
-    
 		if  (mode == 'away') {
         
 			thermostat.away()
-            
 		} else if (mode == 'present') {	
 			thermostat.present()
 		}
-            
 		send("ecobeeSetZoneWithSchedule>set main thermostat ${thermostat} to ${mode} mode based on motion in all rooms")
 		state?.programHoldSet=(mode=='present')?'Home': 'Away'    // set a state for further checking later
  		state?.programSetTime = now()
@@ -774,14 +771,16 @@ private def getSensorTempForAverage(indiceRoom, typeSensor='tempSensor') {
 		key = "roomTstat$indiceRoom"
 	}
 	def tempSensor = settings[key]
-	if ((tempSensor != null) && (tempSensor.hasCapability("Refresh"))) {
-		// do a refresh to get the latest temp value
-		try {        
-			tempSensor.refresh()
-		} catch (e) {
-			log.debug("getSensorTempForAverage>not able to do a refresh() on $tempSensor")
-		}        
+	if (tempSensor != null) {
 		log.debug("getTempSensorForAverage>found sensor ${tempSensor}")
+		if (tempSensor.hasCapability("Refresh")) {
+			// do a refresh to get the latest temp value
+			try {        
+				tempSensor.refresh()
+			} catch (e) {
+				log.debug("getSensorTempForAverage>not able to do a refresh() on $tempSensor")
+			}                
+		}        
 		currentTemp = tempSensor.currentTemperature.toFloat().round(1)
 	}
 	return currentTemp
@@ -1153,6 +1152,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 
 	log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: zones= ${zones}")
 
+	def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
 	for (zone in zones) {
 
 		def zoneDetails=zone.split(':')
@@ -1162,7 +1162,6 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
         
 		log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: looping thru all zones, now zoneName=${zoneName}, about to apply room Tstat's settings")
 		setAllRoomTstatsSettings(indiceZone) 
-		def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
 
 		if (setRoomThermostatsOnly == 'true') { // Does not want to set the main thermostat, only the room ones
 
@@ -1170,10 +1169,11 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 				send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},zone ${zoneName}: all room Tstats set and setRoomThermostatsOnlyFlag= true, continue...")
 			}
             
-		} else if (adjustmentTempFlag == 'true') {
-
-			def indoorTemps = getAllTempsForAverage(indiceZone)
-			indoor_all_zones_temps = indoor_all_zones_temps + indoorTemps
+		} else {
+			if (adjustmentTempFlag=='true') { 
+				def indoorTemps = getAllTempsForAverage(indiceZone)
+				indoor_all_zones_temps = indoor_all_zones_temps + indoorTemps
+			}
 		}
 	}
 	if (setRoomThermostatsOnly=='true') {
