@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.7.1" 
+			paragraph "Version 2.7.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -559,12 +559,12 @@ def setZoneSettings() {
 					// let's adjust the thermostat's temp & mode settings according to outdoor temperature
 					adjust_tstat_for_more_less_heat_cool(i)
 				}                    
-				if (adjustmentFanFlag == 'true') {
-					// will override the fan settings if required (ex. more Fan Threshold is set)
-					set_fan_mode(i)
-				}
             
 			}        
+			if (adjustmentFanFlag == 'true') {
+				// will override the fan settings if required (ex. more Fan Threshold is set)
+				set_fan_mode(i)
+			}
             
 			// If required, let's adjust the vent settings according to desired Temp
 			if (setVentSettings=='true') {            
