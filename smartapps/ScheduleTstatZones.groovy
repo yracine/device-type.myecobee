@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.3.3" 
+			paragraph "Version 2.3.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -66,30 +66,30 @@ def generalSetupPage() {
 		}
 		section("Set your main thermostat to [Away,Present] based on all Room Motion Sensors [default=false] ") {
 			input (name:"setAwayOrPresentFlag", title: "Set Main thermostat to [Away,Present]?", type:"Boolean",
-				description:"optional", metadata: [values: ["true", "false"]],required:false)
+				metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Outdoor temp Sensor used for adjustment [optional]") {
 			input (name:"outTempSensor", type:"capability.temperatureMeasurement", required: false,
-				description:"optional")
+				description:"Optional")
 		}
 		section("Enable vent settings [optional, default=false]") {
 			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
-				description:"optional", metadata: [values: ["true", "false"]],required:false)
+				metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable temp adjustment based on outdoor temp sensor [optional, default=false]") {
 			input (name:"setAdjustmentOutdoorTempFlag", title: "Enable temp adjustment based on outdoor sensor?", type:"Boolean",
-				description:"optional", metadata: [values: ["true", "false"]],required:false)
+				metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable temp adjustment based on indoor temp sensor(s) [optional, default=false]") {
 			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment based on avg temp collected at indoor sensor(s)?", type:"Boolean",
-				description:"optional", metadata: [values: ["true", "false"]],required:false)
+				metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable fan adjustment based on outdoor temp sensors [optional, default=false]") {
 			input (name:"setAdjustmentFanFlag", title: "Enable fan adjustment set in schedules based on sensors?", type:"Boolean",
-				description:"optional", metadata: [values: ["true", "false"]],required:false)
+				metadata: [values: ["true", "false"]],required:false)
 		}
 		section("What do I use for the Master on/off switch to enable/disable smartapp processing? [optional]") {
-			input (name:"powerSwitch", type:"capability.switch", required: false)
+			input (name:"powerSwitch", type:"capability.switch", required: false,description: "Optional")
 		}
 		if (thermostat) {
 			section {
@@ -118,28 +118,34 @@ def roomsSetupPage() {
 				input "roomName${indiceRoom}", title: "Room Name", "string"
 			}
 			section("Room ${indiceRoom}-Thermostat [optional]") {
-				input "roomTstat${indiceRoom}", title: "Room thermostat to be set", "capability.thermostat", required: false
+				input "roomTstat${indiceRoom}", title: "Room thermostat to be set", "capability.thermostat", 
+                	required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-TempSensor [optional]") {
-				input "tempSensor${indiceRoom}", title: "Temp sensor for better temp adjustment", "capability.temperatureMeasurement", required: false
+				input "tempSensor${indiceRoom}", title: "Temp sensor for better temp adjustment", "capability.temperatureMeasurement", 
+                	required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Vents Setup [optional]")  {
 				for (int j = 1;(j <= 5); j++)  {
-					input "ventSwitch${j}${indiceRoom}", title: "Vent switch no ${j} in room", "capability.switch", required: false
+					input "ventSwitch${j}${indiceRoom}", title: "Vent switch no ${j} in room", "capability.switch", 
+                    	required: false, description: "Optional"
 				}           
 			}           
 			section("Room ${indiceRoom}-MotionSensor [optional]") {
-				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", required: false
+				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
+                	required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Do temp adjustment when occupied room only [optional]") {
-				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], required: false
+				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], 
+                	required: false
 
 			}
 			section("Room ${indiceRoom}-Do temp adjustment with this occupied's threshold [optional]") {
-				input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", required: false
+				input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
+                	required: false, description: "Optional"
 
 			}
 			section() {
