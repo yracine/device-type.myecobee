@@ -168,7 +168,7 @@ def initialize() {
     
 	// Resume program every time a install/update is done to remote any holds at thermostat (reset).
     
-	thermostat.resumeProgram("")
+	ecobee.resumeProgram("")
     
 	subscribe(app, appTouch)
     
