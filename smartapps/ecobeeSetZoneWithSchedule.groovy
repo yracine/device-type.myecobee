@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.7.2" 
+			paragraph "Version 2.8" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -337,12 +337,12 @@ def schedulesSetup(params) {
 			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false,
 				defaultValue:settings."givenMaxTempDiff${indiceSchedule}")
 		}
-		section("Schedule ${indiceSchedule}-Set Fan Mode [optional]") {
+		section("Schedule ${indiceSchedule}-Override Fan Mode set at ecobee based on indoor/outdoor sensors [optional]") {
 			input (name:"fanMode${indiceSchedule}", type:"enum", title: "Set Fan Mode ['on', 'auto', 'circulate']", metadata: [values: ["on", "auto", "circulate"]], required: false,
 				defaultValue:settings."fanMode${indiceSchedule}")
 			input (name:"moreFanThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for Fan Mode", required: false,
 				defaultValue:settings."moreFanThreshold${indiceSchedule}")			                
-			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Set Fan Mode only when Threshold is reached(default=false)", 
+			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Override Fan Mode only when Threshold is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}
 		section("Schedule ${indiceSchedule}-Set Room Thermostats Only Indicator [optional]") {
@@ -424,6 +424,10 @@ def initialize() {
 
 	runEvery5Minutes(setZoneSettings)
 
+	// Resume program every time a install/update is done to remote any holds at thermostat (reset).
+    
+	thermostat.resumeProgram("")
+    
 	subscribe(app, appTouch)
 }
 
@@ -960,7 +964,7 @@ private def getAllTempsForAverage(indiceZone) {
 
 }
 
-private def set_fan_mode(indiceSchedule) {
+private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 
 	def key = "fanMode$indiceSchedule"
 	def fanMode = settings[key]
@@ -975,7 +979,7 @@ private def set_fan_mode(indiceSchedule) {
 	def fanModeForThresholdOnlyFlag = settings[key]
 
 	def fanModeForThresholdOnly = (fanModeForThresholdOnlyFlag) ?: 'false'
-	if (fanModeForThresholdOnly=='true') {
+	if ((fanModeForThresholdOnly=='true') && (!overrideThreshold)) {
     
 		if (outTempSensor == null) {
 			return     
@@ -1282,20 +1286,6 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, avg_temp_diff=${avg_temp_diff}, all temps collected from sensors=${indoorTemps}")
 		}
 
-		if (adjustmentFanFlag=='true') {
-			// Adjust the fan mode if avg temp differential is greater than max_temp_diff set in schedule
-			key = "givenMaxTempDiff$indiceSchedule"
-			def givenMaxTempDiff = settings[key]
-			def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
-			float max_temp_diff = input_max_temp_diff.toFloat().round(1)
-			if (avg_temp_diff.abs() > max_temp_diff) {
-				if (detailedNotif == 'true') {
-					send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff}:adjusting fan mode as temp differential too big")
-				}
-				set_fan_mode(indiceSchedule)                
-			}                
-		}            
-
 		key = "includedRooms$indiceZone"
 		def rooms = settings[key]
 		for (room in rooms) {
@@ -1312,6 +1302,21 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 			float temp_diff_at_sensor = tempAtSensor.toFloat().round(1) - desiredTemp 
 			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}, avg_temp_diff=${avg_temp_diff}")
 			switchLevel = ((temp_diff_at_sensor / avg_temp_diff.abs()) * 100).round()
+			if (adjustmentFanFlag=='true') {
+				// Adjust the fan mode if avg temp differential is greater than max_temp_diff set in schedule
+				key = "givenMaxTempDiff$indiceSchedule"
+				def givenMaxTempDiff = settings[key]
+				def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
+
+				float max_temp_diff = input_max_temp_diff.toFloat().round(1)
+				if (avg_temp_diff.abs() > max_temp_diff) {
+					if (detailedNotif == 'true') {
+						send("ScheduleTstatZones>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff}:adjusting fan as temp differential too big")
+					}
+                    // set fan mode with overrideThreshold=true
+					set_fan_mode(indiceSchedule, true)                
+				}                
+			}            
 
 			switchLevel =( switchLevel >=0)?((switchLevel<100)? switchLevel: 100):0
 			if (mode=='heat') {
