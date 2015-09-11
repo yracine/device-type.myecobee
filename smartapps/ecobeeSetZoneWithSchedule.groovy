@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.8" 
+			paragraph "Version 2.9" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -69,7 +69,7 @@ def generalSetupPage() {
 		}
 		section("Outdoor temp Sensor used for adjustment [optional]") {
 			input (name:"outTempSensor", type:"capability.temperatureMeasurement", required: false,
-					description:"optional")				            
+					description:"Optional")				            
 		}
 		section("Enable vent settings [optional, default=false]") {
 			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
@@ -88,7 +88,7 @@ def generalSetupPage() {
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("What do I use for the Master on/off switch to enable/disable smartapp processing? [optional]") {
-			input (name:"powerSwitch", type:"capability.switch", required: false)
+			input (name:"powerSwitch", type:"capability.switch", required: false, description: "Optional")
 		}
 		if (thermostat) {
 			section {
@@ -113,28 +113,34 @@ def roomsSetupPage() {
 				input "roomName${indiceRoom}", title: "Room Name", "string"
 			}
 			section("Room ${indiceRoom}-Thermostat [optional]") {
-				input "roomTstat${indiceRoom}", title: "Room thermostat to be set", "capability.thermostat", required: false
+				input "roomTstat${indiceRoom}", title: "Room thermostat to be set", "capability.thermostat", 
+                	required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-TempSensor [optional]") {
-				input "tempSensor${indiceRoom}", title: "Temp sensor for better temp adjustment", "capability.temperatureMeasurement", required: false
+				input "tempSensor${indiceRoom}", title: "Temp sensor for better temp adjustment", "capability.temperatureMeasurement", 
+                	required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Vents Setup [optional]")  {
 				for (int j = 1;(j <= 5); j++)  {
-					input "ventSwitch${j}${indiceRoom}", title: "Vent switch no ${j} in room", "capability.switch", required: false
+					input "ventSwitch${j}${indiceRoom}", title: "Vent switch no ${j} in room", "capability.switch", 
+                    	required: false, description: "Optional"
 				}           
 			}           
 			section("Room ${indiceRoom}-MotionSensor [optional]") {
-				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", required: false
+				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
+                	required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Do temp adjustment when occupied room only [optional]") {
-				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], required: false
+				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], 
+                	required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Do temp adjustment with this occupied's threshold [optional]") {
-				input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", required: false
+				input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
+                	required: false, description: "Optional"
 
 			}
 			section() {
@@ -325,23 +331,25 @@ def schedulesSetup(params) {
 		}
 		section("Schedule ${indiceSchedule}-More or Less Heat/Cool Threshold in the selected zone(s) based on outdoor temp Sensor [optional]") {
 			input (name:"moreHeatThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for more heating", required: false,
-				defaultValue:settings."moreHeatThreshold${indiceSchedule}")			                
+				defaultValue:settings."moreHeatThreshold${indiceSchedule}", description: "Optional")			                
 			input (name:"moreCoolThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for more cooling",required: false,
-				,defaultValue:settings."moreCoolThreshold${indiceSchedule}")
+				,defaultValue:settings."moreCoolThreshold${indiceSchedule}", description: "Optional")
 			input (name:"lessHeatThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for less heating", required: false,
-				defaultValue:settings."lessHeatThreshold${indiceSchedule}")			                
+				defaultValue:settings."lessHeatThreshold${indiceSchedule}", description: "Optional")			                
 			input (name:"lessCoolThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for less cooling",required: false,
-				,defaultValue:settings."lessCoolThreshold${indiceSchedule}")
+				,defaultValue:settings."lessCoolThreshold${indiceSchedule}", description: "Optional")
 		}
 		section("Schedule ${indiceSchedule}-Max Temp Adjustment at the main thermostat based on temp Sensors [indoor&outdoor]") {
 			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false,
-				defaultValue:settings."givenMaxTempDiff${indiceSchedule}")
+				defaultValue:settings."givenMaxTempDiff${indiceSchedule}", description: "Optional")
 		}
-		section("Schedule ${indiceSchedule}-Override Fan Mode set at ecobee based on indoor/outdoor sensors [optional]") {
-			input (name:"fanMode${indiceSchedule}", type:"enum", title: "Set Fan Mode ['on', 'auto', 'circulate']", metadata: [values: ["on", "auto", "circulate"]], required: false,
-				defaultValue:settings."fanMode${indiceSchedule}")
+		section("Schedule ${indiceSchedule}-Override Fan settings at ecobee based on indoor/outdoor sensors [optional]") {
+			input (name:"fanMode${indiceSchedule}", type:"enum", title: "Set Fan Mode ['on', 'auto']", metadata: [values: ["on", "auto"]], 
+            	required: false, defaultValue:settings."fanMode${indiceSchedule}", description: "Optional")
+			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule", 
+				required: false, defaultValue:settings."givenFanMinTime${indiceSchedule}", description: "Optional")
 			input (name:"moreFanThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for Fan Mode", required: false,
-				defaultValue:settings."moreFanThreshold${indiceSchedule}")			                
+				defaultValue:settings."moreFanThreshold${indiceSchedule}", description: "Optional")			                
 			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Override Fan Mode only when Threshold is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}
@@ -966,6 +974,13 @@ private def getAllTempsForAverage(indiceZone) {
 
 private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 
+	key = "givenFanMinTime${indiceSchedule}"
+	def fanMinTime=settings[key]
+
+	if (fanMinTime) {
+		// set FanMinTime for this schedule    
+		thermostat.setThermostatSettings("", ['fanMinOnTime': "${fanMinTime}"])		    
+	}    
 	def key = "fanMode$indiceSchedule"
 	def fanMode = settings[key]
 	key = "scheduleName$indiceSchedule"
@@ -1313,7 +1328,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 					if (detailedNotif == 'true') {
 						send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff} :adjusting fan as temp differential too big")
 					}
-                    // set fan mode with overrideThreshold=true
+					// set fan mode with overrideThreshold=true
 					set_fan_mode(indiceSchedule, true)                
 				}                
 			}            
