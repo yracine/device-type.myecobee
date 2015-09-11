@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.2" 
+			paragraph "Version 1.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -408,6 +408,7 @@ private updateTempSensors(evt) {
 
 private updateTempSensors() {
 
+	String tempValueString=''    
 	def scale = getTemperatureScale()
 	def ecobeeSensors = ecobee.currentRemoteSensorTmpData.toString().minus('[').minus(']').split(",,")
 
@@ -425,7 +426,7 @@ private updateTempSensors() {
 		def ecobeeSensorId = ecobeeSensorDetails[0]
 		def ecobeeSensorName = ecobeeSensorDetails[1]
 		def ecobeeSensorType = ecobeeSensorDetails[2]
-		def ecobeeSensorValue = ecobeeSensorDetails[3].toDouble()
+		def ecobeeSensorValue = ecobeeSensorDetails[3]
 
 
 		def dni = [app.id, ecobeeSensorName, getTempSensorChildName(), ecobeeSensorId].join('.')
@@ -440,19 +441,16 @@ private updateTempSensors() {
 			log.debug "updateTempSensors>ecobeeSensorName= $ecobeeSensorName"
 			log.debug "updateTempSensors>ecobeeSensorType= $ecobeeSensorType"
 			log.debug "updateTempSensors>ecobeeSensorValue= $ecobeeSensorValue"
-            
-            
-			Double tempValue = getTemperature(ecobeeSensorValue).toDouble().round(1)
-			String tempValueString
-
-			if (scale == "F") {
-				tempValue = getTemperature(value).toDouble().round()
-				tempValueString = String.format('%2d', tempValue.intValue())            
-			} else {
-				tempValue = getTemperature(value).toDouble().round(1)
-				tempValueString = String.format('%2.1f', tempValue)
+			
+            		if (ecobeeSensorValue) {
+				if (scale == "F") {
+					Double tempValue = getTemperature(ecobeeSensorValue).toDouble().round()
+					tempValueString = String.format('%2d', tempValue.intValue())            
+				} else {
+					Double tempValue = getTemperature(ecobeeSensorValue).toDouble().round(1)
+					tempValueString = String.format('%2.1f', tempValue)
+				}
 			}
-
 			def isChange = device.isTemperatureStateChange(device, "temperature", tempValueString)
 			def isDisplayed = isChange
 			log.debug "device $device, found $dni,statusChanged=${isChange}, value= ${tempValueString}"
