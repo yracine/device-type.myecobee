@@ -1311,7 +1311,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 				float max_temp_diff = input_max_temp_diff.toFloat().round(1)
 				if (avg_temp_diff.abs() > max_temp_diff) {
 					if (detailedNotif == 'true') {
-						send("ScheduleTstatZones>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff}:adjusting fan as temp differential too big")
+						send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff} :adjusting fan as temp differential too big")
 					}
                     // set fan mode with overrideThreshold=true
 					set_fan_mode(indiceSchedule, true)                
