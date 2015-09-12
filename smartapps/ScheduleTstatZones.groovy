@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.3.5" 
+			paragraph "Version 2.3.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -352,32 +352,32 @@ def schedulesSetup(params) {
 		}
 		section("Schedule ${indiceSchedule}-Switch thermostat mode (auto/cool/heat) based on this outdoor temp range [optional]") {
 			input (name:"heatModeThreshold${indiceSchedule}", type:"decimal", title: "Heat mode threshold", 
-            	required: false, defaultValue:settings."heatModeThreshold${indiceSchedule}", description: "Optional")			                
+				required: false, defaultValue:settings."heatModeThreshold${indiceSchedule}", description: "Optional")			                
 
 			input (name:"coolModeThreshold${indiceSchedule}", type:"decimal", title: "Cool mode threshold", 
-            	required: false, defaultValue:settings."coolModeThreshold${indiceSchedule}", description: "Optional")			               
+				required: false, defaultValue:settings."coolModeThreshold${indiceSchedule}", description: "Optional")			               
 		}			
 		section("Schedule ${indiceSchedule}-Select the program at ecobee thermostat to be applied [optional,for ecobee]") {
 			input (name:"givenClimate${indiceSchedule}", type:"enum", title: "Which ecobee program? ", options: ecobeePrograms, 
-            	required: false, defaultValue:settings."givenClimate${indiceSchedule}", description: "Optional")
+				required: false, defaultValue:settings."givenClimate${indiceSchedule}", description: "Optional")
 		}
 		section("Schedule ${indiceSchedule}-Desired Cool Temp in the selected zone(s) [when no program settings]") {
 			input (name:"desiredCoolTemp${indiceSchedule}", type:"decimal", title: "Cool Temp, default = 75°F/23°C", 
-            	required: false,defaultValue:settings."desiredCoolTemp${indiceSchedule}", description: "Optional")			                
+				required: false,defaultValue:settings."desiredCoolTemp${indiceSchedule}", description: "Optional")			                
 		}
 		section("Schedule ${indiceSchedule}-Desired Heat Temp in the selected zone(s) [when no program settings]") {
 			input (name:"desiredHeatTemp${indiceSchedule}", type:"decimal", title: "Heat Temp, default=72°F/21°C", 
-            	required: false, defaultValue:settings."desiredHeatTemp${indiceSchedule}", description: "Optional")			                
+				required: false, defaultValue:settings."desiredHeatTemp${indiceSchedule}", description: "Optional")			                
 		}
 		section("Schedule ${indiceSchedule}-More Heat/Cool Threshold in the selected zone(s) based on outdoor temp Sensor [optional]") {
 			input (name:"moreHeatThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for more heating", 
-            	required: false, defaultValue:settings."moreHeatThreshold${indiceSchedule}", description: "Optional")			                
+				required: false, defaultValue:settings."moreHeatThreshold${indiceSchedule}", description: "Optional")			                
 			input (name:"moreCoolThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for more cooling",
-            	required: false,defaultValue:settings."moreCoolThreshold${indiceSchedule}", description: "Optional")
+				required: false,defaultValue:settings."moreCoolThreshold${indiceSchedule}", description: "Optional")
 		}
 		section("Schedule ${indiceSchedule}-Max Temp Adjustment at the main thermostat based on temp Sensors [indoor&outdoor]") {
 			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment (default= +/-5°F/2°C)", 
-            	required: false, defaultValue:settings."givenMaxTempDiff${indiceSchedule}", description: "Optional")
+				required: false, defaultValue:settings."givenMaxTempDiff${indiceSchedule}", description: "Optional")
 		}
         
 		section("Schedule ${indiceSchedule}-Set Fan Mode [optional]") {
@@ -387,14 +387,14 @@ def schedulesSetup(params) {
 				defaultValue:settings."moreFanThreshold${indiceSchedule}", description: "Optional")			                
 			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Set Fan Mode only when Threshold is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
-		}
+		}	
 		section("Schedule ${indiceSchedule}-Set Room Thermostats Only Indicator [optional]") {
 			input (name:"setRoomThermostatsOnlyFlag${indiceSchedule}", type:"Boolean", title: "Set room thermostats only [default=false,main & room thermostats setpoints are set]", metadata: [values: ["true", "false"]], 
 				required: false, defaultValue:settings."setRoomThermostatsOnlyFlag${indiceSchedule}")
 		}
 		section("Schedule ${indiceSchedule}-Set for specific mode(s) [default=all]")  {
-			input (name:"selectedMode${indiceSchedule}", type:"enum", title: "Choose Mode", options: enumModes, required: false, multiple:true,
-				defaultValue:settings."selectedMode${indiceSchedule}", description: "Optional")
+			input (name:"selectedMode${indiceSchedule}", type:"enum", title: "Choose Mode", options: enumModes, 
+				required: false, multiple:true,defaultValue:settings."selectedMode${indiceSchedule}", description: "Optional")
 		}
 		section {
 			href(name: "toSchedulesSetupPage", title: "Back to Schedules Setup Page", page: "schedulesSetupPage")
