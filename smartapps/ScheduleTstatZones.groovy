@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.3.4" 
+			paragraph "Version 2.3.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -607,6 +607,17 @@ def setZoneSettings() {
 		else if ((state.lastScheduleName == scheduleName) && (currTime >= startTimeToday.time) && (currTime <= endTimeToday.time)) {
 			// We're in the middle of a schedule run
         
+        
+			if ((outTempSensor) && (outTempSensor.hasCapability("Refresh"))) {
+
+				// do a refresh to get latest temp value
+				try {        
+					outTempSensor.refresh()
+				} catch (e) {
+					log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
+				}                    
+			}
+        
 			log.debug "setZoneSettings>schedule ${scheduleName},currTime= ${currTime}, current time is OK for execution, we're in the middle of a schedule run"
 			foundSchedule=true
 			def setAwayOrPresent = (setAwayOrPresentFlag)?:'false'
@@ -666,6 +677,7 @@ def setZoneSettings() {
 	}
 	log.debug "End of Fcn"
 }
+
 
 
 private def isRoomOccupied(sensor, indiceRoom) {
@@ -1061,14 +1073,6 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 		return
 	}
 	
-	if (outTempSensor.hasCapability("Refresh")) {
-		// do a refresh to get latest temp value
-		try {        
-			outTempSensor.refresh()
-		} catch (e) {
-			log.debug("setFanMode>not able to do a refresh() on $outTempSensor")
-		}
-	}        
 	float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
 	String currentMode = thermostat.currentThermostatMode.toString()
 	float currentHeatPoint = thermostat.currentHeatingSetpoint.toFloat().round(1)
