@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 1.9.8"
+			paragraph "Version 1.9.9"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -299,7 +299,7 @@ def setHumidityLevel() {
 	String ecobeeMode = ecobee.currentThermostatMode
 	log.debug "ecobee Mode = $ecobeeMode"
 
-	outdoorHumidity = (scale == 'C') ?
+	outdoorHumidity = (scale == 'F') ?
 		calculate_corr_humidity(outdoorTemp, outdoorSensorHumidity, indoorTemp) :
 		calculate_corr_humidity(fToC(outdoorTemp), outdoorSensorHumidity, fToC(indoorTemp))
 
