@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.9.1" 
+			paragraph "Version 2.9.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -314,7 +314,7 @@ def schedulesSetup(params) {
 	indiceSchedule=indiceSchedule.intValue()
 	log.debug "scheduleSetup> indiceSchedule=${indiceSchedule}"
 
-	dynamicPage(name: "schedulesSetup", title: "Schedule Setup") {
+	dynamicPage(name: "schedulesSetup", title: "Schedule Setup", submitOnChange: true) {
 		section("Schedule ${indiceSchedule} Setup") {
 			input (name:"scheduleName${indiceSchedule}", title: "Schedule Name", type: "text",
 				defaultValue:settings."scheduleName${indiceSchedule}")
@@ -346,8 +346,10 @@ def schedulesSetup(params) {
 		section("Schedule ${indiceSchedule}-Override Fan settings at ecobee based on indoor/outdoor sensors [optional]") {
 			input (name:"fanMode${indiceSchedule}", type:"enum", title: "Set Fan Mode ['on', 'auto']", metadata: [values: ["on", "auto"]], 
             	required: false, defaultValue:settings."fanMode${indiceSchedule}", description: "Optional")
-			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule", 
+/*      	Y.R. Not able to add this settings for the moment, ST issue?          
+			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule",
 				required: false, defaultValue:settings."givenFanMinTime${indiceSchedule}", description: "Optional")
+*/                
 			input (name:"moreFanThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for Fan Mode", required: false,
 				defaultValue:settings."moreFanThreshold${indiceSchedule}", description: "Optional")			                
 			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Override Fan Mode only when Threshold is reached(default=false)", 
@@ -973,7 +975,7 @@ private def getAllTempsForAverage(indiceZone) {
 }
 
 private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
-
+/*  Y.R. Not able to do it at the moment, ST issue...
 	def key = "givenFanMinTime${indiceSchedule}"
 	def fanMinTime=settings[key]
 
@@ -981,7 +983,8 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 		// set FanMinTime for this schedule    
 		thermostat.setThermostatSettings("", ['fanMinOnTime': "${fanMinTime}"])		    
 	}    
-	key = "fanMode$indiceSchedule"
+*/    
+	def	key = "fanMode$indiceSchedule"
 	def fanMode = settings[key]
 	key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
