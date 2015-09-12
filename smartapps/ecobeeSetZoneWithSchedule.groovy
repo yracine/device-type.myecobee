@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.9.2" 
+			paragraph "Version 2.9.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -331,13 +331,13 @@ def schedulesSetup(params) {
 		}
 		section("Schedule ${indiceSchedule}-More or Less Heat/Cool Threshold in the selected zone(s) based on outdoor temp Sensor [optional]") {
 			input (name:"moreHeatThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for more heating", required: false,
-				defaultValue:settings."moreHeatThreshold${indiceSchedule}", description: "Optional")			                
+				defaultValue:settings."moreHeatThreshold${indiceSchedule}", description: "[default <= 10°F/-17°C]")			                
 			input (name:"moreCoolThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for more cooling",required: false,
-				,defaultValue:settings."moreCoolThreshold${indiceSchedule}", description: "Optional")
+				,defaultValue:settings."moreCoolThreshold${indiceSchedule}", description: "[default >= 85°F/30°C]")
 			input (name:"lessHeatThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for less heating", required: false,
-				defaultValue:settings."lessHeatThreshold${indiceSchedule}", description: "Optional")			                
+				defaultValue:settings."lessHeatThreshold${indiceSchedule}", description: "[default >= 50°F/10°C]")			                
 			input (name:"lessCoolThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for less cooling",required: false,
-				,defaultValue:settings."lessCoolThreshold${indiceSchedule}", description: "Optional")
+				,defaultValue:settings."lessCoolThreshold${indiceSchedule}", description: "[default <= 75°F/22°C]")
 		}
 		section("Schedule ${indiceSchedule}-Max Temp Adjustment at the main thermostat based on temp Sensors [indoor&outdoor]") {
 			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false,
@@ -542,11 +542,22 @@ def setZoneSettings() {
 		} else if ((selectedClimate==scheduleProgramName) && (state?.lastScheduleName == scheduleName)) {
 			// We're in the middle of a schedule run
 
+
+			if ((outTempSensor) && (outTempSensor.hasCapability("Refresh"))) {
+
+				// do a refresh to get latest temp value
+				try {        
+					outTempSensor.refresh()
+				} catch (e) {
+					log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
+				}                    
+			}
+
 			foundSchedule=true   
 			def setAwayOrPresent = (setAwayOrPresentFlag)?:'false'
 			boolean isResidentPresent=true
 
-		if (setAwayOrPresent=='true') {
+			if (setAwayOrPresent=='true') {
 	            
 				// Check if current Hold (if any) is justified
 				check_if_hold_justified()
@@ -766,6 +777,103 @@ private void check_if_hold_justified() {
 		}
 	}   
     
+	if (outTempSensor == null) {
+		return    
+	}            
+
+	key = "moreHeatThreshold$indiceSchedule"
+	def moreHeatThreshold = settings[key]
+	key = "moreCoolThreshold$indiceSchedule"
+	def moreCoolThreshold = settings[key]
+	key = "lessHeatThreshold$indiceSchedule"
+	def lessHeatThreshold = settings[key]
+	key = "lessCoolThreshold$indiceSchedule"
+	def lessCoolThreshold = settings[key]
+	
+	def scale = getTemperatureScale()
+	float more_heat_threshold, more_cool_threshold
+	float less_heat_threshold, less_cool_threshold
+
+	key = "givenMaxTempDiff$indiceSchedule"
+	def givenMaxTempDiff = settings[key]
+	def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
+
+	float max_temp_diff = input_max_temp_diff.toFloat().round(1)
+    
+	if (scale == 'C') {
+		more_heat_threshold = (moreHeatThreshold) ?(moreHeatThreshold.toFloat().round(1)): (-17) // by default, -17°C is the outdoor temp's threshold for more heating
+		more_cool_threshold = (moreCoolThreshold) ?(moreCoolThreshold.toFloat().round(1)): 30 // by default, 30°C is the outdoor temp's threshold for more cooling
+		less_heat_threshold = (lessHeatThreshold) ?(lessHeatThreshold.toFloat().round(1)): 10 // by default, 10°C is the outdoor temp's threshold for less heating
+		less_cool_threshold = (lessCoolThreshold) ?(lessCoolThreshold.toFloat().round(1)): 22 // by default, 22°C is the outdoor temp's threshold for less cooling
+
+	} else {
+		more_heat_threshold = (moreHeatThreshold) ?(moreHeatThreshold.toFloat().round(1)): 10 // by default, 10°F is the outdoor temp's threshold for more heating
+		more_cool_threshold = (moreCoolThreshold) ?(moreCoolThreshold.toFloat().round(1)): 85 // by default, 85°F is the outdoor temp's threshold for more cooling
+		less_heat_threshold = (lessHeatThreshold) ?(lessHeatThreshold.toFloat().round(1)): 50 // by default, 50°F is the outdoor temp's threshold for less heating
+		less_cool_threshold = (lessCoolThreshold) ?(lessCoolThreshold.toFloat().round(1)): 75 // by default, 75°F is the outdoor temp's threshold for less cooling
+	}
+
+	float heatTemp = thermostat.currentHeatingSetpoint.toFloat()
+	float coolTemp = thermostat.currentCoolingSetpoint.toFloat()
+	float programHeatTemp = thermostat.currentProgramHeatTemp.toFloat()
+	float programCoolTemp = thermostat.currentProgramCoolTemp.toFloat()
+	float ecobeeTemp = thermostat.currentTemperature.toFloat()
+
+	float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
+    
+
+	if (ecobeeMode == 'cool') {
+		log.trace("check_if_hold_justified>evaluate: moreCoolThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
+		log.trace("check_if_hold_justified>evaluate: lessCoolThreshold= ${less_cool_threshold} vs.outdoorTemp ${outdoorTemp}°")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>eval:  moreCoolThreshold ${more_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+			send("ecobeeSetZoneWithSchedule>eval:  lessCoolThreshold ${less_cool_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+		}
+		if ((outdoorTemp > less_cool_threshold) && (outdoorTemp < more_cool_threshold)) {
+			send("ecobeeSetZoneWithSchedule>resuming program, ${less_cool_threshold}° < outdoorTemp <${more_cool_threshold}°")
+			thermostat.resumeProgram("")
+		} else {
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>Hold justified, cooling setPoint=${coolTemp}°")
+			}
+			float actual_temp_diff = (programCoolTemp - coolTemp).round(1).abs()
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>eval: actual_temp_diff ${actual_temp_diff}° vs. Max temp diff ${max_temp_diff}°")
+			}
+			if ((actual_temp_diff > max_temp_diff) && (!state?.programHoldSet)) {
+				if (detailedNotif == 'true') {
+					send("ecobeeSetZoneWithSchedule>Hold differential too big (${actual_temp_diff}), needs adjustment")
+				}
+			}
+		}
+	} else if (ecobeeMode == 'heat') {
+		log.trace("check_if_hold_justified>eval: moreHeatingThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+		log.trace("check_if_hold_justified>eval:lessHeatThreshold=${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+		log.trace(
+			"check_if_hold_justified>evaluate: programHeatTemp= ${programHeatTemp}° vs.avgIndoorTemp= ${avg_indoor_temp}°")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>eval: moreHeatThreshold ${more_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+			send("ecobeeSetZoneWithSchedule>eval: lessHeatThreshold ${less_heat_threshold}° vs.outdoorTemp ${outdoorTemp}°")
+		}
+		if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold)) { 
+			send("ecobeeSetZoneWithSchedule>resuming program, ${less_heat_threshold}° < outdoorTemp > ${more_heat_threshold}°")
+			thermostat.resumeProgram("")
+		} else {
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>Hold justified, heating setPoint=${heatTemp}°")
+			}
+			float actual_temp_diff = (heatTemp - programHeatTemp).round(1).abs()
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>eval: actualTempDiff ${actual_temp_diff}° vs. Max temp Diff ${max_temp_diff}°")
+			}
+			if ((actual_temp_diff > max_temp_diff) && (!state?.programHoldSet)) {
+				if (detailedNotif == 'true') {
+					send("ecobeeSetZoneWithSchedule>Hold differential too big ${actual_temp_diff}, needs adjustment")
+				}
+			}
+		}
+    
+    }
 	log.debug "End of Fcn check_if_hold_justified"
 }
 
@@ -1009,15 +1117,6 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 		if (moreFanThreshold == null) {
 			return     
 		}
-		if (outTempSensor.hasCapability("Refresh")) {
-        
-			// do a refresh to get latest temp value
-			try {        
-				outTempSensor.refresh()
-			} catch (e) {
-				log.debug("setFanMode>not able to do a refresh() on $outTempSensor")
-			}
-		}            
 		float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
         
 		if (outdoorTemp < moreFanThreshold.toFloat()) {
@@ -1047,6 +1146,13 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 	def setRoomThermostatsOnlyFlag = settings[key]
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 
+
+
+	String currentProgType = thermostat.currentProgramType
+	if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
+		log.debug("thermostat ${thermostat} is in vacation mode, exiting")
+		return
+	}
 	key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
 
@@ -1075,15 +1181,6 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 		return
 	}
 	
-	if (outTempSensor.hasCapability("Refresh")) {
-        
-		// do a refresh to get latest temp value
-		try {        
-			outTempSensor.refresh()
-		} catch (e) {
-			log.debug("adjust_tstat_for_more_less_heat_cool>not able to do a refresh() on $outTempSensor")
-		}
-	}            
 	float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
     
 	String currentMode = thermostat.currentThermostatMode.toString()
@@ -1156,6 +1253,13 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def scale = getTemperatureScale()
 	float desiredHeat, desiredCool, avg_indoor_temp
+
+
+	String currentProgType = thermostat.currentProgramType
+	if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
+		log.debug("thermostat ${thermostat} is in vacation mode, exiting")
+		return
+	}
 
 	def key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
