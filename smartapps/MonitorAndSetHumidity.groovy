@@ -299,15 +299,9 @@ def setHumidityLevel() {
 	String ecobeeMode = ecobee.currentThermostatMode
 	log.debug "ecobee Mode = $ecobeeMode"
 
-	outdoorHumidity = (scale == 'F') ?
+	outdoorHumidity = (scale == 'C') ?
 		calculate_corr_humidity(outdoorTemp, outdoorSensorHumidity, indoorTemp) :
 		calculate_corr_humidity(fToC(outdoorTemp), outdoorSensorHumidity, fToC(indoorTemp))
-
-
-	log.debug "outdoorSensorHumidity = $outdoorSensorHumidity%, normalized outdoorHumidity based on ambient temperature = $outdoorHumidity%"
-	if (detailedNotif == 'true') {
-		send "MonitorEcobeeHumidity>normalized outdoor humidity is ${outdoorHumidity}%, sensor outdoor humidity ${outdoorSensorHumidity}%"
-	}
 
 
 	//  If indoorSensor specified, use the more precise humidity measure instead of ecobeeHumidity
@@ -316,6 +310,13 @@ def setHumidityLevel() {
 	if ((indoorSensor) && (indoorHumidity < ecobeeHumidity)) {
 		ecobeeHumidity = indoorHumidity
 	}
+
+	log.debug "outdoorSensorHumidity = $outdoorSensorHumidity%, normalized outdoorHumidity based on ambient temperature = $outdoorHumidity%"
+	if (detailedNotif == 'true') {
+		send "MonitorEcobeeHumidity>normalized outdoor humidity is ${outdoorHumidity}%,sensor outdoor humidity ${outdoorSensorHumidity}%,vs. indoor Humidity ${ecobeeHumidity}%"
+	}
+
+
 
 	log.trace("Evaluate: Ecobee humidity: ${ecobeeHumidity} vs. outdoor humidity ${outdoorHumidity}," +
 		"coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
@@ -328,7 +329,7 @@ def setHumidityLevel() {
 		log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, " +
 			"need to dehumidify the house and normalized outdoor humidity is lower (${outdoorHumidity})"
 
-		//      Turn on the dehumidifer and HRV/ERV, the outdoor humidity is lower or equivalent than inside
+		// Turn on the dehumidifer and HRV/ERV, the outdoor humidity is lower or equivalent than inside
 
 		ecobee.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}", 'vent': 'minontime', 'ventilatorMinOnTime': "${min_vent_time}"])
 
