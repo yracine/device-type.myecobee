@@ -1009,8 +1009,7 @@ private def switch_thermostatMode(indiceSchedule) {
 			log.debug "switch_thermostatMode>thermostat mode set to $newMode"
 			state.scheduleHeatSetpoint=currentHeatPoint      // Set for later processing in adjust_more_less_heat_cool()     
 		}
-	}
-	else if ((coolModeThreshold != null) && (outdoorTemp > coolModeThreshold?.toFloat())) {
+	} else if ((coolModeThreshold != null) && (outdoorTemp > coolModeThreshold?.toFloat())) {
 		if (currentMode != "cool") {
 			def newMode = "cool"
 			thermostat.setThermostatMode(newMode)
