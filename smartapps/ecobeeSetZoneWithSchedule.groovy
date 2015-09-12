@@ -434,7 +434,7 @@ def initialize() {
 
 	runEvery5Minutes(setZoneSettings)
 
-	// Resume program every time a install/update is done to remote any holds at thermostat (reset).
+	// Resume program every time an install/update is done to remote any holds at thermostat (reset).
     
 	thermostat.resumeProgram("")
     
@@ -1329,7 +1329,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 				float max_temp_diff = input_max_temp_diff.toFloat().round(1)
 				if (avg_temp_diff.abs() > max_temp_diff) {
 					if (detailedNotif == 'true') {
-						send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff} :adjusting fan as temp differential too big")
+						send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential too big")
 					}
 					// set fan mode with overrideThreshold=true
 					set_fan_mode(indiceSchedule, true)                
