@@ -369,7 +369,7 @@ def setHumidityLevel() {
 		(outdoorTemp <= min_temp)) {
 
 		log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
-			"normalized outdoor humidity is lower (${outdoorHumidity}), but outdoor temp is ${outdoorTemp}; too cold"
+			"normalized outdoor humidity is lower (${outdoorHumidity}), but outdoor temp is ${outdoorTemp}: too cold to dehumidify"
 
 
 		//      Turn off the dehumidifer and HRV/ERV because it's too cold till the next cycle.
