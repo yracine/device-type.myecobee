@@ -781,7 +781,7 @@ private void check_if_hold_justified() {
 		return    
 	}            
 
-	key = "moreHeatThreshold$indiceSchedule"
+	def key = "moreHeatThreshold$indiceSchedule"
 	def moreHeatThreshold = settings[key]
 	key = "moreCoolThreshold$indiceSchedule"
 	def moreCoolThreshold = settings[key]
