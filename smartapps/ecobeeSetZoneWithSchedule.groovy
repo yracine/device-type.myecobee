@@ -1144,7 +1144,7 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 
 	String currentProgType = thermostat.currentProgramType
-	if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
+	if (currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
 		log.debug("thermostat ${thermostat} is in vacation mode, exiting")
 		return
 	}
@@ -1251,7 +1251,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	float MIN_SETPOINT_ADJUSTMENT=0.5
 
 	String currentProgType = thermostat.currentProgramType
-	if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
+	if (currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
 		log.debug("thermostat ${thermostat} is in vacation mode, exiting")
 		return
 	}
