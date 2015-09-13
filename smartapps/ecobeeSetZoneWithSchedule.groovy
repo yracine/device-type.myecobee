@@ -1327,6 +1327,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		if (detailedNotif == 'true') {
 			send("ecobeeSetZoneWithSchedule>temperature adjustment (${temp_diff}°) between sensors is not significant, exiting")
 		}
+		return
 	}                
 	key = "givenClimate$indiceSchedule"
 	def climateName = settings[key]
