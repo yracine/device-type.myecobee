@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.9.4" 
+			paragraph "Version 2.9.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1322,7 +1322,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
 	float max_temp_diff = input_max_temp_diff.toFloat().round(1)
   
-	if (temp_diff.abs() > MIN_SETPOINT_ADJUSTEMENT) {  // adust the temp only if temp diff is significant
+	if (temp_diff.abs() > MIN_SETPOINT_ADJUSTEMENT) {  // adjust the temp only if temp diff is significant
 		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
 		if (detailedNotif == 'true') {
 			send("ecobeeSetZoneWithSchedule>temperature adjustment (${temp_diff}°) between sensors is not significant, exiting")
@@ -1429,7 +1429,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}, avg_temp_diff=${avg_temp_diff}")
 			switchLevel = ((temp_diff_at_sensor / avg_temp_diff.abs()) * 100).round()
 			if (adjustmentFanFlag=='true') {
-				// Adjust the fan mode if avg temp differential is greater than max_temp_diff set in schedule
+				// Adjust the fan mode if avg temp differential in zone is greater than max_temp_diff set in schedule
 				key = "givenMaxTempDiff$indiceSchedule"
 				def givenMaxTempDiff = settings[key]
 				def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
@@ -1437,7 +1437,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 				float max_temp_diff = input_max_temp_diff.toFloat().round(1)
 				if (avg_temp_diff.abs() > max_temp_diff) {
 					if (detailedNotif == 'true') {
-						send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential too big")
+						send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential in zone is too big")
 					}
 					// set fan mode with overrideThreshold=true
 					set_fan_mode(indiceSchedule, true)                
