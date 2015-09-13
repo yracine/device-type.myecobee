@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.9.5" 
+			paragraph "Version 2.9.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -835,7 +835,7 @@ private void check_if_hold_justified() {
 			}
 			float actual_temp_diff = (programCoolTemp - coolTemp).round(1).abs()
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>eval: actual_temp_diff ${actual_temp_diff}° vs. Max temp diff ${max_temp_diff}°")
+				send("ecobeeSetZoneWithSchedule>eval: actual_temp_diff ${actual_temp_diff}° between program cooling setpoint & hold setpoint vs. max temp diff ${max_temp_diff}°")
 			}
 			if ((actual_temp_diff > max_temp_diff) && (!state?.programHoldSet)) {
 				if (detailedNotif == 'true') {
@@ -862,7 +862,7 @@ private void check_if_hold_justified() {
 			}
 			float actual_temp_diff = (heatTemp - programHeatTemp).round(1).abs()
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>eval: actualTempDiff ${actual_temp_diff}° vs. Max temp Diff ${max_temp_diff}°")
+				send("ecobeeSetZoneWithSchedule>eval: actual_temp_diff ${actual_temp_diff}° between program heating setpoint & hold setpoint vs. max temp diff ${max_temp_diff}°")
 			}
 			if ((actual_temp_diff > max_temp_diff) && (!state?.programHoldSet)) {
 				if (detailedNotif == 'true') {
