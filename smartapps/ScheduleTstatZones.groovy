@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.3.5" 
+			paragraph "Version 2.3.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -521,6 +521,16 @@ def setZoneSettings() {
 	/* Poll the thermostat to get latest values */
 	thermostat.poll()
 
+
+	if ((outTempSensor) && (outTempSensor.hasCapability("Refresh"))) {
+
+		// do a refresh to get latest temp value
+		try {        
+			outTempSensor.refresh()
+		} catch (e) {
+			log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
+		}                    
+	}
 	def ventSwitchesOn = []
 
 	def setVentSettings = (setVentSettingsFlag) ?: 'false'
@@ -606,17 +616,6 @@ def setZoneSettings() {
 		}
 		else if ((state.lastScheduleName == scheduleName) && (currTime >= startTimeToday.time) && (currTime <= endTimeToday.time)) {
 			// We're in the middle of a schedule run
-        
-        
-			if ((outTempSensor) && (outTempSensor.hasCapability("Refresh"))) {
-
-				// do a refresh to get latest temp value
-				try {        
-					outTempSensor.refresh()
-				} catch (e) {
-					log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
-				}                    
-			}
         
 			log.debug "setZoneSettings>schedule ${scheduleName},currTime= ${currTime}, current time is OK for execution, we're in the middle of a schedule run"
 			foundSchedule=true
@@ -1149,6 +1148,7 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def scale = getTemperatureScale()
 	float desiredHeat, desiredCool, avg_indoor_temp
+	float MIN_SETPOINT_ADJUSTMENT=0.5
 
 	def key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
@@ -1161,8 +1161,8 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def indoor_all_zones_temps=[]
 
 
-	log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: zones= ${zones}")
 
+	log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: zones= ${zones}")
 	def adjustmentTempFlag = (setAdjustmentTempFlag)?: 'false'
 
 	for (zone in zones) {
@@ -1205,6 +1205,13 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	if (detailedNotif == 'true') {
 		send("ScheduleTstatZones>schedule ${scheduleName}:avg temp= ${avg_indoor_temp},main Tstat's currentTemp= ${currentTemp},temp adjustment=${temp_diff.abs()}")
 	}
+
+	if (temp_diff.abs() > MIN_SETPOINT_ADJUSTEMENT) {  // adjust the temp only if temp diff is significant
+		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>temperature adjustment (${temp_diff}°) between sensors is not significant, exiting")
+		}
+	}                
 
 	key = "givenMaxTempDiff$indiceSchedule"
 	def givenMaxTempDiff = settings[key]
