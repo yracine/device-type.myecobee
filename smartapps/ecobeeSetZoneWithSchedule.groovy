@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.9.3" 
+			paragraph "Version 2.9.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -340,8 +340,8 @@ def schedulesSetup(params) {
 				,defaultValue:settings."lessCoolThreshold${indiceSchedule}", description: "[default <= 75°F/22°C]")
 		}
 		section("Schedule ${indiceSchedule}-Max Temp Adjustment at the main thermostat based on temp Sensors [indoor&outdoor]") {
-			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment (default= +/-5°F/2°C)", required: false,
-				defaultValue:settings."givenMaxTempDiff${indiceSchedule}", description: "Optional")
+			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment", required: false,
+				defaultValue:settings."givenMaxTempDiff${indiceSchedule}", description: " [default= +/-5°F/2°C]")
 		}
 		section("Schedule ${indiceSchedule}-Override Fan settings at ecobee based on indoor/outdoor sensors [optional]") {
 			input (name:"fanMode${indiceSchedule}", type:"enum", title: "Set Fan Mode ['on', 'auto']", metadata: [values: ["on", "auto"]], 
@@ -481,6 +481,15 @@ def setZoneSettings() {
 		return        
 	}    
 
+	if ((outTempSensor) && (outTempSensor.hasCapability("Refresh"))) {
+
+		// do a refresh to get latest temp value
+		try {        
+			outTempSensor.refresh()
+		} catch (e) {
+			log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
+		}                    
+	}
 	def scheduleProgramName = thermostat.currentClimateName
 
 	boolean foundSchedule=false
@@ -542,16 +551,6 @@ def setZoneSettings() {
 		} else if ((selectedClimate==scheduleProgramName) && (state?.lastScheduleName == scheduleName)) {
 			// We're in the middle of a schedule run
 
-
-			if ((outTempSensor) && (outTempSensor.hasCapability("Refresh"))) {
-
-				// do a refresh to get latest temp value
-				try {        
-					outTempSensor.refresh()
-				} catch (e) {
-					log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
-				}                    
-			}
 
 			foundSchedule=true   
 			def setAwayOrPresent = (setAwayOrPresentFlag)?:'false'
@@ -818,9 +817,7 @@ private void check_if_hold_justified() {
 	float programHeatTemp = thermostat.currentProgramHeatTemp.toFloat()
 	float programCoolTemp = thermostat.currentProgramCoolTemp.toFloat()
 	float ecobeeTemp = thermostat.currentTemperature.toFloat()
-
 	float outdoorTemp = outTempSensor?.currentTemperature.toFloat().round(1)
-    
 
 	if (ecobeeMode == 'cool') {
 		log.trace("check_if_hold_justified>evaluate: moreCoolThreshold=${more_cool_threshold} vs. outdoorTemp ${outdoorTemp}°")
@@ -844,6 +841,7 @@ private void check_if_hold_justified() {
 				if (detailedNotif == 'true') {
 					send("ecobeeSetZoneWithSchedule>Hold differential too big (${actual_temp_diff}), needs adjustment")
 				}
+				thermostat.resumeProgram("")
 			}
 		}
 	} else if (ecobeeMode == 'heat') {
@@ -870,6 +868,7 @@ private void check_if_hold_justified() {
 				if (detailedNotif == 'true') {
 					send("ecobeeSetZoneWithSchedule>Hold differential too big ${actual_temp_diff}, needs adjustment")
 				}
+				thermostat.resumeProgram("")
 			}
 		}
     
@@ -1253,7 +1252,7 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def scale = getTemperatureScale()
 	float desiredHeat, desiredCool, avg_indoor_temp
-
+	float MIN_SETPOINT_ADJUSTMENT=0.5
 
 	String currentProgType = thermostat.currentProgramType
 	if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
@@ -1321,9 +1320,14 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	key = "givenMaxTempDiff$indiceSchedule"
 	def givenMaxTempDiff = settings[key]
 	def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
-
 	float max_temp_diff = input_max_temp_diff.toFloat().round(1)
-    
+  
+	if (temp_diff.abs() > MIN_SETPOINT_ADJUSTEMENT) {  // adust the temp only if temp diff is significant
+		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>temperature adjustment (${temp_diff}°) between sensors is not significant, exiting")
+		}
+	}                
 	key = "givenClimate$indiceSchedule"
 	def climateName = settings[key]
 	if (mode == 'heat') {
