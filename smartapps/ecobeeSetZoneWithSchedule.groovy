@@ -687,8 +687,7 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
     
 		log.debug("set_tstat_to_AwayOrPresent>not setting the thermostat ${thermostat} to ${mode} mode; ${currentSetClimate} 'Hold' already set")
 		return    
-    
-	}    
+ 	}    
     
 	try {
 		if  (mode == 'away') {
@@ -717,7 +716,7 @@ private void check_if_hold_justified() {
 	String ecobeeMode = thermostat.currentThermostatMode.toString()
 	log.trace "check_if_hold_justified> location.mode = $location.mode"
 	log.trace "check_if_hold_justified> ecobee Mode = $ecobeeMode"
-    log.trace "check_if_hold_justified> currentProgName = $currentProgName"
+	log.trace "check_if_hold_justified> currentProgName = $currentProgName"
 	log.trace "check_if_hold_justified> currentSetClimate = $currentSetClimate"
 	log.trace "check_if_hold_justified>state=${state}"
 	
@@ -871,8 +870,7 @@ private void check_if_hold_justified() {
 				thermostat.resumeProgram("")
 			}
 		}
-    
-    }
+	}
 	log.debug "End of Fcn check_if_hold_justified"
 }
 
@@ -1082,7 +1080,7 @@ private def getAllTempsForAverage(indiceZone) {
 }
 
 private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
-/*  Y.R. Not able to do it at the moment, ST issue...
+/*  Y.R. Not able to do it at the moment, ST issue with too many parameters in a page...
 	def key = "givenFanMinTime${indiceSchedule}"
 	def fanMinTime=settings[key]
 
@@ -1144,8 +1142,6 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 	def key = "setRoomThermostatsOnlyFlag$indiceSchedule"
 	def setRoomThermostatsOnlyFlag = settings[key]
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
-
-
 
 	String currentProgType = thermostat.currentProgramType
 	if (!currentProgType.contains("vacation")) {				// don't make adjustment if on vacation mode
