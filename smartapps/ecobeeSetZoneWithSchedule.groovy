@@ -480,12 +480,11 @@ def setZoneSettings() {
 		log.error msg
 		return        
 	}    
-
-	if ((outTempSensor) && (outTempSensor.hasCapability("Refresh"))) {
+	if ((outdoorTempSensor) && ((outdoorTempSensor.hasCapability("Refresh")) || (outdoorTempSensor.hasCapability("Polling")))) {
 
 		// do a refresh to get latest temp value
 		try {        
-			outTempSensor.refresh()
+			outTempSensor.poll()
 		} catch (e) {
 			log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
 		}                    
@@ -889,10 +888,10 @@ private def getSensorTempForAverage(indiceRoom, typeSensor='tempSensor') {
 	def tempSensor = settings[key]
 	if (tempSensor != null) {
 		log.debug("getTempSensorForAverage>found sensor ${tempSensor}")
-		if (tempSensor.hasCapability("Refresh")) {
+		if ((tempSensor.hasCapability("Polling")) || (tempSensor.hasCapability("Refresh")) ) {
 			// do a refresh to get the latest temp value
 			try {        
-				tempSensor.refresh()
+				tempSensor.poll()
 			} catch (e) {
 				log.debug("getSensorTempForAverage>not able to do a refresh() on $tempSensor")
 			}                
@@ -1325,7 +1324,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		// Adjust the fan mode if avg temp differential in zone is greater than max_temp_diff set in schedule
 		if (temp_diff.abs() > max_temp_diff) {
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential in zone is too big")				
+				send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},avg_temp_diff=${temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential in zone is too big")				
 				// set fan mode with overrideThreshold=true
 				set_fan_mode(indiceSchedule, true)          
                 
