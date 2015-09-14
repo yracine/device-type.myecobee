@@ -218,7 +218,7 @@ This smartapp allows a ST user to set the ecobee thermostat(s) to a given climat
 /****************************************************
 
 
-The smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with z-wave vents (optional) for better temp settings control throughout your home"
+The smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
 
 
 And many others...
