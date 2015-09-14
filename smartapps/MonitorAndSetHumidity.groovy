@@ -240,9 +240,9 @@ def setHumidityLevel() {
 		return        
 	}    
 
-	if (outdoorSensor.hasCapability("Refresh")) {
+	if ((outdoorSensor.hasCapability("Refresh")) || (outdoorSensor.hasCapability("Polling"))) {
 		try {    
-			outdoorSensor.refresh()
+			outdoorSensor.poll()
 		} catch (e) {
 			log.debug("MonitorEcobeeHumdity>not able to refresh ${outdoorSensor}'s temp value")
 		}
