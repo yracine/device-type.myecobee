@@ -775,9 +775,11 @@ private void check_if_hold_justified() {
 		}
 	}   
     
-	if (outTempSensor == null) {
+	def adjustmentOutdoorTempFlag = (setAdjustmentOutdoorTempFlag)?: 'false'
+	if ((outTempSensor == null) || (adjustmentOutdoorTempFlag == 'false')) {
 		return    
 	}            
+
 
 	def key = "moreHeatThreshold$indiceSchedule"
 	def moreHeatThreshold = settings[key]
