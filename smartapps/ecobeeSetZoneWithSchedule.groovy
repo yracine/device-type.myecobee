@@ -1323,7 +1323,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		// Adjust the fan mode if avg temp differential in zone is greater than max_temp_diff set in schedule
 		if (temp_diff.abs() > max_temp_diff) {
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${avg_temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential in zone is too big")				
+				send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in zone ${zoneName},avg_temp_diff=${temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential in zone is too big")				
 				// set fan mode with overrideThreshold=true
 				set_fan_mode(indiceSchedule, true)          
                 
