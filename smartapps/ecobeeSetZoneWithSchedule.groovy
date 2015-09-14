@@ -480,7 +480,7 @@ def setZoneSettings() {
 		log.error msg
 		return        
 	}    
-	if ((outdoorTempSensor) && ((outdoorTempSensor.hasCapability("Refresh")) || (outdoorTempSensor.hasCapability("Polling")))) {
+	if ((outTempSensor) && ((outTempSensor.hasCapability("Refresh")) || (outTempSensor.hasCapability("Polling")))) {
 
 		// do a refresh to get latest temp value
 		try {        
