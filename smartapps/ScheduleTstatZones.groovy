@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.4" 
+			paragraph "Version 2.4.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1158,9 +1158,10 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 
 
 private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
-	def scale = getTemperatureScale()
 	float desiredHeat, desiredCool, avg_indoor_temp
-	float MIN_SETPOINT_ADJUSTMENT=0.5
+	float MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS=0.5
+	float MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS=1
+	def scale = getTemperatureScale()
 
 	def key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
@@ -1218,7 +1219,8 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		send("ScheduleTstatZones>schedule ${scheduleName}:avg temp= ${avg_indoor_temp},main Tstat's currentTemp= ${currentTemp},temp adjustment=${temp_diff.abs()}")
 	}
 
-	if (temp_diff.abs() < MIN_SETPOINT_ADJUSTMENT) {  // adjust the temp only if temp diff is significant
+	float min_setpoint_adjustment = (scale=='C') ? MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS:MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS
+	if (temp_diff.abs() < min_setpoint_adjustment) {  // adjust the temp only if temp diff is significant
 		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
 		if (detailedNotif == 'true') {
 			send("ecobeeSetZoneWithSchedule>temperature adjustment (${temp_diff}°) between sensors is not significant, exiting")
