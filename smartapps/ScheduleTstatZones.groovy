@@ -978,16 +978,16 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 
 	try {
 		if (fanMode=='auto') {
-			fanAuto()        
+			thermostat.fanAuto()        
 		}
 		if (fanMode=='off') {
-			fanOff()        
+			thermostat.fanOff()        
 		}
 		if (fanMode=='on') {
-			fanOn()        
+			thermostat.fanOn()        
 		}
 		if (fanMode=='circulate') {
-			fanCirculate()        
+			thermostat.fanCirculate()        
 		}
         
 		if (detailedNotif == 'true') {
