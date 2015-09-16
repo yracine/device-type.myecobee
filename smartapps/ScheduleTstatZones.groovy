@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.3.9" 
+			paragraph "Version 2.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -977,7 +977,19 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 	}    
 
 	try {
-		thermostat?.setThermostatFanMode(fanMode)
+		if (fanMode=='auto') {
+			fanAuto()        
+		}
+		if (fanMode=='off') {
+			fanOff()        
+		}
+		if (fanMode=='on') {
+			fanOn()        
+		}
+		if (fanMode=='circulate') {
+			fanCirculate()        
+		}
+        
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>schedule ${scheduleName},set fan mode to ${fanMode} at thermostat ${thermostat} as requested")
 		}
