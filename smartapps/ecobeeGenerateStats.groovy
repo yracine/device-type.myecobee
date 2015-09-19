@@ -28,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 1.9.6" 
+		paragraph "Version 1.9.7" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -42,16 +42,16 @@ preferences {
 
 	}
 	section("Start date for the initial run, format = YYYY-MM-DD") {
-		input "givenStartDate", "text", title: "Beginning Date [default=yesterday]"
+		input "givenStartDate", "text", title: "Beginning Date [default=yesterday]", required: false
 	}        
 	section("Start time for initial run HH:MM (24HR)") {
-		input "givenStartTime", "text", title: "Beginning time [default=00:00]"	
+		input "givenStartTime", "text", title: "Beginning time [default=00:00]"	, required: false
 	}        
 	section("End date for the initial run = YYYY-MM-DD") {
-		input "givenEndDate", "text", title: "End Date [default=today]"
+		input "givenEndDate", "text", title: "End Date [default=today]", required: false
 	}        
 	section("End time for the initial run (24HR)" ) {
-		input "givenEndTime", "text", title: "End time [default=00:00]"
+		input "givenEndTime", "text", title: "End time [default=00:00]", required: false
 	}        
 	section( "Notifications" ) {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
