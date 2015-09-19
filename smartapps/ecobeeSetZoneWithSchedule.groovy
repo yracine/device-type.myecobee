@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.0.1" 
+			paragraph "Version 3.0.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -76,7 +76,7 @@ def generalSetupPage() {
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable temp adjustment based on outdoor temp sensor [optional, default=false]") {
-			input (name:"setAdjustmentOutdoorTempFlag", title: "Enable temp adjustment set in rooms based on outdoor sensor?", type:"Boolean",
+			input (name:"setAdjustmentOutdoorTempFlag", title: "Enable temp adjustment set in schedules based on outdoor sensor?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
 		section("Enable temp adjustment based on indoor temp sensor(s) [optional, default=false]") {
@@ -538,13 +538,13 @@ def setZoneSettings() {
 				ventSwitchesZoneSet= control_vent_switches_in_zone(i)
 				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 			}				
+			if (adjustmentFanFlag == 'true') {
+				set_fan_mode(i)
+			}
 			if (adjustmentTempFlag == 'true') {
 				// adjust the temperature at the thermostat(s) based on avg temp calculated from indoor temp sensors if any
 				adjust_thermostat_setpoint_in_zone(i)
 			}                
-			if (adjustmentFanFlag == 'true') {
-				set_fan_mode(i)
-			}
 			ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 			state.lastScheduleName = scheduleName
 		} else if ((selectedClimate==scheduleProgramName) && (state?.lastScheduleName == scheduleName)) {
@@ -573,6 +573,11 @@ def setZoneSettings() {
 				}
 			}   
             
+			if (adjustmentFanFlag == 'true') {
+				// will override the fan settings if required (ex. more Fan Threshold is set)
+				set_fan_mode(i)
+			}
+            
 			if (isResidentPresent) {
 				if (adjustmentTempFlag == 'true') {
 					// adjust the temperature at the thermostat(s) based on avg temp calculated from indoor temp sensors if any
@@ -584,10 +589,6 @@ def setZoneSettings() {
 				}                    
             
 			}        
-			if (adjustmentFanFlag == 'true') {
-				// will override the fan settings if required (ex. more Fan Threshold is set)
-				set_fan_mode(i)
-			}
             
 			// If required, let's adjust the vent settings according to desired Temp
 			if (setVentSettings=='true') {            
