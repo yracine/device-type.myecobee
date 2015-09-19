@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.4.1" 
+			paragraph "Version 2.4.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -595,10 +595,10 @@ def setZoneSettings() {
 				if (detailedNotif == 'true') {
 					send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
 				}
-				adjust_thermostat_setpoint_in_zone(i)
 				if (adjustmentFanFlag == 'true') {                
 					set_fan_mode(i)
 				}   
+				adjust_thermostat_setpoint_in_zone(i)
 				if (setVentSettings=='true') {
 					// set the zoned vent switches to 'on'
 					ventSwitchesZoneSet= control_vent_switches_in_zone(i)
@@ -636,6 +636,10 @@ def setZoneSettings() {
 					}                
 				}
 			}            
+			if (adjustmentFanFlag == 'true') {                
+            	// will override the fan settings if required (ex. more Fan Threshold is set)
+				set_fan_mode(i)
+			}                    
 			if (isResidentPresent) {
             
 				if (adjustmentTempFlag =='true') {            	
@@ -649,10 +653,6 @@ def setZoneSettings() {
 					adjust_tstat_for_more_less_heat_cool(i)
 				}                    
 			}        
-			if (adjustmentFanFlag == 'true') {                
-            	// will override the fan settings if required (ex. more Fan Threshold is set)
-				set_fan_mode(i)
-			}                    
 			// let's adjust the vent settings according to desired Temp
             
 			if (setVentSettings=='true') {            
