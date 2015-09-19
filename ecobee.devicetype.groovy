@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.2.4
+ *  Version 2.2.6
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -234,30 +234,24 @@ metadata {
 		}
 		valueTile("temperature", "device.temperatureDisplay", width: 2, height: 2,
 			canChangeIcon: false) {
-//		If one prefers Celsius over Farenheits, just comment out the temperature in Farenheits 
-//		and remove the comment below to have the right color scale in Celsius.
-//		This issue will be solved as soon as Smartthings supports dynamic tiles
-//			state("temperature", label: '${currentValue}°', unit: "C", 
-//            		backgroundColors: [
-//					[value: 0, color: "#153591"],
-//					[value: 8, color: "#1e9cbb"],
-//					[value: 14, color: "#90d2a7"],
-//					[value: 20, color: "#44b621"],
-//					[value: 24, color: "#f1d801"],
-//					[value: 29, color: "#d04e00"],
-//					[value: 36, color: "#bc2323"]
-//				])
-//		}
 			state("temperature", label:'${currentValue}°', unit:"F",
-			backgroundColors:[
-					[value: 31, color: "#153591"],
+				backgroundColors: [
+					[value: 0, color: "#153591"],
+					[value: 7, color: "#1e9cbb"],
+					[value: 15, color: "#90d2a7"],
+					[value: 23, color: "#44b621"],
+					[value: 29, color: "#f1d801"],
+					[value: 33, color: "#d04e00"],
+					[value: 36, color: "#bc2323"],
+					// Fahrenheit Color Range
+					[value: 40, color: "#153591"],
 					[value: 44, color: "#1e9cbb"],
 					[value: 59, color: "#90d2a7"],
 					[value: 74, color: "#44b621"],
 					[value: 84, color: "#f1d801"],
-					[value: 95, color: "#d04e00"],
+					[value: 92, color: "#d04e00"],
 					[value: 96, color: "#bc2323"]
-				])
+                ])
 		}
 		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
 			decoration: "flat") {
@@ -521,31 +515,32 @@ void heatLevelDown() {
 
 
 void setHeatingSetpoint(temp) {
+	def scale = getTemperatureScale()
 	setHold("", device.currentValue("coolingSetpoint"), temp,
 		null, null)
 	def exceptionCheck=device.currentValue("verboseTrace")
 	if (exceptionCheck.contains("setHold>done")) {
-		sendEvent(name: 'heatingSetpoint', value: temp,unit: getTemperatureScale())
-		sendEvent(name: 'heatingSetpointDisplay', value: temp,unit: getTemperatureScale())
+		sendEvent(name: 'heatingSetpoint', value: temp,unit: scale)
+		sendEvent(name: 'heatingSetpointDisplay', value: temp,unit: scale)
 		def currentMode = device.currentValue("thermostatMode")
 		if ((currentMode=='heat') || (currentMode=='auto')) {
-			sendEvent(name: 'thermostatSetpoint', value: temp,unit: getTemperatureScale())     
+			sendEvent(name: 'thermostatSetpoint', value: temp,unit: scale)     
 		} 
 	}        
 }
 
 
 void setCoolingSetpoint(temp) {
+	def scale = getTemperatureScale()
 	setHold("", temp, device.currentValue("heatingSetpoint"),
 		null, null)
-
-	def currentMode = device.currentValue("thermostatMode")
 	def exceptionCheck=device.currentValue("verboseTrace")
 	if (exceptionCheck.contains("setHold>done")) {
-		sendEvent(name: 'coolingSetpoint', value: temp, unit: getTemperatureScale())
-		sendEvent(name: 'coolingSetpointDisplay', value: temp, unit: getTemperatureScale())
+		def currentMode = device.currentValue("thermostatMode")
+		sendEvent(name: 'coolingSetpoint', value: temp, unit: scale)
+		sendEvent(name: 'coolingSetpointDisplay', value: temp, unit: scale)
 		if ((currentMode=='cool') || (currentMode=='auto')) {
-			sendEvent(name:'thermostatSetpoint', value: temp, unit: getTemperatureScale())     
+			sendEvent(name:'thermostatSetpoint', value: temp, unit: scale)     
 		}
 	}
 }
@@ -1064,7 +1059,7 @@ private def getAlerts() {
 	if (data.thermostatList[0].alerts.size() > 0) {
 		alerts = 'Alert(s) '
 		for (i in 0..data.thermostatList[0].alerts.size() - 1) {
-			alerts = (i > 0) ? ', \n' + alerts + data.thermostatList[0].alerts[i].notificationType :
+			alerts = (i > 0) ? '\n' + ' ' + alerts + data.thermostatList[0].alerts[i].notificationType :
 				alerts +
 				data.thermostatList[0].alerts[i].notificationType
 		}
