@@ -637,7 +637,7 @@ def setZoneSettings() {
 				}
 			}            
 			if (adjustmentFanFlag == 'true') {                
-            	// will override the fan settings if required (ex. more Fan Threshold is set)
+				// will override the fan settings if required (ex. more Fan Threshold is set)
 				set_fan_mode(i)
 			}                    
 			if (isResidentPresent) {
