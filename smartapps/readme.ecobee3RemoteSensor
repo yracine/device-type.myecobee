@@ -97,8 +97,11 @@ This could mean that the old Device Type is still in the cache..
 You may have to redo the cache cleaning another time (go back to step 4).
 
 Please also make sure that you have the latest firmware (at least v3.6) as motion sensors
-are not detected prior to that firmware version.  And, of course, that all your remote sensors
-are actually reporting to the physical thermostat...
+are not detected prior to that firmware version.  
+
+And, of course, make sure that all your remote sensors are actually reporting to the physical thermostat...
+In some cases, remote sensors may have some connection issues with your physical thermostat, and my code is not able 
+to detect them.
 
 
 
