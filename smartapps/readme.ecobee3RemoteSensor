@@ -92,12 +92,14 @@ https://graph.api.smartthings.com/ide/logs
 
 'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
 
-This means that the old Device Type is still in the cache..
+This could mean that the old Device Type is still in the cache..
 
 You may have to redo the cache cleaning another time (go back to step 4).
 
 Please also make sure that you have the latest firmware (at least v3.6) as motion sensors
-are not detected prior to that firmware version.
+are not detected prior to that firmware version.  And, of course, that all your remote sensors
+are actually reporting to the physical thermostat...
+
 
 
 /*********************************************************************************************
