@@ -96,6 +96,9 @@ This means that the old Device Type is still in the cache..
 
 You may have to redo the cache cleaning another time (go back to step 4).
 
+Please also make sure that you have the latest firmware (at least v3.6) as motion sensors
+are not detected prior to that firmware version.
+
 
 /*********************************************************************************************
 6) Under My apps on your smartphone/tablet, execute ecobee3RemoteSensorInit the same way as the My Ecobee Init (service Manager).
