@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.2.6
+ *  Version 2.2.7
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -2424,9 +2424,6 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 	endInt = (endInterval == null)? get_interval(endDateTime): endInterval.toInteger()
 	Calendar startCalendar = startDateTime.toCalendar()
 	Calendar endCalendar = endDateTime.toCalendar()
-	if (endCalendar.get(Calendar.DATE) != startCalendar.get(Calendar.DATE)) {
-		endInt += nbDaysInPeriod.intValue() * REPORT_MAX_INTERVALS_PER_DAY 
-	}
 	if (settings.trace) {
 		log.debug "getReportData> startInterval = ${beginInt}, endInterval = ${endInt}"
 	}
