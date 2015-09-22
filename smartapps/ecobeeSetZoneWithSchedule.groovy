@@ -345,7 +345,7 @@ def schedulesSetup(params) {
 		}
 		section("Schedule ${indiceSchedule}-Override Fan settings at ecobee based on indoor/outdoor sensors [optional]") {
 			input (name:"fanMode${indiceSchedule}", type:"enum", title: "Set Fan Mode ['on', 'auto']", metadata: [values: ["on", "auto"]], 
-            	required: false, defaultValue:settings."fanMode${indiceSchedule}", description: "Optional")
+				required: false, defaultValue:settings."fanMode${indiceSchedule}", description: "Optional")
 /*      	Y.R. Not able to add this settings for the moment, ST issue?          
 			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule",
 				required: false, defaultValue:settings."givenFanMinTime${indiceSchedule}", description: "Optional")
