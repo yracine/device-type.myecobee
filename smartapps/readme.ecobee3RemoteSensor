@@ -88,7 +88,8 @@ b) Run ecobee3RemoteSensorInit on your smartphone/tablet
 c) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
 
 
-If you have a blank page in ecobee3RemoteSensorInit:
+If you have a blank page in ecobee3RemoteSensorInit or "a unexpected error occurred" while
+executing the smartapp:
 
 (a) Make sure that you have the latest firmware (at least v3.6) as motion sensors
 are not detected prior to that firmware version.  
