@@ -87,22 +87,29 @@ b) Run ecobee3RemoteSensorInit on your smartphone/tablet
 c) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
 
 
-BTW, If you have a blank page in ecobee3RemoteSensorInit and/or the following error msg in the logs:
-https://graph.api.smartthings.com/ide/logs
+If you have a blank page in ecobee3RemoteSensorInit:
 
-'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
-
-This could mean that the old Device Type is still in the cache..
-
-You may have to redo the cache cleaning another time (go back to step 4).
-
-Please also make sure that you have the latest firmware (at least v3.6) as motion sensors
+(1) Make sure that you have the latest firmware (at least v3.6) as motion sensors
 are not detected prior to that firmware version.  
 
 And, of course, make sure that all your remote sensors are actually reporting to the physical thermostat...
 In some cases, remote sensors may have some connection issues with your physical thermostat, and my code is not able 
 to detect them.
 
+
+(2) If you have the following error msg in the logs:
+
+physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Motion Detector' in namespace 'smartthings' not found
+
+Then, it means that somehow, you have not completed step 3 entirely (please refer to step 3 above).
+
+(3) If you have the following error msg in the logs:
+
+'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
+
+This could mean that the old Device Type is still in the cache..
+
+You may have to redo the cache cleaning another time (go back to step 4).
 
 
 /*********************************************************************************************
@@ -124,3 +131,16 @@ https://graph.api.smartthings.com/device/list
 /*********************************************************************************************
 7) The temp and motion sensors data should be updated according to the polling interval specified as input in the smartapp.
 /*********************************************************************************************
+
+
+/*********************************************************************************************
+8) Repeat step 7 for each ecobee3 thermostat
+/*********************************************************************************************
+
+If you have many ecobee3 thermostats, you'd need to repeat step 7 for each one, but change the instance
+name each time at the last page (Notifications And Other Settings):
+
+"Assign a name for this SmartApp"
+
+
+
