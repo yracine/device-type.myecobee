@@ -50,9 +50,10 @@ Click "Save" & Publish"
 3) Prior to calling ecobee3RemoteSensorInit, you need to create 2 additional generic device types in your IDE:
 /*********************************************************************************************
 
+-------------------------------
 - Motion Detector
-
 - Temperature Sensor
+-------------------------------
 
 Those are 2 devices types from SmartThings. 
 
@@ -101,7 +102,7 @@ to detect them.
 
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Motion Detector' in namespace 'smartthings' not found
 
-Then, it means that somehow, you have not completed step 3 entirely (please refer to step 3 above).
+Then, it means that somehow, step 3 was not completed entirely.
 
 (c) If you have the following error msg in the logs:
 
