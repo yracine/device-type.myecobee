@@ -91,7 +91,7 @@ c) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensor
 If you have a blank page in ecobee3RemoteSensorInit or "a unexpected error occurred" while
 executing the smartapp:
 
-(a) Make sure that you have the latest firmware (at least v3.6) as motion sensors
+d) Make sure that you have the latest firmware (at least v3.6) as motion sensors
 are not detected prior to that firmware version.  
 
 And, of course, make sure that all your remote sensors are actually reporting to the physical thermostat...
@@ -99,13 +99,13 @@ In some cases, remote sensors may have some connection issues with your physical
 to detect them.
 
 
-(b) If you have the following error msg in the logs:
+e) If you have the following error msg in the logs:
 
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Motion Detector' in namespace 'smartthings' not found
 
 Then, it means that somehow, step 3 was not completed entirely.
 
-(c) If you have the following error msg in the logs:
+f) If you have the following error msg in the logs:
 
 'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
 
