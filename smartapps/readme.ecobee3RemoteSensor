@@ -5,6 +5,7 @@
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *
  *  in compliance with the License. You may obtain a copy of the License at:
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -50,23 +51,32 @@ Click "Save" & Publish"
 3) Prior to calling ecobee3RemoteSensorInit, you need to create 2 additional generic device types in your IDE:
 /*********************************************************************************************
 
--------------------------------
+----------------------------------------------------------------------------------------------
 - Motion Detector
 - Temperature Sensor
--------------------------------
+----------------------------------------------------------------------------------------------
 
 Those are 2 devices types from SmartThings. 
 
 In order to do so,
 
+----------------------------------------------------------------------------------------------
 a) Go to https://graph.api.smartthings.com/ide/devices
+----------------------------------------------------------------------------------------------
 b) Click on new SmartDevice on the right
+----------------------------------------------------------------------------------------------
 c) On the new SmartDevice page, click on the "From Template" tab
+----------------------------------------------------------------------------------------------
 d) Scroll down to Temperature Sensor
+----------------------------------------------------------------------------------------------
 e) Click "create" at the bottom of the page
+----------------------------------------------------------------------------------------------
 f) Click Save and publish on the next page
+----------------------------------------------------------------------------------------------
 g) Do the same for Motion Detector
+----------------------------------------------------------------------------------------------
 h) Click "create" at the bottom of the page
+----------------------------------------------------------------------------------------------
 i) Click save and publish
 
 /*********************************************************************************************
@@ -83,8 +93,11 @@ otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSe
 for better support, just active the live logging and get more tracing
 in the IDE by following these steps:
 
+----------------------------------------------------------------------------------------------
 a) Go to https://graph.api.smartthings.com/ide/logs
+----------------------------------------------------------------------------------------------
 b) Run ecobee3RemoteSensorInit on your smartphone/tablet
+----------------------------------------------------------------------------------------------
 
 Click on '+' at the bottom of your smartThings dashboard, scroll down till 'My apps'.
 Scroll down to ecobee3RemoteSensorInit and click on it to execute it.
@@ -94,28 +107,36 @@ any of the following screens: Home & Marketspace, and then MyApps (last item in 
 
 The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
 
+----------------------------------------------------------------------------------------------
 c) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
+----------------------------------------------------------------------------------------------
 
 
 If you have a blank page in ecobee3RemoteSensorInit or "a unexpected error occurred" while
 executing the smartapp:
 
+----------------------------------------------------------------------------------------------
 d) Make sure that you have the latest firmware (at least v3.6) as motion sensors
 are not detected prior to that firmware version.  
+----------------------------------------------------------------------------------------------
 
 And, of course, make sure that all your remote sensors are actually reporting to the physical thermostat...
 In some cases, remote sensors may have some connection issues with your physical thermostat, and my code is not able 
 to detect them.
 
 
+----------------------------------------------------------------------------------------------
 e) If you have the following error msg in the logs:
+----------------------------------------------------------------------------------------------
 
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Motion Detector' in namespace 'smartthings' not found
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Temperature Sensor' in namespace 'smartthings' not found
 
 Then, it means that somehow, step 3 was not completed entirely.
 
+----------------------------------------------------------------------------------------------
 f) If you have the following error msg in the logs:
+----------------------------------------------------------------------------------------------
 
 'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
 
