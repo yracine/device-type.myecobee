@@ -85,6 +85,15 @@ in the IDE by following these steps:
 
 a) Go to https://graph.api.smartthings.com/ide/logs
 b) Run ecobee3RemoteSensorInit on your smartphone/tablet
+
+Click on '+' at the bottom of your smartThings dashboard, scroll down till 'My apps'.
+Scroll down to ecobee3RemoteSensorInit and click on it to execute it.
+
+<b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of 
+any of the following screens: Home & Marketspace, and then MyApps (last item in the list).</b>
+
+The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
+
 c) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
 
 
@@ -114,32 +123,20 @@ This could mean that the old Device Type is still in the cache..
 You may have to redo the cache cleaning another time (go back to step 4).
 
 
-/*********************************************************************************************
-6) Under My apps on your smartphone/tablet, execute ecobee3RemoteSensorInit the same way as the My Ecobee Init (service Manager).
-/*********************************************************************************************
-
-Click on '+' at the bottom of your smartThings dashboard, scroll down till 'My apps'.
-Scroll down to ecobee3RemoteSensorInit and click on it to execute it.
-
-<b>If you have upgraded to the new UI, click on the Smartapps link in the upper section of 
-any of the following screens: Home & Marketspace, and then MyApps (last item in the list).</b>
-
-The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
-
 After execution, you should be able to see the new Sensor objects under
 
 https://graph.api.smartthings.com/device/list
 
 /*********************************************************************************************
-7) The temp and motion sensors data should be updated according to the polling interval specified as input in the smartapp.
+6) The temp and motion sensors data should be updated according to the polling interval specified as input in the smartapp.
 /*********************************************************************************************
 
 
 /*********************************************************************************************
-8) Repeat step 7 for each ecobee3 thermostat
+7) Repeat step 5b for each ecobee3 thermostat
 /*********************************************************************************************
 
-If you have many ecobee3 thermostats, you'd need to repeat step 7 for each one, but change the instance
+If you have many ecobee3 thermostats, you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
 name each time at the last page (Notifications And Other Settings):
 
 "Assign a name for this SmartApp"
