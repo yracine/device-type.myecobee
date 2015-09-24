@@ -111,6 +111,7 @@ to detect them.
 e) If you have the following error msg in the logs:
 
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Motion Detector' in namespace 'smartthings' not found
+physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Temperature Sensor' in namespace 'smartthings' not found
 
 Then, it means that somehow, step 3 was not completed entirely.
 
