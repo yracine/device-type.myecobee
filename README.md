@@ -19,6 +19,9 @@ https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2e
 
 **************************************************************************************************
 
+
+Setup time: about 5 minutes
+
 =====================
 INSTALLATION STEPS
 =====================
