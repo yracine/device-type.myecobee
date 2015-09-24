@@ -87,7 +87,7 @@ For iOS devices, in order to clear the cache, you'd need to uninstall & reinstal
 otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSensor smartapp.
 
 /*********************************************************************************************
-5) Enable tracing and activate live Logging
+5) Enable tracing, activate live Logging & Execute ecobee3RemoteSensorInit
 /*********************************************************************************************
 
 for better support, just active the live logging and get more tracing
