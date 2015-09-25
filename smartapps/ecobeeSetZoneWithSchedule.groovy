@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.2" 
+			paragraph "Version 3.2.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -768,7 +768,9 @@ private void check_if_hold_justified() {
                 
 		} else if (state?.programHoldSet == 'Away') {
 			log.trace("check_if_hold_justified>quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName},'Away' hold justified")
-			send("ecobeeSetZoneWithSchedule>quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Away' hold justified")
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Away' hold justified")
+			}    
 			thermostat.setClimate("","Away")
 		}    
 	}
@@ -794,8 +796,8 @@ private void check_if_hold_justified() {
 			log.trace("check_if_hold_justified>not quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Home' hold justified")
 			if (detailedNotif == 'true') {
 				send("ecobeeSetZoneWithSchedule>not quiet since ${state.programSetTimestamp}, current ecobee schedule= ${currentProgName}, 'Home' hold justified")
-				thermostat.setClimate("", "Home")
 			}
+			thermostat.setClimate("", "Home")
 		}
 	}   
     
