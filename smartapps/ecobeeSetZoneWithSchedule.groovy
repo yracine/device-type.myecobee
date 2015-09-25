@@ -457,7 +457,7 @@ def initialize() {
 		def motionSensor = settings[key]
         
 		if (motionSensor) {
-     		motionSensors.add(motionSensor)    
+			motionSensors.add(motionSensor)    
 		}            
 	}        
 	// associate the motionHandler to the list of motionSensors in rooms   	 
