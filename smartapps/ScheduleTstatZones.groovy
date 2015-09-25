@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.4.3" 
+			paragraph "Version 2.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -450,6 +450,16 @@ def coolingSetpointHandler(evt) {
 	log.debug "cooling Setpoint now: $evt.value"
 }
 
+def motionEvtHandler(evt) {
+	if (evt.value == "active") {
+		log.debug "Motion at home..."
+
+		if (state?.setPresentOrAway == 'Away') {
+			set_main_tstat_to_AwayOrPresent('present')
+		}        
+	}
+}
+
 def initialize() {
 
 	if (powerSwitch) {
@@ -473,28 +483,19 @@ def initialize() {
 
 	subscribe(app, appTouch)
     
-/*	Commented out as not a reliable way to do scheduling
-
-	def currTime = now()
-	for (i in 1..settings.schedulesCount) {
-		key = "scheduleName$i"
-		def scheduleName = settings[key]
-		def key = "begintime$i"
-		def startTime = settings[key]
-		def startTimeToday = timeToday(startTime)
-		if (startTime != null) {
-			if (startTimeToday.time < currTime) {
-				startTimeToday = startTimeToday + 1
-			}        
-			String startInLocalTime = startTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
-			String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
-			log.debug "initialize>scheduled ${scheduleName} at ${startInLocalTime}, (${startHourInLocal}:${startMinutesInLocal}) now = ${nowInLocalTime}, startTime UTC =${startTimeToday}"
-
-//			schedule(startTimeToday, setZoneSettings)
-
+	def motionSensors =[]   	 
+	for (int i = 1;
+		((i <= settings.roomsCount) && (i <= 16)); i++) {
+		def key = "motionSensor${i}"
+		def motionSensor = settings[key]
+        
+		if (motionSensor) {
+			motionSensors.add(motionSensor)    
 		}            
-	}
-*/
+	}        
+	// associate the motionHandler to the list of motionSensors in rooms   	 
+	subscribe(motionSensors, "motion", motionEvtHandler, [filterEvents: false])
+    
 
 }
 
