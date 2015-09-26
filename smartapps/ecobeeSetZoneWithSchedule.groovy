@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.2.3" 
+			paragraph "Version 3.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -473,6 +473,7 @@ def appTouch(evt) {
 
 
 def setZoneSettings() {
+	log.debug "Begin of setZoneSettings Fcn"
     
 	if (powerSwitch?.currentSwitch == "off") {
 		if (detailedNotif == 'true') {
@@ -636,7 +637,7 @@ def setZoneSettings() {
 		log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
 		turn_off_all_other_vents(ventSwitchesOn)
 	}		    
-	log.debug "End of Fcn"
+	log.debug "End of setZoneSettings Fcn"
 }
 
 private def isRoomOccupied(sensor, indiceRoom) {
@@ -928,7 +929,7 @@ private def getSensorTempForAverage(indiceRoom, typeSensor='tempSensor') {
 	return currentTemp
 }
 
-private def setRoomTstatSettings(indiceZone, indiceRoom) {
+private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 
 	def scale = getTemperatureScale()
 	float desiredHeat, desiredCool
@@ -936,7 +937,10 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 	def key = "zoneName$indiceZone"
 	def zoneName = settings[key]
 
-	key = "givenClimate$indiceZone"
+	key = "scheduleName$indiceSchedule"
+	def scheduleName = settings[key]
+
+	key = "givenClimate$indiceSchedule"
 	def climateName = settings[key]
 
 	key = "roomTstat$indiceRoom"
@@ -945,7 +949,7 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 	key = "roomName$indiceRoom"
 	def roomName = settings[key]
 
-	log.debug("ecobeeSetZoneWithSchedule>in room ${roomName},about to apply zone's temp settings at ${roomTstat}")
+	log.debug("ecobeeSetZoneWithSchedule>>schedule ${scheduleName}, in room ${roomName},about to apply zone's temp settings at ${roomTstat}")
 	String mode = thermostat?.currentThermostatMode.toString() // get the mode at the main thermostat
 	if (mode == 'heat') {
 		roomTstat.heat()
@@ -954,59 +958,58 @@ private def setRoomTstatSettings(indiceZone, indiceRoom) {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
 			} catch (any) {
-				log.debug("setRoomTstatSettings>in room ${roomName},not able to set climate ${climateName} for heating at the thermostat ${roomTstat}")
+				log.debug("setRoomTstatSettings>schedule ${scheduleName}, in room ${roomName},not able to set climate ${climateName} for heating at the thermostat ${roomTstat}")
 
 			}
 		}
 		if (!setClimate) {
-			log.debug("ecobeeSetZoneWithSchedule>in room ${roomName},about to apply zone's temp settings")
-			key = "desiredHeatTemp$indiceZone"
+			log.debug("ecobeeSetZoneWithSchedule>>schedule ${scheduleName}, in room ${roomName},about to apply zone's temp settings")
+			key = "desiredHeatTemp$indiceSchedule"
 			def heatTemp = settings[key]
 			if ((heatTemp == null) || (heatTemp?.trim()=="")) {
-				log.debug("setRoomTstatSettings>in room ${roomName},about to apply default heat settings")
+				log.debug("setRoomTstatSettings>schedule ${scheduleName}, in room ${roomName},about to apply default heat settings")
 				desiredHeat = (scale=='C') ? 21:72				// by default, 21°C/72°F is the target heat temp
 			} else {
 				desiredHeat = heatTemp.toFloat()
 			}
-			log.debug("setRoomTstatSettings>in room ${roomName},${roomTstat}'s desiredHeat=${desiredHeat}")
+			log.debug("setRoomTstatSettings>schedule ${scheduleName},in room ${roomName},${roomTstat}'s desiredHeat=${desiredHeat}")
 			roomTstat.setHeatingSetpoint(desiredHeat)
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>in room ${roomName}, ${roomTstat}'s heating setPoint now =${desiredHeat}°")
+				send("ecobeeSetZoneWithSchedule>schedule ${scheduleName}, in room ${roomName}, ${roomTstat}'s heating setPoint now =${desiredHeat}°")
 			}                
 		}
 	} else if (mode == 'cool') {
-
 		roomTstat.cool()
 		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
 			try {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
 			} catch (any) {
-				log.debug("setRoomTstatSettings>in room ${roomName},not able to set climate ${climateName} for cooling at the thermostat ${roomTstat}")
+				log.debug("setRoomTstatSettings>schedule ${scheduleName},in room ${roomName},not able to set climate ${climateName} for cooling at the thermostat ${roomTstat}")
 
 			}
 		}
 		if (!setClimate) {
-			log.debug("ecobeeSetZoneWithSchedule>in room ${roomName},about to apply zone's temp settings")
-			key = "desiredCoolTemp$indiceZone"
+			log.debug("ScheduleTstatZones>schedule ${scheduleName}, in room ${roomName},about to apply zone's temp settings")
+			key = "desiredCoolTemp$indiceSchedule"
 			def coolTemp = settings[key]
 			if ((coolTemp == null) || (coolTemp?.trim()=="")) {
-				log.debug("setRoomTstatSettings>in room ${roomName},about to apply default cool settings")
+				log.debug("setRoomTstatSettings>schedule ${scheduleName}, in room ${roomName},about to apply default cool settings")
 				desiredCool = (scale=='C') ? 23:75				// by default, 23°C/75°F is the target cool temp
 			} else {
             
 				desiredCool = coolTemp.toFloat()
 			}
-			log.debug("setRoomTstatSettings>in room ${roomName}, ${roomTstat}'s desiredCool=${desiredCool}")
+			log.debug("setRoomTstatSettings>schedule ${scheduleName}, in room ${roomName}, ${roomTstat}'s desiredCool=${desiredCool}")
 			roomTstat.setCoolingSetpoint(desiredCool)
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>in room ${roomName}, ${roomTstat}'s cooling setPoint now =${desiredCool}°")
+				send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},in room ${roomName}, ${roomTstat}'s cooling setPoint now =${desiredCool}°")
 			}                
 		}
 	}
 }
 
-private def setAllRoomTstatsSettings(indiceZone) {
+private def setAllRoomTstatsSettings(indiceSchedule,indiceZone) {
 	boolean foundRoomTstat = false
 
 	def key = "includedRooms$indiceZone"
@@ -1016,7 +1019,6 @@ private def setAllRoomTstatsSettings(indiceZone) {
 		def roomDetails=room.split(':')
 		def indiceRoom = roomDetails[0]
 		def roomName = roomDetails[1]
-
 		key = "needOccupiedFlag$indiceRoom"
 		def needOccupied = (settings[key]) ?: 'false'
 		key = "roomTstat$indiceRoom"
@@ -1035,7 +1037,7 @@ private def setAllRoomTstatsSettings(indiceZone) {
 
 				if (isRoomOccupied(motionSensor, indiceRoom)) {
 					log.debug("setAllRoomTstatsSettings>for occupied room ${roomName},about to call setRoomTstatSettings ")
-					setRoomTstatSettings(indiceZone, indiceRoom)
+					setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom)
 				} else {
                 
 					log.debug("setAllRoomTstatsSettings>room ${roomName} not occupied,skipping it")
@@ -1045,7 +1047,7 @@ private def setAllRoomTstatsSettings(indiceZone) {
 		} else {
 
 			log.debug("setAllRoomTstatsSettings>for room ${roomName},about to call setRoomTstatSettings ")
-			setRoomTstatSettings(indiceZone, indiceRoom)
+			setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom)
 		}
 	}
 	return foundRoomTstat
@@ -1317,7 +1319,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		def zoneName = zoneDetails[1]
         
 		log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: looping thru all zones, now zoneName=${zoneName}, about to apply room Tstat's settings")
-		setAllRoomTstatsSettings(indiceZone) 
+		setAllRoomTstatsSettings(indiceSchedule, indiceZone) 
 
 		if (setRoomThermostatsOnly == 'true') { // Does not want to set the main thermostat, only the room ones
 
