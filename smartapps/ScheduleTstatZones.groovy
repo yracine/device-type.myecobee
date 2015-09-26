@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 2.5" 
+			paragraph "Version 2.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -375,9 +375,9 @@ def schedulesSetup(params) {
 			input (name:"moreCoolThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for more cooling",
 				required: false,defaultValue:settings."moreCoolThreshold${indiceSchedule}", description: "Optional")
 		}
-		section("Schedule ${indiceSchedule}-Max Temp Adjustment at the main thermostat based on temp Sensors [indoor&outdoor]") {
-			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment (default= +/-5°F/2°C)", 
-				required: false, defaultValue:settings."givenMaxTempDiff${indiceSchedule}", description: "Optional")
+		section("Schedule ${indiceSchedule}-Max Temp Adjustment/Differential Allowed for the zone(s)") {
+			input (name:"givenMaxTempDiff${indiceSchedule}", type:"decimal",  title: "Max Temp adjustment/Differential", required: false,
+				defaultValue:settings."givenMaxTempDiff${indiceSchedule}", description: " [default= +/-5°F/2°C]")
 		}
         
 		section("Schedule ${indiceSchedule}-Set Fan Mode [optional]") {
@@ -385,7 +385,7 @@ def schedulesSetup(params) {
 				defaultValue:settings."fanMode${indiceSchedule}", description: "Optional")
 			input (name:"moreFanThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for Fan Mode", required: false,
 				defaultValue:settings."moreFanThreshold${indiceSchedule}", description: "Optional")			                
-			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Set Fan Mode only when Threshold is reached(default=false)", 
+			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Override Fan Mode only when Threshold or Indoor Temp differential is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}	
 		section("Schedule ${indiceSchedule}-Set Room Thermostats Only Indicator [optional]") {
@@ -952,7 +952,7 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 	def fanModeForThresholdOnlyFlag = settings[key]
 
 	def fanModeForThresholdOnly = (fanModeForThresholdOnlyFlag) ?: 'false'
-	if (fanModeForThresholdOnly=='true') {
+	if ((fanModeForThresholdOnly=='true') && (!overrideThreshold)) {
     
 		if (outTempSensor == null) {
 			return     
@@ -1220,6 +1220,18 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		send("ScheduleTstatZones>schedule ${scheduleName}:avg temp= ${avg_indoor_temp},main Tstat's currentTemp= ${currentTemp},temp adjustment=${temp_diff.abs()}")
 	}
 
+	def adjustmentFanFlag = (setAdjustmentFanFlag)?: 'false'
+	if (adjustmentFanFlag=='true') {
+		// Adjust the fan mode if avg temp differential in zone is greater than max_temp_diff set in schedule
+		if (temp_diff.abs() > max_temp_diff) {
+			if (detailedNotif == 'true') {
+				send("ScheduleTstatZones>schedule ${scheduleName},avg_temp_diff=${temp_diff.abs()} > ${max_temp_diff} :adjusting fan mode as temp differential in zone is too big")				
+				// set fan mode with overrideThreshold=true
+				set_fan_mode(indiceSchedule, true)          
+                
+			}   
+		}   
+	}
 	float min_setpoint_adjustment = (scale=='C') ? MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS:MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS
 	if (temp_diff.abs() < min_setpoint_adjustment) {  // adjust the temp only if temp diff is significant
 		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
