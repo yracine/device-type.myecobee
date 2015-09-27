@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.3" 
+			paragraph "Version 3.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -75,15 +75,15 @@ def generalSetupPage() {
 			input (name:"setVentSettingsFlag", title: "Set Vent Settings?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
-		section("Enable temp adjustment based on outdoor temp sensor [optional, default=false]") {
+		section("Enable temp adjustment at main thermostat based on outdoor temp sensor [optional, default=false]") {
 			input (name:"setAdjustmentOutdoorTempFlag", title: "Enable temp adjustment set in schedules based on outdoor sensor?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
-		section("Enable temp adjustment based on indoor temp sensor(s) [optional, default=false]") {
+		section("Enable temp adjustment at main thermostat based on indoor temp sensor(s) [optional, default=false]") {
 			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment based on avg temp collected at indoor sensor(s)?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
-		section("Enable fan adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
+		section("Enable fan adjustment at main thermostat based on indoor/outdoor temp sensors [optional, default=false]") {
 			input (name:"setAdjustmentFanFlag", title: "Enable fan adjustment set in schedules based on sensors?", type:"Boolean",
 				description:"optional", metadata: [values: ["true", "false"]],required:false)
 		}
@@ -319,8 +319,8 @@ def schedulesSetup(params) {
 			input (name:"scheduleName${indiceSchedule}", title: "Schedule Name", type: "text",
 				defaultValue:settings."scheduleName${indiceSchedule}")
 		}
-		section("Schedule ${indiceSchedule}-Select the program schedule(s) at ecobee thermostat for the included zone(s)") {
-			input (name:"givenClimate${indiceSchedule}", type:"enum", title: "Which ecobee program? ", options: ecobeePrograms,  
+		section("Schedule ${indiceSchedule}-Select the climate/program scheduled at ecobee thermostat for the included zone(s)") {
+			input (name:"givenClimate${indiceSchedule}", type:"enum", title: "Which ecobee climate/program? ", options: ecobeePrograms,  
 				defaultValue:settings."givenClimate${indiceSchedule}")
 		}
 		section("Schedule ${indiceSchedule}-Included zones") {
@@ -358,6 +358,12 @@ def schedulesSetup(params) {
 		section("Schedule ${indiceSchedule}-Set Room Thermostats Only Indicator [optional]") {
 			input (name:"setRoomThermostatsOnlyFlag${indiceSchedule}", type:"Boolean", title: "Set room thermostats only [default=false,main & room thermostats setpoints are set]", metadata: [values: ["true", "false"]], 
 				required: false, defaultValue:settings."setRoomThermostatsOnlyFlag${indiceSchedule}")
+		}
+		section("Schedule ${indiceSchedule}-Desired Heat/Cool Temp for Room Thermostats [when no support for desired ecobee program/climate]") {
+			input (name:"desiredCoolTemp${indiceSchedule}", type:"decimal", title: "Cool Temp, default = 75°F/23°C", 
+				required: false,defaultValue:settings."desiredCoolTemp${indiceSchedule}", description: "Optional")			                
+			input (name:"desiredHeatTemp${indiceSchedule}", type:"decimal", title: "Heat Temp, default=72°F/21°C", 
+				required: false, defaultValue:settings."desiredHeatTemp${indiceSchedule}", description: "Optional")			                
 		}
 		section("Schedule ${indiceSchedule}-Set for specific mode(s) [default=all]")  {
 			input (name:"selectedMode${indiceSchedule}", type:"enum", title: "Choose Mode", options: enumModes, required: false, multiple:true,
