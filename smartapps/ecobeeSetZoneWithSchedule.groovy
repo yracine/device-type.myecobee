@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.5.1" 
+			paragraph "Version 3.5.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -351,10 +351,12 @@ def schedulesSetup(params) {
 			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Override Fan Mode only when Threshold or Indoor Temp differential is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}
+/*        
 		section("Schedule ${indiceSchedule}-Minimum Fan Time during the Schedule [optional]") {
 			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule",
 				required: false, defaultValue:settings."givenFanMinTime${indiceSchedule}", description: "Optional")
 		}                
+*/        
 		section("Schedule ${indiceSchedule}-Set Room Thermostats Only Indicator [optional]") {
 			input (name:"setRoomThermostatsOnlyFlag${indiceSchedule}", type:"Boolean", title: "Set room thermostats only [default=false,main & room thermostats setpoints are set]", metadata: [values: ["true", "false"]], 
 				required: false, defaultValue:settings."setRoomThermostatsOnlyFlag${indiceSchedule}")
@@ -1118,14 +1120,21 @@ private def getAllTempsForAverage(indiceZone) {
 private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 	def	key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
+
+/*
 	key = "givenFanMinTime${indiceSchedule}"
 	def fanMinTime=settings[key]
 
 	if (fanMinTime) {
-		// set FanMinTime for this schedule    
-		thermostat.setThermostatSettings("", ['fanMinOnTime': "${fanMinTime}"])		    
-		log.debug("setFanMode>Minimum Fan Time set for this $scheduleName schedule is $fanMinTime minutes")
+		log.debug("set_fan_mode>minimum Fan Time for $scheduleName schedule is $fanMinTime")
+		def currentFanMinOnTime=thermostat.currentFanMinOnTime
+		if (fanMinTime !=currentFanMinOnTime) {        
+			// set FanMinTime for this schedule    
+			thermostat.setThermostatSettings("", ['fanMinOnTime': "${fanMinTime}"])		    
+			send ("ecobeeSetZoneWithSchedule>minimum Fan Time set for this $scheduleName schedule is now $fanMinTime minutes")             
+		}            
 	}    
+*/    
 	key = "fanMode$indiceSchedule"
 	def fanMode = settings[key]
         
