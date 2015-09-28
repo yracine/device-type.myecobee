@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.5.3" 
+			paragraph "Version 3.5.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -351,7 +351,7 @@ def schedulesSetup(params) {
 			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Override Fan Mode only when Threshold or Indoor Temp differential is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}
-/*        
+/*		Y.R. Commented out as issue with Schedule page        
 		section("Schedule ${indiceSchedule}-Minimum Fan Time during the Schedule [optional]") {
 			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule",
 				required: false, defaultValue:settings."givenFanMinTime${indiceSchedule}", description: "Optional")
@@ -361,7 +361,7 @@ def schedulesSetup(params) {
 			input (name:"setRoomThermostatsOnlyFlag${indiceSchedule}", type:"Boolean", title: "Set room thermostats only [default=false,main & room thermostats setpoints are set]", metadata: [values: ["true", "false"]], 
 				required: false, defaultValue:settings."setRoomThermostatsOnlyFlag${indiceSchedule}")
 		}
-		section("Schedule ${indiceSchedule}-Desired Heat/Cool Temp for Room Thermostats [when no support for desired ecobee program/climate]") {
+		section("Schedule ${indiceSchedule}-Desired Heat/Cool Temp for Room Thermostats [optional,when no support for ecobee program/climate]") {
 			input (name:"desiredCoolTemp${indiceSchedule}", type:"decimal", title: "Cool Temp, default = 75°F/23°C", 
 				required: false,defaultValue:settings."desiredCoolTemp${indiceSchedule}", description: "Optional")			                
 			input (name:"desiredHeatTemp${indiceSchedule}", type:"decimal", title: "Heat Temp, default=72°F/21°C", 
@@ -1121,7 +1121,7 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 	def	key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
 
-/*
+/* YR commented out as issue with Schedule page (ST constraint?)
 	key = "givenFanMinTime${indiceSchedule}"
 	def fanMinTime=settings[key]
 
