@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.5.4" 
+			paragraph "Version 3.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -629,7 +629,6 @@ def setZoneSettings() {
 				ventSwitchesZoneSet=adjust_vent_settings_in_zone(i)
 				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 			}        
-
 		}
 
 	} /* end for */ 	
@@ -1528,6 +1527,10 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 
 private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	def foundVentSwitch
+	int nbClosedVents=0, totalVents=0
+	float MAX_RATIO_CLOSED_VENTS=0.5 // not more than 50% of the smart vents should be closed at once
+	def MIN_OPEN_LEVEL=25  
+	def closedVentsSet=[]
     
 	for (indiceZone in 1..zonesCount) {
 		def key = "zoneName$indiceZone"  
@@ -1553,9 +1556,12 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 				key = "ventSwitch${j}$indiceRoom"
 				def ventSwitch = settings[key]
 				if (ventSwitch != null) {
+					totalVents++                
 					log.debug "turn_off_all_other_vents>in zone=${zoneName},room ${roomName},found=${ventSwitch}"
 					foundVentSwitch = ventSwitchesOnSet.find{it == ventSwitch}
 					if (foundVentSwitch ==null) {
+						nbClosedVents++ 
+						closedVentsSet.add(ventSwitch)                        
 						ventSwitch.off()
 						log.debug("turn_off_all_other_vents>in zone ${zoneName},turned off ${ventSwitch} in room ${roomName} as requested to create the desired zone(s)")
 					}                
@@ -1563,28 +1569,42 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 			} /* end for ventSwitch */                    
 		}  /* end for rooms */          
 	} /* end for zones */
-
+	float ratioClosedVents=(nbClosedVents/totalVents)
+    
+	if (ratioClosedVents > MAX_RATIO_CLOSED_VENTS) {
+		log.debug("turn_off_all_other_vents>ratio of closed vents is too high (${ratioClosedVents.round(1)}), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}% ")
+		if (detailedNotif == 'true') {
+			send("ecobeeSetZoneWithSchedule>ratio of closed vents is too high (${ratioClosedVents.round(1)}), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}% ")
+		}
+		closedVentsSet.each {
+			setVentSwitchLevel(null, it, MIN_OPEN_LEVEL)
+		}        
+	}    
 }
 
 
 private def setVentSwitchLevel(indiceRoom, ventSwitch, switchLevel=100) {
-
-	def key = "roomName$indiceRoom"
-	def roomName = settings[key]
-
+	def roomName
+    
+	if (indiceRoom) {
+		def key = "roomName$indiceRoom"
+		roomName = settings[key]
+	}
 	try {
 		ventSwitch.setLevel(switchLevel)
-		log.debug("setVentSwitchLevel>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
-		if (detailedNotif == 'true') {
-			send("ecobeeSetZoneWithSchedule>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
-		}
+		if (roomName) {       
+			log.debug("setVentSwitchLevel>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
+			if (detailedNotif == 'true') {
+				send("ecobeeSetZoneWithSchedule>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
+			}
+		}            
 	} catch (e) {
 		if (switchLevel >0) {
 			ventSwitch.on()        
-			log.error "setVentSwitchLevel>in room ${roomName}, not able to set ${ventSwitch} at ${switchLevel} (exception $e), trying to turn it on"
+			log.error "setVentSwitchLevel>not able to set ${ventSwitch} at ${switchLevel} (exception $e), trying to turn it on"
 		} else {
 			ventSwitch.off()        
-			log.error "setVentSwitchLevel>in room ${roomName}, not able to set ${ventSwitch} at ${switchLevel} (exception $e), trying to turn it off"
+			log.error "setVentSwitchLevel>not able to set ${ventSwitch} at ${switchLevel} (exception $e), trying to turn it off"
 		}
 	}
     
