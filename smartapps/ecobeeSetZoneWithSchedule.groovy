@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.6" 
+			paragraph "Version 3.6.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1528,7 +1528,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	def foundVentSwitch
 	int nbClosedVents=0, totalVents=0
-	float MAX_RATIO_CLOSED_VENTS=0.5 // not more than 50% of the smart vents should be closed at once
+	float MAX_RATIO_CLOSED_VENTS=50 // not more than 50% of the smart vents should be closed at once
 	def MIN_OPEN_LEVEL=25  
 	def closedVentsSet=[]
     
@@ -1569,12 +1569,12 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 			} /* end for ventSwitch */                    
 		}  /* end for rooms */          
 	} /* end for zones */
-	float ratioClosedVents=(nbClosedVents/totalVents)
+	float ratioClosedVents=(nbClosedVents/totalVents*100)
     
 	if (ratioClosedVents > MAX_RATIO_CLOSED_VENTS) {
-		log.debug("turn_off_all_other_vents>ratio of closed vents is too high (${ratioClosedVents.round(1)}), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}% ")
+		log.debug("turn_off_all_other_vents>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
 		if (detailedNotif == 'true') {
-			send("ecobeeSetZoneWithSchedule>ratio of closed vents is too high (${ratioClosedVents.round(1)}), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}% ")
+			send("ecobeeSetZoneWithSchedule>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
 		}
 		closedVentsSet.each {
 			setVentSwitchLevel(null, it, MIN_OPEN_LEVEL)
