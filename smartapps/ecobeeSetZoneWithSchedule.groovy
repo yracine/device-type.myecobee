@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.7.1" 
+			paragraph "Version 3.8" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1434,6 +1434,11 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	def MIN_OPEN_LEVEL_SMALL=25
 	def MIN_OPEN_LEVEL_BIG=35
 	float desiredTemp, avg_indoor_temp, avg_temp_diff
+	def indiceRoom
+	boolean closedAllVentsInZone=true
+	int nbVents=0
+	def switchLevel    
+	def ventSwitchesOnSet=[]
 
 	def key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
@@ -1444,11 +1449,6 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	def setRoomThermostatsOnlyFlag = settings[key]
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 	def indoor_all_zones_temps=[]
-	def indiceRoom
-	boolean closedAllVentsInZone=true
-	int nbVents=0
-	def switchLevel    
-	def ventSwitchesOnSet=[]
   
 	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}: zones= ${zones}")
 
@@ -1466,7 +1466,9 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 		desiredTemp = thermostat.currentThermostatSetpoint.toFloat().round(1)
 	}    
 	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, desiredTemp=${desiredTemp}")
-    
+
+	float currentTemp = thermostat?.currentTemperature.toFloat().round(1)
+	indoor_all_zones_temps.add(currentTemp)
 	for (zone in zones) {
 
 		def zoneDetails=zone.split(':')
@@ -1476,15 +1478,19 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 		def indoorTemps = getAllTempsForAverage(indiceZone)
 
 		if (indoorTemps != [] ) {
-			avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).round(1)
-			avg_temp_diff = (avg_indoor_temp - desiredTemp).round(1)
+			indoor_all_zones_temps = indoor_all_zones_temps + indoorTemps
 			            
 		} else {
 			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, no data from temp sensors, exiting")
 		}        
-		if (detailedNotif == 'true') {
-			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, avg_temp_diff=${avg_temp_diff}, all temps collected from sensors=${indoorTemps}")
-		}
+		log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, all temps collected from sensors=${indoorTemps}")
+	} /* end for zones */
+
+	avg_indoor_temp = (indoor_all_zones_temps.sum() / indoor_all_zones_temps.size()).round(1)
+	avg_temp_diff = (avg_indoor_temp - desiredTemp).round(1)
+	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in all zones, all temps collected from sensors=${indoor_all_zones_temps}, avg_indoor_temp=${avg_indoor_temp}, avg_temp_diff=${avg_temp_diff}")
+
+	for (zone in zones) {
 
 		key = "includedRooms$indiceZone"
 		def rooms = settings[key]
