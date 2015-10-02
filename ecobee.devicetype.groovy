@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.3
+ *  Version 2.3.1
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -1751,10 +1751,16 @@ void iterateResumeProgram(tstatType) {
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
-void resumeProgram(thermostatId=settings.thermostatId) {  
+// resumeAllFlag, if true then a resume all will be sent, otherwise, just a partial resume will be done.
+void resumeProgram(thermostatId=settings.thermostatId, resumeAllFlag=true) {  
 	thermostatId = determine_tstat_id(thermostatId)
 
-	def resumeParams = [resumeAll: 'true']
+	def resumeParams=null
+    
+ 	if (resumeAllFlag==true) {
+		resumeParams = [resumeAll: 'true']
+	}
+    
 	def bodyReq = build_body_request('resumeProgram',null,thermostatId,resumeParams)
 	if (settings.trace) {
 		log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
@@ -2478,7 +2484,7 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 					log.debug "getReportData> sensorList= ${data.sensorList}"
 					log.debug "getReportData> postData= ${postData}"
 				}
-				sendEvent name: "verboseTrace", value:"getReportData> done for thermostatId ${thermostatId}"
+				sendEvent name: "verboseTrace", value:"getReportData>done for thermostatId ${thermostatId}"
         	        
 			} else {
 				log.error "getReportData> error=${statusCode.toString()}, message = ${message}"
@@ -3034,7 +3040,6 @@ def getModelNumber() {
 }
 
 private def refresh_tokens() {
-
     
 	def method = 
 	[
