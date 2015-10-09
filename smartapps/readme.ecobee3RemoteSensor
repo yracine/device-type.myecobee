@@ -83,14 +83,7 @@ h) Click "create" at the bottom of the page
 i) Click save and publish
 
 /*********************************************************************************************
-4) Kill your smartThings app, clean the cache under your OS (android or iOS) and reload 
-the app (as the old device is cached)
-/*********************************************************************************************
-For iOS devices, in order to clear the cache, you'd need to uninstall & reinstall the smartThings app,
-otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSensor smartapp.
-
-/*********************************************************************************************
-5) Enable tracing, activate live Logging & Execute ecobee3RemoteSensorInit
+4) Enable tracing, activate live Logging & Execute ecobee3RemoteSensorInit
 /*********************************************************************************************
 
 for better support, just active the live logging and get more tracing
@@ -145,7 +138,12 @@ f) If you have the following error msg in the logs:
 
 This could mean that the old Device Type is still in the cache..
 
-You may have to redo the cache cleaning another time (go back to step 4).
+- Kill your smartThings app, clean the cache under your OS (android or iOS) and reload 
+the app (as the old device is cached)
+
+- For iOS devices, in order to clear the cache, you'd need to uninstall & reinstall the smartThings app,
+otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSensor smartapp.
+
 
 
 After execution, you should be able to see the new Sensor objects under
@@ -153,12 +151,12 @@ After execution, you should be able to see the new Sensor objects under
 https://graph.api.smartthings.com/device/list
 
 /*********************************************************************************************
-6) The temp and motion sensors data should be updated according to the polling interval specified as input in the smartapp.
+5) The temp and motion sensors data should be updated according to the polling interval specified as input in the smartapp.
 /*********************************************************************************************
 
 
 /*********************************************************************************************
-7) Repeat step 5b for each ecobee3 thermostat
+6) Repeat step 5b for each ecobee3 thermostat
 /*********************************************************************************************
 
 If you have many ecobee3 thermostats, you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
