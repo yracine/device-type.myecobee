@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.3" 
+			paragraph "Version 1.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -409,6 +409,7 @@ private updateTempSensors(evt) {
 private updateTempSensors() {
 
 	String tempValueString=''    
+	Double tempValue    
 	def scale = getTemperatureScale()
 	def ecobeeSensors = ecobee.currentRemoteSensorTmpData.toString().minus('[').minus(']').split(",,")
 
@@ -441,13 +442,13 @@ private updateTempSensors() {
 			log.debug "updateTempSensors>ecobeeSensorName= $ecobeeSensorName"
 			log.debug "updateTempSensors>ecobeeSensorType= $ecobeeSensorType"
 			log.debug "updateTempSensors>ecobeeSensorValue= $ecobeeSensorValue"
-			
-            		if (ecobeeSensorValue) {
+            
+			if (ecobeeSensorValue) {
 				if (scale == "F") {
-					Double tempValue = getTemperature(ecobeeSensorValue).toDouble().round()
+					tempValue = getTemperature(ecobeeSensorValue).round()
 					tempValueString = String.format('%2d', tempValue.intValue())            
 				} else {
-					Double tempValue = getTemperature(ecobeeSensorValue).toDouble().round(1)
+					tempValue = getTemperature(ecobeeSensorValue).round(1)
 					tempValueString = String.format('%2.1f', tempValue)
 				}
 			}
@@ -539,7 +540,7 @@ private send(msg) {
 }
 
 private def getTemperature(value) {
-	def farenheits = value
+	Double farenheits = value.toDouble()
 	if (getTemperatureScale() == "F") {
 		return farenheits
 	} else {
