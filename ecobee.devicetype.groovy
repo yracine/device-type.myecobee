@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.3.1
+ *  Version 2.3.2
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -1004,7 +1004,7 @@ private void generateEvent(Map results) {
 
 			} else if ((name.toUpperCase().contains("TEMP")) || (name.toUpperCase().contains("SETPOINT"))) {  
                                 
-				Double tempValue = getTemperature(value).toDouble().round(1)
+				Double tempValue = getTemperature(value).round(1)
 				String tempValueString = String.format('%2.1f', tempValue)
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
                 
@@ -1014,15 +1014,16 @@ private void generateEvent(Map results) {
 
 // 			Speed variable names contain 'speed'
 
- 				float speedValue = getSpeed(value).toFloat().round(1)
+ 				Double speedValue = getSpeed(value).round(1)
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
 			} else if (name.toUpperCase().contains("HUMIDITY")) {
- 				float humidityValue = value.toFloat().round(1)
-				def isChange = isStateChange(device, name, humidityValue.toString())
+ 				Double humValue = value.toDouble().round(0)
+				String humValueString = String.format('%2d', humValue.intValue())
+				def isChange = isStateChange(device, name, humValueString)
 				isDisplayed = isChange
-				sendEvent(name: name, value: humidityValue.toString(), unit: "%", displayed: isDisplayed)                                     									 
+				sendEvent(name: name, value: humValueString, unit: "%", displayed: isDisplayed)                                     									 
  			} else {
 				def isChange = isStateChange(device, name, value)
 				isDisplayed = isChange
@@ -1087,8 +1088,8 @@ private def getThermostatGroups(thermostatId) {
 }
 
 private def getTemperature(value) {
-	def farenheits = value
-	if(getTemperatureScale() == "F"){
+	Double farenheits = value.toDouble()
+	if (getTemperatureScale() == "F") {
 		return farenheits
 	} else {
 		return fToC(farenheits)
@@ -1096,7 +1097,7 @@ private def getTemperature(value) {
 }
 
 private def getSpeed(value) {
-	def miles = value
+	Double miles = value
 	if(getTemperatureScale() == "F"){
 		return miles
 	} else {
@@ -1530,7 +1531,7 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 
 	}
 	// Add the extraHoldParams if any
-    if ((extraHoldParams != null) && (extraHoldParams != [])) {
+ 	if ((extraHoldParams != null) && (extraHoldParams != [])) {
 		tstatParams = tstatParams + extraHoldParams
     		
 	}
