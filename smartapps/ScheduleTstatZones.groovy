@@ -1503,7 +1503,7 @@ private boolean is_temperature_in_vent_too_hot(ventSwitch) {
 			} /* end for vent switches */
 		} /* end for rooms */
         
-    	send("ScheduleTstatZones> ** IMMEDIATE ATTENTION: inside temperature of vent ${ventSwitch} is too high (${tempSwitch}°), opening all vents and turning off the HVAC to avoid any damage **")
+		send("ScheduleTstatZones> ** IMMEDIATE ATTENTION: inside temperature of vent ${ventSwitch} is too high (${tempSwitch}°), opening all vents and turning off the HVAC to avoid any damage **")
 		powerSwitch.off()                        
 		return true
 	}          
