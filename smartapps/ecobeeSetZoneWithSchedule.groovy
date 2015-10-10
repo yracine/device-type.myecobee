@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 4.0" 
+			paragraph "Version 4.0.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1611,7 +1611,9 @@ private boolean is_temperature_in_vent_too_hot(ventSwitch) {
 			for (int j = 1;(j <= 5); j++)  {
 				key = "ventSwitch${j}$indiceRoom"
 				def vent = settings[key]
-				vent.on()	
+				if (vent != null) {
+					vent.on()	
+				} /* end if vent != null */
 			} /* end for vent switches */
 		} /* end for rooms */
         
