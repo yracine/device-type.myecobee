@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.0.2" 
+			paragraph "Version 3.0.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1451,10 +1451,11 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 			def ventSwitch = settings[key]
 			if (ventSwitch != null) {
 				totalVents++
-				log.debug "turn_off_all_other_vents>in zone=${zoneName},room ${roomName},found=${ventSwitch}, currentHVACMode=${currentHVACMode}"
+				log.debug "turn_off_all_other_vents>found=${ventSwitch}, currentHVACMode=${currentHVACMode}"
 				// Prior to any processing, check temperature in each vent to avoid any HVAC damage
-				if (currentHVACMode=='heat') {
+				if ((currentHVACMode=='heat') || (currentHVACMode == 'auto')) {
 					if (is_temperature_in_vent_too_hot(ventSwitch)) {
+						log.debug("turn_off_all_other_vents>temperature too hot in ${ventSwitch}, exiting...")
 						return                        
 					}                            
 				}                    
@@ -1462,7 +1463,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 				if (foundVentSwitch ==null) {
 					nbClosedVents++ 
 					closedVentsSet.add(ventSwitch)                        
-					log.debug("turn_off_all_other_vents>in zone ${zoneName},turned off ${ventSwitch} in room ${roomName} as requested to create the desired zone(s)")
+					log.debug("turn_off_all_other_vents>turned off ${ventSwitch} as requested to create the desired zone(s)")
 				}
 			}   /* end if ventSwitch */                  
 		}  /* end for ventSwitch */         
