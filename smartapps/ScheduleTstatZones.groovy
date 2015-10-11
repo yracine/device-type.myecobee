@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.0.3" 
+			paragraph "Version 3.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1443,7 +1443,6 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	float MAX_RATIO_CLOSED_VENTS=50 // not more than 50% of the smart vents should be closed at once
 	def MIN_OPEN_LEVEL=25  
 	def closedVentsSet=[]
-	String currentHVACMode = thermostat.currentThermostatMode.toString()
     
 	for (indiceRoom in 1..roomsCount) {
 		for (int j = 1;(j <= 5); j++)  {
@@ -1453,11 +1452,9 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 				totalVents++
 				log.debug "turn_off_all_other_vents>found=${ventSwitch}, currentHVACMode=${currentHVACMode}"
 				// Prior to any processing, check temperature in each vent to avoid any HVAC damage
-				if ((currentHVACMode=='heat') || (currentHVACMode == 'auto')) {
-					if (is_temperature_in_vent_too_hot(ventSwitch)) {
-						log.debug("turn_off_all_other_vents>temperature too hot in ${ventSwitch}, exiting...")
-						return                        
-					}                            
+				if (is_temperature_too_hot_or_too_cold(ventSwitch)) {
+					log.debug("turn_off_all_other_vents>temperature too hot or too cold in ${ventSwitch}, exiting...")
+					return                        
 				}                    
 				foundVentSwitch = ventSwitchesOnSet.find{it == ventSwitch}
 				if (foundVentSwitch ==null) {
@@ -1473,7 +1470,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	if (ratioClosedVents > MAX_RATIO_CLOSED_VENTS) {
 		log.debug("turn_off_all_other_vents>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
 		if (detailedNotif == 'true') {
-			send("ScheduleTstatZones>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
+			send("ecobeeSetZoneWithSchedule>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
 		}
 		closedVentsSet.each {
 			setVentSwitchLevel(null, it, MIN_OPEN_LEVEL)
@@ -1487,30 +1484,47 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
     
 }
 
-private boolean is_temperature_in_vent_too_hot(ventSwitch) {
-	def MAX_TEMP_VENT_SWITCH = (getTemperatureScale()=='C')?37:100 //Max temperature inside a ventSwitch
-
+private boolean is_temperature_too_hot_or_too_cold(ventSwitch) {
+	def scale = getTemperatureScale()
+	def MAX_TEMP_VENT_SWITCH = (scale=='C')?37:100 //Max temperature inside a ventSwitch
+	def MIN_TEMP_VENT_SWITCH = (scale=='C')?7:45 //Min temperature inside a ventSwitch
+	String currentHVACMode = thermostat.currentThermostatMode.toString()
+    
 	def tempSwitch=getTemperatureInVent(ventSwitch)                    
-	log.debug("is_temperature_in_vent_too_hot>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. Maximum Temp of ${MAX_TEMP_VENT_SWITCH}°")
-	if ((tempSwitch) && (tempSwitch >= MAX_TEMP_VENT_SWITCH)) {
-		// Turn the HVAC off and Deactivate any further smartapp processing
-		thermostat.off() 
-		// Turn on all vents        
-		for (indiceRoom in 1..roomsCount) {
-			for (int j = 1;(j <= 5); j++)  {
-				key = "ventSwitch${j}$indiceRoom"
-				def vent = settings[key]
+	log.debug("is_temperature_in_vent_too_hot>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Max Temp of ${MAX_TEMP_VENT_SWITCH}°")
+	log.debug("is_temperature_in_vent_too_hot>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Min Temp of ${MIN_TEMP_VENT_SWITCH}°")
+	if (tempSwitch) {    
+    	if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (tempSwitch >= MAX_TEMP_VENT_SWITCH)) {
+			// Turn the HVAC off, open all vents, and deactivate any further smartapp processing
+			thermostat.off()            
+			open_all_vents()
+			powerSwitch?.off()            
+			send("ScheduleTstatZones> ** IMMEDIATE ATTENTION: current HVAC mode is ${currentHVACMode}, and inside temperature of vent ${ventSwitch} too hot (${tempSwitch}°), opening all vents and turning off the HVAC to avoid any damage **")
+			return true            
+		} /* if too hot */           
+    	if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (tempSwitch <= MIN_TEMP_VENT_SWITCH)) {
+			// Turn the HVAC off, open all vents, and deactivate any further smartapp processing
+			thermostat.off()            
+			open_all_vents()
+			powerSwitch?.off()            
+			send("ScheduleTstatZones> ** IMMEDIATE ATTENTION: current HVAC mode is ${currentHVACMode}, and inside temperature of vent ${ventSwitch} too cold (${tempSwitch}°), opening all vents and turning off the HVAC to avoid any damage **")
+			return true            
+		} /* if too cold */ 
+	} /* if tempSwitch != null */         
+	return false
+}
+
+private def open_all_vents() {
+	// Turn on all vents        
+	for (indiceRoom in 1..roomsCount) {
+		for (int j = 1;(j <= 5); j++)  {
+			key = "ventSwitch${j}$indiceRoom"
+			def vent = settings[key]
 				if (vent != null) {
 					vent.on()	
 				} /* end if vent != null */
-			} /* end for vent switches */
-		} /* end for rooms */
-        
-		send("ScheduleTstatZones> ** IMMEDIATE ATTENTION: inside temperature of vent ${ventSwitch} is too high (${tempSwitch}°), opening all vents and turning off the HVAC to avoid any damage **")
-		powerSwitch?.off()                        
-		return true
-	}          
-	return false
+		} /* end for vent switches */
+	} /* end for rooms */
 }
 
 private def getTemperatureInVent(ventSwitch) {
