@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.3.2
+ *  Version 2.3.3
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -1422,9 +1422,9 @@ void setThermostatSettings(thermostatId,tstatSettings = []) {
 				sendEvent name: "verboseTrace", value:
 						"setThermostatSettings>done for ${thermostatId}"
 			} else {
-				log.error "setThermostatSettings> error=${statusCode.toString()}, message = ${message}"
-				sendEvent name: "verboseTrace", value:
-					"setThermostatSettings>error ${statusCode.toString()} for ${thermostatId}"
+				log.error "setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				sendEvent name: "verboseTrace", value: 
+                	"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			} /* end if statusCode */
 		} /* end api call */                
 	} /* end for */
@@ -1546,9 +1546,9 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 				sendEvent name: "verboseTrace", value:
 						"setHold>done for ${thermostatId}"
 			} else {
-				log.error "setHold> error=${statusCode.toString()}, message = ${message}"
+				log.error "setHold> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
-					"setHold>error ${statusCode.toString()} for ${thermostatId}"
+					"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			} /* end if statusCode */
 		} /* end api call */
         
@@ -1638,9 +1638,9 @@ void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 			sendEvent name: "verboseTrace", value:
 					"createVacation>done for ${thermostatId}"
 		} else {
-			log.error "createVacation>error=${statusCode.toString()}, message = ${message}"
-			sendEvent name: "verboseTrace", value:
-				"createVacation>error ${statusCode.toString()} for ${thermostatId}"
+			log.error "createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
+			sendEvent name: "verboseTrace", value: 
+				"createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 		}
 	}
 }
@@ -1703,9 +1703,9 @@ void deleteVacation(thermostatId, vacationName) {
 			sendEvent name: "verboseTrace", value:
 					"deleteVacation>done for ${thermostatId}"
 		} else {
-			log.error "deleteVacation> error= ${statusCode.toString()}, message = ${message}"
+			log.error "deleteVacation> error= ${statusCode.toString()},message=${message} for ${thermostatId}"
 			sendEvent name: "verboseTrace", value:
-				"deleteVacation>error ${statusCode.toString()} for ${thermostatId}"
+				"deleteVacation>error ${statusCode.toString()},message=${message} for ${thermostatId}"
 		}
 	}
 }
@@ -1773,9 +1773,9 @@ void resumeProgram(thermostatId=settings.thermostatId, resumeAllFlag=true) {
 			sendEvent name: "verboseTrace", value:
 					"resumeProgram>resume done for ${thermostatId}"
 		} else {
-			log.error "resumeProgram>error=${statusCode.toString()}, message = ${message}"
+			log.error "resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			sendEvent name: "verboseTrace", value:
-				"resumeProgram>error=${statusCode.toString()} for ${thermostatId}"
+				"resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 		}
 	}
 }
@@ -1835,9 +1835,9 @@ def getGroups(thermostatId) {
 				}
 			}
 		} else {
-			log.error "getGroups>> error=${statusCode.toString()}, message = ${message}"
+			log.error "getGroups>> error=${statusCode.toString()},message=${message} for ${thermostatId}" 
 			sendEvent name: "verboseTrace", value:
-				"getGroups>error ${statusCode.toString()} for ${thermostatId}"
+				"getGroups>error ${statusCode.toString()},message=${message} for ${thermostatId}"
 		}
 	}
 }
@@ -1923,9 +1923,9 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 				sendEvent name: "verboseTrace", value:
 						"updateGroup>done for groupName =${groupName}, ${thermostatId}"
 			} else {
-				log.error "updateGroup> error=${statusCode.toString()}, message = ${message}"
+				log.error "updateGroup> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
-					"updateGroup>error ${statusCode.toString()} for ${thermostatId}"
+					"updateGroup>error ${statusCode.toString()},message=${message} for ${thermostatId}"
 			} /* end if statusCode */
 		} /* end api call */                
                         
@@ -1960,9 +1960,10 @@ void deleteGroup(groupRef, groupName) {
 			sendEvent name: "verboseTrace", value:
 					"deleteGroup>done for groupName =${groupName},groupRef = ${groupRef}"
 		} else {
-			log.error "deleteGroup> error=  ${statusCode.toString()}, message = ${message}"
+			log.error 
+				"deleteGroup> error=  ${statusCode.toString()},message= ${message} for ${groupName},groupRef= ${groupRef}"
 			sendEvent name: "verboseTrace", value:
-				"deteteGroup>error ${statusCode.toString()} for ${groupName},groupRef = ${groupRef}"
+				"deteteGroup>error ${statusCode.toString()},message= ${message} for ${groupName},groupRef= ${groupRef}"
 		}
 	}
 }
@@ -2087,9 +2088,9 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 					sendEvent name: "verboseTrace", value:
 							"setClimate>done for thermostatId =${data.thermostatList[i].identifier},climateName =${climateName}"
 				} else {
-					log.error "setClimate>error ${statusCode.toString()} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
+					log.error "setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
 					sendEvent name: "verboseTrace", value:
-						"setClimate>error ${statusCode.toString()} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
+						"setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
 				} /* end if statusCode */
 			} /* end api call */                   
 		} /* end while */               
@@ -2196,7 +2197,7 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 			if (settings.trace) {
 				log.debug "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
 				sendEvent name: "verboseTrace", value:
-					"updateClimate>substituteClimateName ${substituteClimateName}  for substitution not found"
+					"updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
 			}
 			return
 		}
@@ -2281,8 +2282,9 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 				sendEvent name: "verboseTrace", value:
 						"updateClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
 			} else {
-				log.error "updateClimate>error=${statusCode.toString()}, message = ${message}"
-				sendEvent name: "verboseTrace", value:"updateClimate>error ${statusCode.toString()} for ${climateName}"
+				log.error "updateClimate>error=${statusCode.toString()},message= ${message} for thermostatId =${thermostatId},climateName =${climateName}"
+				sendEvent name: "verboseTrace", value:
+					"updateClimate>error ${statusCode.toString()},message= ${message} for thermostatId =${thermostatId},climateName =${climateName}"
 
 			} /* end if statusCode */
 		} /* end api call */               
@@ -2336,9 +2338,10 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 				}
 				generateEvent(plugEvents)
 			} else {
-				log.error "controlPlug>error=${statusCode.toString()}, message = ${message}"
+				log.error 
+					"controlPlug>error=${statusCode.toString()},message=${message} for thermostatId =${thermostatId},plugName =${plugName}"
 				sendEvent name: "verboseTrace", value:
-					"controlPlug>error ${statusCode.toString()} for ${plugName}"
+					"controlPlug>error ${statusCode.toString()},message=${message} for thermostatId =${thermostatId},plugName =${plugName}"
 			} /* end if statusCode */
 		} /* end api call */               
 	} /* end while */
@@ -2488,9 +2491,9 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 				sendEvent name: "verboseTrace", value:"getReportData>done for thermostatId ${thermostatId}"
         	        
 			} else {
-				log.error "getReportData> error=${statusCode.toString()}, message = ${message}"
+				log.error "getReportData> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
-					"getReportData>error=${statusCode} for ${thermostatId}"
+					"getReportData>error=${statusCode},message= ${message} for ${thermostatId}"
 			} /* end if statusCode */
 		} /* end api call */                
 	} /* end while */
@@ -2931,9 +2934,9 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 				sendEvent name: "verboseTrace", value:
 					"getTstatInfo>done for ${thermostatId}"
 			} else {
-				log.error "getThermostatInfo> error=${statusCode.toString()}, message = ${message}"
+				log.error "getThermostatInfo> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
-					"getTstatInfo>error=${statusCode} for ${thermostatId}"
+					"getTstatInfo>error=${statusCode},message=${message} for ${thermostatId}"
 			} /* end if statusCode */                 
 		} /* end api call */
 	} /* end while */
@@ -3022,9 +3025,9 @@ void getThermostatSummary(tstatType) {
 				sendEvent name: "verboseTrace", value:
 					"getTstatSummary>done"
 			} else {
-				log.error "getThermostatSummary> error=${statusCode.toString()}, message = ${message}"
+				log.error "getThermostatSummary> error=${statusCode.toString()},message=${message}"
 				sendEvent name: "verboseTrace", value:
-					"getTstatSummary> error= ${statusCode.toString()}"
+					"getTstatSummary> error= ${statusCode.toString()},message=${message}"
 			} /* end if statusCode */
 		}  /* end api call */              
 	} /* end while */
