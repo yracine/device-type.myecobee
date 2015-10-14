@@ -99,6 +99,9 @@ After being connected, click 'Next' and select your ecobee thermostat(s) (SMART,
 that you want to control from Smartthings and, then press 'Next' for the 'Other Settings &Notification' page, 
 and then 'Done' when finished.
 
+If you get a blank screen after pressing 'Next or you get the following error: " Error - bad state. Unable to complete page configuration", you'd need to enable oAuth as specified in step 2f) above.
+
+
 /*********************************************************************************************
 
 <b>5) Your device(s) should now be ready to process your commands</b>
