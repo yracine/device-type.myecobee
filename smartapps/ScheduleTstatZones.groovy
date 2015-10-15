@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.1.3" 
+			paragraph "Version 3.1.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -784,7 +784,7 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 	String mode = thermostat?.currentThermostatMode.toString() // get the mode at the main thermostat
 	if (mode == 'heat') {
 		roomTstat.heat()
-		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
+		if ((climateName) && (roomTstat?.hasCommand("setClimate"))) {
 			try {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
@@ -811,7 +811,7 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 		}
 	} else if (mode == 'cool') {
 		roomTstat.cool()
-		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
+		if ((climateName) && (roomTstat?.hasCommand("setClimate"))) {
 			try {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
@@ -1253,18 +1253,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	def climateName = settings[key]
 	if (mode == 'heat') {
 	
-		if ((climateName == null) || (climateName.trim() == "") || (!thermostat.hasCommand("setClimate"))) {
-			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:no climate to be applied for heatingSetpoint")
-			key = "desiredHeatTemp$indiceSchedule"
-			def heatTemp = settings[key]
-			if (!heatTemp) {
-				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:about to apply default heat settings")
-				desiredHeat = (scale=='C') ? 21:72 					// by default, 21°C/72°F is the target heat temp
-			} else {
-				desiredHeat = heatTemp.toFloat()
-			}
-			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},desiredHeat=${desiredHeat}")
-		} else {
+		if ((climateName) && (thermostat.hasCommand("setClimate"))) {
 			try {
 				thermostat.setClimate("", climateName)
 			} catch (any) {
@@ -1275,7 +1264,18 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			}                
 			desiredHeat = thermostat.currentHeatingSetpoint
 			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},according to climateName ${climateName}, desiredHeat=${desiredHeat}")
-		}
+		} else {
+			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:no climate to be applied for heatingSetpoint")
+			key = "desiredHeatTemp$indiceSchedule"
+			def heatTemp = settings[key]
+			if (!heatTemp) {
+				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:about to apply default heat settings")
+				desiredHeat = (scale=='C') ? 21:72 					// by default, 21°C/72°F is the target heat temp
+			} else {
+				desiredHeat = heatTemp.toFloat()
+			}
+			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},desiredHeat=${desiredHeat}")
+		} 
 		temp_diff = (temp_diff < (0-max_temp_diff)) ? -(max_temp_diff):(temp_diff >max_temp_diff) ?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
 		float targetTstatTemp = (desiredHeat - temp_diff).round(1)
 		thermostat?.setHeatingSetpoint(targetTstatTemp)
@@ -1288,7 +1288,18 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
         
 	} else if (mode == 'cool') {
 
-		if ((climateName == null) || (climateName.trim() == "") || (!thermostat.hasCommand("setClimate"))) {
+		if ((climateName) && (thermostat.hasCommand("setClimate"))) {
+			try {
+				thermostat?.setClimate("", climateName)
+			} catch (any) {
+				if (detailedNotif == 'true') {
+					send("ScheduleTstatZones>schedule ${scheduleName},not able to set climate ${climateName} for cooling at the thermostat(s) ${thermostat}")
+				}
+				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},not able to set climate ${climateName} associated for cooling at the thermostat ${thermostat}")
+			}                
+			desiredCool = thermostat.currentCoolingSetpoint
+			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},according to climateName ${climateName}, desiredCool=${desiredCool}")
+		} else {
 			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:no climate to be applied for coolingSetpoint")
 			key = "desiredCoolTemp$indiceSchedule"
 			def coolTemp = settings[key]
@@ -1301,18 +1312,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			}
             
 			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},desiredCool=${desiredCool}")
-		} else {
-			try {
-				thermostat?.setClimate("", climateName)
-			} catch (any) {
-				if (detailedNotif == 'true') {
-					send("ScheduleTstatZones>schedule ${scheduleName},not able to set climate ${climateName} for cooling at the thermostat(s) ${thermostat}")
-				}
-				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},not able to set climate ${climateName} associated for cooling at the thermostat ${thermostat}")
-			}                
-			desiredCool = thermostat.currentCoolingSetpoint
-			log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName},according to climateName ${climateName}, desiredCool=${desiredCool}")
-		}
+		} 
 		temp_diff = (temp_diff < (0-max_temp_diff)) ? -(max_temp_diff):(temp_diff >max_temp_diff) ?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
 		float targetTstatTemp = (desiredCool - temp_diff).round(1)
 		thermostat?.setCoolingSetpoint(targetTstatTemp)
