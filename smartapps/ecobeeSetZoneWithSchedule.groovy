@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 4.1" 
+			paragraph "Version 4.1.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -968,7 +968,7 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 	String mode = thermostat?.currentThermostatMode.toString() // get the mode at the main thermostat
 	if (mode == 'heat') {
 		roomTstat.heat()
-		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
+		if ((climateName) && (roomTstat?.hasCommand("setClimate"))) {
 			try {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
@@ -981,7 +981,7 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 			log.debug("ecobeeSetZoneWithSchedule>>schedule ${scheduleName}, in room ${roomName},about to apply zone's temp settings")
 			key = "desiredHeatTemp$indiceSchedule"
 			def heatTemp = settings[key]
-			if ((heatTemp == null) || (heatTemp?.trim()=="")) {
+			if (!heatTemp) {
 				log.debug("setRoomTstatSettings>schedule ${scheduleName}, in room ${roomName},about to apply default heat settings")
 				desiredHeat = (scale=='C') ? 21:72				// by default, 21°C/72°F is the target heat temp
 			} else {
@@ -995,7 +995,7 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 		}
 	} else if (mode == 'cool') {
 		roomTstat.cool()
-		if ((climateName != null) && (climateName.trim() != "") && (roomTstat?.hasCommand("setClimate"))) {
+		if ((climateName) && (roomTstat?.hasCommand("setClimate"))) {
 			try {
 				roomTstat?.setClimate("", climateName)
 				setClimate = true
@@ -1008,7 +1008,7 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 			log.debug("ScheduleTstatZones>schedule ${scheduleName}, in room ${roomName},about to apply zone's temp settings")
 			key = "desiredCoolTemp$indiceSchedule"
 			def coolTemp = settings[key]
-			if ((coolTemp == null) || (coolTemp?.trim()=="")) {
+			if (!coolTemp) {
 				log.debug("setRoomTstatSettings>schedule ${scheduleName}, in room ${roomName},about to apply default cool settings")
 				desiredCool = (scale=='C') ? 23:75				// by default, 23°C/75°F is the target cool temp
 			} else {
