@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.1.6" 
+			paragraph "Version 3.1.7" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1161,6 +1161,8 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 
 
 private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
+	float MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS=0.5
+	float MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS=1
 	float desiredHeat, desiredCool, avg_indoor_temp
 	def scale = getTemperatureScale()
 
@@ -1232,6 +1234,15 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			}   
 		}   
 	}
+	float min_setpoint_adjustment = (scale=='C') ? MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS:MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS
+	if ((scheduleName == state.lastScheduleLastName) && (temp_diff.abs() < min_setpoint_adjustment)) {  // adjust the temp only if temp diff is significant
+		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
+		if (detailedNotif == 'true') {
+			send("ScheduleTsatZones>running ongoing schedule ${scheduleName}, temperature adjustment (${temp_diff}°) between sensors is not significant, skipping adjustment in zone")
+		}
+		return
+	}                
+
 	key = "givenMaxTempDiff$indiceSchedule"
 	def givenMaxTempDiff = settings[key]
 	def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
