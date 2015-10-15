@@ -1162,8 +1162,6 @@ private def adjust_tstat_for_more_less_heat_cool(indiceSchedule) {
 
 private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 	float desiredHeat, desiredCool, avg_indoor_temp
-	float MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS=0.5
-	float MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS=1
 	def scale = getTemperatureScale()
 
 	def key = "scheduleName$indiceSchedule"
@@ -1234,15 +1232,6 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			}   
 		}   
 	}
-	float min_setpoint_adjustment = (scale=='C') ? MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS:MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS
-	if (temp_diff.abs() < min_setpoint_adjustment) {  // adjust the temp only if temp diff is significant
-		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
-		if (detailedNotif == 'true') {
-			send("ecobeeSetZoneWithSchedule>temperature adjustment (${temp_diff}°) between sensors is not significant, exiting")
-		}
-		return        
-	}                
-
 	key = "givenMaxTempDiff$indiceSchedule"
 	def givenMaxTempDiff = settings[key]
 	def input_max_temp_diff = givenMaxTempDiff ?: (scale=='C')? 2: 5 // 2°C/5°F temp differential is applied by default
