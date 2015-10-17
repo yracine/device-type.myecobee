@@ -522,7 +522,7 @@ def setZoneSettings() {
 	try {        
 		thermostat.refresh()
 	} catch (e) {
-		log.debug("setZoneSettings>not able to do a refresh() on $thermostat")
+		log.debug("setZoneSettings>not able to do a refresh() on ${thermostat}, exception ${e}")
 	}                    
 
 
@@ -532,7 +532,7 @@ def setZoneSettings() {
 		try {        
 			outTempSensor.refresh()
 		} catch (e) {
-			log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
+			log.debug("setZoneSettings>not able to do a refresh() on ${outTempSensor}, exception ${e}")
 		}                    
 	}
 	def ventSwitchesOn = []
