@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.1.8" 
+			paragraph "Version 3.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -84,7 +84,7 @@ def generalSetupPage() {
 			input (name:"setAdjustmentTempFlag", title: "Enable temp adjustment based on avg temp collected at indoor sensor(s)?", type:"Boolean",
 				metadata: [values: ["true", "false"]],required:false)
 		}
-		section("Enable fan adjustment based on outdoor temp sensors [optional, default=false]") {
+		section("Enable fan adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
 			input (name:"setAdjustmentFanFlag", title: "Enable fan adjustment set in schedules based on sensors?", type:"Boolean",
 				metadata: [values: ["true", "false"]],required:false)
 		}
@@ -518,15 +518,19 @@ def setZoneSettings() {
 	String startInLocalTime,nowInLocalTime
 	boolean foundSchedule=false
 
-	/* Poll the thermostat to get latest values */
-	thermostat.poll()
+	/* Refresh the thermostat to get latest values */
+	try {        
+		thermostat.refresh()
+	} catch (e) {
+		log.debug("setZoneSettings>not able to do a refresh() on $thermostat")
+	}                    
 
 
 	if ((outTempSensor) && ((outTempSensor.hasCapability("Refresh")) || (outTempSensor.hasCapability("Polling")))) {
 
 		// do a refresh to get latest temp value
 		try {        
-			outTempSensor.poll()
+			outTempSensor.refresh()
 		} catch (e) {
 			log.debug("setZoneSettings>not able to do a refresh() on $outTempSensor")
 		}                    
