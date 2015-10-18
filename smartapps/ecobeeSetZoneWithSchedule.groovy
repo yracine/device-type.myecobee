@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 4.1.3" 
+			paragraph "Version 4.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1562,7 +1562,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 			def ventSwitch = settings[key]
 			if (ventSwitch != null) {
 				totalVents++
-				log.debug "turn_off_all_other_vents>found=${ventSwitch}, currentHVACMode=${currentHVACMode}"
+				log.debug "turn_off_all_other_vents>found=${ventSwitch}"
 				// Prior to any processing, check temperature in each vent to avoid any HVAC damage
 				if (is_temperature_too_hot_or_too_cold(ventSwitch)) {
 					log.debug("turn_off_all_other_vents>temperature too hot or too cold in ${ventSwitch}, exiting...")
@@ -1630,7 +1630,7 @@ private def open_all_vents() {
 	// Turn on all vents        
 	for (indiceRoom in 1..roomsCount) {
 		for (int j = 1;(j <= 5); j++)  {
-			key = "ventSwitch${j}$indiceRoom"
+			def key = "ventSwitch${j}$indiceRoom"
 			def vent = settings[key]
 				if (vent != null) {
 					vent.on()	
