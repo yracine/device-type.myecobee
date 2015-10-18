@@ -515,7 +515,6 @@ def setZoneSettings() {
 	}
 
 	def currTime = now()
-	String startInLocalTime,nowInLocalTime
 	boolean foundSchedule=false
 
 	/* Refresh the thermostat to get latest values */
@@ -571,12 +570,6 @@ def setZoneSettings() {
 		key = "endtime$i"
 		def endTime = settings[key]
 		def endTimeToday = timeToday(endTime,location.timeZone)
-		startInLocalTime = startTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
-		String endInLocalTime = endTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
-		nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
-		log.debug "setZoneSettings>found schedule ${scheduleName} prior to any change,original startTime=$startTime,original endTime=$endTime,nowInLocalTime= ${nowInLocalTime},startInLocalTime=${startInLocalTime},endInLocalTime=${endInLocalTime}," +
-        		"currTime=${currTime},begintime=${startTimeToday.time},endTime=${endTimeToday.time},lastScheduleName=$state.lastScheduleName, lastStartTime=$state.lastStartTime"
-        
 		if ((currTime < endTimeToday.time) && (endTimeToday.time < startTimeToday.time)) {
 			startTimeToday = startTimeToday -1        
 			log.debug "setZoneSettings>schedule ${scheduleName}, subtracted - 1 day, new startTime=${startTimeToday.time}"
@@ -585,9 +578,9 @@ def setZoneSettings() {
 			endTimeToday = endTimeToday +1        
 			log.debug "setZoneSettings>schedule ${scheduleName} added + 1 day, new endTime=${endTimeToday.time}"
 		}        
-		startInLocalTime = startTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
-		endInLocalTime = endTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
-		nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
+		String startInLocalTime = startTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
+		String endInLocalTime = endTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
+		String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 
 		log.debug "setZoneSettings>found schedule ${scheduleName},original startTime=$startTime,original endTime=$endTime,nowInLocalTime= ${nowInLocalTime},startInLocalTime=${startInLocalTime},endInLocalTime=${endInLocalTime}," +
         		"currTime=${currTime},begintime=${startTimeToday.time},endTime=${endTimeToday.time},lastScheduleName=$state.lastScheduleName, lastStartTime=$state.lastStartTime"
@@ -1249,6 +1242,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 			}   
 		}   
 	}
+     
 	float min_setpoint_adjustment = (scale=='C') ? MIN_SETPOINT_ADJUSTMENT_IN_CELSIUS:MIN_SETPOINT_ADJUSTMENT_IN_FARENHEITS
 	if ((scheduleName == state.lastScheduleLastName) && (temp_diff.abs() < min_setpoint_adjustment)) {  // adjust the temp only if temp diff is significant
 		log.debug("adjust_thermostat_setpoint_in_zone>temperature adjustment (${temp_diff}°) between sensors is small, skipping it and exiting")
