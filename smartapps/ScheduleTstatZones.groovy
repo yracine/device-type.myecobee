@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.3" 
+			paragraph "Version 3.3.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -571,14 +571,25 @@ def setZoneSettings() {
 		key = "endtime$i"
 		def endTime = settings[key]
 		def endTimeToday = timeToday(endTime,location.timeZone)
-		if (endTimeToday.time < startTimeToday.time) {
-			endTimeToday = endTimeToday +1        
-		}        
 		startInLocalTime = startTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
 		String endInLocalTime = endTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
 		nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
+		log.debug "setZoneSettings>found schedule ${scheduleName} prior to any change,original startTime=$startTime,original endTime=$endTime,nowInLocalTime= ${nowInLocalTime},startInLocalTime=${startInLocalTime},endInLocalTime=${endInLocalTime}," +
+        		"currTime=${currTime},begintime=${startTimeToday.time},endTime=${endTimeToday.time},lastScheduleName=$state.lastScheduleName, lastStartTime=$state.lastStartTime"
+        
+		if ((currTime < endTimeToday.time) && (endTimeToday.time < startTimeToday.time)) {
+			startTimeToday = startTimeToday -1        
+			log.debug "setZoneSettings>schedule ${scheduleName}, subtracted - 1 day, new startTime=${startTimeToday.time}"
+		}            
+		if ((currTime > endTimeToday.time) && (endTimeToday.time < startTimeToday.time)) {
+			endTimeToday = endTimeToday +1        
+			log.debug "setZoneSettings>schedule ${scheduleName} added + 1 day, new endTime=${endTimeToday.time}"
+		}        
+		startInLocalTime = startTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
+		endInLocalTime = endTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
+		nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 
-		log.debug "setZoneSettings>found schedule ${scheduleName}, startTime=$startTime,endTime=$endTime,nowInLocalTime= ${nowInLocalTime},startInLocalTime=${startInLocalTime},endInLocalTime=${endInLocalTime}," +
+		log.debug "setZoneSettings>found schedule ${scheduleName},original startTime=$startTime,original endTime=$endTime,nowInLocalTime= ${nowInLocalTime},startInLocalTime=${startInLocalTime},endInLocalTime=${endInLocalTime}," +
         		"currTime=${currTime},begintime=${startTimeToday.time},endTime=${endTimeToday.time},lastScheduleName=$state.lastScheduleName, lastStartTime=$state.lastStartTime"
         
 		def ventSwitchesZoneSet = []        
