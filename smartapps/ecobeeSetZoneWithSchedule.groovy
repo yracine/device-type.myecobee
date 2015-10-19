@@ -114,33 +114,33 @@ def roomsSetupPage() {
 			}
 			section("Room ${indiceRoom}-Thermostat [optional]") {
 				input "roomTstat${indiceRoom}", title: "Room thermostat to be set", "capability.thermostat", 
-                	required: false, description: "Optional"
+	          			required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-TempSensor [optional]") {
 				input "tempSensor${indiceRoom}", title: "Temp sensor for better temp adjustment", "capability.temperatureMeasurement", 
-                	required: false, description: "Optional"
+                			required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Vents Setup [optional]")  {
 				for (int j = 1;(j <= 5); j++)  {
 					input "ventSwitch${j}${indiceRoom}", title: "Vent switch no ${j} in room", "capability.switch", 
-                    	required: false, description: "Optional"
+                    			required: false, description: "Optional"
 				}           
 			}           
 			section("Room ${indiceRoom}-MotionSensor [optional]") {
 				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
-                	required: false, description: "Optional"
+                			required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Do temp adjustment when occupied room only [optional]") {
 				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], 
-                	required: false, description: "Optional"
+                			required: false, description: "Optional"
 
 			}
 			section("Room ${indiceRoom}-Do temp adjustment with this occupied's threshold [optional]") {
 				input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
-                	required: false, description: "Optional"
+               				required: false, description: "Optional"
 
 			}
 			section() {
