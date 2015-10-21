@@ -9,9 +9,9 @@ linkedIn profile:   ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
 Date:               2014-03-31
 
 Code: http://github.com/yracine/device-type.myecobee
-
-**************************************************************************************************
+..........................................................................................................
 If you like My Ecobee Device and related smartapps, please support the developer:
+..........................................................................................................
 
 
 <br/> [![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](
