@@ -1608,7 +1608,7 @@ private boolean is_temperature_too_hot_or_too_cold(ventSwitch) {
 	log.debug("is_temperature_in_vent_too_hot>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Max Temp of ${MAX_TEMP_VENT_SWITCH}°")
 	log.debug("is_temperature_in_vent_too_hot>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Min Temp of ${MIN_TEMP_VENT_SWITCH}°")
 	if (tempSwitch) {    
-    	if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (tempSwitch >= MAX_TEMP_VENT_SWITCH)) {
+		if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (tempSwitch >= MAX_TEMP_VENT_SWITCH)) {
 			// Turn the HVAC off, open all vents, and deactivate any further smartapp processing
 			thermostat.off()            
 			open_all_vents()
