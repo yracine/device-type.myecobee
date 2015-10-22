@@ -1616,7 +1616,7 @@ private boolean is_temperature_too_hot_or_too_cold(ventSwitch) {
 			send("ecobeeSetZoneWithSchedule> ** IMMEDIATE ATTENTION: current HVAC mode is ${currentHVACMode}, and inside temperature of vent ${ventSwitch} too hot (${tempSwitch}°), opening all vents and turning off the HVAC to avoid any damage **")
 			return true            
 		} /* if too hot */           
-    	if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (tempSwitch <= MIN_TEMP_VENT_SWITCH)) {
+		if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (tempSwitch <= MIN_TEMP_VENT_SWITCH)) {
 			// Turn the HVAC off, open all vents, and deactivate any further smartapp processing
 			thermostat.off()            
 			open_all_vents()
