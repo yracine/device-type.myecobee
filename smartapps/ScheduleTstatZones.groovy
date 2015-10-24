@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.4.2" 
+			paragraph "Version 3.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -481,11 +481,6 @@ def initialize() {
 	state.scheduleCoolSetpoint=0    
 	state.setPresentOrAway=''
 
-	Integer delay =5 				// wake up every 5 minutes to apply zone settings if any
-	log.debug "Scheduling setZoneSettings every ${delay} minutes to check for zone settings to be applied"
-
-	runEvery5Minutes(setZoneSettings)
-
 	subscribe(app, appTouch)
     
 	def motionSensors =[]   	 
@@ -501,18 +496,59 @@ def initialize() {
 	// associate the motionHandler to the list of motionSensors in rooms   	 
 	subscribe(motionSensors, "motion", motionEvtHandler, [filterEvents: false])
     
+	state?.poll = [ last: 0, rescheduled: now() ]
 
+	Integer delay =5 				// wake up every 5 minutes to apply zone settings if any
+	log.debug "initialize>scheduling setZoneSettings every ${delay} minutes to check for zone settings to be applied"
+
+	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
+	subscribe(location, "sunrise", rescheduleIfNeeded)
+	subscribe(location, "sunset", rescheduleIfNeeded)
+	subscribe(location, "mode", rescheduleIfNeeded)
+	subscribe(location, "sunriseTime", rescheduleIfNeeded)
+	subscribe(location, "sunsetTime", rescheduleIfNeeded)
+
+	rescheduleIfNeeded()   
+}
+
+
+
+def rescheduleIfNeeded() {
+	Integer delay = 5 // By default, schedule SetZoneSettings() every 5 min.
+	BigDecimal currentTime = now()    
+	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	if (lastPollTime != currentTime) {    
+		log.info "rescheduleIfNeeded>last poll was  ${(lastPollTime/60000).round(1).toString()} minutes ago"
+	}
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+		log.info "recheduleIfNeeded>scheduling setZoneSettings in ${delay} minutes.."
+		runEvery5Minutes(setZoneSettings)
+	}
+    
+	setZoneSettings()
+    
+	// Update rescheduled state
+    
+	if (!evt) state.poll["rescheduled"] = now()
 }
 
 def appTouch(evt) {
 	setZoneSettings()
 }
 
-
-
 def setZoneSettings() {
 
 	log.debug "Begin of setZoneSettings Fcn"
+	Integer delay = 5 // By default, schedule SetZoneSettings() every 5 min.
+
+	//schedule the rescheduleIfNeeded() function
+    
+	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+		log.info "setZoneSettings>Scheduling rescheduleIfNeeded() in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		state?.poll["rescheduled"] = now()
+	}
 	if (powerSwitch?.currentSwitch == "off") {
 		if (detailedNotif == 'true') {
 			send("ScheduleTstatZones>${powerSwitch.name} is off, schedule processing on hold...")
