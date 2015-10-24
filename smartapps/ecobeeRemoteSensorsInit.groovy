@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.5" 
+			paragraph "Version 1.5.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -238,10 +238,14 @@ private def deleteSensors() {
 		delete = getChildDevices().findAll {
 			((it.device.deviceNetworkId.contains(getMotionSensorChildName())) && (!motionSensors.contains(it.device.deviceNetworkId)))
 		}
-	}
+	}		
 	log.trace("ecobeeRemoteSensorsInit>deleting ${delete.size()} MyEcobee's Motion Sensors")
 	delete.each {
-		deleteChildDevice(it.deviceNetworkId)
+		try {    
+			deleteChildDevice(it.deviceNetworkId)
+		} catch(e) {
+			log.trace("ecobeeRemoteSensorsInit>exception $e while trying to delete Motion Sensor ${it.deviceNetworkId}")
+		}        
 	}
 
 
@@ -257,7 +261,11 @@ private def deleteSensors() {
 	}
 	log.trace("ecobeeRemoteSensorsInit>deleting ${delete.size()} MyEcobee's Temp Sensors")
 	delete.each {
-		deleteChildDevice(it.deviceNetworkId)
+		try {
+			deleteChildDevice(it.deviceNetworkId)
+		} catch (e) {
+			log.trace("ecobeeRemoteSensorsInit>exception $e while trying to delete Temp Sensor ${it.deviceNetworkId}")
+		}        
 	}
 
 }
