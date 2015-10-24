@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 1.9.9"
+			paragraph "Version 2.0"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -148,12 +148,40 @@ def initialize() {
 		runIn(30, "sendNotifDelayNotInRange")
 		return
 	}
-	log.debug "Scheduling Humidity Monitoring and adjustment every ${delay} minutes"
+	log.debug "initialize>scheduling Humidity Monitoring and adjustment every ${delay} minutes"
 
-	schedule("0 0/${delay} * * * ?", setHumidityLevel) // monitor the humidity according to delay specified
-	subscribe(app, appTouch)
+	state?.poll = [ last: 0, rescheduled: now() ]
 
+	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
+	subscribe(location, "sunrise", rescheduleIfNeeded)
+	subscribe(location, "sunset", rescheduleIfNeeded)
+	subscribe(location, "mode", rescheduleIfNeeded)
+	subscribe(location, "sunriseTime", rescheduleIfNeeded)
+	subscribe(location, "sunsetTime", rescheduleIfNeeded)
+
+	rescheduleIfNeeded()   
 }
+
+
+def rescheduleIfNeeded() {
+	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	BigDecimal currentTime = now()    
+	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	if (lastPollTime != currentTime) {    
+		log.info "rescheduleIfNeeded>last poll was  ${(lastPollTime/60000).round(1).toString()} minutes ago"
+	}
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+		log.info "rescheduleIfNeeded>scheduling setHumidityLevel in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", setHumidityLevel)
+	}
+    
+	setHumidityLevel()
+    
+	// Update rescheduled state
+    
+	if (!evt) state.poll["rescheduled"] = now()
+}
+
 
 
 private def sendNotifDelayNotInRange() {
@@ -179,8 +207,18 @@ def appTouch(evt) {
 
 
 def setHumidityLevel() {
-
 	Integer scheduleInterval = givenInterval ?: 59 // By default, do it every hour
+	state?.poll["last"] = now()
+		
+	//schedule the rescheduleIfNeeded() function
+    
+	if (((state?.poll["rescheduled"]?:0) + (scheduleInterval * 60000)) < now()) {
+		log.info "takeAction>scheduling rescheduleIfNeeded() in ${scheduleInterval} minutes.."
+		schedule("0 0/${scheduleInterval} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		state?.poll["rescheduled"] = now()
+	}
+
 	if (detailedNotif == 'true') {
 		send("MonitorEcobeeHumidity>monitoring every ${scheduleInterval} minute(s)")
 		log.debug "Scheduling Humidity Monitoring & Change every ${scheduleInterval}  minutes"
@@ -407,13 +445,13 @@ def setHumidityLevel() {
 
 		send "MonitorEcobeeHumidity>dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and normalized outdoor humidity (${outdoorHumidity}%) is too high to dehumidify"
 
-	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'true')) &&
-		(ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
-
+	} else if ((ecobeeMode == 'cool') && (hasDehumidifier == 'true') &&
+		(ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
+		(outdoorHumidity < target_humidity + min_humidity_diff)) {
 
 		//      If mode is cooling and outdoor humidity is too high, then just use dehumidifier if any available
 
-		log.trace "Dehumidify to ${target_humidity} in ${ecobeeMode} mode using the dehumidifier only"
+		log.trace "Dehumidify to ${target_humidity} in ${ecobeeMode} mode using the dehumidifier"
 
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': "${target_humidity}", 'humidifierMode': 'off',
 			'dehumidifyWithAC': 'false', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
