@@ -29,7 +29,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.0.2" 
+		paragraph "Version 2.0.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -150,7 +150,8 @@ def initialize() {
 
 
 
-def rescheduleIfNeeded() {
+def rescheduleIfNeeded(evt) {
+	log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
 	Integer delay  = givenInterval ?: 5 // By default, schedule processQueue every 5 min.
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
