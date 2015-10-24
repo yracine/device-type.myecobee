@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 2.3.3
+ *  Version 3.0
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -39,10 +39,10 @@ preferences {
 metadata {
 	// Automatically generated. Make future change here.
 	definition(name: "My Ecobee Device", author: "Yves Racine",  namespace: "yracine") {
+		capability "Thermostat"
 		capability "Relative Humidity Measurement"
 		capability "Temperature Measurement"
 		capability "Polling"
-		capability "Thermostat"
 		capability "Refresh"
 		capability "Presence Sensor"
 		capability "Actuator"
@@ -223,38 +223,29 @@ metadata {
 	simulator {
 		// TODO: define status and reply messages here
 	}
-	tiles {
-		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 1,
-			height: 1, decoration: "flat") {
+
+	tiles(scale: 2) { 
+		multiAttributeTile(name:"summary", type: "lighting", width: 6, height: 4, canChangeIcon: false){
+			tileAttribute ("device.temperatureDisplay", key: "PRIMARY_CONTROL") {
+				attributeState ("temperature", label:'${currentValue}°', backgroundColor:"#44b621", 					
+					icon:"st.Home.home1", unit:"F"       
+				)
+        	}
+			tileAttribute ("device.equipmentStatus", key: "SECONDARY_CONTROL") {
+				attributeState "equipmentStatus", label:'${currentValue}'
+			}
+		}
+    
+		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 2,
+			height: 2, decoration: "flat") {
 			state "default", label: '${currentValue}\n'
 		}
-		valueTile("groups", "device.groups", inactiveLabel: false, width: 1, 
-			height: 1, decoration: "flat") {
+		valueTile("groups", "device.groups", inactiveLabel: false, width: 2, 
+			height: 2, decoration: "flat") {
 			state "default", label: '${currentValue}'
 		}
-		valueTile("temperature", "device.temperatureDisplay", width: 2, height: 2,
-			canChangeIcon: false) {
-			state("temperature", label:'${currentValue}°', unit:"F",
-				backgroundColors: [
-					[value: 0, color: "#153591"],
-					[value: 7, color: "#1e9cbb"],
-					[value: 15, color: "#90d2a7"],
-					[value: 23, color: "#44b621"],
-					[value: 29, color: "#f1d801"],
-					[value: 33, color: "#d04e00"],
-					[value: 36, color: "#bc2323"],
-					// Fahrenheit Color Range
-					[value: 40, color: "#153591"],
-					[value: 44, color: "#1e9cbb"],
-					[value: 59, color: "#90d2a7"],
-					[value: 74, color: "#44b621"],
-					[value: 84, color: "#f1d801"],
-					[value: 92, color: "#d04e00"],
-					[value: 96, color: "#bc2323"]
-                ])
-		}
 		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
-			decoration: "flat") {
+			decoration: "flat", width: 2, height: 2,) {
 			state "heat", label: '${name}', action: "thermostat.off", 
 				icon: "st.Weather.weather14", backgroundColor: "#ffffff"
 			state "off", label: '${name}', action: "thermostat.cool", 
@@ -264,15 +255,68 @@ metadata {
 			state "auto", action: "thermostat.heat", 
 				icon: "st.thermostat.auto"
 		}
+        
 		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
-			decoration: "flat") {
+			decoration: "flat", width: 2, height: 2,) {
 			state "auto", label: '${name}', action: "thermostat.fanOn", 
 				icon: "st.Appliances.appliances11"
 			state "on", label: '${name}', action: "thermostat.fanAuto", 
 				icon: "st.Appliances.appliances11"
 		}
+		standardTile("heatLevelUp", "device.heatingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "heatLevelUp", label:'Heat', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"
+		}
+		valueTile("heatingSetpoint", "device.heatingSetpointDisplay", width: 3, height: 2, inactiveLabel: false) {
+			state "heat", label:'${currentValue}°', unit:"F",
+			backgroundColors:[
+				[value: 0, color: "#153591"],
+				[value: 7, color: "#1e9cbb"],
+				[value: 15, color: "#90d2a7"],
+				[value: 23, color: "#44b621"],
+				[value: 29, color: "#f1d801"],
+				[value: 33, color: "#d04e00"],
+				[value: 36, color: "#bc2323"],
+				// Fahrenheit Color Range
+				[value: 40, color: "#153591"],
+				[value: 44, color: "#1e9cbb"],
+				[value: 59, color: "#90d2a7"],
+				[value: 74, color: "#44b621"],
+				[value: 84, color: "#f1d801"],
+				[value: 92, color: "#d04e00"],
+				[value: 96, color: "#bc2323"]
+			]                    
+		}
+		standardTile("heatLevelDown", "device.heatingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "heatLevelDown", label:'Heat', action:"heatLevelDown", icon:"st.thermostat.thermostat-down"
+		}
+		standardTile("coolLevelUp", "device.coolingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "coolLevelUp", label:'Cool', action:"coolLevelUp", icon:"st.thermostat.thermostat-up"
+		}
+		valueTile("coolingSetpoint", "device.coolingSetpointDisplay", width: 3, height: 2, inactiveLabel: false) {
+			state "cool", label:'${currentValue}°', unit:"F",
+			backgroundColors:[
+				[value: 0, color: "#153591"],
+				[value: 7, color: "#1e9cbb"],
+				[value: 15, color: "#90d2a7"],
+				[value: 23, color: "#44b621"],
+				[value: 29, color: "#f1d801"],
+				[value: 33, color: "#d04e00"],
+				[value: 36, color: "#bc2323"],
+				// Fahrenheit Color Range
+				[value: 40, color: "#153591"],
+				[value: 44, color: "#1e9cbb"],
+				[value: 59, color: "#90d2a7"],
+				[value: 74, color: "#44b621"],
+				[value: 84, color: "#f1d801"],
+				[value: 92, color: "#d04e00"],
+				[value: 96, color: "#bc2323"]
+			]
+		}
+		standardTile("coolLevelDown", "device.coolingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "coolLevelDown", label:'Cool', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"
+		}
 		standardTile("switchProgram", "device.programNameForUI", 
-			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
+			inactiveLabel: false, width: 2, height: 2, decoration: "flat") {
 			state "Home", label: '${name}', action: "sleep", 
 				icon: "st.Home.home4"
 			state "Sleep", label: '${name}', action: "awake", 
@@ -286,44 +330,11 @@ metadata {
 			state "Custom", label: 'Custom', action: "resumeThisTstat", 
 				icon: "st.Office.office6"
 		}
-		valueTile("heatingSetpoint", "device.heatingSetpointDisplay", inactiveLabel: false,
-			decoration: "flat") {
-			state "heat", label: '${currentValue}° heat', unit: "F", 
-			backgroundColor: "#ffffff"
-		}
-		valueTile("coolingSetpoint", "device.coolingSetpointDisplay", inactiveLabel: false,
-			decoration: "flat") {
-			state "cool", label: '${currentValue}° cool', unit: "F", 
-			backgroundColor: "#ffffff"
-		}
 		valueTile("humidity", "device.humidity", inactiveLabel: false, 
-			decoration: "flat") {
+			decoration: "flat", width: 2, height: 2,) {
 			state "default", label: 'Humidity\n${currentValue}%', unit: "humidity"
 		}
-		standardTile("heatLevelUp", "device.heatingSetpoint", canChangeIcon: false,
-			inactiveLabel: false, decoration: "flat") {
-			state "heatLevelUp", label: '  ', action: "heatLevelUp", 
-			icon: "st.thermostat.thermostat-up"
-		}
-		standardTile("heatLevelDown", "device.heatingSetpoint", canChangeIcon: false,
-			inactiveLabel: false, decoration: "flat") {
-			state "heatLevelDown", label: '  ', action: "heatLevelDown", 
- 			icon:"st.thermostat.thermostat-down"
-		}
-		standardTile("coolLevelUp", "device.coolingSetpoint", canChangeIcon: false,
-			inactiveLabel: false, decoration: "flat") {
-			state "coolLevelUp", label: '  ', action: "coolLevelUp", 
-			icon: "st.thermostat.thermostat-up"
-		}
-		standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false,
-			inactiveLabel: false, decoration: "flat") {
-			state "coolLevelDown", label: '  ', action: "coolLevelDown", 
-			icon: "st.thermostat.thermostat-down"
-		}
-		valueTile("equipStatus", "device.equipmentStatus", inactiveLabel: false,
-			decoration: "flat", width: 3, height: 1) {
-			state "default", label: '${currentValue}'
-		}
+        
 //		One could also use thermostatOperatingState as display value for equipStatus (in line with default ecobee device's status)
 //		However, it does not contain humidifier/dehumidifer/HRV/ERV/aux heat
 //		components' running states, just the basic thermostat states (heating, cooling, fan only).
@@ -332,42 +343,50 @@ metadata {
 //			decoration: "flat", width: 3, height: 1) {
 //			state "default", label: '${currentValue}'
 //		}
-		valueTile("programEndTimeMsg", "device.programEndTimeMsg", inactiveLabel:
-			false, decoration: "flat", width: 3, height: 1) {
+
+/*
+		valueTile("equipStatus", "device.equipmentStatus", inactiveLabel: false,
+			decoration: "flat", width: 6, height: 2) {
 			state "default", label: '${currentValue}'
 		}
-		valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false,
-			decoration: "flat", width: 1, height: 1) {
-			state "default", label: 'FanMin\n${currentValue}'
+*/        
+		valueTile("programEndTimeMsg", "device.programEndTimeMsg", inactiveLabel:
+			false, decoration: "flat", width: 3, height: 2) {
+			state "default", label: '${currentValue}'
 		}
 		valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat",
-			width: 2, height: 1) {
+			width: 3, height: 2) {
 			state "default", label: '${currentValue}'
+		}
+        
+		valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false,
+			decoration: "flat", width: 2, height: 2) {
+			state "default", label: 'FanMin\n${currentValue}'
 		}
 		// Program Tiles
 		valueTile("programScheduleName", "device.programScheduleName", inactiveLabel:
-			false, width: 1, height: 1, decoration: "flat") {
+			false, width: 2, height: 2, decoration: "flat") {
 			state "default", label: 'Mode\n${currentValue}'
 		}
-		valueTile("programType", "device.programType", inactiveLabel: false, width: 1,
-			height: 1, decoration: "flat") {
+		valueTile("programType", "device.programType", inactiveLabel: false, width: 2,
+			height: 2, decoration: "flat") {
 			state "default", label: 'Prog Type\n${currentValue}'
 		}
 		valueTile("programCoolTemp", "device.programCoolTempDisplay", inactiveLabel: false,
-			width: 1, height: 1, decoration: "flat") {
+			width: 2, height: 2, decoration: "flat") {
 			state "default", label: 'Prog Cool\n${currentValue}°'
 		}
 		valueTile("programHeatTemp", "device.programHeatTempDisplay", inactiveLabel: false,
-			width: 1, height: 1, decoration: "flat") {
+			width: 2, height: 2, decoration: "flat") {
 			state "default", label: 'Prog Heat\n${currentValue}°'
 		}
 		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false,
-			decoration: "flat") {
+			decoration: "flat",width: 2, height: 2) {
 			state "default", label: 'ResumeProg', action: "resumeThisTstat", 
             		icon: "st.Office.office7", backgroundColor: "#ffffff"
 		}
 		// Weather Tiles
-		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 1, height: 1,
+		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 2, height: 2,
 			decoration: "flat") {
 			state "-2",			label: 'updating...',		icon: "st.unknown.unknown.unknown"
 			state "0",			label: 'Sunny',			icon: "st.Weather.weather14"
@@ -394,63 +413,61 @@ metadata {
 			state "21",			label: 'Dust',			icon: "st.Weather.weather13"
 		}
 		valueTile("weatherDateTime", "device.weatherDateTime", inactiveLabel: false,
-			width: 2, height: 1, decoration: "flat") {
+			width: 3, height: 2, decoration: "flat") {
 			state "default", label: '${currentValue}'
 		}
 		valueTile("weatherConditions", "device.weatherCondition", 
-			inactiveLabel: false, width: 2, height: 1, decoration: "flat") {
+			inactiveLabel: false, width: 3, height: 2, decoration: "flat") {
 			state "default", label: 'Forecast\n${currentValue}'
 		}
 		valueTile("weatherTemperature", "device.weatherTemperatureDisplay", inactiveLabel:
-			false, width: 1, height: 1, decoration: "flat") {
+			false, width: 2, height: 2, decoration: "flat") {
 			state "default", label: 'Out Temp\n${currentValue}°', unit: "C"
 		}
 		valueTile("weatherRelativeHumidity", "device.weatherRelativeHumidity",
-			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
+			inactiveLabel: false, width: 2, height: 2,decoration: "flat") {
 			state "default", label: 'Out Hum\n${currentValue}%', unit: "humidity"
 		}
 		valueTile("weatherTempHigh", "device.weatherTempHigh", inactiveLabel: false,
-			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'FcastHigh\n${currentValue}°', unit: "C"
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'ForecastH\n${currentValue}°', unit: "C"
 		}
 		valueTile("weatherTempLow", "device.weatherTempLow", inactiveLabel: false,
-			width: 1, height: 1, decoration: "flat") {
-			state "default", label: 'FcastLow\n${currentValue}°', unit: "C"
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'ForecastL\n${currentValue}°', unit: "C"
 		}
 		valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false,
-			width: 1, height: 1, decoration: "flat") {
+			width: 2, height: 2, decoration: "flat") {
 			state "default", label: 'Pressure\n${currentValue}', unit: "hpa"
 		}
 		valueTile("weatherWindDirection", "device.weatherWindDirection",
-			inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
+			inactiveLabel: false, width: 2, height: 2, decoration: "flat") {
 			state "default", label: 'W.Dir\n${currentValue}'
 		}
 		valueTile("weatherWindSpeed", "device.weatherWindSpeed", inactiveLabel: false,
-			width: 1, height: 1, decoration: "flat") {
+			width: 2, height: 2, decoration: "flat") {
 			state "default", label: 'W.Speed\n${currentValue}'
 		}
-		valueTile("weatherPop", "device.weatherPop", inactiveLabel: false, width: 1,
-			height: 1, decoration: "flat") {
+		valueTile("weatherPop", "device.weatherPop", inactiveLabel: false, width: 2,
+			height: 2, decoration: "flat") {
 			state "default", label: 'PoP\n${currentValue}%', unit: "%"
 		}
         
 		standardTile("refresh", "device.thermostatMode", inactiveLabel: false,
-			decoration: "flat") {
+			decoration: "flat",width: 2, height: 2) {
 			state "default", action: "polling.poll", icon: "st.secondary.refresh"
 		}
-		main "temperature"
-		details(["name", "groups", "mode", "temperature", "fanMode", "switchProgram",
-			"heatLevelDown", "heatingSetpoint", "heatLevelUp", "coolLevelDown",
-			"coolingSetpoint", "coolLevelUp",
-			"equipStatus", "programEndTimeMsg", "humidity", "alerts",
-			"fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
-			"programHeatTemp", "resProgram",            
-			"weatherIcon", "weatherDateTime", "weatherConditions",
-			"weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
+		main "summary"
+		details("summary", "name", "groups", "mode",  "switchProgram", "resProgram", "fanMode",
+ 			"heatLevelUp", "coolLevelUp", "heatingSetpoint", "coolingSetpoint", "heatLevelDown", "coolLevelDown",
+ 			 "programEndTimeMsg", "alerts","weatherDateTime", "weatherConditions",
+			"humidity","fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
+			"programHeatTemp",             
+			"weatherIcon", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
 			"weatherTempLow", "weatherPressure", "weatherWindDirection",
 			"weatherWindSpeed", "weatherPop", 
 			"refresh"
-		])
+		)
 	}
 }
 
@@ -1547,7 +1564,8 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 				sendEvent name: "verboseTrace", value:
 						"setHold>done for ${thermostatId}"
 			} else {
-				log.error "setHold> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				log.error 
+					"setHold> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			} /* end if statusCode */
@@ -1639,7 +1657,8 @@ void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 			sendEvent name: "verboseTrace", value:
 					"createVacation>done for ${thermostatId}"
 		} else {
-			log.error "createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
+			log.error 
+				"createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			sendEvent name: "verboseTrace", value: 
 				"createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 		}
@@ -1774,7 +1793,8 @@ void resumeProgram(thermostatId=settings.thermostatId, resumeAllFlag=true) {
 			sendEvent name: "verboseTrace", value:
 					"resumeProgram>resume done for ${thermostatId}"
 		} else {
-			log.error "resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
+			log.error 
+				"resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			sendEvent name: "verboseTrace", value:
 				"resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 		}
@@ -1836,7 +1856,8 @@ def getGroups(thermostatId) {
 				}
 			}
 		} else {
-			log.error "getGroups>> error=${statusCode.toString()},message=${message} for ${thermostatId}" 
+			log.error 
+				"getGroups>> error=${statusCode.toString()},message=${message} for ${thermostatId}" 
 			sendEvent name: "verboseTrace", value:
 				"getGroups>error ${statusCode.toString()},message=${message} for ${thermostatId}"
 		}
@@ -1924,7 +1945,8 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 				sendEvent name: "verboseTrace", value:
 						"updateGroup>done for groupName =${groupName}, ${thermostatId}"
 			} else {
-				log.error "updateGroup> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				log.error 
+					"updateGroup> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"updateGroup>error ${statusCode.toString()},message=${message} for ${thermostatId}"
 			} /* end if statusCode */
@@ -1962,7 +1984,7 @@ void deleteGroup(groupRef, groupName) {
 					"deleteGroup>done for groupName =${groupName},groupRef = ${groupRef}"
 		} else {
 			log.error 
-				"deleteGroup> error=  ${statusCode.toString()},message= ${message} for ${groupName},groupRef= ${groupRef}"
+				"deleteGroup> error= ${statusCode.toString()},message= ${message} for ${groupName},groupRef= ${groupRef}"
 			sendEvent name: "verboseTrace", value:
 				"deteteGroup>error ${statusCode.toString()},message= ${message} for ${groupName},groupRef= ${groupRef}"
 		}
@@ -2089,7 +2111,8 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 					sendEvent name: "verboseTrace", value:
 							"setClimate>done for thermostatId =${data.thermostatList[i].identifier},climateName =${climateName}"
 				} else {
-					log.error "setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
+					log.error 
+						"setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
 					sendEvent name: "verboseTrace", value:
 						"setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
 				} /* end if statusCode */
@@ -2283,7 +2306,8 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 				sendEvent name: "verboseTrace", value:
 						"updateClimate>done for thermostatId =${thermostatId},climateName =${climateName}"
 			} else {
-				log.error "updateClimate>error=${statusCode.toString()},message=${message} for thermostatId =${thermostatId},climateName =${climateName}"
+				log.error 
+					"updateClimate>error=${statusCode.toString()},message=${message} for thermostatId =${thermostatId},climateName =${climateName}"
 				sendEvent name: "verboseTrace", value:
 					"updateClimate>error ${statusCode.toString()},message=${message} for thermostatId =${thermostatId},climateName =${climateName}"
 
@@ -2492,7 +2516,8 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 				sendEvent name: "verboseTrace", value:"getReportData>done for thermostatId ${thermostatId}"
         	        
 			} else {
-				log.error "getReportData> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				log.error 
+					"getReportData> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"getReportData>error=${statusCode},message= ${message} for ${thermostatId}"
 			} /* end if statusCode */
@@ -2935,7 +2960,8 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 				sendEvent name: "verboseTrace", value:
 					"getTstatInfo>done for ${thermostatId}"
 			} else {
-				log.error "getThermostatInfo> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				log.error 
+					"getThermostatInfo> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"getTstatInfo>error=${statusCode},message=${message} for ${thermostatId}"
 			} /* end if statusCode */                 
@@ -3026,7 +3052,8 @@ void getThermostatSummary(tstatType) {
 				sendEvent name: "verboseTrace", value:
 					"getTstatSummary>done"
 			} else {
-				log.error "getThermostatSummary> error=${statusCode.toString()},message=${message}"
+				log.error
+					"getThermostatSummary> error=${statusCode.toString()},message=${message}"
 				sendEvent name: "verboseTrace", value:
 					"getTstatSummary> error= ${statusCode.toString()},message=${message}"
 			} /* end if statusCode */
