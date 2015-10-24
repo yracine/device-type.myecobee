@@ -303,7 +303,7 @@ def initialize() {
 
 
 def rescheduleIfNeeded() {
-	Integer delay = givenInterval ?: 30 // By default, do poll every 20 min.
+	Integer delay = givenInterval ?: 30 // By default, do poll every 30 min.
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
 	if (lastPollTime != currentTime) {    
@@ -324,7 +324,7 @@ def rescheduleIfNeeded() {
 
 def takeAction() {
 	log.trace "takeAction>begin"
-	Integer delay = givenInterval ?: 30 // By default, do poll every 20 min.
+	Integer delay = givenInterval ?: 30 // By default, do poll every 30 min.
 	state?.poll["last"] = now()
 		
 	//schedule the scheduleIfNeeded() function
