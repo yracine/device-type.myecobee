@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 2.0"
+			paragraph "Version 2.0.1"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -167,8 +167,10 @@ def rescheduleIfNeeded() {
 	Integer delay = givenInterval ?: 59 // By default, do it every hour
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+ 
 	if (lastPollTime != currentTime) {    
-		log.info "rescheduleIfNeeded>last poll was  ${(lastPollTime/60000).round(1).toString()} minutes ago"
+		BigDecimal lastPollTimeInMinutes = (lastPollTime/60000).round(1)      
+		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
 	}
 	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
 		log.info "rescheduleIfNeeded>scheduling setHumidityLevel in ${delay} minutes.."
@@ -447,7 +449,6 @@ def setHumidityLevel() {
 
 	} else if ((ecobeeMode == 'cool') && (hasDehumidifier == 'true') &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff)) 
-
 		//      If mode is cooling and outdoor humidity is too high, then just use dehumidifier if any available
 
 		log.trace "Dehumidify to ${target_humidity} in ${ecobeeMode} mode using the dehumidifier"
