@@ -29,7 +29,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 1.9.1" 
+		paragraph "Version 2.0" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -132,10 +132,36 @@ def initialize() {
 	subscribe(automatic, "yesterdayAvgScoreSpeeding",handleDailyStats)
 	subscribe(automatic, "yesterdayAvgScoreEvents",handleDailyStats)
 	state.queue = []
-	Integer delay = (givenInterval) ?: 5
 
-	schedule("0 0/${delay} * * * ?", processQueue)
+	state?.poll = [ last: 0, rescheduled: now() ]
+
+	Integer delay  = givenInterval ?: 5 // By default, schedule processQueue every 5 min.
+	log.debug "initialize>scheduling processQueue every ${delay} minutes"
+
+	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
+	subscribe(location, "sunrise", rescheduleIfNeeded)
+	subscribe(location, "sunset", rescheduleIfNeeded)
+	subscribe(location, "mode", rescheduleIfNeeded)
+	subscribe(location, "sunriseTime", rescheduleIfNeeded)
+	subscribe(location, "sunsetTime", rescheduleIfNeeded)
+
+	rescheduleIfNeeded()   
 }
+
+
+
+def rescheduleIfNeeded() {
+	Integer delay  = givenInterval ?: 5 // By default, schedule processQueue every 5 min.
+	BigDecimal currentTime = now()    
+	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	if (lastPollTime != currentTime) {    
+		log.info "rescheduleIfNeeded>last poll was  ${(lastPollTime/60000).round(1).toString()} minutes ago"
+	}
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+		log.info "rescheduleIfNeeded>scheduling processQueue in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", processQueue)
+	}
+}    
 
 def handleTemperatureEvent(evt) {
 	queueValue(evt) {
@@ -325,6 +351,17 @@ private queueValue(evt, Closure convert) {
 }
 
 def processQueue() {
+	Integer delay  = givenInterval ?: 5 // By default, schedule processQueue every 5 min.
+	state?.poll["last"] = now()
+		
+	//schedule the rescheduleIfNeeded() function
+    
+	if (((state?.poll["rescheduled"]?:0) + (scheduleInterval * 60000)) < now()) {
+		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		state?.poll["rescheduled"] = now()
+	}
 	def url = "https://grovestreams.com/api/feed?api_key=${channelKey}"
 	log.debug "processQueue"
 	if (state.queue != []) {
