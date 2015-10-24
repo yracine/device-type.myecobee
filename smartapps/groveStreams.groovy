@@ -151,7 +151,7 @@ def initialize() {
 
 
 def rescheduleIfNeeded(evt) {
-	log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
+	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
 	Integer delay  = givenInterval ?: 5 // By default, schedule processQueue every 5 min.
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
