@@ -356,7 +356,7 @@ def processQueue() {
 		
 	//schedule the rescheduleIfNeeded() function
     
-	if (((state?.poll["rescheduled"]?:0) + (scheduleInterval * 60000)) < now()) {
+	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
 		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
 		// Update rescheduled state
