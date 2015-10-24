@@ -43,7 +43,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 2.0.5\n\n" 
+			paragraph "Version 2.1\n\n" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -396,11 +396,11 @@ def initialize() {
 	log.debug "initialize"
 	state?.exceptionCount=0    
 	state?.msg=null
+	state?.poll = [ last: 0, rescheduled: now() ]
     
 	delete_child_devices()	
 	create_child_devices()
     
-	takeAction()
 	Integer delay = givenInterval ?: 10 // By default, do it every 10 min.
 	if ((delay < 5) || (delay>59)) {
 		state?.msg= "MyEcobeeInit>scheduling interval not in range (${delay} min), exiting..."
@@ -408,15 +408,53 @@ def initialize() {
 		runIn(30, "sendMsgWithDelay")
  		return
 	}
+	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
+	subscribe(location, "sunrise", rescheduleIfNeeded)
+	subscribe(location, "sunset", rescheduleIfNeeded)
+	subscribe(location, "mode", rescheduleIfNeeded)
+	subscribe(location, "sunriseTime", rescheduleIfNeeded)
+	subscribe(location, "sunsetTime", rescheduleIfNeeded)
 
-	log.trace "initialize>setting poll to ${delay}"
-	schedule("0 0/${delay} * * * ?", takeAction)
+	log.trace "initialize>polling delay= ${delay}..."
+	rescheduleIfNeeded()   
+}
+
+
+def rescheduleIfNeeded() {
+	Integer delay = givenInterval ?: 10 // By default, do poll every 10 min.
+	BigDecimal currentTime = now()    
+	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	if (lastPollTime != currentTime) {    
+		log.info "rescheduleIfNeeded>last poll was  ${(lastPollTime/60000).round(1).toString()} minutes ago"
+	}
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+		log.info "rescheduleIfNeeded>scheduling takeAction in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", takeAction)
+	}
+    
+	takeAction()
+    
+	// Update rescheduled state
+    
+	if (!evt) state.poll["rescheduled"] = now()
 }
 
 def takeAction() {
 	log.trace "takeAction>begin"
 	def msg, exceptionCheck    
 	def MAX_EXCEPTION_COUNT=5
+
+	Integer delay = givenInterval ?: 10 // By default, the poll is done every 10 min.
+	state?.poll["last"] = now()
+		
+	//schedule the rescheduleIfNeeded() function
+    
+	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		state?.poll["rescheduled"] = now()
+	}
 
 	def devices = thermostats.collect { dni ->
 		def d = getChildDevice(dni)
