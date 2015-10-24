@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.4" 
+			paragraph "Version 1.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -288,17 +288,55 @@ def initialize() {
 		return
 	}
 	log.trace("ecobeeRemoteSensorsInit>scheduling takeAction every ${delay} minutes")
+	state?.poll = [ last: 0, rescheduled: now() ]
 
-	schedule("0 0/${delay} * * * ?", takeAction) 
+	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
+	subscribe(location, "sunrise", rescheduleIfNeeded)
+	subscribe(location, "sunset", rescheduleIfNeeded)
+	subscribe(location, "mode", rescheduleIfNeeded)
+	subscribe(location, "sunriseTime", rescheduleIfNeeded)
+	subscribe(location, "sunsetTime", rescheduleIfNeeded)
+
+	log.trace "initialize>polling delay= ${delay}..."
+	rescheduleIfNeeded()   
+}
 
 
-
-	log.debug "initialize>end"
+def rescheduleIfNeeded() {
+	Integer delay = givenInterval ?: 30 // By default, do poll every 20 min.
+	BigDecimal currentTime = now()    
+	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	if (lastPollTime != currentTime) {    
+		Double lastPollTimeInMinutes = (lastPollTime/60000).toDouble().round(1)      
+		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
+	}
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+		log.info "rescheduleIfNeeded>scheduling takeAction in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", takeAction)
+	}
+    
+	takeAction()
+    
+	// Update rescheduled state
+    
+	if (!evt) state.poll["rescheduled"] = now()
 }
 
 def takeAction() {
-    
 	log.trace "takeAction>begin"
+	Integer delay = givenInterval ?: 30 // By default, do poll every 20 min.
+	state?.poll["last"] = now()
+		
+	//schedule the scheduleIfNeeded() function
+    
+	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		state?.poll["rescheduled"] = now()
+	}
+
+    
 	def MAX_EXCEPTION_COUNT=5
 	String exceptionCheck, msg 
 	try {        
