@@ -459,11 +459,6 @@ def initialize() {
 	reset_state_program_values()  
 	state?.exceptionCount=0	
 
-	Integer delay =5 				// wake up every 5 minutes to apply zone settings if any
-	log.debug "Scheduling setZoneSettings every ${delay} minutes to check for zone settings to be applied"
-
-	runEvery5Minutes(setZoneSettings)
-
 	// Resume program every time an install/update is done to remote any holds at thermostat (reset).
     
 	thermostat.resumeProgram("")
@@ -483,7 +478,45 @@ def initialize() {
 	// associate the motionHandler to the list of motionSensors in rooms   	 
 	subscribe(motionSensors, "motion", motionEvtHandler, [filterEvents: false])
 
+	state?.poll = [ last: 0, rescheduled: now() ]
+
+
+	Integer delay =5 				// wake up every 5 minutes to apply zone settings if any
+	log.debug "initialize>scheduling setZoneSettings every ${delay} minutes to check for zone settings to be applied"
+
+	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
+	subscribe(location, "sunrise", rescheduleIfNeeded)
+	subscribe(location, "sunset", rescheduleIfNeeded)
+	subscribe(location, "mode", rescheduleIfNeeded)
+	subscribe(location, "sunriseTime", rescheduleIfNeeded)
+	subscribe(location, "sunsetTime", rescheduleIfNeeded)
+
+	rescheduleIfNeeded()   
 }
+
+
+
+def rescheduleIfNeeded() {
+	Integer delay = 5 // By default, schedule SetZoneSettings() every 5 min.
+	BigDecimal currentTime = now()    
+	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	if (lastPollTime != currentTime) {    
+		log.info "rescheduleIfNeeded>last poll was  ${(lastPollTime/60000).round(1).toString()} minutes ago"
+	}
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+		log.info "rescheduleIfNeeded>scheduling takeAction in ${delay} minutes.."
+		runEvery5Minutes(setZoneSettings)
+	}
+    
+	setZoneSettings()
+    
+	// Update rescheduled state
+    
+	if (!evt) state.poll["rescheduled"] = now()
+}
+
+
+
 
 def appTouch(evt) {
 	setZoneSettings()
@@ -492,6 +525,16 @@ def appTouch(evt) {
 
 def setZoneSettings() {
 	log.debug "Begin of setZoneSettings Fcn"
+	Integer delay = 5 // By default, schedule SetZoneSettings() every 5 min.
+
+	//schedule the rescheduleIfNeeded() function
+    
+	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+		log.info "setZoneSettings>scheduling rescheduleIfNeeded() in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		state?.poll["rescheduled"] = now()
+	}
     
 	if (powerSwitch?.currentSwitch == "off") {
 		if (detailedNotif == 'true') {
