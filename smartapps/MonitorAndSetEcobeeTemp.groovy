@@ -317,7 +317,7 @@ def monitorAdjustTemp() {
 		state?.poll["rescheduled"] = now()
 	}
     
-    if (powerSwitch?.currentSwitch == "off") {
+	if (powerSwitch?.currentSwitch == "off") {
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>Virtual master switch ${powerSwitch.name} is off, processing on hold...")
 		}
