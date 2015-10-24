@@ -94,6 +94,7 @@ def initialize() {
 
 
 def rescheduleIfNeeded(evt) {
+	log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
 	Integer delay = (24*60) // By default, do it every day
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
