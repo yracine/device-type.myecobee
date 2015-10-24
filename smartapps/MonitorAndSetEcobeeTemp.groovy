@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 2.3.1" 
+			paragraph "Version 2.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -172,7 +172,37 @@ def initialize() {
     
 	subscribe(app, appTouch)
     
+	state?.poll = [ last: 0, rescheduled: now() ]
+
+	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
+	subscribe(location, "sunrise", rescheduleIfNeeded)
+	subscribe(location, "sunset", rescheduleIfNeeded)
+	subscribe(location, "mode", rescheduleIfNeeded)
+	subscribe(location, "sunriseTime", rescheduleIfNeeded)
+	subscribe(location, "sunsetTime", rescheduleIfNeeded)
+
+	rescheduleIfNeeded()   
 }
+
+
+def rescheduleIfNeeded() {
+	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	BigDecimal currentTime = now()    
+	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	if (lastPollTime != currentTime) {    
+		log.info "rescheduleIfNeeded>last poll was  ${(lastPollTime/60000).round(1).toString()} minutes ago"
+	}
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+		log.info "rescheduleIfNeeded>scheduling monitorAdjustTemp in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", monitorAdjustTemp)
+	}
+    
+	monitorAdjustTemp()    
+	// Update rescheduled state
+    
+	if (!evt) state.poll["rescheduled"] = now()
+}
+    
 
 def appTouch(evt) {
 	monitorAdjustTemp()
@@ -278,7 +308,16 @@ private isProgramScheduleSet(climateName, threshold) {
 
 
 def monitorAdjustTemp() {
-	if (powerSwitch?.currentSwitch == "off") {
+	
+	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+		log.info "monitorAdjustTemp>scheduling rescheduleIfNeeded() in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		state?.poll["rescheduled"] = now()
+	}
+    
+    if (powerSwitch?.currentSwitch == "off") {
 		if (detailedNotif == 'true') {
 			send("MonitorEcobeeTemp>Virtual master switch ${powerSwitch.name} is off, processing on hold...")
 		}
@@ -286,7 +325,6 @@ def monitorAdjustTemp() {
 	}
 
 	if (detailedNotif == 'true') {
-		Integer delay = givenInterval ?: 59 // By default, do it every hour
 		send("MonitorEcobeeTemp>monitoring every ${delay} minute(s)")
 	}
 
