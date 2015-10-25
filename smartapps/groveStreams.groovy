@@ -29,7 +29,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.0.3" 
+		paragraph "Version 2.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -52,6 +52,7 @@ preferences {
 		input "motions", "capability.motionSensor", title: "Motions", required: false, multiple: true
 		input "presence", "capability.presenceSensor", title: "Presence", required: false, multiple: true
 		input "switches", "capability.switch", title: "Switches", required: false, multiple: true
+		input "dimmerSwitches", "capability.switchLevel", title: "Dimmer Switches", required: false, multiple: true
 		input "batteries", "capability.battery", title: "Battery-powered devices", required: false, multiple: true
 		input "powers", "capability.powerMeter", title: "Power Meters", required: false, multiple: true
 		input "energys", "capability.energyMeter", title: "Energy Meters", required: false, multiple: true
@@ -90,6 +91,8 @@ def initialize() {
 	subscribe(motions, "motion", handleMotionEvent)
 	subscribe(presence, "presence", handlePresenceEvent)
 	subscribe(switches, "switch", handleSwitchEvent)
+	subscribe(dimmerSwitches, "switch", handleSwitchEvent)
+	subscribe(dimmerSwitches, "level", handleSetLevelEvent)
 	subscribe(batteries, "battery", handleBatteryEvent)
 	subscribe(powers, "power", handlePowerEvent)
 	subscribe(energys, "energy", handleEnergyEvent)
@@ -319,6 +322,12 @@ def handlePresenceEvent(evt) {
 def handleSwitchEvent(evt) {
 	queueValue(evt) {
 		it == "on" ? 1 : 0
+	}
+}
+
+def handleSetLevelEvent(evt) {
+	queueValue(evt) {
+		it.toString()
 	}
 }
 
