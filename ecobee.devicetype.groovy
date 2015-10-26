@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.0
+ *  Version 3.0.1
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -968,20 +968,25 @@ void poll() {
 	}
 	generateEvent(dataEvents)
 	if (data.thermostatList[0].settings.hasHumidifier) {
-		sendEvent(name: 'humidifierMode', value: data.thermostatList[0].settings.humidifierMode)
-		sendEvent(name: 'humidifierLevel', value: data.thermostatList[0].settings.humidity,
-			unit: "%")
+		dataEvents = [
+			humidifierMode: data.thermostatList[0].settings.humidifierMode,
+			humidifierLevel:data.thermostatList[0].settings.humidity
+		]
+		generateEvent(dataEvents)        
 	}
 	if (data.thermostatList[0].settings.hasDehumidifier) {
-		sendEvent(name: 'dehumidifierMode', value: data.thermostatList[0].settings.dehumidifierMode)
-		sendEvent(name: 'dehumidifierLevel', value: data.thermostatList[0].settings.dehumidifierLevel,
-			unit: "%")
+		dataEvents = [
+			dehumidifierMode: data.thermostatList[0].settings.dehumidifierMode,
+			dehumidifierLevel:data.thermostatList[0].settings.dehumidifierLevel
+		]            
+		generateEvent(dataEvents)                    
 	}
-	if ((data.thermostatList[0].settings.hasHrv) || (data.thermostatList[0].settings
-		.hasErv)) {
-		sendEvent(name: 'ventilatorMinOnTime', value: data.thermostatList[0].settings
-			.ventilatorMinOnTime)
-		sendEvent(name: 'ventilatorMode', value: data.thermostatList[0].settings.vent)
+	if ((data.thermostatList[0].settings.hasHrv) || (data.thermostatList[0].settings.hasErv)) {
+		dataEvents = [
+			ventilatorMinOnTime:data.thermostatList[0].settings.ventilatorMinOnTime.toString(),
+			ventilatorMode: data.thermostatList[0].settings.vent
+		]            
+		generateEvent(dataEvents)                    
 	}
        
 	sendEvent name: "verboseTrace", value: "poll>done for thermostatId =${thermostatId}"
@@ -1035,7 +1040,7 @@ private void generateEvent(Map results) {
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
-			} else if (name.toUpperCase().contains("HUMIDITY")) {
+			} else if ((name.toUpperCase().contains("HUMIDITY")) || (name.toUpperCase().contains("LEVEL"))) {
  				Double humValue = value.toDouble().round(0)
 				String humValueString = String.format('%2d', humValue.intValue())
 				def isChange = isStateChange(device, name, humValueString)
