@@ -1,4 +1,1391 @@
- iterateSetThermostatSettings(tstatType, tstatSettings = []) {
+/***
+ *  My Ecobee Device
+ *  Copyright 2014 Yves Racine
+ *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *  Version 3.1.1
+ *  Code: https://github.com/yracine/device-type.myecobee
+ *  Refer to readme file for installation instructions.
+ *
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ * 
+ */
+ 
+
+// for the UI
+preferences {
+
+//	Preferences are no longer required since I created a Service Manager.
+
+	input("thermostatId", "text", title: "Serial #", description:
+		"The serial number of your thermostat (no spaces)")
+	input("appKey", "text", title: "App Key", description:
+		"The application key given by Ecobee (no spaces)")
+	input("trace", "text", title: "trace", description:
+		"Set it to true to enable tracing (no spaces) or leave it empty (no tracing)"
+	)
+	input("holdType", "text", title: "holdType", description:
+		"Set it to nextTransition or indefinite (latter by default)")
+	input("ecobeeType", "text", title: "ecobee Tstat Type", description:
+		"Set it to registered (by default) or managementSet (no spaces)")
+}
+metadata {
+	// Automatically generated. Make future change here.
+	definition(name: "My Ecobee Device", author: "Yves Racine",  namespace: "yracine") {
+		capability "Thermostat"
+		capability "Relative Humidity Measurement"
+		capability "Temperature Measurement"
+		capability "Polling"
+		capability "Refresh"
+		capability "Presence Sensor"
+		capability "Actuator"
+
+		attribute "thermostatName", "string"
+		attribute "temperatureDisplay", "string"
+		attribute "coolingSetpointDisplay", "string"
+		attribute "heatingSetpointDisplay", "string"
+		attribute "heatLevelUp", "string"
+		attribute "heatLevelDown", "string"
+		attribute "coolLevelUp", "string"
+		attribute "coolLevelDown", "string"
+		attribute "verboseTrace", "string"
+		attribute "fanMinOnTime", "string"
+		attribute "humidifierMode", "string"
+		attribute "dehumidifierMode", "string"
+		attribute "humidifierLevel", "string"
+		attribute "dehumidifierLevel", "string"
+		attribute "condensationAvoid", "string"
+		attribute "groups", "string"
+		attribute "equipmentStatus", "string"
+		attribute "alerts", "string"
+		attribute "programScheduleName", "string"
+		attribute "programFanMode", "string"
+		attribute "programType", "string"
+		attribute "programCoolTemp", "string"
+		attribute "programHeatTemp", "string"
+		attribute "programCoolTempDisplay", "string"
+		attribute "programHeatTempDisplay", "string"
+		attribute "programEndTimeMsg", "string"
+		attribute "weatherDateTime", "string"
+		attribute "weatherSymbol", "string"
+		attribute "weatherStation", "string"
+		attribute "weatherCondition", "string"
+		attribute "weatherTemperatureDisplay", "string"
+		attribute "weatherPressure", "string"
+		attribute "weatherRelativeHumidity", "string"
+		attribute "weatherWindSpeed", "string"
+		attribute "weatherWindDirection", "string"
+		attribute "weatherPop", "string"
+		attribute "weatherTempHigh", "string"
+		attribute "weatherTempLow", "string"
+		attribute "weatherTempHighDisplay", "string"
+		attribute "weatherTempLowDisplay", "string"
+		attribute "plugName", "string"
+		attribute "plugState", "string"
+		attribute "plugSettings", "string"
+		attribute "hasHumidifier", "string"
+		attribute "hasDehumidifier", "string"
+		attribute "hasErv", "string"
+		attribute "hasHrv", "string"
+		attribute "ventilatorMinOnTime", "string"
+		attribute "ventilatorMode", "string"
+		attribute "programNameForUI", "string"
+		attribute "thermostatOperatingState", "string"        
+		attribute "climateList", "string"	
+		attribute "modelNumber", "string"
+		attribute "followMeComfort", "string"
+		attribute "autoAway", "string"
+		attribute "intervalRevision", "string"
+		attribute "runtimeRevision", "string"
+		attribute "thermostatRevision", "string"
+		attribute "heatStages", "string"
+		attribute "coolStages", "string"
+		attribute "climateName", "string"
+		attribute "setClimate", "string"
+        
+		// Report Runtime events
+        
+		attribute "auxHeat1RuntimeInPeriod", "string"
+		attribute "auxHeat2RuntimeInPeriod", "string"
+		attribute "auxHeat3RuntimeInPeriod", "string"
+		attribute "compCool1RuntimeInPeriod", "string"
+		attribute "compCool2RuntimeInPeriod", "string"
+		attribute "dehumidifierRuntimeInPeriod", "string"
+		attribute "humidifierRuntimeInPeriod", "string"
+		attribute "ventilatorRuntimeInPeriod", "string"
+		attribute "fanRuntimeInPeriod", "string"
+
+		attribute "auxHeat1RuntimeDaily", "string"
+		attribute "auxHeat2RuntimeDaily", "string"
+		attribute "auxHeat3RuntimeDaily", "string"
+		attribute "compCool1RuntimeDaily", "string"
+		attribute "compCool2RuntimeDaily", "string"
+		attribute "dehumidifierRuntimeDaily", "string"
+		attribute "humidifierRuntimeDaily", "string"
+		attribute "ventilatorRuntimeDaily", "string"
+		attribute "fanRuntimeDaily", "string"
+		attribute "reportData", "string"
+
+		// Report Sensor Data & Stats
+		        
+		attribute "reportSensorMetadata", "string"
+		attribute "reportSensorData", "string"
+		attribute "reportSensorAvgInPeriod", "string"
+		attribute "reportSensorMinInPeriod", "string"
+		attribute "reportSensorMaxInPeriod", "string"
+		attribute "reportSensorTotalInPeriod", "string"
+        
+		// Remote Sensor Data & Stats
+
+		attribute "remoteSensorData", "string"
+		attribute "remoteSensorTmpData", "string"
+		attribute "remoteSensorHumData", "string"
+		attribute "remoteSensorOccData", "string"
+		attribute "remoteSensorAvgTemp", "string"
+		attribute "remoteSensorAvgHumidity", "string"
+		attribute "remoteSensorMinTemp", "string"
+		attribute "remoteSensorMinHumidity", "string"
+		attribute "remoteSensorMaxTemp", "string"
+		attribute "remoteSensorMaxHumidity", "string"
+
+		command "setFanMinOnTime"
+		command "setCondensationAvoid"
+		command "createVacation"
+		command "deleteVacation"
+		command "getEcobeePinAndAuth"
+		command "getThermostatInfo"
+		command "getThermostatSummary"
+		command "iterateCreateVacation"
+		command "iterateDeleteVacation"
+		command "iterateResumeProgram"
+		command "iterateSetHold"
+		command "resumeProgram"
+		command "resumeThisTstat"        
+		command "setAuthTokens"
+		command "setHold"
+		command "setHoldExtraParams"
+		command "heatLevelUp"
+		command "heatLevelDown"
+		command "coolLevelUp"
+		command "coolLevelDown"
+		command "auxHeatOnly"
+		command "setThermostatFanMode"
+		command "dehumidifierOff"
+		command "dehumidifierOn"
+		command "humidifierOff"
+		command "humidifierAuto"
+		command "humidifierManual"
+		command "setHumidifierLevel"
+		command "setDehumidifierLevel"
+		command "updateGroup"
+		command "getGroups"
+		command "iterateUpdateGroup"
+		command "createGroup"
+		command "deleteGroup"
+		command "updateClimate"
+		command "iterateUpdateClimate"
+		command "createClimate"
+		command "deleteClimate"
+		command "setClimate"
+		command "iterateSetClimate"
+		command "controlPlug" 
+		command "ventilatorOn"
+		command "ventilatorAuto"
+		command "ventilatorOff"
+		command "ventilatorAuto"
+		command "setVentilatorMinOnTime"
+		command "awake"
+		command "away"
+		command "present"
+		command "home"
+		command "asleep"
+		command "quickSave"
+		command "setThisTstatClimate"
+		command "setThermostatSettings"
+		command "iterateSetThermostatSettings"
+		command "getEquipmentStatus"
+		command "refreshChildTokens" 
+		command "autoAway"
+		command "followMeComfort"
+		command "getReportData"
+		command "generateReportRuntimeEvents"
+		command "generateReportSensorStatsEvents"
+		command "getThermostatRevision"
+		command "generateRemoteSensorEvents"
+	}        
+	simulator {
+		// TODO: define status and reply messages here
+	}
+
+	tiles(scale: 2) { 
+		multiAttributeTile(name:"summary", type: "lighting", width: 6, height: 4, canChangeIcon: false){
+			tileAttribute ("device.temperatureDisplay", key: "PRIMARY_CONTROL") {
+				attributeState ("temperature", label:'${currentValue}°', backgroundColor:"#44b621", 					
+					icon:"st.Home.home1", unit:"F"       
+				)
+        	}
+			tileAttribute ("device.equipmentStatus", key: "SECONDARY_CONTROL") {
+				attributeState "equipmentStatus", label:'${currentValue}'
+			}
+		}
+    
+		valueTile("name", "device.thermostatName", inactiveLabel: false, width: 2,
+			height: 2, decoration: "flat") {
+			state "default", label: '${currentValue}\n'
+		}
+		valueTile("groups", "device.groups", inactiveLabel: false, width: 2, 
+			height: 2, decoration: "flat") {
+			state "default", label: '${currentValue}'
+		}
+		standardTile("mode", "device.thermostatMode", inactiveLabel: false,
+			decoration: "flat", width: 2, height: 2,) {
+			state "heat", label: '${name}', action: "thermostat.off", 
+				icon: "st.Weather.weather14", backgroundColor: "#ffffff"
+			state "off", label: '${name}', action: "thermostat.cool", 
+				icon: "st.Outdoor.outdoor19"
+			state "cool", label: '${name}', action: "thermostat.auto", 
+				icon: "st.Weather.weather7"
+			state "auto", action: "thermostat.heat", 
+				icon: "st.thermostat.auto"
+		}
+        
+		standardTile("fanMode", "device.thermostatFanMode", inactiveLabel: false,
+			decoration: "flat", width: 2, height: 2,) {
+			state "auto", label: '${name}', action: "thermostat.fanOn", 
+				icon: "st.Appliances.appliances11"
+			state "on", label: '${name}', action: "thermostat.fanAuto", 
+				icon: "st.Appliances.appliances11"
+		}
+		standardTile("heatLevelUp", "device.heatingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "heatLevelUp", label:'Heat', action:"heatLevelUp", icon:"st.thermostat.thermostat-up"
+		}
+		valueTile("heatingSetpoint", "device.heatingSetpointDisplay", width: 3, height: 2, inactiveLabel: false) {
+			state "heat", label:'${currentValue}°', unit:"F",
+			backgroundColors:[
+				[value: 0, color: "#153591"],
+				[value: 7, color: "#1e9cbb"],
+				[value: 15, color: "#90d2a7"],
+				[value: 23, color: "#44b621"],
+				[value: 29, color: "#f1d801"],
+				[value: 33, color: "#d04e00"],
+				[value: 36, color: "#bc2323"],
+				// Fahrenheit Color Range
+				[value: 40, color: "#153591"],
+				[value: 44, color: "#1e9cbb"],
+				[value: 59, color: "#90d2a7"],
+				[value: 74, color: "#44b621"],
+				[value: 84, color: "#f1d801"],
+				[value: 92, color: "#d04e00"],
+				[value: 96, color: "#bc2323"]
+			]                    
+		}
+		standardTile("heatLevelDown", "device.heatingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "heatLevelDown", label:'Heat', action:"heatLevelDown", icon:"st.thermostat.thermostat-down"
+		}
+		standardTile("coolLevelUp", "device.coolingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "coolLevelUp", label:'Cool', action:"coolLevelUp", icon:"st.thermostat.thermostat-up"
+		}
+		valueTile("coolingSetpoint", "device.coolingSetpointDisplay", width: 3, height: 2, inactiveLabel: false) {
+			state "cool", label:'${currentValue}°', unit:"F",
+			backgroundColors:[
+				[value: 0, color: "#153591"],
+				[value: 7, color: "#1e9cbb"],
+				[value: 15, color: "#90d2a7"],
+				[value: 23, color: "#44b621"],
+				[value: 29, color: "#f1d801"],
+				[value: 33, color: "#d04e00"],
+				[value: 36, color: "#bc2323"],
+				// Fahrenheit Color Range
+				[value: 40, color: "#153591"],
+				[value: 44, color: "#1e9cbb"],
+				[value: 59, color: "#90d2a7"],
+				[value: 74, color: "#44b621"],
+				[value: 84, color: "#f1d801"],
+				[value: 92, color: "#d04e00"],
+				[value: 96, color: "#bc2323"]
+			]
+		}
+		standardTile("coolLevelDown", "device.coolingSetpoint", width: 3, height: 1, canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
+			state "coolLevelDown", label:'Cool', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"
+		}
+		standardTile("switchProgram", "device.programNameForUI", 
+			inactiveLabel: false, width: 2, height: 2, decoration: "flat") {
+			state "Home", label: '${name}', action: "sleep", 
+				icon: "st.Home.home4"
+			state "Sleep", label: '${name}', action: "awake", 
+ 				icon: "st.Bedroom.bedroom2"
+			state "Awake", label: '${name}', action: "away", 
+				icon: "st.Outdoor.outdoor20"
+			state "Away", label: '${name}', action: "quickSave", 
+				icon: "st.presence.car.car"
+			state "QuickSave", label: '${name}', action: "home", 
+				icon: "st.Home.home1"
+			state "Custom", label: 'Custom', action: "resumeThisTstat", 
+				icon: "st.Office.office6"
+		}
+		valueTile("humidity", "device.humidity", inactiveLabel: false, 
+			decoration: "flat", width: 2, height: 2,) {
+			state "default", label: 'Humidity\n${currentValue}%', unit: "humidity"
+		}
+        
+//		One could also use thermostatOperatingState as display value for equipStatus (in line with default ecobee device's status)
+//		However, it does not contain humidifier/dehumidifer/HRV/ERV/aux heat
+//		components' running states, just the basic thermostat states (heating, cooling, fan only).
+//		To use this tile instead of the above, just comment out the above tile, and remove comments below.
+//		valueTile("equipStatus", "device.thermostatOperatingState", inactiveLabel: false,
+//			decoration: "flat", width: 3, height: 1) {
+//			state "default", label: '${currentValue}'
+//		}
+
+/*
+		valueTile("equipStatus", "device.equipmentStatus", inactiveLabel: false,
+			decoration: "flat", width: 6, height: 2) {
+			state "default", label: '${currentValue}'
+		}
+*/        
+		valueTile("programEndTimeMsg", "device.programEndTimeMsg", inactiveLabel:
+			false, decoration: "flat", width: 3, height: 2) {
+			state "default", label: '${currentValue}'
+		}
+		valueTile("alerts", "device.alerts", inactiveLabel: false, decoration: "flat",
+			width: 3, height: 2) {
+			state "default", label: '${currentValue}'
+		}
+        
+		valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false,
+			decoration: "flat", width: 2, height: 2) {
+			state "default", label: 'FanMin\n${currentValue}'
+		}
+		// Program Tiles
+		valueTile("programScheduleName", "device.programScheduleName", inactiveLabel:
+			false, width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'Mode\n${currentValue}'
+		}
+		valueTile("programType", "device.programType", inactiveLabel: false, width: 2,
+			height: 2, decoration: "flat") {
+			state "default", label: 'Prog Type\n${currentValue}'
+		}
+		valueTile("programCoolTemp", "device.programCoolTempDisplay", inactiveLabel: false,
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'Prog Cool\n${currentValue}°'
+		}
+		valueTile("programHeatTemp", "device.programHeatTempDisplay", inactiveLabel: false,
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'Prog Heat\n${currentValue}°'
+		}
+		standardTile("resProgram", "device.thermostatMode", inactiveLabel: false,
+			decoration: "flat",width: 2, height: 2) {
+			state "default", label: 'ResumeProg', action: "resumeThisTstat", 
+            		icon: "st.Office.office7", backgroundColor: "#ffffff"
+		}
+		// Weather Tiles
+		standardTile("weatherIcon", "device.weatherSymbol", inactiveLabel: false, width: 2, height: 2,
+			decoration: "flat") {
+			state "-2",			label: 'updating...',		icon: "st.unknown.unknown.unknown"
+			state "0",			label: 'Sunny',			icon: "st.Weather.weather14"
+			state "1",			label: 'FewClouds',		icon: "st.Weather.weather15"
+			state "2",			label: 'PartlyCloudy',		icon: "st.Weather.weather15"
+			state "3",			label: 'MostlyCloudy',		icon: "st.Weather.weather15"
+			state "4",			label: 'Overcast',		icon: "st.Weather.weather13"
+			state "5",			label: 'Drizzle',		icon: "st.Weather.weather9"
+			state "6",			label: 'Rain',			icon: "st.Weather.weather10"
+			state "7",			label: 'FreezingRain',		icon: "st.Weather.weather10"
+			state "8",			label: 'Showers',		icon: "st.Weather.weather10"
+			state "9",			label: 'Hail',			icon: "st.custom.wuk.sleet"
+			state "10",			label: 'Snow',			icon: "st.Weather.weather6"
+			state "11",			label: 'Flurries',		icon: "st.Weather.weather6"
+			state "12",			label: 'Sleet',			icon: "st.Weather.weather6"
+			state "13",			label: 'Blizzard',		icon: "st.Weather.weather7"
+			state "14",			label: 'Pellets',		icon: "st.custom.wuk.sleet"
+			state "15",			label: 'ThunderStorms',		icon: "st.custom.wuk.tstorms"
+			state "16",			label: 'Windy',			icon: "st.Transportation.transportation5"
+			state "17",			label: 'Tornado',		icon: "st.Weather.weather1"
+			state "18",			label: 'Fog',			icon: "st.Weather.weather13"
+			state "19",			label: 'Hazy',			icon: "st.Weather.weather13"
+			state "20",			label: 'Smoke',			icon: "st.Weather.weather13"
+			state "21",			label: 'Dust',			icon: "st.Weather.weather13"
+		}
+		valueTile("weatherDateTime", "device.weatherDateTime", inactiveLabel: false,
+			width: 3, height: 2, decoration: "flat") {
+			state "default", label: '${currentValue}'
+		}
+		valueTile("weatherConditions", "device.weatherCondition", 
+			inactiveLabel: false, width: 3, height: 2, decoration: "flat") {
+			state "default", label: 'Forecast\n${currentValue}'
+		}
+		valueTile("weatherTemperature", "device.weatherTemperatureDisplay", inactiveLabel:
+			false, width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'Out Temp\n${currentValue}°', unit: "C"
+		}
+		valueTile("weatherRelativeHumidity", "device.weatherRelativeHumidity",
+			inactiveLabel: false, width: 2, height: 2,decoration: "flat") {
+			state "default", label: 'Out Hum\n${currentValue}%', unit: "humidity"
+		}
+		valueTile("weatherTempHigh", "device.weatherTempHigh", inactiveLabel: false,
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'ForecastH\n${currentValue}°', unit: "C"
+		}
+		valueTile("weatherTempLow", "device.weatherTempLow", inactiveLabel: false,
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'ForecastL\n${currentValue}°', unit: "C"
+		}
+		valueTile("weatherPressure", "device.weatherPressure", inactiveLabel: false,
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'Pressure\n${currentValue}', unit: "hpa"
+		}
+		valueTile("weatherWindDirection", "device.weatherWindDirection",
+			inactiveLabel: false, width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'W.Dir\n${currentValue}'
+		}
+		valueTile("weatherWindSpeed", "device.weatherWindSpeed", inactiveLabel: false,
+			width: 2, height: 2, decoration: "flat") {
+			state "default", label: 'W.Speed\n${currentValue}'
+		}
+		valueTile("weatherPop", "device.weatherPop", inactiveLabel: false, width: 2,
+			height: 2, decoration: "flat") {
+			state "default", label: 'PoP\n${currentValue}%', unit: "%"
+		}
+        
+		standardTile("refresh", "device.thermostatMode", inactiveLabel: false,
+			decoration: "flat",width: 2, height: 2) {
+			state "default", action: "polling.poll", icon: "st.secondary.refresh"
+		}
+		main "summary"
+		details("summary", "name", "groups", "mode",  "switchProgram", "resProgram", "fanMode",
+ 			"heatLevelUp", "coolLevelUp", "heatingSetpoint", "coolingSetpoint", "heatLevelDown", "coolLevelDown",
+ 			 "programEndTimeMsg", "alerts","weatherDateTime", "weatherConditions",
+			"humidity","fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
+			"programHeatTemp",             
+			"weatherIcon", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
+			"weatherTempLow", "weatherPressure", "weatherWindDirection",
+			"weatherWindSpeed", "weatherPop", 
+			"refresh"
+		)
+	}
+}
+
+void coolLevelUp() {
+	int nextLevel = device.currentValue("coolingSetpoint") + 1
+	def scale = getTemperatureScale()
+	if (scale == 'C') {
+		if (nextLevel > 30) {
+			nextLevel = 30
+		}
+	} else {
+		if (nextLevel > 99) {
+			nextLevel = 99
+		}
+	}
+	setCoolingSetpoint(nextLevel)
+}
+void coolLevelDown() {
+	int nextLevel = device.currentValue("coolingSetpoint") - 1
+	def scale = getTemperatureScale()
+	if (scale == 'C') {
+		if (nextLevel < 10) {
+			nextLevel = 10
+		}
+	} else {
+		if (nextLevel < 50) {
+			nextLevel = 50
+		}
+	}
+	setCoolingSetpoint(nextLevel)
+}
+void heatLevelUp() {
+	int nextLevel = device.currentValue("heatingSetpoint") + 1
+	def scale = getTemperatureScale()
+	if (scale == 'C') {
+		if (nextLevel > 30) {
+			nextLevel = 30
+		}
+	} else {
+		if (nextLevel > 99) {
+			nextLevel = 99
+		}
+	}
+	setHeatingSetpoint(nextLevel)
+}
+void heatLevelDown() {
+	int nextLevel = device.currentValue("heatingSetpoint") - 1
+	def scale = getTemperatureScale()
+	if (scale == 'C') {
+		if (nextLevel < 10) {
+			nextLevel = 10
+		}
+	} else {
+		if (nextLevel < 50) {
+			nextLevel = 50
+		}
+	}
+	setHeatingSetpoint(nextLevel)
+}
+
+// handle commands
+
+
+void setHeatingSetpoint(temp) {
+	def scale = getTemperatureScale()
+	setHold("", device.currentValue("coolingSetpoint"), temp,
+		null, null)
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setHold>done")) {
+		sendEvent(name: 'heatingSetpoint', value: temp,unit: scale)
+		sendEvent(name: 'heatingSetpointDisplay', value: temp,unit: scale)
+		def currentMode = device.currentValue("thermostatMode")
+		if ((currentMode=='heat') || (currentMode=='auto')) {
+			sendEvent(name: 'thermostatSetpoint', value: temp,unit: scale)     
+		} 
+	}        
+}
+
+
+void setCoolingSetpoint(temp) {
+	def scale = getTemperatureScale()
+	setHold("", temp, device.currentValue("heatingSetpoint"),
+		null, null)
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setHold>done")) {
+		def currentMode = device.currentValue("thermostatMode")
+		sendEvent(name: 'coolingSetpoint', value: temp, unit: scale)
+		sendEvent(name: 'coolingSetpointDisplay', value: temp, unit: scale)
+		if ((currentMode=='cool') || (currentMode=='auto')) {
+			sendEvent(name:'thermostatSetpoint', value: temp, unit: scale)     
+		}
+	}
+}
+
+void off() {
+	setThermostatMode('off')
+}
+void auto() {
+	setThermostatMode('auto')
+}
+void heat() {
+	setThermostatMode('heat')
+}
+void emergencyHeat() {
+	setThermostatMode('heat')
+}
+void auxHeatOnly() {
+	setThermostatMode('auxHeatOnly')
+}
+void cool() {
+	setThermostatMode('cool')
+}
+void setThermostatMode(mode) {
+	mode = mode == 'emergency heat' ? 'heat' : mode
+	setThermostatSettings("", ['hvacMode': "${mode}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'thermostatMode', value: mode)
+	}        
+}
+void fanOn() {
+	setThermostatFanMode('on')
+}
+void fanAuto() {
+	setThermostatFanMode('auto')
+}
+void fanOff() { // fanOff is not supported, setting it to 'auto' instead.
+	setThermostatFanMode('auto')
+}
+def fanCirculate() {
+	fanAuto()
+	setFanMinOnTime(15)	// Set a minimum of 15 minutes of fan per hour
+}
+void setThermostatFanMode(mode) {
+	mode = (mode == 'off') ? 'auto' : mode
+	setHold("", device.currentValue("coolingSetpoint"), device
+		.currentValue("heatingSetpoint"),
+		mode, null)
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setHold>done")) {
+		sendEvent(name: 'thermostatFanMode', value: mode)
+	}        
+}
+void setFanMinOnTime(minutes) {
+	setThermostatSettings("", ['fanMinOnTime': "${minutes}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'fanMinOnTime', value: minutes)
+	}        
+}
+void ventilatorOn() {
+	setVentilatorMode('on')
+}
+void ventilatorOff() {
+	setVentilatorMode('off')
+}
+void ventilatorAuto() {
+	setVentilatorMode('auto')
+}
+void setVentilatorMinOnTime(minutes) {
+	setThermostatSettings("", ['vent': "minontime",
+			'ventilatorMinOnTime': "${minutes}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'ventilatorMinOnTime', value: minutes)
+		sendEvent(name: 'ventilatorMode', value: "minontime")
+	}        
+}
+void setVentilatorMode(mode) {
+	setThermostatSettings("", ['vent': "${mode}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'ventilatorMode', value: mode)
+	}        
+}
+void setCondensationAvoid(flag) { // set the flag to true or false
+	flag = flag == 'true' ? 'true' : 'false'
+ 	def mode = (flag=='true')? 'auto': 'manual'
+	setHumidifierMode(mode)
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'condensationAvoid', value: flag)
+	}        
+}
+void dehumidifierOn() {
+	setDehumidifierMode('on')
+}
+void dehumidifierOff() {
+	setDehumidifierMode('off')
+}
+void setDehumidifierMode(mode) {
+	setThermostatSettings("", ['dehumidifierMode': "${mode}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'dehumidifierMode', value: mode)
+	}        
+}
+void setDehumidifierLevel(level) {
+	setThermostatSettings("", ['dehumidifierLevel': "${level}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'dehumidifierLevel', value: level)
+	}        
+}
+void humidifierAuto() {
+	setHumidifierMode('auto')
+}
+void humidifierManual() {
+	setHumidifierMode('manual')
+}
+void humidifierOff() {
+	setHumidifierMode('off')
+}
+void setHumidifierMode(mode) {
+	setThermostatSettings("", ['humidifierMode': "${mode}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'humidifierMode', value: mode)
+	}        
+}
+void setHumidifierLevel(level) {
+	setThermostatSettings("", ['humidity': "${level}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'humidifierLevel', value: level)
+	}        
+}
+// Only valid for ecobee3 thermostats, not for EMS or Smart, Smart-SI thermostats)
+void followMeComfort(flag) {
+	flag = flag == 'true' ? 'true' : 'false'
+	setThermostatSettings("", ['followMeComfort': "${flag}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'followMeComfort', value: flag)
+	}        
+}
+// Only valid for ecobee3 thermostats, not for EMS or Smart, Smart-SI thermostats)
+
+void autoAway(flag) {
+	flag = flag == 'true' ? 'true' : 'false'
+	setThermostatSettings("", ['autoAway': "${flag}"])
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if (exceptionCheck.contains("setThermostatSettings>done")) {
+		sendEvent(name: 'autoAway', value: flag)
+	}        
+}
+
+void awake() {
+	setThisTstatClimate("Awake")    
+}
+void away() {
+	setThisTstatClimate("Away")
+}
+void present() {
+	home()
+}
+void home() {
+	setThisTstatClimate("Home")
+
+}
+void asleep() {
+	setThisTstatClimate("Sleep")
+}
+void quickSave() {
+	def thermostatId= determine_tstat_id("") 	    
+	def currentProgramType = device.currentValue("programType")
+	if (currentProgramType.toUpperCase() == 'VACATION') {
+		if (settings.trace) {
+			log.debug "quickSave>thermostatId = ${thermostatId},cannot do quickSave due to vacation settings"
+			sendEvent name: "verboseTrace", value:
+				"quickSave>thermostatId = ${thermostatId},cannot do quickSave switch due to vacation settings"
+		}
+		return
+	}
+	float quickSaveSetBack, quickSaveSetForw, quickSaveHeating, quickSaveCooling
+	def scale = getTemperatureScale()
+	if (scale == 'C') {
+		quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack.toFloat() / 2 // approximate conversion of differential to celcius
+		quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward.toFloat() / 2
+		quickSaveCooling = fToC(data.thermostatList[0].runtime.desiredCool.toFloat())
+		quickSaveHeating = fToC(data.thermostatList[0].runtime.desiredHeat.toFloat())
+	} else {
+		quickSaveSetBack = data.thermostatList[0].settings.quickSaveSetBack.toFloat()
+		quickSaveSetForw = data.thermostatList[0].settings.quickSaveSetForward.toFloat()
+		quickSaveCooling = data.thermostatList[0].runtime.desiredCool.toFloat()
+		quickSaveHeating = data.thermostatList[0].runtime.desiredHeat.toFloat()
+	}
+	quickSaveCooling = (quickSaveCooling + quickSaveSetForw).round(0)
+	quickSaveHeating = (quickSaveHeating - quickSaveSetBack).round(0)
+	setHold(thermostatId, quickSaveCooling, quickSaveHeating, null, null)
+	def quickSaveMap = ['coolingSetpoint': quickSaveCooling,		
+		'heatingSetpoint': quickSaveHeating,
+		'programScheduleName': "QuickSave",
+		'programNameForUI': "QuickSave"
+	]        
+	generateEvent(quickSaveMap)    
+	    
+}
+  
+void setThisTstatClimate(climateName) {
+
+	def thermostatId= determine_tstat_id("") 	    
+	def currentProgram = device.currentValue("programScheduleName")
+	def currentProgramType = device.currentValue("programType").trim().toUpperCase()
+	if (currentProgramType == 'VACATION') {
+		if (settings.trace) {
+			log.debug "setThisTstatClimate>thermostatId = ${settings.thermostatId},cannot do the prog switch due to vacation settings"
+			sendEvent name: "verboseTrace", value:
+					"setThisTstatClimate>thermostatId = ${settings.thermostatId},cannot do the prog switch due to vacation settings"
+		}
+		return
+	}
+	// If climate is different from current one, then change it to the given climate
+	if (currentProgram.toUpperCase() != climateName.trim().toUpperCase()) {
+    
+		resumeProgram("")
+		setClimate(thermostatId, climateName)
+		def exceptionCheck=device.currentValue("verboseTrace")
+		if (exceptionCheck.contains("setClimate>done")) {
+        
+			sendEvent(name: 'programScheduleName', value: climateName)
+			sendEvent(name: 'programNameForUI', value: climateName)
+			if (climateName.toUpperCase().contains('AWAY')) { 
+				sendEvent(name: "presence", value: "non present")
+			} else {        
+				sendEvent(name: "presence", value: "present")
+			}
+		}            
+		poll() // to refresh the values in the UI
+	}
+}
+
+// parse events into attributes
+def parse(String description) {
+
+}
+
+void poll() {
+	def tstatId,ecobeeType
+    
+	def thermostatId= determine_tstat_id("") 	    
+
+
+	def poll_interval=0.25   // set a 15 sec. poll interval to avoid unecessary load on ecobee servers
+	def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
+	if ((state?.lastPollTimestamp) && (state?.lastPollTimestamp > time_check_for_poll)) {
+		if (settings.trace) {
+			log.debug "poll>thermostatId = ${thermostatId},time_check_for_poll (${time_check_for_poll}) < state.lastPollTimestamp (${state.lastPollTimestamp}), not refreshing data..."
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},time_check_for_poll (${time_check_for_poll} < state.lastPollTimestamp (${state.lastPollTimestamp}), not refreshing data..."
+		}
+		return
+	}
+	state.lastPollTimestamp = now()
+    
+	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
+	if (!getThermostatRevision(ecobeeType,"")) {
+    
+		// if there are no changes in the thermostat, runtime or interval revisions, stop the polling as values at ecobee haven't changed since last poll()
+		return
+	}
+	getThermostatInfo(thermostatId)
+
+	String exceptionCheck = device.currentValue("verboseTrace").toString()
+	if ((exceptionCheck.contains("exception")) || (exceptionCheck.contains("error"))) {  
+	// check if there is any exception or an error reported in the verboseTrace associated to the device 
+		log.error "poll>$exceptionCheck" 
+		return    
+	}
+
+	// determine if there is an event running
+    
+	Integer indiceEvent = 0    
+	boolean foundEvent = false
+	if (data.thermostatList[0].events.size > 0) {
+		for (i in 0..data.thermostatList[0].events.size() - 1) {
+			if (data.thermostatList[0].events[i].running) {
+				indiceEvent = i // save the right indice associated to the Event that is currently running
+				foundEvent = true
+				exit
+			}
+		}
+	}
+
+	def currentClimate = null
+	// Get the current Climate 
+	data.thermostatList[0].program.climates.each() {
+		if (it.climateRef == data.thermostatList[0].program.currentClimateRef) {
+			currentClimate = it
+			exit
+		}
+	}
+
+	def programScheduleName= (foundEvent)? data.thermostatList[0].events[indiceEvent].name : currentClimate.name
+	def programType= (foundEvent)?data.thermostatList[0].events[indiceEvent].type : currentClimate.type
+    
+	// Generate the events for programScheduleName and programType as they are used by many attributes later
+    
+	def dataEvents = [
+		programScheduleName: (foundEvent)? data.thermostatList[0].events[indiceEvent].name : currentClimate.name,
+		programType: (foundEvent)?data.thermostatList[0].events[indiceEvent].type : currentClimate.type
+	]    
+	generateEvent(dataEvents)
+    
+	def progDisplayName = getCurrentProgName()
+	def currentClimateTemplate= (data.thermostatList[0].program.currentClimateRef)? currentClimate.name: progDisplayName  // if no program's climate set, then use current program
+	if (settings.trace) {
+		log.debug "poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef},currentClimateTemplate=${currentClimateTemplate}"
+		sendEvent name: "verboseTrace", value:
+			"poll>thermostatId = ${thermostatId},Current Climate Ref=${data.thermostatList[0].program.currentClimateRef},currentClimateTemplate=${currentClimateTemplate}"
+		if (foundEvent) {
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},indiceEvent=${indiceEvent}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event name=${data.thermostatList[0].events[indiceEvent].name}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event type=${data.thermostatList[0].events[indiceEvent].type}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event's coolHoldTemp=${data.thermostatList[0].events[indiceEvent].coolHoldTemp}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event's heatHoldTemp=${data.thermostatList[0].events[indiceEvent].heatHoldTemp}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event's fan mode=${data.thermostatList[0].events[indiceEvent].fan}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event's fanMinOnTime=${data.thermostatList[0].events[indiceEvent].fanMinOnTime}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event's vent mode=${data.thermostatList[0].events[indiceEvent].vent}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event's ventilatorMinOnTime=${data.thermostatList[0].events[indiceEvent].ventilatorMinOnTime}"
+			sendEvent name: "verboseTrace", value:
+				"poll>thermostatId = ${thermostatId},event's running=${data.thermostatList[0].events[indiceEvent].running}"
+		}
+	}
+
+	dataEvents = [
+ 		thermostatName:data.thermostatList[0].name,
+		thermostatMode:data.thermostatList[0].settings.hvacMode,
+		temperature: data.thermostatList[0].runtime.actualTemperature,
+		temperatureDisplay: data.thermostatList[0].runtime.actualTemperature,
+		humidity:data.thermostatList[0].runtime.actualHumidity,
+		coolingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].coolHoldTemp: 
+			data.thermostatList[0].runtime.desiredCool,
+		coolingSetpointDisplay: (foundEvent)? data.thermostatList[0].events[indiceEvent].coolHoldTemp: 
+			data.thermostatList[0].runtime.desiredCool,
+		heatingSetpoint: (foundEvent)? data.thermostatList[0].events[indiceEvent].heatHoldTemp: 
+			data.thermostatList[0].runtime.desiredHeat,
+		heatingSetpointDisplay: (foundEvent)? data.thermostatList[0].events[indiceEvent].heatHoldTemp: 
+			data.thermostatList[0].runtime.desiredHeat,
+		modelNumber: data.thermostatList[0].modelNumber,
+		equipmentStatus:getEquipmentStatus(),
+		thermostatOperatingState: getThermostatOperatingState(),
+		hasHumidifier:data.thermostatList[0].settings.hasHumidifier.toString(),
+		hasDehumidifier:data.thermostatList[0].settings.hasDehumidifier.toString(),
+		hasHrv:data.thermostatList[0].settings.hasHrv.toString(),
+		hasErv:data.thermostatList[0].settings.hasErv.toString(),
+		programEndTimeMsg: (foundEvent)? "${data.thermostatList[0].events[indiceEvent].type}" +
+				" ends at ${data.thermostatList[0].events[indiceEvent].endDate} " +
+				"${data.thermostatList[0].events[indiceEvent].endTime.substring(0,5)}":
+ 				"No Events running",
+		thermostatFanMode: (foundEvent)? data.thermostatList[0].events[indiceEvent].fan: 
+			data.thermostatList[0].runtime.desiredFanMode,
+		fanMinOnTime: (foundEvent)? data.thermostatList[0].events[indiceEvent].fanMinOnTime.toString() :
+			data.thermostatList[0].settings.fanMinOnTime.toString(),
+		programFanMode: (data.thermostatList[0].settings.hvacMode == 'cool')? currentClimate.coolFan : currentClimate.heatFan,
+		programNameForUI: progDisplayName,
+		weatherStation:data.thermostatList[0].weather.weatherStation,
+		weatherSymbol:data.thermostatList[0].weather.forecasts[0].weatherSymbol.toString(),
+		weatherTemperature:data.thermostatList[0].weather.forecasts[0].temperature,
+		weatherTemperatureDisplay:data.thermostatList[0].weather.forecasts[0].temperature,
+		weatherDateTime:"Weather as of\n ${data.thermostatList[0].weather.forecasts[0].dateTime.substring(0,16)}",
+		weatherCondition:data.thermostatList[0].weather.forecasts[0].condition,
+		weatherTemp: data.thermostatList[0].weather.forecasts[0].temperature,
+		weatherTempDisplay: data.thermostatList[0].weather.forecasts[0].temperature,
+		weatherTempHigh: data.thermostatList[0].weather.forecasts[0].tempHigh, 
+		weatherTempLow: data.thermostatList[0].weather.forecasts[0].tempLow,
+		weatherTempHighDisplay: data.thermostatList[0].weather.forecasts[0].tempHigh, 
+		weatherTempLowDisplay: data.thermostatList[0].weather.forecasts[0].tempLow,
+		weatherWindSpeed: (data.thermostatList[0].weather.forecasts[0].windSpeed/1000),		// divided by 1000 for display
+		weatherPressure:data.thermostatList[0].weather.forecasts[0].pressure.toString(),
+		weatherRelativeHumidity:data.thermostatList[0].weather.forecasts[0].relativeHumidity,
+		weatherWindDirection:data.thermostatList[0].weather.forecasts[0].windDirection + " Winds",
+		weatherPop:data.thermostatList[0].weather.forecasts[0].pop.toString(),        
+		programCoolTemp:(currentClimate.coolTemp / 10),										// divided by 10 for display
+		programHeatTemp:(currentClimate.heatTemp / 10),
+		programCoolTempDisplay:(currentClimate.coolTemp / 10),								// divided by 10 for display
+		programHeatTempDisplay:(currentClimate.heatTemp / 10),
+		alerts: getAlerts(),
+		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
+		climateList: getClimateList(),
+		presence: (currentClimateTemplate.toUpperCase()!='AWAY')? "present":"not present",
+		heatStages:data.thermostatList[0].settings.heatStages.toString(),
+		coolStages:data.thermostatList[0].settings.coolStages.toString(),
+		climateName: currentClimate.name
+	]
+         
+	if (foundEvent && (data.thermostatList[0]?.events[indiceEvent]?.type.toUpperCase() == 'QUICKSAVE')) {
+		dataEvents.programEndTimeMsg ="Quicksave running"
+	}
+	generateEvent(dataEvents)
+	if (data.thermostatList[0].settings.hasHumidifier) {
+		dataEvents = [
+			humidifierMode: data.thermostatList[0].settings.humidifierMode,
+			humidifierLevel:data.thermostatList[0].settings.humidity
+		]
+		generateEvent(dataEvents)        
+	}
+	if (data.thermostatList[0].settings.hasDehumidifier) {
+		dataEvents = [
+			dehumidifierMode: data.thermostatList[0].settings.dehumidifierMode,
+			dehumidifierLevel:data.thermostatList[0].settings.dehumidifierLevel
+		]            
+		generateEvent(dataEvents)                    
+	}
+	if ((data.thermostatList[0].settings.hasHrv) || (data.thermostatList[0].settings.hasErv)) {
+		dataEvents = [
+			ventilatorMinOnTime:data.thermostatList[0].settings.ventilatorMinOnTime.toString(),
+			ventilatorMode: data.thermostatList[0].settings.vent
+		]            
+		generateEvent(dataEvents)                    
+	}
+       
+	sendEvent name: "verboseTrace", value: "poll>done for thermostatId =${thermostatId}"
+    
+}
+
+private void generateEvent(Map results) {
+	if (settings.trace) {
+		log.debug "generateEvent>parsing data $results"
+	}
+    
+	def scale = getTemperatureScale()
+    
+	if (results) {
+		results.each { name, value ->
+			def isDisplayed = true
+
+// 			Temperature variable names for display contain 'display'            
+
+			if (name.toUpperCase().contains("DISPLAY")) {  
+
+				String tempValueString 
+				Double tempValue 
+				if (scale == "F") {
+					tempValue = getTemperature(value).toDouble().round()
+					tempValueString = String.format('%2d', tempValue.intValue())            
+				} else {
+					tempValue = getTemperature(value).toDouble().round(1)
+					tempValueString = String.format('%2.1f', tempValue)
+				}
+				def isChange = isTemperatureStateChange(device, name, tempValueString)
+                
+				isDisplayed = isChange
+				sendEvent(name: name, value: tempValueString, unit: scale, displayed: isDisplayed)                                     									 
+
+// 			Temperature variable names contain 'temp' or 'setpoint' (not for display)           
+
+			} else if ((name.toUpperCase().contains("TEMP")) || (name.toUpperCase().contains("SETPOINT"))) {  
+                                
+				Double tempValue = getTemperature(value).round(1)
+				String tempValueString = String.format('%2.1f', tempValue)
+				def isChange = isTemperatureStateChange(device, name, tempValueString)
+                
+				isDisplayed = isChange
+				sendEvent(name: name, value: tempValueString, unit: scale, displayed: isDisplayed)                                     									 
+			} else if (name.toUpperCase().contains("SPEED")) {
+
+// 			Speed variable names contain 'speed'
+
+ 				Double speedValue = getSpeed(value).round(1)
+				def isChange = isStateChange(device, name, speedValue.toString())
+				isDisplayed = isChange
+				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
+			} else if ((name.toUpperCase().contains("HUMIDITY")) || (name.toUpperCase().contains("LEVEL"))) {
+ 				Double humValue = value.toDouble().round(0)
+				String humValueString = String.format('%2d', humValue.intValue())
+				def isChange = isStateChange(device, name, humValueString)
+				isDisplayed = isChange
+				sendEvent(name: name, value: humValueString, unit: "%", displayed: isDisplayed)                                     									 
+ 			} else {
+				def isChange = isStateChange(device, name, value)
+				isDisplayed = isChange
+
+				sendEvent(name: name, value: value, isStateChange: isChange, displayed: isDisplayed)       
+			}
+		}
+	}
+}
+
+private def getCurrentProgName() {
+	def AWAY_PROG = 'Away'
+	def SLEEP_PROG = 'Sleep'
+	def HOME_PROG = 'Home'
+	def AWAKE_PROG = 'Awake'
+	def CUSTOM_PROG = 'Custom'
+	def QUICKSAVE = 'QuickSave'
+
+	def progCurrentName = device.currentValue("programScheduleName")
+	def progType = device.currentValue("programType")
+	progType = (progType == null) ? "": progType.trim().toUpperCase()	
+	progCurrentName = (progCurrentName == null) ? "": progCurrentName.trim()
+	if ((progCurrentName != AWAY_PROG) && (progCurrentName != SLEEP_PROG) && (
+		progCurrentName != AWAKE_PROG) &&
+		(progCurrentName != HOME_PROG) && (progCurrentName != QUICKSAVE)) {
+		progCurrentName = (progType == 'VACATION') ? AWAY_PROG : CUSTOM_PROG
+	}
+	return progCurrentName
+}
+
+private def getAlerts() {
+
+	def alerts = null
+	if (data.thermostatList[0].alerts.size() > 0) {
+		alerts = 'Alert(s) '
+		for (i in 0..data.thermostatList[0].alerts.size() - 1) {
+			alerts = (i > 0) ? '\n' + ' ' + alerts + data.thermostatList[0].alerts[i].notificationType :
+				alerts +
+				data.thermostatList[0].alerts[i].notificationType
+		}
+	}
+	alerts = (alerts != null) ? alerts + '\ngo to ecobee portal' : 'No alerts'
+	return alerts
+}
+
+private def getThermostatGroups(thermostatId) {
+
+	def groupList = 'No groups'
+	getGroups(thermostatId)
+	if (data.groups.size() > 0) {
+		groupList = 'Group(s) '
+		def j=0
+		for (i in 0..data.groups.size() - 1) {
+			if (data.groups[i].groupName != '') {
+				groupList = (j > 0) ? ' \n' + groupList + data.groups[i].groupName :
+					groupList + data.groups[i].groupName
+				j++    
+			}        
+		}
+	}	
+	return groupList
+}
+
+private def getTemperature(value) {
+	Double farenheits = value.toDouble()
+	if (getTemperatureScale() == "F") {
+		return farenheits
+	} else {
+		return fToC(farenheits)
+	}
+}
+
+private def getSpeed(value) {
+	Double miles = value
+	if(getTemperatureScale() == "F"){
+		return miles
+	} else {
+		return milesToKm(miles)
+	}
+}
+
+private def getDistanceScale() {
+	def scale= getTemperatureScale()
+	if (scale == 'C') {
+		return "kmh"
+	}
+	return "mph"
+}
+
+
+// Get the EquipmentStatus including all components (HVAC, fan, dehumidifier/humidifier,HRV/ERV, aux heat)
+// To be called after a poll() or refresh() to have the latest status
+def getEquipmentStatus() {
+	def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0) ? data
+		.thermostatList[0].equipmentStatus + ' running' : 'Idle'
+	return equipStatus
+}
+// Get the basic thermostat status (heating,cooling,fan only)
+// To be called after a poll() or refresh() to have the latest status
+
+def getThermostatOperatingState() {
+
+	def equipStatus = getEquipmentStatus()
+	
+	equipStatus = equipStatus.trim().toUpperCase()
+    
+	def currentOpState = equipStatus.contains('HEAT')? 'heating' : (equipStatus.contains('COOL')? 'cooling' : 
+    	equipStatus.contains('FAN')? 'fan only': 'idle')
+	return currentOpState
+}
+
+// thermostatId may only be a specific thermostatId or "" (for current thermostat)
+// To be called after a poll() or refresh() to have the latest status
+private def getClimateList(thermostatId) {
+	def climateList=""
+    
+	for (i in 0..data.thermostatList[0].program.climates.size() - 1) {
+		climateList = data.thermostatList[0].program.climates[i].name  + "," + climateList
+	}
+	if (settings.trace) {
+		log.debug "getClimateList>climateList=${climateList}"
+		sendEvent name: "verboseTrace", value:
+			"getClimateList>climateList=${climateList}"
+	}
+	return climateList
+}
+
+void refresh() {
+	poll()
+}
+
+void resumeThisTstat() {
+	resumeProgram("") 
+	poll()
+}
+private void api(method, args, success = {}) {
+	def MAX_EXCEPTION_COUNT=5
+	String URI_ROOT = "${get_URI_ROOT()}/1"
+	if (!isLoggedIn()) {
+		login()
+		
+	}    
+	if (isTokenExpired()) {
+		if (settings.trace) {
+			log.debug "api>need to refresh tokens"
+		}
+		if (!refresh_tokens()) {
+			login()
+			def exceptionCheck=device.currentValue("verboseTrace")
+			if (exceptionCheck.contains("exception")) {
+				log.error ("api>$exceptionCheck, not able to renew the refresh token, need to re-login to ecobee, run MyEcobeeInit....")         
+				sendEvent (name: "verboseTrace", value:"api>$exceptionCheck, not able to renew the refresh token, need to re-login to ecobee, run MyEcobeeInit....")         
+			}
+            
+		} else {
+        
+			/* Reset Exceptions counter as the refresh_tokens() call has been successful */    
+			state.exceptionCount=0
+		}            
+	}
+	if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
+
+		log.error ("api>error: found a high number of exceptions (${state.exceptionCount}), will try to refresh tokens, it it fails, you should run MyEcobeeInit and re-login to ecobee....")
+		sendEvent (name: "verboseTrace", 
+			value: "api>error: found a high number of exceptions (${state.exceptionCount}) , will try to refresh tokens, it it fails, you should run MyEcobeeInit and re-login to ecobee....")         
+		refresh_tokens()        
+		state.exceptionCount=0
+	}    
+	def args_encoded = java.net.URLEncoder.encode(args.toString(), "UTF-8")
+	def methods = [
+		'thermostatSummary': 
+			[uri:"${URI_ROOT}/thermostatSummary?format=json&body=${args_encoded}", 
+      			type:'get'],
+		'thermostatInfo': 
+			[uri:"${URI_ROOT}/thermostat?format=json&body=${args_encoded}", 
+          		type: 'get'],
+		'setThermostatSettings':
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'setHold': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'resumeProgram': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'createVacation': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'deleteVacation': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'getGroups': 
+			[uri: "${URI_ROOT}/group?format=json&body=${args_encoded}",
+			type: 'get'],
+		'updateGroup': 
+			[uri: "${URI_ROOT}/group?format=json", type: 'post'],
+		'updateClimate': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'controlPlug': 
+			[uri: "${URI_ROOT}/thermostat?format=json", type: 'post'],
+		'runtimeReport': 
+			[uri:"${URI_ROOT}/runtimeReport?format=json&body=${args_encoded}", 
+          		type: 'get'],
+		]
+	def request = methods.getAt(method)
+	if (settings.trace) {
+		log.debug "api> about to call doRequest with (unencoded) args = ${args}"
+		sendEvent name: "verboseTrace", value:
+			"api> about to call doRequest with (unencoded) args = ${args}"
+	}
+	doRequest(request.uri, args_encoded, request.type, success)
+}
+
+// Need to be authenticated in before this is called. So don't call this. Call api.
+private void doRequest(uri, args, type, success) {
+	def params = [
+		uri: uri,
+		headers: [
+			'Authorization': "${data.auth.token_type} ${data.auth.access_token}",
+			'Content-Type': "application/json",
+			'charset': "UTF-8",
+			'Accept': "application/json"
+		],
+		body: args
+	]
+	try {
+		if (settings.trace) {
+//			sendEvent name: "verboseTrace", value: "doRequest>token= ${data.auth.access_token}"
+			sendEvent name: "verboseTrace", value:
+				"doRequest>about to ${type} with uri ${params.uri}, (encoded)args= ${args}"
+				log.debug "doRequest> ${type}> uri ${params.uri}, args= ${args}"
+		}
+		if (type == 'post') {
+			httpPostJson(params, success)
+
+		} else if (type == 'get') {
+			params.body = null // parameters already in the URL request
+			httpGet(params, success)
+		}
+		/* when success, reset the exception counter */
+		state.exceptionCount=0
+
+	} catch (java.net.UnknownHostException e) {
+		log.error "doRequest> Unknown host - check the URL " + params.uri
+		sendEvent name: "verboseTrace", value: "doRequest> Unknown host ${params.uri}"
+		state.exceptionCount = state.exceptionCount +1     
+		throw e        
+	} catch (java.net.NoRouteToHostException e) {
+		log.error "doRequest> No route to host - check the URL " + params.uri
+		sendEvent name: "verboseTrace", value: "doRequest> No route to host ${params.uri}"
+		state.exceptionCount = state.exceptionCount +1     
+		throw e        
+	} catch (e) {
+		log.debug "doRequest>exception $e for " + params.body
+		sendEvent name: "verboseTrace", value:
+			"doRequest>exception $e for " + params.body
+		state.exceptionCount = state.exceptionCount +1 
+		if (!(e.toString().contains("TimeoutException"))) {
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
+		}
+		throw e        
+	}
+}
+
+// tstatType =managementSet or registered (no spaces).  
+//		registered is for SMART & SMART-SI thermostats, 
+//		managementSet is for EMS thermostat
+//		may also be set to a specific locationSet (ex. /Toronto/Campus/BuildingA)
+//		may be set to null if not relevant for the given method
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+private def build_body_request(method, tstatType="registered", thermostatId, tstatParams = [],
+	tstatSettings = []) {
+	def selectionJson = null
+	def selection = null  
+	if (method == 'thermostatSummary') {
+		if (tstatType.trim().toUpperCase() == 'REGISTERED') {
+			selection = [selection: [selectionType: 'registered', selectionMatch: '',
+							includeEquipmentStatus: 'true']
+						]
+		} else {
+			// If tstatType is different than managementSet, it is assumed to be locationSet specific (ex./Toronto/Campus/BuildingA)
+			selection = (tstatType.trim().toUpperCase() == 'MANAGEMENTSET') ? 
+				// get all EMS thermostats from the root
+				[selection: [selectionType: 'managementSet', selectionMatch: '/',
+					includeEquipmentStatus: 'true']
+				] : // Or Specific to a location
+				[selection: [selectionType: 'managementSet', selectionMatch: tstatType.trim(),
+					includeEquipmentStatus: 'true']
+				]
+		}
+		selectionJson = new groovy.json.JsonBuilder(selection)
+		return selectionJson
+	} else if (method == 'thermostatInfo') {
+		selection = [selection: [selectionType: 'thermostats',
+			selectionMatch: thermostatId,
+			includeSettings: 'true',
+			includeRuntime: 'true',
+			includeProgram: 'true',           
+			includeWeather: 'true',            
+			includeAlerts: 'true',
+			includeEvents: 'true',
+			includeEquipmentStatus: 'true',
+			includeSensors: 'true'
+			]
+		]
+		selectionJson = new groovy.json.JsonBuilder(selection)
+		return selectionJson
+	} else {
+		selection = [selectionType: 'thermostats', selectionMatch: thermostatId]
+	}
+	selectionJson = new groovy.json.JsonBuilder(selection)
+	if ((method != 'setThermostatSettings') && (tstatSettings != null) && (tstatSettings != [])) {
+		def function_clause = ((tstatParams != null) && (tsatParams != [])) ? 
+			[type:method, params: tstatParams] : 
+			[type: method]
+		def bodyWithSettings = [functions: [function_clause], selection: selection,
+				thermostat: [settings: tstatSettings]
+			]
+		def bodyWithSettingsJson = new groovy.json.JsonBuilder(bodyWithSettings)
+		return bodyWithSettingsJson
+	} else if (method == 'setThermostatSettings') {
+		def bodyWithSettings = [selection: selection,thermostat: [settings: tstatSettings]
+			]
+		def bodyWithSettingsJson = new groovy.json.JsonBuilder(bodyWithSettings)
+		return bodyWithSettingsJson
+	} else if ((tstatParams != null) && (tsatParams != [])) {
+		def function_clause = [type: method, params: tstatParams]
+		def simpleBody = [functions: [function_clause], selection: selection]
+		def simpleBodyJson = new groovy.json.JsonBuilder(simpleBody)
+		return simpleBodyJson
+	} else {
+		def function_clause = [type: method]
+		def simpleBody = [functions: [function_clause], selection: selection]
+		def simpleBodyJson = new groovy.json.JsonBuilder(simpleBody)
+		return simpleBodyJson
+    }    
+}
+
+
+// iterateSetThermostatSettings: iterate thru all the thermostats under a specific account and set the desired settings
+// tstatType =managementSet or registered (no spaces).  May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
+// settings can be anything supported by ecobee 
+//		at https://www.ecobee.com/home/developer/api/documentation/v1/objects/Settings.shtml
+void iterateSetThermostatSettings(tstatType, tstatSettings = []) {
 	Integer MAX_TSTAT_BATCH = get_MAX_TSTAT_BATCH()
 	def tstatlist = null
 	Integer nTstats = 0
