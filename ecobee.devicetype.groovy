@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.0.1
+ *  Version 3.1
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -1297,7 +1297,11 @@ private void doRequest(uri, args, type, success) {
 		log.debug "doRequest>exception $e for " + params.body
 		sendEvent name: "verboseTrace", value:
 			"doRequest>exception $e for " + params.body
-		state.exceptionCount = state.exceptionCount +1     
+		state.exceptionCount = state.exceptionCount +1 
+		if (!(e.contains("TimeoutException"))) {
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
+		}
 		throw e        
 	}
 }
@@ -1448,6 +1452,8 @@ void setThermostatSettings(thermostatId,tstatSettings = []) {
 					"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value: 
 					"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */
 		} /* end api call */                
 	} /* end for */
@@ -1573,6 +1579,8 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 					"setHold> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */
 		} /* end api call */
         
@@ -1666,6 +1674,8 @@ void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 				"createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			sendEvent name: "verboseTrace", value: 
 				"createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
 		}
 	}
 }
@@ -1731,6 +1741,8 @@ void deleteVacation(thermostatId, vacationName) {
 			log.error "deleteVacation> error= ${statusCode.toString()},message=${message} for ${thermostatId}"
 			sendEvent name: "verboseTrace", value:
 				"deleteVacation>error ${statusCode.toString()},message=${message} for ${thermostatId}"
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
 		}
 	}
 }
@@ -1802,6 +1814,8 @@ void resumeProgram(thermostatId=settings.thermostatId, resumeAllFlag=true) {
 				"resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			sendEvent name: "verboseTrace", value:
 				"resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
 		}
 	}
 }
@@ -1865,6 +1879,8 @@ def getGroups(thermostatId) {
 				"getGroups>> error=${statusCode.toString()},message=${message} for ${thermostatId}" 
 			sendEvent name: "verboseTrace", value:
 				"getGroups>error ${statusCode.toString()},message=${message} for ${thermostatId}"
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
 		}
 	}
 }
@@ -1954,6 +1970,8 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 					"updateGroup> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"updateGroup>error ${statusCode.toString()},message=${message} for ${thermostatId}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */
 		} /* end api call */                
                         
@@ -1992,6 +2010,8 @@ void deleteGroup(groupRef, groupName) {
 				"deleteGroup> error= ${statusCode.toString()},message= ${message} for ${groupName},groupRef= ${groupRef}"
 			sendEvent name: "verboseTrace", value:
 				"deteteGroup>error ${statusCode.toString()},message= ${message} for ${groupName},groupRef= ${groupRef}"
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
 		}
 	}
 }
@@ -2120,6 +2140,8 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 						"setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
 					sendEvent name: "verboseTrace", value:
 						"setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
+					// introduce a 1 second delay before re-attempting any other command                    
+					delay(1000)                    
 				} /* end if statusCode */
 			} /* end api call */                   
 		} /* end while */               
@@ -2315,7 +2337,8 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 					"updateClimate>error=${statusCode.toString()},message=${message} for thermostatId =${thermostatId},climateName =${climateName}"
 				sendEvent name: "verboseTrace", value:
 					"updateClimate>error ${statusCode.toString()},message=${message} for thermostatId =${thermostatId},climateName =${climateName}"
-
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */
 		} /* end api call */               
 	} /* end for */
@@ -2372,6 +2395,8 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 					"controlPlug>error=${statusCode.toString()},message=${message} for thermostatId =${thermostatId},plugName =${plugName}"
 				sendEvent name: "verboseTrace", value:
 					"controlPlug>error ${statusCode.toString()},message=${message} for thermostatId =${thermostatId},plugName =${plugName}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */
 		} /* end api call */               
 	} /* end while */
@@ -2525,6 +2550,8 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 					"getReportData> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"getReportData>error=${statusCode},message= ${message} for ${thermostatId}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */
 		} /* end api call */                
 	} /* end while */
@@ -2969,6 +2996,8 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 					"getThermostatInfo> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				sendEvent name: "verboseTrace", value:
 					"getTstatInfo>error=${statusCode},message=${message} for ${thermostatId}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */                 
 		} /* end api call */
 	} /* end while */
@@ -3061,6 +3090,8 @@ void getThermostatSummary(tstatType) {
 					"getThermostatSummary> error=${statusCode.toString()},message=${message}"
 				sendEvent name: "verboseTrace", value:
 					"getTstatSummary> error= ${statusCode.toString()},message=${message}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				delay(1000)                    
 			} /* end if statusCode */
 		}  /* end api call */              
 	} /* end while */
@@ -3119,6 +3150,10 @@ private def refresh_tokens() {
 		sendEvent name: "verboseTrace", value:
 			"refresh_tokens>exception $e at " + method.uri
 		state.exceptionCount = state.exceptionCount +1     
+		if (!(e.contains("TimeoutException"))) {
+			// introduce a 1 second delay before re-attempting any other command                    
+			delay(1000)                    
+		}
 		return false
 	}
 	// determine token's expire time
