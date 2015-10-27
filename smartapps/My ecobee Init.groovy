@@ -39,7 +39,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 2.3.1\n\n" 
+			paragraph "Version 2.3.2\n\n" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -131,9 +131,6 @@ def ecobeeDeviceList() {
 	log.debug "device list: $ems"
 
 	stats = stats + ems
-/*    
-	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", nextPage: "deviceList2") {
-*/    
 	def p = dynamicPage(name: "deviceList", title: "Select Your Thermostats", uninstall: true) {
 		section(""){
 			paragraph "Tap below to see the list of ecobee thermostats available in your ecobee account and select the ones you want to connect to SmartThings (3 max)."
@@ -145,30 +142,6 @@ def ecobeeDeviceList() {
 	return p
 }
 
-
-def ecobeeDeviceList2() {
-	log.debug "ecobeeDeviceList2()"
-
-	def stats = getEcobeeThermostats()
-
-	log.debug "device list: $stats"
-
-	def ems = getEcobeeThermostats("ems")
-
-	log.debug "device list: $ems"
-
-	stats = stats + ems
-    
-	def p = dynamicPage(name: "deviceList2", title: "Select Your Thermostats", uninstall: true) {
-		section(""){
-			paragraph "page 2: select the ones you want to connect to SmartThings (3 max per page due to ST execution time constraints)."
-			input(name: "thermostats", title:"", type: "enum", required:true, multiple:true, description: "Tap to choose", metadata:[values:stats])
-		}
-	}
-
-	log.debug "list p: $p"
-	return p
-}
 
 
 def getEcobeeThermostats(String type="") {
