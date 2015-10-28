@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.1.2
+ *  Version 3.1.3
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -1301,7 +1301,9 @@ private void doRequest(uri, args, type, success) {
 		def exceptionCheck=device.currentValue("verboseTrace")
 		if (!(exceptionCheck.contains("TimeoutException"))) {
 			// introduce a 1 second delay before re-attempting any other command                    
-			delay(1000)                    
+			def cmd= []           
+			cmd << "delay(1000)"                    
+			cmd            
 		}
 		throw e        
 	}
@@ -1454,7 +1456,9 @@ void setThermostatSettings(thermostatId,tstatSettings = []) {
 				sendEvent name: "verboseTrace", value: 
 					"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				// introduce a 1 second delay before re-attempting any other command                    
-				delay(1000)                    
+				def cmd= []           
+    	        cmd << delay(1000)                    
+				cmd            
 			} /* end if statusCode */
 		} /* end api call */                
 	} /* end for */
@@ -1581,7 +1585,9 @@ void setHoldExtraParams(thermostatId, coolingSetPoint, heatingSetPoint, fanMode,
 				sendEvent name: "verboseTrace", value:
 					"setThermostatSettings> error=${statusCode.toString()},message=${message} for ${thermostatId}"
 				// introduce a 1 second delay before re-attempting any other command                    
-				delay(1000)                    
+				def cmd= []           
+				cmd << "delay(1000)"                    
+				cmd            
 			} /* end if statusCode */
 		} /* end api call */
         
@@ -1676,7 +1682,9 @@ void createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp,
 			sendEvent name: "verboseTrace", value: 
 				"createVacation>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			// introduce a 1 second delay before re-attempting any other command                    
-			delay(1000)                    
+			def cmd= []           
+			cmd << "delay(1000)"                    
+			cmd            
 		}
 	}
 }
@@ -1816,7 +1824,9 @@ void resumeProgram(thermostatId=settings.thermostatId, resumeAllFlag=true) {
 			sendEvent name: "verboseTrace", value:
 				"resumeProgram>error=${statusCode.toString()},message=${message} for ${thermostatId}"
 			// introduce a 1 second delay before re-attempting any other command                    
-			delay(1000)                    
+			def cmd= []           
+			cmd << "delay(1000)"                    
+			cmd            
 		}
 	}
 }
@@ -1972,7 +1982,9 @@ void updateGroup(groupRef, groupName, thermostatId, groupSettings = []) {
 				sendEvent name: "verboseTrace", value:
 					"updateGroup>error ${statusCode.toString()},message=${message} for ${thermostatId}"
 				// introduce a 1 second delay before re-attempting any other command                    
-				delay(1000)                    
+				def cmd= []           
+				cmd << "delay(1000)"                    
+				cmd            
 			} /* end if statusCode */
 		} /* end api call */                
                         
@@ -2142,7 +2154,9 @@ void setClimate(thermostatId, climateName, paramsMap=[]) {
 					sendEvent name: "verboseTrace", value:
 						"setClimate>error ${statusCode.toString()},message=${message} while setting climate ${climateName} for thermostatId =${data.thermostatList[i].identifier}"
 					// introduce a 1 second delay before re-attempting any other command                    
-					delay(1000)                    
+					def cmd= []           
+					cmd << "delay(1000)"                    
+					cmd            
 				} /* end if statusCode */
 			} /* end api call */                   
 		} /* end while */               
@@ -2339,7 +2353,9 @@ void updateClimate(thermostatId, climateName, deleteClimateFlag,
 				sendEvent name: "verboseTrace", value:
 					"updateClimate>error ${statusCode.toString()},message=${message} for thermostatId =${thermostatId},climateName =${climateName}"
 				// introduce a 1 second delay before re-attempting any other command                    
-				delay(1000)                    
+				def cmd= []           
+				cmd << "delay(1000)"                    
+				cmd            
 			} /* end if statusCode */
 		} /* end api call */               
 	} /* end for */
@@ -2552,7 +2568,9 @@ void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endI
 				sendEvent name: "verboseTrace", value:
 					"getReportData>error=${statusCode},message= ${message} for ${thermostatId}"
 				// introduce a 1 second delay before re-attempting any other command                    
-				delay(1000)                    
+				def cmd= []           
+				cmd << "delay(1000)"                    
+				cmd            
 			} /* end if statusCode */
 		} /* end api call */                
 	} /* end while */
@@ -2998,7 +3016,9 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 				sendEvent name: "verboseTrace", value:
 					"getTstatInfo>error=${statusCode},message=${message} for ${thermostatId}"
 				// introduce a 1 second delay before re-attempting any other command                    
-				delay(1000)                    
+				def cmd= []           
+				cmd << "delay(1000)"                    
+				cmd            
 			} /* end if statusCode */                 
 		} /* end api call */
 	} /* end while */
@@ -3092,7 +3112,9 @@ void getThermostatSummary(tstatType) {
 				sendEvent name: "verboseTrace", value:
 					"getTstatSummary> error= ${statusCode.toString()},message=${message}"
 				// introduce a 1 second delay before re-attempting any other command                    
-				delay(1000)                    
+				def cmd= []           
+				cmd << "delay(1000)"                    
+				cmd            
 			} /* end if statusCode */
 		}  /* end api call */              
 	} /* end while */
@@ -3154,7 +3176,9 @@ private def refresh_tokens() {
 		def exceptionCheck=device.currentValue("verboseTrace")
 		if (!(exceptionCheck.contains("TimeoutException"))) {
 			// introduce a 1 second delay before re-attempting any other command                    
-			delay(1000)                    
+			def cmd= []           
+			cmd << "delay(1000)"                    
+			cmd            
 		}
 		return false
 	}
