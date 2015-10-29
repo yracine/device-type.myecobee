@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.5.2" 
+			paragraph "Version 1.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -384,9 +384,8 @@ def takeAction() {
 	    
 	updateMotionSensors()
 	updateTempSensors()    
-/*	
 	updateHumiditySensors()
-*/
+
 	log.trace "takeAction>end"
 }
 
@@ -552,21 +551,20 @@ private updateHumiditySensors() {
 			log.debug "updateHumiditySensors>ecobeeSensorType= $ecobeeSensorType"
 			log.debug "updateHumiditySensors>ecobeeSensorValue= $ecobeeSensorValue"
             
-            
-			Double humValue = ecobeeSensorValue.toDouble().round()
-			String humValueString = String.format('%2d', humValue.intValue())
+			if (ecobeeSensorValue) {
+				Double humValue = ecobeeSensorValue.toDouble().round()
+				String humValueString = String.format('%2d', humValue.intValue())
 
-			def isChange = device.isStateChange(device, "humidity", humValueString)
-			def isDisplayed = isChange
-			log.debug "device $device, found $dni,statusChanged=${isChange}, value= ${humValue}"
+				def isChange = device.isStateChange(device, "humidity", humValueString)
+				def isDisplayed = isChange
+				log.debug "device $device, found $dni,statusChanged=${isChange}, value= ${humValue}"
 
-			device.sendEvent(name: "humidity", value: humValueString, unit: '%', isStateChange: isChange, displayed: isDisplayed)
+				device.sendEvent(name: "humidity", value: humValueString, unit: '%', isStateChange: isChange, displayed: isDisplayed)
+			}	
 		} else {
-			log.debug "updateHumiditySensors>couldn't find Humidity Sensor device $ecobeeSensorName with dni $dni, probably not selected originally"
-		}
-
+				log.debug "updateHumiditySensors>couldn't find Humidity Sensor device $ecobeeSensorName with dni $dni, probably not selected originally"
+		}	
 	}
-
 }
 
 
