@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.5.3" 
+			paragraph "Version 3.5.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -118,7 +118,7 @@ def roomsSetupPage() {
 				input "roomName${indiceRoom}", title: "Room Name", "string"
 			}
 			section("Room ${indiceRoom}-Thermostat [optional]") {
-				input "roomTstat${indiceRoom}", title: "Room thermostat to be set", "capability.thermostat", 
+				input "roomTstat${indiceRoom}", title: "Zone or Room thermostat to be set", "capability.thermostat", 
 					required: false, description: "Optional"
 
 			}
@@ -387,7 +387,7 @@ def schedulesSetup(params) {
 			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"Boolean",  title: "Override Fan Mode only when Threshold or Indoor Temp differential is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}	
-		section("Schedule ${indiceSchedule}-Set Room Thermostats Only Indicator [optional]") {
+		section("Schedule ${indiceSchedule}-Set Zone/Room Thermostats Only Indicator [optional]") {
 			input (name:"setRoomThermostatsOnlyFlag${indiceSchedule}", type:"Boolean", title: "Set room thermostats only [default=false,main & room thermostats setpoints are set]", metadata: [values: ["true", "false"]], 
 				required: false, defaultValue:settings."setRoomThermostatsOnlyFlag${indiceSchedule}")
 		}
