@@ -481,7 +481,7 @@ def initialize() {
 	state.scheduleCoolSetpoint=0    
 	state.setPresentOrAway=''
 	state.programSetTime = ""
-    state.programSetTimestamp = null
+	state.programSetTimestamp = null
     
 	subscribe(app, appTouch)
     
