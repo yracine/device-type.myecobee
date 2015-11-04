@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.5.5" 
+			paragraph "Version 3.5.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -561,13 +561,20 @@ def setZoneSettings() {
 	def currTime = now()
 	boolean foundSchedule=false
 
-	/* Refresh the thermostat to get latest values */
-	try {        
-		thermostat.refresh()
-	} catch (e) {
-		log.debug("setZoneSettings>not able to do a refresh() on ${thermostat}, exception ${e}")
+	/* Poll or refresh the thermostat to get latest values */
+	if  (thermostat.hasCapability("Polling")) {
+		try {        
+			thermostat.poll()
+		} catch (e) {
+			log.debug("setZoneSettings>not able to do a poll() on ${thermostat}, exception ${e}")
+		}                    
+	}  else if  (thermostat.hasCapability("Refresh")) {
+		try {        
+			thermostat.refresh()
+		} catch (e) {
+			log.debug("setZoneSettings>not able to do a refresh() on ${thermostat}, exception ${e}")
+		}                    
 	}                    
-
 
 	if ((outTempSensor) && ((outTempSensor.hasCapability("Refresh")) || (outTempSensor.hasCapability("Polling")))) {
 
@@ -779,9 +786,9 @@ private def set_main_tstat_to_AwayOrPresent(mode) {
 		}
             
 		send("ScheduleTstatZones>set main thermostat ${thermostat} to ${mode} mode based on motion in all rooms")
-		state.setPresentOrAway=mode    // set a state for further checking later
-	 	state.programSetTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
- 		state.programSetTimestamp = now()
+		state?.setPresentOrAway=mode    // set a state for further checking later
+	 	state?.programSetTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
+ 		state?.programSetTimestamp = now()
 	}    
 	catch (e) {
 		log.error("set_tstat_to_AwayOrPresent>not able to set thermostat ${thermostat} to ${mode} mode (exception $e)")
