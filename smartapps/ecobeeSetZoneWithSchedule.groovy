@@ -22,7 +22,7 @@ definition(
 	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
-
+)
 
 
 
@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 4.3.5" 
+			paragraph "Version 4.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -547,7 +547,7 @@ def setZoneSettings() {
 	def MAX_EXCEPTION_COUNT=5
 	String exceptionCheck, msg 
 	try {        
-		thermostat.refresh()
+		thermostat.poll()
 		exceptionCheck= thermostat.currentVerboseTrace.toString()
 		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
@@ -625,7 +625,6 @@ def setZoneSettings() {
 			if (setVentSettings=='true') {            
 				// set the zoned vent switches to 'on'
 				ventSwitchesZoneSet= control_vent_switches_in_zone(i)
-				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 			}				
 			if (adjustmentFanFlag == 'true') {
 				set_fan_mode(i)
@@ -1500,17 +1499,18 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 
 	key = "includedZones$indiceSchedule"
 	def zones = settings[key]
-	key = "setRoomThermostatsOnlyFlag$indiceSchedule"
-	def setRoomThermostatsOnlyFlag = settings[key]
-	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 	def indoor_all_zones_temps=[]
   
 	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}: zones= ${zones}")
-
+/*
+	key = "setRoomThermostatsOnlyFlag$indiceSchedule"
+	def setRoomThermostatsOnlyFlag = settings[key]
+	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
 	if (setRoomThermostatsOnly=='true') {
 		log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}:all room Tstats set and setRoomThermostatsOnlyFlag= true,exiting")
 		return				    
 	}    
+*/    
 	String mode = thermostat?.currentThermostatMode.toString()
 	float currentTempAtTstat = thermostat?.currentTemperature.toFloat().round(1)
 	if (mode=='heat') {
@@ -1546,7 +1546,10 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in all zones, all temps collected from sensors=${indoor_all_zones_temps}, avg_indoor_temp=${avg_indoor_temp}, avg_temp_diff=${avg_temp_diff}")
 
 	for (zone in zones) {
-
+				
+		def zoneDetails=zone.split(':')
+		def indiceZone = zoneDetails[0]
+		def zoneName = zoneDetails[1]
 		key = "includedRooms$indiceZone"
 		def rooms = settings[key]
 		for (room in rooms) {
@@ -1570,6 +1573,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 			if (switchLevel >=10) {	
 				closedAllVentsInZone=false
 			}              
+			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room ${roomName},switchLevel to be set=${switchLevel}")
                 
 			for (int j = 1;(j <= 5); j++)  {
 				key = "ventSwitch${j}$indiceRoom"
@@ -1593,6 +1597,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 			send("ecobeeSetZoneWithSchedule>schedule ${scheduleName},set all ventSwitches at ${switchLevel}% to avoid closing all of them")
 		}
 	}    
+	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName},ventSwitchesOnSet=${ventSwitchesOnSet}")
 	return ventSwitchesOnSet    
 }
 
