@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 4.4" 
+			paragraph "Version 4.4.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -51,7 +51,7 @@ def generalSetupPage() {
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
  		}
-		section("Main ecobee thermostat at home") {
+		section("Main ecobee thermostat at home (used for temp/vent adjustment)") {
 			input (name:"thermostat", type: "capability.thermostat", title: "Which main ecobee thermostat?")
 		}
 		section("Rooms count") {
@@ -1655,8 +1655,8 @@ private boolean is_temperature_too_hot_or_too_cold(ventSwitch) {
 	String currentHVACMode = thermostat.currentThermostatMode.toString()
     
 	def tempSwitch=getTemperatureInVent(ventSwitch)                    
-	log.debug("is_temperature_in_vent_too_hot>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Max Temp of ${MAX_TEMP_VENT_SWITCH}°")
-	log.debug("is_temperature_in_vent_too_hot>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Min Temp of ${MIN_TEMP_VENT_SWITCH}°")
+	log.debug("is_temperature_in_vent_too_hot_or_too_cold>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Max Temp of ${MAX_TEMP_VENT_SWITCH}°")
+	log.debug("is_temperature_in_vent_too_hot_or_too_cold>checking current Temperature of ${ventSwitch}= ${tempSwitch}° vs. HVAC Min Temp of ${MIN_TEMP_VENT_SWITCH}°")
 	if (tempSwitch) {    
 		if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (tempSwitch >= MAX_TEMP_VENT_SWITCH)) {
 			// Turn the HVAC off, open all vents, and deactivate any further smartapp processing
