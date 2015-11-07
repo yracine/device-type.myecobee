@@ -41,7 +41,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 2.0.4"
+			paragraph "Version 2.0.5"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -67,11 +67,9 @@ def humiditySettings() {
 		section("Minimum fan runtime per hour in minutes") {
 			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
 		}
-		section("Minimum HRV/ERV runtime per hour in minutes") {
+		section("Your dehumidifier as HRV input parameters section") {
+			input "useDehumidifierAsHRV", "Boolean", title: "Use Dehumidifier as HRV (By default=false)?", metadata: [values: ["true", "false"]], required: false
 			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime [default=20]", required: false
-		}
-		section("Use Dehumidifier as HRV (By default=false)") {
-			input "useDehumidifierAsHRV", "Boolean", title: "Use Dehumidifier as HRV?", metadata: [values: ["true", "false"]], required: false
 		}
 		section("Minimum temperature for dehumidification (in Farenheits/Celsius)") {
 			input "givenMinTemp", "decimal", title: "Min Temp [default=10°F/-15°C]", required: false
