@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.6.2" 
+			paragraph "Version 3.7" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -442,6 +442,12 @@ def onHandler(evt) {
 }
 
 
+def thermostatOperatingHandler(evt) {
+	log.debug "Thermostat Operating now: $evt.value"
+	state?.operatingState=evt.value    
+	setZoneSettings()      
+}
+
 def heatingSetpointHandler(evt) {
 	log.debug "heating Setpoint now: $evt.value"
 }
@@ -471,7 +477,9 @@ def initialize() {
 		subscribe(powerSwitch, "switch.on", onHandler, [filterEvents: false])
 	}
 	subscribe(thermostat, "heatingSetpoint", heatingSetpointHandler)    
-	subscribe(thermostat, "coolingSetpoint", coolingSetpointHandler)    
+	subscribe(thermostat, "coolingSetpoint", coolingSetpointHandler)
+	subscribe(thermostat, "thermostatOperatingState", thermostatOperatingHandler)
+    
 	subscribe(location, changeModeHandler)
 
 	// Initialize state variables
@@ -482,6 +490,7 @@ def initialize() {
 	state.setPresentOrAway=''
 	state.programSetTime = ""
 	state.programSetTimestamp = null
+	state.operatingState=""
     
 	subscribe(app, appTouch)
     
@@ -711,10 +720,14 @@ def setZoneSettings() {
 					// let's adjust the thermostat's temp & mode settings according to outdoor temperature            
 					adjust_tstat_for_more_less_heat_cool(i)
 				}                    
-			}        
-			// let's adjust the vent settings according to desired Temp
+			}
             
-			if (setVentSettings=='true') {            
+			// Check the operating State before adjusting the vents again.
+			String operatingState = thermostat.currentThermostatOperatingState           
+			state?.operatingState=operatingState
+			// let's adjust the vent settings according to desired Temp only if thermostat is not idle
+			if ((setVentSettings=='true') && (operatingState.toUpperCase() !='IDLE'))  {            
+				log.debug "setZoneSettings>thermostat ${thermostat}'s Operating State= ${operatingState}, adjusting the vents for schedule ${scheduleName}"
 				ventSwitchesZoneSet=adjust_vent_settings_in_zone(i)
 				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
 			}                
@@ -728,7 +741,7 @@ def setZoneSettings() {
 		}
 		log.debug "setZoneSettings>No schedule applicable at this time ${nowInLocalTime}"
         
-	} else if (setVentSettings=='true') {
+	} else if ((setVentSettings=='true') && (ventSwitchesOn != [])) {
     
 		log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
 		turn_off_all_other_vents(ventSwitchesOn)
@@ -1552,7 +1565,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 
 private boolean is_temperature_too_hot_or_too_cold(ventSwitch) {
 	def scale = getTemperatureScale()
-	def MAX_TEMP_VENT_SWITCH = (scale=='C')?48:120 //Max temperature inside a ventSwitch
+	def MAX_TEMP_VENT_SWITCH = (scale=='C')?49:121 //Max temperature inside a ventSwitch
 	def MIN_TEMP_VENT_SWITCH = (scale=='C')?7:45 //Min temperature inside a ventSwitch
 	String currentHVACMode = thermostat.currentThermostatMode.toString()
     
