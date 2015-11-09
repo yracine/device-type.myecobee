@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.7" 
+			paragraph "Version 3.7.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -765,7 +765,6 @@ private def isRoomOccupied(sensor, indiceRoom) {
 		log.debug "isRoomOccupied>room ${roomName} has been occupied, motion was detected at sensor ${sensor} in the last ${threshold} minutes"
 		result = true
 	}
-	log.debug "isRoomOccupied>result = $result"
 	return result
 }
 
@@ -1419,7 +1418,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
   
 	log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}: zones= ${zones}")
 
-/*
+
 	key = "setRoomThermostatsOnlyFlag$indiceSchedule"
 	def setRoomThermostatsOnlyFlag = settings[key]
 	def setRoomThermostatsOnly = (setRoomThermostatsOnlyFlag) ?: 'false'
@@ -1427,7 +1426,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 		log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}:all room Tstats set and setRoomThermostatsOnlyFlag= true,exiting")
 		return				    
 	}
-*/    
+
 	String mode = thermostat?.currentThermostatMode.toString()
 	float currentTempAtTstat = thermostat?.currentTemperature.toFloat().round(1)
 	if (mode=='heat') {
