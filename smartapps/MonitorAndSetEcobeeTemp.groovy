@@ -40,7 +40,7 @@ def thresholdSettings() {
 	dynamicPage(name: "thresholdSettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 2.4.3" 
+			paragraph "Version 2.4.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -312,6 +312,9 @@ private isProgramScheduleSet(climateName, threshold) {
 def monitorAdjustTemp() {
 	
 	Integer delay = givenInterval ?: 59 // By default, do it every hour
+
+	state?.poll["last"] = now()
+
 	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
 		log.info "monitorAdjustTemp>scheduling rescheduleIfNeeded() in ${delay} minutes.."
 		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
