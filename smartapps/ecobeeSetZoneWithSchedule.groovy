@@ -445,7 +445,7 @@ def ventTemperatureHandler(evt) {
     
 	if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (ventTemp >= MAX_TEMP_VENT_SWITCH)) {
 		// Open all vents just to be safe
-        open_all_vents()
+		open_all_vents()
 		send("ecobeeSetZoneWithSchedule>current HVAC mode is ${currentHVACMode}, found one of the vents' value too hot (${evt.value}°), opening all vents to avoid any damage")
 	} /* if too hot */           
 	if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (ventTemp <= MIN_TEMP_VENT_SWITCH)) {
