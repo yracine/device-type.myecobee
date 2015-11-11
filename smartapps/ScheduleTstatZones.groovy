@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.7.2" 
+			paragraph "Version 3.7.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -441,6 +441,25 @@ def onHandler(evt) {
 	setZoneSettings()
 }
 
+def ventTemperatureHandler(evt) {
+	log.debug "vent temperature: $evt.value"
+	float ventTemp = evt.value.toFloat()
+	def scale = getTemperatureScale()
+	def MAX_TEMP_VENT_SWITCH = (scale=='C')?49:121 //Max temperature inside a ventSwitch
+	def MIN_TEMP_VENT_SWITCH = (scale=='C')?7:45 //Min temperature inside a ventSwitch
+	String currentHVACMode = thermostat.currentThermostatMode.toString()
+    
+	if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (ventTemp >= MAX_TEMP_VENT_SWITCH)) {
+		// Open all vents just to be safe
+        open_all_vents()
+		send("ecobeeSetZoneWithSchedule>current HVAC mode is ${currentHVACMode}, found one of the vents' value too hot (${evt.value}°), opening all vents to avoid any damage")
+	} /* if too hot */           
+	if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (ventTemp <= MIN_TEMP_VENT_SWITCH)) {
+		// Open all vents just to be safe
+		open_all_vents()
+		send("ecobeeSetZoneWithSchedule>current HVAC mode is ${currentHVACMode}, found one of the vents' value too cold (${evt.value}°), opening all vents to avoid any damage")
+	} /* if too cold */ 
+}
 
 def thermostatOperatingHandler(evt) {
 	log.debug "Thermostat Operating now: $evt.value"
@@ -493,6 +512,20 @@ def initialize() {
 	state.operatingState=""
     
 	subscribe(app, appTouch)
+
+	// subscribe all vents to check their temperature on a regular basis
+    
+	for (indiceRoom in 1..roomsCount) {
+		for (int j = 1;(j <= 5); j++)  {
+			def key = "ventSwitch${j}$indiceRoom"
+			def vent = settings[key]
+				if (vent != null) {
+					subscribe(vent, "temperature", ventTemperatureHandler)
+				} /* end if vent != null */
+		} /* end for vent switches */
+	} /* end for rooms */
+
+	// subscribe all motion sensors to check for active motion in rooms
     
 	def motionSensors =[]   	 
 	for (int i = 1;
