@@ -758,13 +758,19 @@ def setZoneSettings() {
             
 			// Check the operating State before adjusting the vents again.
 			String operatingState = thermostat.currentThermostatOperatingState           
-			state?.operatingState=operatingState
-			// let's adjust the vent settings according to desired Temp only if thermostat is not idle
-			if ((setVentSettings=='true') && (operatingState.toUpperCase() !='IDLE'))  {            
-				log.debug "setZoneSettings>thermostat ${thermostat}'s Operating State= ${operatingState}, adjusting the vents for schedule ${scheduleName}"
+			// let's adjust the vent settings according to desired Temp only if thermostat is not idle or was not idle at the last run
+            
+			if ((setVentSettings=='true') && ((operatingState.toUpperCase() !='IDLE') ||
+				((state?.operatingState.toUpperCase() =='HEATING') || (state?.operatingState.toUpperCase() =='COOLING'))))
+			{            
+				log.debug
+					"setZoneSettings>thermostat ${thermostat}'s Operating State is ${operatingState} or was just recently " +
+                    "${state?.operatingState}, adjusting the vents for schedule ${scheduleName}"
 				ventSwitchesZoneSet=adjust_vent_settings_in_zone(i)
-				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
-			}                
+				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet     
+                
+			}   
+			state?.operatingState =operatingState            
 		}
 
 	} /* end for */
