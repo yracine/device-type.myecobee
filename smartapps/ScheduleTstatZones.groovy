@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.7.4" 
+			paragraph "Version 3.8" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -135,17 +135,17 @@ def roomsSetupPage() {
 			}           
 			section("Room ${indiceRoom}-MotionSensor [optional]") {
 				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
-					required: false, description: "Optional"
+                			required: false, description: "Optional"
 
 			}
-			section("Room ${indiceRoom}-Do temp adjustment when occupied room only [optional]") {
+			section("Room ${indiceRoom}-Do temp/vent adjustment when occupied room only [optional]") {
 				input "needOccupiedFlag${indiceRoom}", title: "Will do temp adjustement only when Occupied [default=false]", "Boolean", metadata: [values: ["true", "false"]], 
-					required: false
+                			required: false, description: "Optional"
 
 			}
-			section("Room ${indiceRoom}-Do temp adjustment with this occupied's threshold [optional]") {
+			section("Room ${indiceRoom}-Do temp/vent adjustment with this occupied's threshold [optional]") {
 				input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
-					required: false, description: "Optional"
+               				required: false, description: "Optional"
 
 			}
 			section() {
@@ -1503,23 +1503,41 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 		key = "includedRooms$indiceZone"
 		def rooms = settings[key]
 		for (room in rooms) {
+        
+			switchLevel =0	// initially set at zero for check later
 			def roomDetails=room.split(':')
 			indiceRoom = roomDetails[0]
 			def roomName = roomDetails[1]
 			if (!roomName) {
 				continue
 			}
-			def tempAtSensor =getSensorTempForAverage(indiceRoom)			
-			if (tempAtSensor == null) {
-				tempAtSensor= currentTempAtTstat				            
-			}
-			float temp_diff_at_sensor = tempAtSensor.toFloat().round(1) - desiredTemp 
-			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}, avg_temp_diff=${avg_temp_diff}")
-			switchLevel = ((temp_diff_at_sensor / avg_temp_diff.abs()) * 100).round()
-			switchLevel =( switchLevel >=0)?((switchLevel<100)? switchLevel: 100):0
-			if (mode=='heat') {
-				100-switchLevel
-			}
+			key = "needOccupiedFlag$indiceRoom"
+			def needOccupied = (settings[key]) ?: 'false'
+			log.debug("adjust_vent_settings_in_zone>looping thru all rooms,now room=${roomName},indiceRoom=${indiceRoom}, needOccupied=${needOccupied}")
+
+			if (needOccupied == 'true') {
+				key = "motionSensor$indiceRoom"
+				def motionSensor = settings[key]
+				if (motionSensor != null) {
+					if (!isRoomOccupied(motionSensor, indiceRoom)) {
+						switchLevel =MIN_OPEN_LEVEL_SMALL // setLevel at a minimum as the room is not occupied.
+						log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room = ${roomName},not occupied,vents set to mininum level=${switchLevel}")
+					}
+				}
+			} 
+			if (!switchLevel) {
+				def tempAtSensor =getSensorTempForAverage(indiceRoom)			
+				if (tempAtSensor == null) {
+					tempAtSensor= currentTempAtTstat				            
+				}
+				float temp_diff_at_sensor = tempAtSensor.toFloat().round(1) - desiredTemp 
+				log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}, avg_temp_diff=${avg_temp_diff}")
+				switchLevel = ((temp_diff_at_sensor / avg_temp_diff.abs()) * 100).round()
+				switchLevel =( switchLevel >=0)?((switchLevel<100)? switchLevel: 100):0
+				if (mode=='heat') {
+					100-switchLevel
+				}
+			} 
 			if (switchLevel >=10) {	
 				closedAllVentsInZone=false
 			}              
