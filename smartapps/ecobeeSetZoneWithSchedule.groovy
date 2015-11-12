@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 4.6.1" 
+			paragraph "Version 4.7" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -1119,7 +1119,7 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 
 private def setAllRoomTstatsSettings(indiceSchedule,indiceZone) {
 	boolean foundRoomTstat = false
-	def	key = "scheduleName$indiceSchedule"
+	def	key= "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
 
 	key = "includedRooms$indiceZone"
@@ -1636,12 +1636,14 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 					tempAtSensor= currentTempAtTstat				            
 				}
 				float temp_diff_at_sensor = tempAtSensor.toFloat().round(1) - desiredTemp 
-				log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}, avg_temp_diff=${avg_temp_diff}")
+				log.debug("adjust_vent_settings_in_zone>thermostat mode = ${mode}, schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}, avg_temp_diff=${avg_temp_diff}")
 				switchLevel = ((temp_diff_at_sensor / avg_temp_diff.abs()) * 100).round()
 				switchLevel =( switchLevel >=0)?((switchLevel<100)? switchLevel: 100):0
 				if (mode=='heat') {
-					100-switchLevel
-				}
+					switchLevel=(temp_diff_at_sensor >0)? 0: 100-switchLevel
+				} else if (mode =='cool') {
+					switchLevel=(temp_diff_at_sensor <0)? 0: switchLevel
+				}                
 			} 
 			if (switchLevel >=10) {	
 				closedAllVentsInZone=false
