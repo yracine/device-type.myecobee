@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.8" 
+			paragraph "Version 3.8.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -949,8 +949,10 @@ private def setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom) {
 
 private def setAllRoomTstatsSettings(indiceSchedule,indiceZone) {
 	boolean foundRoomTstat = false
+	def	key= "scheduleName$indiceSchedule"
+	def scheduleName = settings[key]
 
-	def key = "includedRooms$indiceZone"
+	key = "includedRooms$indiceZone"
 	def rooms = settings[key]
 	for (room in rooms) {
 
@@ -965,7 +967,7 @@ private def setAllRoomTstatsSettings(indiceSchedule,indiceZone) {
 		if (!roomTstat) {
 			continue
 		}
-		log.debug("setAllRoomTstatsSettings>found a room Tstat ${roomTstat}, needOccupied=${needOccupied} in room ${roomName}, indiceRoom=${indiceRoom}")
+		log.debug("setAllRoomTstatsSettings>schedule ${scheduleName},found a room Tstat ${roomTstat}, needOccupied=${needOccupied} in room ${roomName}, indiceRoom=${indiceRoom}")
 		foundRoomTstat = true
 		if (needOccupied == 'true') {
 
@@ -974,22 +976,23 @@ private def setAllRoomTstatsSettings(indiceSchedule,indiceZone) {
 			if (motionSensor != null) {
 
 				if (isRoomOccupied(motionSensor, indiceRoom)) {
-					log.debug("setAllRoomTstatsSettings>for occupied room ${roomName},about to call setRoomTstatSettings ")
+					log.debug("setAllRoomTstatsSettings>schedule ${scheduleName},for occupied room ${roomName},about to call setRoomTstatSettings ")
 					setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom)
 				} else {
                 
-					log.debug("setAllRoomTstatsSettings>room ${roomName} not occupied,skipping it")
+					log.debug("setAllRoomTstatsSettings>schedule ${scheduleName},room ${roomName} not occupied,skipping it")
                 
 				}
 			}
 		} else {
 
-			log.debug("setAllRoomTstatsSettings>for room ${roomName},about to call setRoomTstatSettings ")
+			log.debug("setAllRoomTstatsSettings>schedule ${scheduleName},for room ${roomName},about to call setRoomTstatSettings ")
 			setRoomTstatSettings(indiceSchedule,indiceZone, indiceRoom)
 		}
 	}
 	return foundRoomTstat
 }
+
 
 private def getAllTempsForAverage(indiceZone) {
 	def tempAtSensor
@@ -1294,9 +1297,7 @@ private def adjust_thermostat_setpoint_in_zone(indiceSchedule) {
 		log.debug("adjust_thermostat_setpoint_in_zone>zone=${zone}: zoneDetails= ${zoneDetails}")
 		def indiceZone = zoneDetails[0]
 		def zoneName = zoneDetails[1]
-		log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}: looping thru all zones, now zoneName=${zoneName}, about to apply room Tstat's settings")
 		setAllRoomTstatsSettings(indiceSchedule,indiceZone) 
-        
 		if (setRoomThermostatsOnly == 'true') { // Does not want to set the main thermostat, only the room ones
 			if (detailedNotif == 'true') {
 				send("ScheduleTstatZones>schedule ${scheduleName},zone ${zoneName}: all room Tstats set and setRoomThermostatsOnlyFlag= true, continue...")
@@ -1542,6 +1543,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 				closedAllVentsInZone=false
 			}              
                 
+			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room ${roomName},switchLevel to be set=${switchLevel}")
 			for (int j = 1;(j <= 5); j++)  {
 				key = "ventSwitch${j}$indiceRoom"
 				def ventSwitch = settings[key]
