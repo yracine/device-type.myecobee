@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.9.2" 
+			paragraph "Version 3.9.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -702,8 +702,11 @@ def setZoneSettings() {
 				}   
 				adjust_thermostat_setpoint_in_zone(i)
 				if (setVentSettings=='true') {
-					// set the zoned vent switches to 'on'
-					ventSwitchesZoneSet= control_vent_switches_in_zone(i)
+				// set the zoned vent switches to 'on' and adjust them according to the ambient temperature
+                
+/*				ventSwitchesZoneSet= control_vent_switches_in_zone(i)
+*/
+				ventSwitchesZoneSet= adjust_vent_settings_in_zone(i)
 					log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 
 				}
@@ -1515,9 +1518,11 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 			def roomDetails=room.split(':')
 			indiceRoom = roomDetails[0]
 			def roomName = roomDetails[1]
+/*            
 			if (!roomName) {
 				continue
 			}
+*/            
 			key = "needOccupiedFlag$indiceRoom"
 			def needOccupied = (settings[key]) ?: 'false'
 			log.debug("adjust_vent_settings_in_zone>looping thru all rooms,now room=${roomName},indiceRoom=${indiceRoom}, needOccupied=${needOccupied}")
