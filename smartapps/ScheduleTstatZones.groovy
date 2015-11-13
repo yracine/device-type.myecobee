@@ -704,9 +704,9 @@ def setZoneSettings() {
 				if (setVentSettings=='true') {
 				// set the zoned vent switches to 'on' and adjust them according to the ambient temperature
                 
-/*				ventSwitchesZoneSet= control_vent_switches_in_zone(i)
+/*					ventSwitchesZoneSet= control_vent_switches_in_zone(i)
 */
-				ventSwitchesZoneSet= adjust_vent_settings_in_zone(i)
+					ventSwitchesZoneSet= adjust_vent_settings_in_zone(i)
 					log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
 
 				}
