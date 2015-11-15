@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.9.5" 
+			paragraph "Version 3.9.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -452,12 +452,12 @@ def ventTemperatureHandler(evt) {
 	if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (ventTemp >= MAX_TEMP_VENT_SWITCH)) {
 		// Open all vents just to be safe
         open_all_vents()
-		send("ecobeeSetZoneWithSchedule>current HVAC mode is ${currentHVACMode}, found one of the vents' value too hot (${evt.value}°), opening all vents to avoid any damage")
+		send("ScheduleTstatZones>current HVAC mode is ${currentHVACMode}, found one of the vents' value too hot (${evt.value}°), opening all vents to avoid any damage")
 	} /* if too hot */           
 	if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (ventTemp <= MIN_TEMP_VENT_SWITCH)) {
 		// Open all vents just to be safe
 		open_all_vents()
-		send("ecobeeSetZoneWithSchedule>current HVAC mode is ${currentHVACMode}, found one of the vents' value too cold (${evt.value}°), opening all vents to avoid any damage")
+		send("ScheduleTstatZones>current HVAC mode is ${currentHVACMode}, found one of the vents' value too cold (${evt.value}°), opening all vents to avoid any damage")
 	} /* if too cold */ 
 }
 
@@ -583,6 +583,8 @@ def appTouch(evt) {
 def setZoneSettings() {
 
 	log.debug "Begin of setZoneSettings Fcn"
+	log.debug "setZoneSettings>setVentSettingsFlag=$setVentSettingsFlag,setAdjustmentTempFlag=$setAdjustmentTempFlag" +
+		",setAdjustmentOutdoorTempFlag=$setAdjustmentOutdoorTempFlag,setAdjustmentFanFlag=$setAdjustmentFanFlag"
 	Integer delay = 5 // By default, schedule SetZoneSettings() every 5 min.
 
 	//schedule the rescheduleIfNeeded() function
@@ -1693,7 +1695,7 @@ private def setVentSwitchLevel(indiceRoom, ventSwitch, switchLevel=100) {
 		if (roomName) {       
 			log.debug("setVentSwitchLevel>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
 			if (detailedNotif == 'true') {
-				send("ecobeeSetZoneWithSchedule>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
+				send("ScheduleTstatZones>set ${ventSwitch} at level ${switchLevel} in room ${roomName} to reach desired temperature")
 			}
 		}            
 	} catch (e) {
