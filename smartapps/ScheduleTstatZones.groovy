@@ -519,9 +519,9 @@ def initialize() {
 		for (int j = 1;(j <= 5); j++)  {
 			def key = "ventSwitch${j}$indiceRoom"
 			def vent = settings[key]
-				if (vent != null) {
-					subscribe(vent, "temperature", ventTemperatureHandler)
-				} /* end if vent != null */
+			if (vent) {
+				subscribe(vent, "temperature", ventTemperatureHandler)
+			} /* end if vent != null */
 		} /* end for vent switches */
 	} /* end for rooms */
 
@@ -691,7 +691,7 @@ def setZoneSettings() {
 
 			log.debug "setZoneSettings>schedule ${scheduleName},currTime= ${currTime}, current date & time OK for execution"
 			if (detailedNotif == 'true') {
-				send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
+				send("ScheduleTstatZones>now running schedule ${scheduleName},about to set zone settings as requested")
 			}
 			if (adjustmentFanFlag == 'true') {                
 				set_fan_mode(i)
