@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 3.9.7" 
+			paragraph "Version 3.9.8" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -604,6 +604,7 @@ def setZoneSettings() {
 	}
 
 	def currTime = now()
+	boolean initialScheduleSetup=false        
 	boolean foundSchedule=false
 
 	/* Poll or refresh the thermostat to get latest values */
@@ -682,44 +683,37 @@ def setZoneSettings() {
         		"currTime=${currTime},begintime=${startTimeToday.time},endTime=${endTimeToday.time},lastScheduleName=$state.lastScheduleName, lastStartTime=$state.lastStartTime"
         
 		def ventSwitchesZoneSet = []        
-        
-		if ((currTime >= startTimeToday.time) && (currTime <= endTimeToday.time) && (state.lastStartTime != startTimeToday.time)) {
+		if ((currTime >= startTimeToday.time) && (currTime <= endTimeToday.time) && (state.lastStartTime != startTimeToday.time) && (IsRightDayForChange(i))) {
         
 			// let's set the given schedule
-            
+			initialScheduleSetup=true
+			foundSchedule=true
+
 			log.debug "setZoneSettings>schedule ${scheduleName},currTime= ${currTime}, current time seems OK for execution, need to check the day of Week"
 			def doChange = IsRightDayForChange(i)
 
 			log.debug "setZoneSettings>schedule ${scheduleName}, doChange=$doChange"
 			// If we have hit the condition to schedule this then let's do it
 
-			if (doChange) {
-            
-				foundSchedule=true
-				if (detailedNotif == 'true') {
-					send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
-				}
-				if (adjustmentFanFlag == 'true') {                
-					set_fan_mode(i)
-				}   
-				adjust_thermostat_setpoint_in_zone(i)
-				if (setVentSettings=='true') {
-				// set the zoned vent switches to 'on' and adjust them according to the ambient temperature
-                
-/*					ventSwitchesZoneSet= control_vent_switches_in_zone(i)
-*/
-					ventSwitchesZoneSet= adjust_vent_settings_in_zone(i)
-					log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
-
-				}
- 				ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
-				state.lastScheduleName = scheduleName
-				state.lastStartTime = startTimeToday.time
-			} else {
-				if (detailedNotif == 'true') {
-					send("ScheduleTstatZones>schedule: ${scheduleName},change not scheduled at this time ${nowInLocalTime}...")
-				}
+			if (detailedNotif == 'true') {
+				send("ScheduleTstatZones>running schedule ${scheduleName},about to set zone settings as requested")
 			}
+			if (adjustmentFanFlag == 'true') {                
+				set_fan_mode(i)
+			}   
+			adjust_thermostat_setpoint_in_zone(i)
+			if (setVentSettings=='true') {
+			// set the zoned vent switches to 'on' and adjust them according to the ambient temperature
+               
+/*				ventSwitchesZoneSet= control_vent_switches_in_zone(i)
+*/
+				ventSwitchesZoneSet= adjust_vent_settings_in_zone(i)
+				log.debug "setZoneSettings>schedule ${scheduleName},list of Vents turned 'on'= ${ventSwitchesZoneSet}"
+
+			}
+ 			ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
+			state.lastScheduleName = scheduleName
+			state?.lastStartTime = startTimeToday.time
 		}
 		else if ((state.lastScheduleName == scheduleName) && (currTime >= startTimeToday.time) && (currTime <= endTimeToday.time) && (IsRightDayForChange)) {
 			// We're in the middle of a schedule run
@@ -775,22 +769,25 @@ def setZoneSettings() {
                 
 			}   
 			state?.operatingState =operatingState            
+		} else {
+			if (detailedNotif == 'true') {
+				send("ScheduleTstatZones>schedule: ${scheduleName},change not scheduled at this time ${nowInLocalTime}...")
+			}
 		}
 
 	} /* end for */
     
+	if ((setVentSettings=='true') && ((ventSwitchesOn !=[]) || (initialScheduleSetup))) {
+		log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
+		turn_off_all_other_vents(ventSwitchesOn)
+	}
 	if (!foundSchedule) {
 		if (detailedNotif == 'true') {
 			send "ScheduleTstatZones>No schedule applicable at this time ${nowInLocalTime}"
 		}
 		log.debug "setZoneSettings>No schedule applicable at this time ${nowInLocalTime}"
-        
 	} 
-	if ((setVentSettings=='true') && (foundSchedule)) {
-    
-		log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
-		turn_off_all_other_vents(ventSwitchesOn)
-	}
+        
 	log.debug "End of setZoneSettings Fcn"
 }
 
