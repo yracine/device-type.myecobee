@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 4.7.7" 
+			paragraph "Version 4.7.8" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -483,6 +483,7 @@ def initialize() {
 	// Initialize state variables
     
 	state.lastScheduleLastName=""
+	state.lastStartTime=""
 	state.scheduleHeatSetpoint=0  
 	state.scheduleCoolSetpoint=0    
 	state.operatingState=""
@@ -627,6 +628,7 @@ def setZoneSettings() {
 	def scheduleProgramName = thermostat.currentClimateName
 
 	boolean foundSchedule=false
+	boolean initialScheduleSetup=false        
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 	def ventSwitchesOn = []
 
@@ -664,6 +666,7 @@ def setZoneSettings() {
             
 			log.debug "setZoneSettings>now applying ${scheduleName}, scheduled program is now ${scheduleProgramName}"
 			foundSchedule=true   
+			initialScheduleSetup=true
 
 			if (detailedNotif == 'true') {
 				send("ecobeeSetZoneWithSchedule>running schedule ${scheduleName},about to set zone settings as requested")
@@ -683,10 +686,10 @@ def setZoneSettings() {
 				adjust_thermostat_setpoint_in_zone(i)
 			}                
 			ventSwitchesOn = ventSwitchesOn + ventSwitchesZoneSet              
-			state.lastScheduleName = scheduleName
+			state?.lastScheduleName = scheduleName
+			state?.lastStartTime = startTimeToday.time
 		} else if ((selectedClimate==scheduleProgramName) && (state?.lastScheduleName == scheduleName)) {
 			// We're in the middle of a schedule run
-
 
 			foundSchedule=true   
 			def setAwayOrPresent = (setAwayOrPresentFlag)?:'false'
@@ -726,7 +729,6 @@ def setZoneSettings() {
 				}                    
             
 			}        
-            
 			// Check the operating State before adjusting the vents again.
 			String operatingState = thermostat.currentThermostatOperatingState           
 			// let's adjust the vent settings according to desired Temp only if thermostat is not idle or was not idle at the last run
@@ -745,16 +747,16 @@ def setZoneSettings() {
 
 	} /* end for */ 	
     		
+	if ((setVentSettings=='true') && ((ventSwitchesOn !=[]) || (initialScheduleSetup))) {
+		log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
+		turn_off_all_other_vents(ventSwitchesOn)
+	}		    
 	if (!foundSchedule) {
 		if (detailedNotif == 'true') {
 			send "ecobeeSetZoneWithSchedule>No schedule applicable at this time ${nowInLocalTime}"
 		}
 		log.debug "setZoneSettings>No schedule applicable at this time ${nowInLocalTime}"
 	} 
-	if ((setVentSettings=='true') && (foundSchedule)) {
-		log.debug "setZoneSettings>list of Vents turned on= ${ventSwitchesOn}"
-		turn_off_all_other_vents(ventSwitchesOn)
-	}		    
 	log.debug "End of setZoneSettings Fcn"
 }
 
