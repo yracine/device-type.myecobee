@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 0.5" 
+			paragraph "Version 0.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -328,6 +328,10 @@ def schedulesSetup(params) {
 				defaultValue:settings."begintime${indiceSchedule}")
 			input (name:"endtime${indiceSchedule}", type: "time", title: "End time",
 				defaultValue:settings."endtime${indiceSchedule}")
+		}
+		section("Schedule ${indiceSchedule}-Select the program/climate at ecobee thermostat to be applied [optional,for ecobee]") {
+			input (name:"givenClimate${indiceSchedule}", type:"enum", title: "Which ecobee program? ", options: ecobeePrograms, 
+				required: false, defaultValue:settings."givenClimate${indiceSchedule}", description: "Optional")
 		}
 		section("Schedule ${indiceSchedule}-Desired Cool Temp during the schedule [optional]") {
 			input (name:"desiredCool${indiceSchedule}", type:"decimal", title: "Cool Temp, default = 75°F/23°C", 
@@ -803,44 +807,74 @@ private def set_thermostat_setpoint_in_zone(indiceSchedule) {
 	def scheduleName = settings[key]
 	key = "includedZones$indiceSchedule"
 	def zones = settings[key]
+	key = "givenClimate$indiceSchedule"
+	def climateName = settings[key]
 
 	float currentTemp = thermostat?.currentTemperature.toFloat().round(1)
 	String mode = thermostat?.currentThermostatMode.toString()
 	if (mode == 'heat') {
-		key = "desiredHeat$indiceSchedule"
-		def heatTemp = settings[key]
-		if (!heatTemp) {
-			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName}:about to apply default heat settings")
-			desiredHeat = (scale=='C') ? 21:72 					// by default, 21°C/72°F is the target heat temp
+		if ((climateName) && (thermostat.hasCommand("setClimate"))) {
+			try {
+				thermostat.setClimate("", climateName)
+			} catch (any) {
+				if (detailedNotif == 'true') {
+					send("ScheduleRoomTempControl>schedule ${scheduleName}:not able to set climate ${climateName} for heating at the thermostat ${thermostat}")
+				}
+				log.debug("adjust_thermostat_setpoint_in_zone>schedule ${scheduleName}:not able to set climate  ${climateName} for heating at the thermostat ${thermostat}")
+			}                
+			desiredHeat = thermostat.currentHeatingSetpoint
+			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName},according to climateName ${climateName}, desiredHeat=${desiredHeat}")
 		} else {
-			desiredHeat = heatTemp.toFloat()
-		}
-		thermostat?.setHeatingSetpoint(desiredHeat)
-		if (detailedNotif == 'true') {
-			send("ScheduleRoomTempControl>schedule ${scheduleName},in zones=${zones},heating setPoint now =${heatTemp}°")
-		}
-		if (scheduleName != state.lastScheduleLastName) {
-			state.scheduleHeatSetpoint=desiredHeat 
-		}        
-        
+			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName}:no climate to be applied for heatingSetpoint")
+			key = "desiredHeat$indiceSchedule"
+			def heatTemp = settings[key]
+			if (!heatTemp) {
+				log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName}:about to apply default heat settings")
+				desiredHeat = (scale=='C') ? 21:72 					// by default, 21°C/72°F is the target heat temp
+			} else {
+				desiredHeat = heatTemp.toFloat()
+			}
+			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName},desiredHeat=${desiredHeat}")
+			thermostat?.setHeatingSetpoint(desiredHeat)
+			if (detailedNotif == 'true') {
+				send("ScheduleRoomTempControl>schedule ${scheduleName},in zones=${zones},heating setPoint now =${targetTstatTemp}°")
+			}
+			if (scheduleName != state.lastScheduleLastName) {
+				state.scheduleHeatSetpoint=desiredHeat 
+			}        
+		} 
 	} else if (mode == 'cool') {
-
-		key = "desiredCool$indiceSchedule"
-		def coolTemp = settings[key]
-		if (!coolTemp) {
-			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName},about to apply default cool settings")
-			desiredCool = (scale=='C') ? 23:75					// by default, 23°C/75°F is the target cool temp
+		if ((climateName) && (thermostat.hasCommand("setClimate"))) {
+			try {
+				thermostat?.setClimate("", climateName)
+			} catch (any) {
+				if (detailedNotif == 'true') {
+					send("ScheduleRoomTempControl>schedule ${scheduleName},not able to set climate ${climateName} for cooling at the thermostat(s) ${thermostat}")
+				}
+				log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName},not able to set climate ${climateName} associated for cooling at the thermostat ${thermostat}")
+			}                
+			desiredCool = thermostat.currentCoolingSetpoint
+			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName},according to climateName ${climateName}, desiredCool=${desiredCool}")
 		} else {
-			desiredCool = coolTemp.toFloat()
-		}
+			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName}:no climate to be applied for coolingSetpoint")
+			key = "desiredCool$indiceSchedule"
+			def coolTemp = settings[key]
+			if (!coolTemp) {
+				log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName},about to apply default cool settings")
+				desiredCool = (scale=='C') ? 23:75					// by default, 23°C/75°F is the target cool temp
+			} else {
+				desiredCool = coolTemp.toFloat()
+			}
+            
+			log.debug("set_thermostat_setpoint_in_zone>schedule ${scheduleName},desiredCool=${desiredCool}")
+		} 
 		thermostat?.setCoolingSetpoint(desiredCool)
 		if (detailedNotif == 'true') {
-			send("ScheduleRoomTempControl>schedule ${scheduleName},in zones=${zones},cooling setPoint now =${coolTemp}°")
-		}
+			send("ScheduleTstatZones>schedule ${scheduleName}, in zones=${zones},cooling setPoint now =${desiredCool}°")
+		}            
 		if (scheduleName != state.lastScheduleLastName) {
-			state.scheduleCoolSetpoint=desiredCool
+			state.scheduleCoolSetpoint=desiredCool 
 		}        
-
 	}
 
 }
