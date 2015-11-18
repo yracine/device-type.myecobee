@@ -28,7 +28,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.0.2" 
+		paragraph "Version 2.0.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -58,7 +58,7 @@ preferences {
 		input "phoneNumber", "phone", title: "Send a text message?", required: false
     }
 	section("Detailed Notifications") {
-		input "detailedNotif", "Boolean", title: "Detailed Notifications?",metadata:[values:["true", "false"]], required:false
+		input "detailedNotif", "bool", title: "Detailed Notifications?", required:false
     }
     
 }
@@ -186,7 +186,7 @@ void generateStats() {
 	def component = "auxHeat1"
 	generateRuntimeReport(component,startDate, endDate)
 	float runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
-	if (detailedNotif == 'true') {
+	if (detailedNotif ) {
 		send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
 
@@ -200,7 +200,7 @@ void generateStats() {
 		component = "auxHeat2"
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = ecobee.currentAuxHeat2RuntimeDaily.toFloat().round(2)
-		if (detailedNotif == 'true') {
+		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
 	}     
@@ -212,7 +212,7 @@ void generateStats() {
 		component = "auxHeat3"
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = ecobee.currentAuxHeat3RuntimeDaily.toFloat().round(2)
-		if (detailedNotif == 'true') {
+		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
 	}     
@@ -224,7 +224,7 @@ void generateStats() {
 	component = "compCool1"
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentCompCool1RuntimeDaily.toFloat().round(2)
-	if (detailedNotif == 'true') {
+	if (detailedNotif) {
 		send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
     
@@ -234,7 +234,7 @@ void generateStats() {
 		component = "compCool2"
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = ecobee.currentCompCool2RuntimeDaily.toFloat().round(2)
-		if (detailedNotif == 'true') {
+		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		} 
 	} 
@@ -244,7 +244,7 @@ void generateStats() {
  	component = "fan"
 	generateRuntimeReport(component,startDate, endDate)
 	runtimeTotalDaily = ecobee.currentFanRuntimeDaily.toFloat().round(2)
-	if (detailedNotif == 'true') {
+	if (detailedNotif) {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
 
@@ -253,33 +253,33 @@ void generateStats() {
 	def hasHrv = (ecobee.currentHasHrv)? ecobee.currentHasHrv : 'false' 
 	def hasErv = (ecobee.currentHasErv)? ecobee.currentHasErv : 'false' 
 
-	if (hasHumidifier) {
+	if (hasHumidifier=='true') {
 	 	// Get the humidifier's runtime for startDate-endDate period
 		component = "humidifier"
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
-		if (detailedNotif == 'true') {
+		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
     
 	}
 
-	if (hasDehumidifier) {
+	if (hasDehumidifier=='true') {
 	// Get the dehumidifier's for startDate-endDate period
 		component = "dehumidifier"
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2)
-		if (detailedNotif == 'true') {
+		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
 
 	}
-	if (hasHrv || hasErv) {
+	if (hasHrv=='true' || hasErv=='true') {
  	// Get the ventilator's runtime for  startDate-endDate period
 		component = "ventilator"
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = ecobee.currentVentilatorRuntimeDaily.toFloat().round(2)
-		if (detailedNotif == 'true') {
+		if (detailedNotif) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
 
