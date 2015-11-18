@@ -31,7 +31,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "AwayFromHome, the smartapp that sets your ecobee thermostat to 'Away' or to some specific settings when all presences leave your home"
-		paragraph "Version 1.9.1" 
+		paragraph "Version 1.9.2" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -77,7 +77,7 @@ preferences {
 		input "phone", "phone", title: "Send a Text Message?", required: false
 	}
 	section("Detailed Notifications") {
-		input "detailedNotif", "Boolean", title: "Detailed Notifications?", metadata: [values: ["true", "false"]], required: false
+		input "detailedNotif", "bool", title: "Detailed Notifications?", required: false
 	}
 
 }
@@ -112,7 +112,7 @@ def alarmSwitchContact(evt) {
 	log.info "alarmSwitchContact, $evt.name: $evt.value"
 
 	if ((alarmSwitch.currentContact == "closed") && residentsHaveBeenQuiet() && everyoneIsAway()) {
-		if (detailedNotif == 'true') {
+		if (detailedNotif) {
 			send("AwayFromHome>alarm system just armed, take actions")
 		}
 		log.debug "alarm is armed, nobody at home"
@@ -155,27 +155,27 @@ def presence(evt) {
 	log.debug "$evt.name: $evt.value"
 	if (evt.value == "not present") {
 		def person = getPerson(evt)
-		if (detailedNotif == 'true') {
+		if (detailedNotif) {
 			send("AwayFromHome> ${person.displayName} not present at home")
 		}
 		log.debug "checking if everyone is away  and quiet at home"
 		if (residentsHaveBeenQuiet()) {
 
 			if (everyoneIsAway()) {
-				if (detailedNotif == 'true') {
+				if (detailedNotif) {
 					send("AwayFromHome>Quiet at home...")
 				}
 				runIn(delay, "takeActions")
 			} else {
 				log.debug "Not everyone is away, doing nothing"
-				if (detailedNotif == 'true') {
+				if (detailedNotif) {
 					send("AwayFromHome>Not everyone is away, doing nothing..")
 				}
 			}
 		} else {
 
 			log.debug "Things are not quiet at home, doing nothing"
-			if (detailedNotif == 'true') {
+			if (detailedNotif) {
 				send("AwayFromHome>Things are not quiet at home...")
 			}
 		}
@@ -205,7 +205,7 @@ def takeActions() {
 		if (alarmSwitch ?.currentContact == "open") {
 			log.debug "alarm is not set, arm it..."
 			alarmSwitch.on() // arm the alarm system
-			if (detailedNotif == 'true') {
+			if (detailedNotif) {
 				send(msg)
 			}
 		}
@@ -220,21 +220,21 @@ def takeActions() {
 		}
 
 		msg = "AwayFromHome>ecobee's settings are now lower"
-		if (detailedNotif == 'true') {
+		if (detailedNotif ) {
 			send(msg)
 		}
 		log.info msg
 
 		locks ?.lock() // lock the locks 		
 		msg = "AwayFromHome>Locked the locks"
-		if (detailedNotif == 'true') {
+		if (detailedNotif) {
 			send(msg)
 		}
 		log.info msg
 
 		switches?.off() // turn off the lights		
 		msg = "AwayFromHome>Switched off all switches"
-		if (detailedNotif == 'true') {
+		if (detailedNotif) {
 			send(msg)
 		}
 		log.info msg
@@ -242,7 +242,7 @@ def takeActions() {
 
 		cameras?.alarmOn() // arm the cameras
 		msg = "AwayFromHome>cameras are now armed"
-		if (detailedNotif == 'true') {
+		if (detailedNotif) {
 			send(msg)
 		}
 		log.info msg
@@ -256,7 +256,7 @@ def takeActions() {
 
 private checkAlarmSystem() {
 	if (alarmSwitch.currentContact == "open") {
-		if (detailedNotif == 'true') {
+		if (detailedNotif) {
 			send("AwayFromHome>alarm still not activated,repeat...")
 		}
 		alarmSwitch.on() // try to arm the alarm system again
