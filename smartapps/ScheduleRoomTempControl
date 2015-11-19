@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.3" 
+			paragraph "Version 1.3.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -337,12 +337,12 @@ def schedulesSetup(params) {
 			input (name:"givenClimate${indiceSchedule}", type:"enum", title: "Which ecobee program? ", options: ecobeePrograms, 
 				required: false, defaultValue:settings."givenClimate${indiceSchedule}", description: "Optional")
 		}
-		section("Schedule ${indiceSchedule}-Cool setpoint during the schedule [optional, when no ecobee climate is specified]") {
-			input (name:"desiredCool${indiceSchedule}", type:"decimal", title: "Cool Temp, default = 75°F/23°C", 
+		section("Schedule ${indiceSchedule}-Set Thermostat's Cooling setpoint during the schedule [optional, when no ecobee climate is specified]") {
+			input (name:"desiredCool${indiceSchedule}", type:"decimal", title: "Cooling Setpoint, default = 75°F/23°C", 
 				required: false,defaultValue:settings."desiredCool${indiceSchedule}", description: "Optional")			                
 		}
-		section("Schedule ${indiceSchedule}-Heat setpoint during the schedule [optional, when no ecobee climate is specified]") {
-			input (name:"desiredHeat${indiceSchedule}", type:"decimal", title: "Heat Temp, default=72°F/21°C", 
+		section("Schedule ${indiceSchedule}-Set Thermostat's Heating setpoint during the schedule [optional, when no ecobee climate is specified]") {
+			input (name:"desiredHeat${indiceSchedule}", type:"decimal", title: "Heating Setpoint, default=72°F/21°C", 
 				required: false, defaultValue:settings."desiredHeat${indiceSchedule}", description: "Optional")			                
 		}
 		section("Schedule ${indiceSchedule}-Adjust vent settings every 5 minutes [optional]") {
