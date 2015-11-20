@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.1" 
+			paragraph "Version 5.1.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -352,12 +352,12 @@ def schedulesSetup(params) {
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}
 /*		Y.R. Commented out as issue with Schedule page        
-*/
-
 		section("Schedule ${indiceSchedule}-Minimum Fan Time during the Schedule [optional]") {
 			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule",
 				required: false, defaultValue:settings."givenFanMinTime${indiceSchedule}", description: "Optional")
 		}                        
+*/
+
 		section("Schedule ${indiceSchedule}-Set Zone/Room Thermostats Only Indicator [optional]") {
 			input (name:"setRoomThermostatsOnlyFlag${indiceSchedule}", type:"bool", title: "Set room thermostats only [default=false,main & room thermostats setpoints are set]", 
 				required: false, defaultValue:settings."setRoomThermostatsOnlyFlag${indiceSchedule}")
@@ -1234,7 +1234,6 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 	def scheduleName = settings[key]
 
 /* YR commented out as issue with Schedule page (ST constraint?)
-*/
 	key = "givenFanMinTime${indiceSchedule}"
 	def fanMinTime=settings[key]
 
@@ -1247,6 +1246,7 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 			send ("ecobeeSetZoneWithSchedule>minimum Fan Time set for this $scheduleName schedule is now $fanMinTime minutes")             
 		}            
 	}    
+*/
     
 	key = "fanMode$indiceSchedule"
 	def fanMode = settings[key]
@@ -1651,12 +1651,12 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 				float temp_diff_at_sensor = tempAtSensor.toFloat().round(1) - desiredTemp 
 				log.debug("adjust_vent_settings_in_zone>thermostat mode = ${mode}, schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}, avg_temp_diff=${avg_temp_diff}")
 				if (mode=='heat') {
-					if (avg_temp_diff ==0) avg_temp_diff=-0.1  // to avoid divided by zero exception
+					avg_temp_diff = (avg_temp_diff !=0) ? avg_temp_diff : (-0.1)  // to avoid divided by zero exception
 					switchLevel = ((temp_diff_at_sensor / avg_temp_diff) * 100).round()
 					switchLevel =( switchLevel >=0)?((switchLevel<100)? switchLevel: 100):0
 					switchLevel=(temp_diff_at_sensor >=0)? MIN_OPEN_LEVEL_SMALL: ((temp_diff_at_sensor <0) && (avg_temp_diff>0))?100:switchLevel
 				} else if (mode =='cool') {
-					if (avg_temp_diff ==0) avg_temp_diff=0.1 // to avoid divided by zero exception
+					avg_temp_diff = (avg_temp_diff !=0) ? avg_temp_diff : (0.1)  // to avoid divided by zero exception
 					switchLevel = ((temp_diff_at_sensor / avg_temp_diff) * 100).round()
 					switchLevel =( switchLevel >=0)?((switchLevel<100)? switchLevel: 100):0
 					switchLevel=(temp_diff_at_sensor <=0)? MIN_OPEN_LEVEL_SMALL: ((temp_diff_at_sensor >0) && (avg_temp_diff<0))?100:switchLevel
