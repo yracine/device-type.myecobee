@@ -12,7 +12,6 @@
  *
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *
  */
  
 definition(
@@ -44,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.3.1" 
+			paragraph "Version 1.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -403,13 +402,13 @@ def ventTemperatureHandler(evt) {
 	log.debug "vent temperature: $evt.value"
 	float ventTemp = evt.value.toFloat()
 	def scale = getTemperatureScale()
-	def MAX_TEMP_VENT_SWITCH = (scale=='C')?49:121 //Max temperature inside a ventSwitch
+	def MAX_TEMP_VENT_SWITCH = (scale=='C')?52:125 //Max temperature inside a ventSwitch
 	def MIN_TEMP_VENT_SWITCH = (scale=='C')?7:45 //Min temperature inside a ventSwitch
 	String currentHVACMode = thermostat.currentThermostatMode.toString()
     
 	if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (ventTemp >= MAX_TEMP_VENT_SWITCH)) {
 		// Open all vents just to be safe
-        open_all_vents()
+		open_all_vents()
 		send("ScheduleRoomTempControl>current HVAC mode is ${currentHVACMode}, found one of the vents' value too hot (${evt.value}°), opening all vents to avoid any damage")
 	} /* if too hot */           
 	if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (ventTemp <= MIN_TEMP_VENT_SWITCH)) {
