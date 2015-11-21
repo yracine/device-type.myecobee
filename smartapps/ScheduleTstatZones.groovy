@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.1.2" 
+			paragraph "Version 5.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -445,7 +445,7 @@ def ventTemperatureHandler(evt) {
     
 	if (((currentHVACMode=='heat') || (currentHVACMode == 'auto')) && (ventTemp >= MAX_TEMP_VENT_SWITCH)) {
 		// Open all vents just to be safe
-        open_all_vents()
+		open_all_vents()
 		send("ScheduleTstatZones>current HVAC mode is ${currentHVACMode}, found one of the vents' value too hot (${evt.value}°), opening all vents to avoid any damage")
 	} /* if too hot */           
 	if (((currentHVACMode=='cool') || (currentHVACMode == 'auto')) && (ventTemp <= MIN_TEMP_VENT_SWITCH)) {
@@ -1589,7 +1589,6 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 			def ventSwitch = settings[key]
 			if (ventSwitch != null) {
 				totalVents++
-				log.debug "turn_off_all_other_vents>found=${ventSwitch}"
 
 /* Y.R. Now the check is done by an event handler
 				// Prior to any processing, check temperature in each vent to avoid any HVAC damage
@@ -1604,6 +1603,11 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 					closedVentsSet.add(ventSwitch)                        
 					log.debug("turn_off_all_other_vents>about to turn off ${ventSwitch} as requested to create the desired zone(s)")
 				} else {
+					try {                
+						ventSwitch.refresh() 
+					} catch (e) {
+						log.debug("turn_off_all_other_vents>exception ${e} while trying to call refresh() on ${ventSwitch}")
+					}                    
 					def setLevel = ventSwitch.latestValue("level")
 					if (setlevel < MIN_OPEN_LEVEL) {                    
 						nbClosedVents++ 
@@ -1668,7 +1672,7 @@ private def open_all_vents() {
 			def key = "ventSwitch${j}$indiceRoom"
 			def vent = settings[key]
 				if (vent != null) {
-					vent.on()	
+					vent.setLevel(100)	
 				} /* end if vent != null */
 		} /* end for vent switches */
 	} /* end for rooms */
