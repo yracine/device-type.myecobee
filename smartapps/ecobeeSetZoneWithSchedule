@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.2" 
+			paragraph "Version 5.2.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -439,7 +439,7 @@ def ventTemperatureHandler(evt) {
 	log.debug "vent temperature: $evt.value"
 	float ventTemp = evt.value.toFloat()
 	def scale = getTemperatureScale()
-	def MAX_TEMP_VENT_SWITCH = (scale=='C')?49:121 //Max temperature inside a ventSwitch
+	def MAX_TEMP_VENT_SWITCH = (scale=='C')?52:125 //Max temperature inside a ventSwitch
 	def MIN_TEMP_VENT_SWITCH = (scale=='C')?7:45 //Min temperature inside a ventSwitch
 	String currentHVACMode = thermostat.currentThermostatMode.toString()
     
@@ -1754,7 +1754,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 
 private boolean is_temperature_too_hot_or_too_cold(ventSwitch) {
 	def scale = getTemperatureScale()
-	def MAX_TEMP_VENT_SWITCH = (scale=='C')?50:122 //Max temperature inside a ventSwitch
+	def MAX_TEMP_VENT_SWITCH = (scale=='C')?52:125 //Max temperature inside a ventSwitch
 	def MIN_TEMP_VENT_SWITCH = (scale=='C')?7:45 //Min temperature inside a ventSwitch
 	String currentHVACMode = thermostat.currentThermostatMode.toString()
     
