@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.1.4
+ *  Version 3.1.5
  *  Code: https://github.com/yracine/device-type.myecobee
  *  Refer to readme file for installation instructions.
  *
@@ -1287,18 +1287,15 @@ private void doRequest(uri, args, type, success) {
 		log.error "doRequest> Unknown host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> Unknown host ${params.uri}"
 		state.exceptionCount = state.exceptionCount +1     
-		throw e        
 	} catch (java.net.NoRouteToHostException e) {
 		log.error "doRequest> No route to host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> No route to host ${params.uri}"
 		state.exceptionCount = state.exceptionCount +1     
-		throw e        
 	} catch (e) {
 		log.debug "doRequest>exception $e for " + params.body
 		sendEvent name: "verboseTrace", value:
 			"doRequest>exception $e for " + params.body
 		state.exceptionCount = state.exceptionCount +1 
-		throw e        
 	}
 }
 
