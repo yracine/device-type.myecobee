@@ -4,19 +4,19 @@
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
+ *  in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
+ *  Developer grants a non exclusive perpetual license to use the Background technology in the Software developed for and delivered 
+ *  to Customer under this Agreement. However, the Customer shall make no commercial use of the Background technology without
+ *  Developer's written consent.
  *
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *  for the specific language governing permissions and limitations under the License.
- *
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * 
  * The MonitorAndSetEcobeeTemp monitors the outdoor temp and adjusts the heating and cooling set points
-     * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
-     * It also constantly monitors any 'holds' at the thermostat to make sure that these holds are justified according to
-     * the motion sensors at home and the given thresholds.
+ * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
+ * It also constantly monitors any 'holds' at the thermostat to make sure that these holds are justified according to
+ * the motion sensors at home and the given thresholds.
  */
 definition(
 	name: "MonitorAndSetEcobeeTemp",
