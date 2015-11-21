@@ -8,8 +8,6 @@ linkedIn profile:   ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
 
 Date:               2014-03-31
 
-Code: http://github.com/yracine/device-type.myecobee
-
 /*********************************************************************************************
 
 If you like My Ecobee Device and related smartapps, please support the developer:
@@ -40,8 +38,9 @@ b) Hit the "+New Device Type" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) Copy and paste the code from ecobee.devicetype.groovy
-under http://github.com/yracine/device-type.myecobee
+d) Copy and paste the code from ecobee.devicetype.groovy under 
+
+https://github.com/yracine/device-type.myecobee/blob/master/myecobee-devicetype.groovy
 
 e) Hit the create button at the bottom
 
