@@ -9,7 +9,16 @@
  *      JLH - 02-15-2014 - Fuller use of ecobee API
  *		Y.Racine Nov 2014 - Simplified the Service Manager as much as possible to reduce tight coupling with 
  *							its child device types (device handlers) for better performance and reliability.
- *      linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *      LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ * 
+ *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
+ *  in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
+ *  Developer grants a non exclusive perpetual license to use the Background technology in the Software developed for and delivered 
+ *  to Customer under this Agreement. However, the Customer shall make no commercial use of the Background technology without
+ *  Developer's written consent.
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  **/
 definition(
     name: "MyEcobeeInit",
