@@ -2,7 +2,7 @@
  *  MonitorAndSetEcobeeTemp
  *
  *  Copyright 2014 Yves Racine
- *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
  *  in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
@@ -11,11 +11,12 @@
  *  Developer's written consent.
  *
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. *
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ *
  * The MonitorAndSetEcobeeTemp monitors the outdoor temp and adjusts the heating and cooling set points
- * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
- * It also constantly monitors any 'holds' at the thermostat to make sure that these holds are justified according to
- * the motion sensors at home and the given thresholds.
+     * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
+     * It also constantly monitors any 'holds' at the thermostat to make sure that these holds are justified according to
+     * the motion sensors at home and the given thresholds.
  */
 definition(
 	name: "MonitorAndSetEcobeeTemp",
@@ -338,8 +339,8 @@ def monitorAdjustTemp() {
 	try {        
 		ecobee.poll()
 		exceptionCheck= ecobee.currentVerboseTrace.toString()
-		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
-			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+		if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
 		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
 			state?.exceptionCount=state.exceptionCount+1    
 			log.error "monitorAdjustTemp>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
@@ -351,7 +352,7 @@ def monitorAdjustTemp() {
 		state?.exceptionCount=state?.exceptionCount+1    
 		log.error "monitorAdjustTemp>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
+	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")))) {
 		// need to authenticate again    
 		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
 		send "MonitorEcobeeTemp> ${msg}"
