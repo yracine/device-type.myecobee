@@ -12,7 +12,7 @@
  *
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-*
+ *
  */
 definition(
 	name: "ecobee3RemoteSensorsInit",
@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.6.2" 
+			paragraph "Version 1.6.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -350,8 +350,8 @@ def takeAction() {
 	try {        
 		ecobee.poll()
 		exceptionCheck= ecobee.currentVerboseTrace.toString()
-		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
-			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+		if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
 		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
 			state?.exceptionCount=state.exceptionCount+1    
 			log.error "takeAction>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
@@ -363,7 +363,7 @@ def takeAction() {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "takeAction>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
+	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")))) {
 		// need to authenticate again    
 		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
 		send "ecobee3RemoteSensorInit> ${msg}"
