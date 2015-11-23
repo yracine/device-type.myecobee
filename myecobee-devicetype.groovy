@@ -2,14 +2,14 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.1.5
- *  Code: https://github.com/yracine/device-type.myecobee
+ *  Version 3.1.6
  *  Refer to readme file for installation instructions.
  *
- *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
- *  in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
- *  Developer grants a non exclusive perpetual license to use the Background technology in the Software developed for and delivered 
- *  to Customer under this Agreement. However, the Customer shall make no commercial use of the Background technology without
+ *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
+ *  trade secret in the Background technology. May be subject to consulting fees under an Agreement 
+ *  between the Developer and the Customer. Developer grants a non exclusive perpetual license to use
+ *  the Background technology in the Software developed for and delivered to Customer under this
+ *  Agreement. However, the Customer shall make no commercial use of the Background technology without
  *  Developer's written consent.
  *
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
@@ -17,7 +17,6 @@
  * 
  */
  
-
 // for the UI
 preferences {
 
@@ -471,60 +470,76 @@ metadata {
 }
 
 void coolLevelUp() {
-	int nextLevel = device.currentValue("coolingSetpoint") + 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
+		double nextLevel = device.currentValue("coolingSetpoint").toDouble() 
+		nextLevel = (nextLevel + 0.5).round(1)        
 		if (nextLevel > 30) {
 			nextLevel = 30
 		}
+		setCoolingSetpoint(nextLevel)
 	} else {
+		int nextLevel = device.currentValue("coolingSetpoint") 
+		nextLevel = nextLevel + 1    
 		if (nextLevel > 99) {
 			nextLevel = 99
 		}
+		setCoolingSetpoint(nextLevel)
 	}
-	setCoolingSetpoint(nextLevel)
 }
 void coolLevelDown() {
-	int nextLevel = device.currentValue("coolingSetpoint") - 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
+		double nextLevel = device.currentValue("coolingSetpoint").toDouble() 
+		nextLevel = (nextLevel - 0.5).round(1)        
 		if (nextLevel < 10) {
-			nextLevel = 10
+			nextLevel = 10.0
 		}
+		setCoolingSetpoint(nextLevel)
 	} else {
+		int nextLevel = device.currentValue("coolingSetpoint") 
+		nextLevel = (nextLevel - 1)
 		if (nextLevel < 50) {
 			nextLevel = 50
 		}
+		setCoolingSetpoint(nextLevel)
 	}
-	setCoolingSetpoint(nextLevel)
 }
 void heatLevelUp() {
-	int nextLevel = device.currentValue("heatingSetpoint") + 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
+		double nextLevel = device.currentValue("heatingSetpoint").toDouble() 
+		nextLevel = (nextLevel + 0.5).round(1)        
 		if (nextLevel > 30) {
-			nextLevel = 30
+			nextLevel = 30.0
 		}
+		setHeatingSetpoint(nextLevel)
 	} else {
+		int nextLevel = device.currentValue("heatingSetpoint") 
+		nextLevel = (nextLevel + 1)
 		if (nextLevel > 99) {
 			nextLevel = 99
 		}
+		setHeatingSetpoint(nextLevel)
 	}
-	setHeatingSetpoint(nextLevel)
 }
 void heatLevelDown() {
-	int nextLevel = device.currentValue("heatingSetpoint") - 1
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
+		double nextLevel = device.currentValue("heatingSetpoint").toDouble() 
+		nextLevel = (nextLevel - 0.5).round(1)        
 		if (nextLevel < 10) {
-			nextLevel = 10
+			nextLevel = 10.0
 		}
+		setHeatingSetpoint(nextLevel)
 	} else {
+		int nextLevel = device.currentValue("heatingSetpoint")
+		nextLevel = (nextLevel - 1)
 		if (nextLevel < 50) {
 			nextLevel = 50
 		}
+		setHeatingSetpoint(nextLevel)
 	}
-	setHeatingSetpoint(nextLevel)
 }
 
 // handle commands
@@ -1008,7 +1023,7 @@ private void generateEvent(Map results) {
 			if (name.toUpperCase().contains("DISPLAY")) {  
 
 				String tempValueString 
-				Double tempValue 
+				double tempValue 
 				if (scale == "F") {
 					tempValue = getTemperature(value).toDouble().round()
 					tempValueString = String.format('%2d', tempValue.intValue())            
@@ -1025,7 +1040,7 @@ private void generateEvent(Map results) {
 
 			} else if ((name.toUpperCase().contains("TEMP")) || (name.toUpperCase().contains("SETPOINT"))) {  
                                 
-				Double tempValue = getTemperature(value).round(1)
+				double tempValue = getTemperature(value).round(1)
 				String tempValueString = String.format('%2.1f', tempValue)
 				def isChange = isTemperatureStateChange(device, name, tempValueString)
                 
@@ -1035,12 +1050,12 @@ private void generateEvent(Map results) {
 
 // 			Speed variable names contain 'speed'
 
- 				Double speedValue = getSpeed(value).round(1)
+ 				double speedValue = getSpeed(value).round(1)
 				def isChange = isStateChange(device, name, speedValue.toString())
 				isDisplayed = isChange
 				sendEvent(name: name, value: speedValue.toString(), unit: getDistanceScale(), displayed: isDisplayed)                                     									 
 			} else if ((name.toUpperCase().contains("HUMIDITY")) || (name.toUpperCase().contains("LEVEL"))) {
- 				Double humValue = value.toDouble().round(0)
+ 				double humValue = value.toDouble().round(0)
 				String humValueString = String.format('%2d', humValue.intValue())
 				def isChange = isStateChange(device, name, humValueString)
 				isDisplayed = isChange
@@ -1109,7 +1124,7 @@ private def getThermostatGroups(thermostatId) {
 }
 
 private def getTemperature(value) {
-	Double farenheits = value.toDouble()
+	double farenheits = value.toDouble()
 	if (getTemperatureScale() == "F") {
 		return farenheits
 	} else {
@@ -1118,7 +1133,7 @@ private def getTemperature(value) {
 }
 
 private def getSpeed(value) {
-	Double miles = value
+	double miles = value
 	if(getTemperatureScale() == "F"){
 		return miles
 	} else {
@@ -2444,13 +2459,13 @@ void controlPlug(thermostatId, plugName, plugState, plugSettings = []) {
 //		}
 
 void getReportData(thermostatId, startDateTime, endDateTime, startInterval, endInterval, reportColumn, includeSensorData, postData='false') {
-	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
+	double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
 	int beginInt, endInt
 
 	thermostatId = determine_tstat_id(thermostatId)
-	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
+	double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
         
 	if (nbDaysInPeriod > 2) {  // Report period should not be bigger than 2 days to avoid summarizing too much data.
 		if (settings.trace) {
@@ -2595,12 +2610,12 @@ private int get_interval(Date dateTime) {
 // typeEvent may be 'daily' or others
 
 void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInterval, endInterval, typeEvent ='daily') {
-	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
+	double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
 	int beginInt, endInt
     
-	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
+	double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
         
 	if (nbDaysInPeriod > 2) {  // Report period should not be bigger than 2 days to avoid summarizing too much data.
 		if (settings.trace) {
@@ -2713,13 +2728,13 @@ void generateReportRuntimeEvents(component, startDateTime, endDateTime, startInt
 // operation may be one or several stats separated by comma (ex. avg, min, max, total)
 
 void generateReportSensorStatsEvents(sensorId, startDateTime, endDateTime, startInterval, endInterval, operation) {
-	Double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
+	double TOTAL_MILLISECONDS_PER_DAY=(24*60*60*1000)	
 	def REPORT_TIME_INTERVAL=5
 	def REPORT_MAX_INTERVALS_PER_DAY=287
 	int beginInt, endInt
 	boolean foundSensor=false
     
-	Double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
+	double nbDaysInPeriod = ((endDateTime.getTime() - startDateTime.getTime()) /TOTAL_MILLISECONDS_PER_DAY).round(2)
 
 	float runtimeSensorStat
     
