@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.2.3" 
+			paragraph "Version 5.2.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -595,8 +595,8 @@ def setZoneSettings() {
 	try {        
 		thermostat.poll()
 		exceptionCheck= thermostat.currentVerboseTrace?.toString()
-		if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
-			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+		if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
 			// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
 			state?.exceptionCount=state.exceptionCount+1    
 			log.error "setZoneSettings>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
@@ -1674,7 +1674,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 					log.debug "adjust_vent_settings_in_zone>in zone=${zoneName},room ${roomName},set ${ventSwitch} at switchLevel =${switchLevel}%"
 					ventSwitchesOnSet.add(ventSwitch)
 					nbVents++                    
-				}
+				}                
 			} /* end for ventSwitch */                             
 		} /* end for rooms */
 	} /* end for zones */
@@ -1718,7 +1718,14 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 					nbClosedVents++ 
 					closedVentsSet.add(ventSwitch)                        
 					log.debug("turn_off_all_other_vents>turned off ${ventSwitch} as requested to create the desired zone(s)")
-				}                    
+				} else {
+					def ventLevel= ventSwitch.getLevel()
+					if ((ventLevel) && (ventLevel < MIN_OPEN_LEVEL)) { // below minimum level is considered as closed.
+						nbClosedVents++ 
+						closedVentsSet.add(ventSwitch)                        
+						log.debug("turn_off_all_other_vents>${ventSwitch}'s level=${ventLevel} is lesser than minimum level ${MAX_OPEN_LEVEL}")
+ 					}                        
+				} /* else if foundSwitch==null */                    
 			}   /* end if ventSwitch */                  
 		}  /* end for ventSwitch */         
 	} /* end for rooms */
