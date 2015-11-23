@@ -1,21 +1,15 @@
 /**
- * My ecobee Init (Service Manager)
+ *	My ecobee Init (Service Manager)
+ *
+ *	Author: scott
+ *	Date: 2013-08-07
  *
  *  Last Modification:
  *      JLH - 01-23-2014 - Update for Correct SmartApp URL Format
  *      JLH - 02-15-2014 - Fuller use of ecobee API
  *		Y.Racine Nov 2014 - Simplified the Service Manager as much as possible to reduce tight coupling with 
  *							its child device types (device handlers) for better performance and reliability.
- *      LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- * 
- *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
- *  in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
- *  Developer grants a non exclusive perpetual license to use the Background technology in the Software developed for and delivered 
- *  to Customer under this Agreement. However, the Customer shall make no commercial use of the Background technology without
- *  Developer's written consent.
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ *      linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  **/
 definition(
     name: "MyEcobeeInit",
@@ -45,7 +39,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 2.3.2\n\n" 
+			paragraph "Version 2.3.3\n\n" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -442,8 +436,8 @@ def takeAction() {
 		try {        
 			d.poll()
 			exceptionCheck = d.currentVerboseTrace.toString()
-			if ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
-				(!exceptionCheck.contains("Java.util.concurrent.TimeoutException")))) {  
+			if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+				(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
 			// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
 				state.exceptionCount=state.exceptionCount+1    
 				log.error "found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
@@ -456,7 +450,7 @@ def takeAction() {
 			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 		}
 	}
-	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || (exceptionCheck.contains("Unauthorized"))) {
+	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")))) {
 		// need to authenticate again    
 		atomicState.authToken=null                    
 		state?.oauthTokenProvided=false
