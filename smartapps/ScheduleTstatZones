@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.2.3" 
+			paragraph "Version 5.2.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -83,6 +83,9 @@ def generalSetupPage() {
 		section("Enable fan adjustment based on indoor/outdoor temp sensors [optional, default=false]") {
 			input (name:"setAdjustmentFanFlag", title: "Enable fan adjustment set in schedules based on sensors?", type:"bool",required:false)
 		}
+		section("Close the vents [optional, default=some safeguards are implemented to avoid closing them totally]") {
+			input (name:"fullyCloseVentsFlag", title: "Close the vents totally?", type:"bool",required:false)
+		}       
 		section("What do I use for the Master on/off switch to enable/disable smartapp processing? [optional]") {
 			input (name:"powerSwitch", type:"capability.switch", required: false,description: "Optional")
 		}
@@ -749,8 +752,7 @@ def setZoneSettings() {
 			// let's adjust the vent settings according to desired Temp only if thermostat is not idle or was not idle at the last run
             
 			if ((setVentSettings) && ((operatingState.toUpperCase() !='IDLE') ||
-				((state?.operatingState.toUpperCase() =='HEATING') || (state?.operatingState.toUpperCase() =='COOLING'))))
-			{            
+				((state?.operatingState.toUpperCase() =='HEATING') || (state?.operatingState.toUpperCase() =='COOLING')))) {            
 				log.debug "setZoneSettings>thermostat ${thermostat}'s Operating State is ${operatingState} or was just recently " +
 					"${state?.operatingState}, adjusting the vents for schedule ${scheduleName}"
 				ventSwitchesZoneSet=adjust_vent_settings_in_zone(i)
@@ -1442,6 +1444,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	int nbVents=0
 	def switchLevel    
 	def ventSwitchesOnSet=[]
+	def fullyCloseVents = (fullyCloseVentsFlag) ?: false
 
 	def key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
@@ -1564,7 +1567,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 		} /* end for rooms */
 	} /* end for zones */
 
-	if ((closedAllVentsInZone) && (nbVents)) {
+	if ((!fullyCloseVents) && (closedAllVentsInZone) && (nbVents)) {
 		    	
 		switchLevel=(nbVents>2)? MIN_OPEN_LEVEL_SMALL:MIN_OPEN_LEVEL_BIG        
 		ventSwitchesOnSet=control_vent_switches_in_zone(indiceSchedule, switchLevel)		    
@@ -1582,6 +1585,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	float MAX_RATIO_CLOSED_VENTS=50 // not more than 50% of the smart vents should be closed at once
 	def MIN_OPEN_LEVEL=25  
 	def closedVentsSet=[]
+	def fullyCloseVents = (fullyCloseVentsFlag) ?: false
     
 	for (indiceRoom in 1..roomsCount) {
 		for (int j = 1;(j <= 5); j++)  {
@@ -1615,7 +1619,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	} /* end for rooms */
 	float ratioClosedVents=(nbClosedVents/totalVents*100)
     
-	if (ratioClosedVents > MAX_RATIO_CLOSED_VENTS) {
+	if ((!fullyCloseVents) && (ratioClosedVents > MAX_RATIO_CLOSED_VENTS)) {
 		log.debug("turn_off_all_other_vents>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
 		if (detailedNotif) {
 			send("ScheduleTstatZones>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
