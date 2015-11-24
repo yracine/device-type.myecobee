@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.5" 
+			paragraph "Version 1.5.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -995,7 +995,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 		} /* end for rooms */
 	} /* end for zones */
 
-	if ( (!fullyCloseVents) && (closedAllVentsInZone) && (nbVents)) {
+	if ((!fullyCloseVents) && (closedAllVentsInZone) && (nbVents)) {
 		    	
 		switchLevel=(nbVents>2)? MIN_OPEN_LEVEL_SMALL:MIN_OPEN_LEVEL_BIG        
 		ventSwitchesOnSet=control_vent_switches_in_zone(indiceSchedule, switchLevel)		    
@@ -1013,6 +1013,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	float MAX_RATIO_CLOSED_VENTS=50 // not more than 50% of the smart vents should be closed at once
 	def MIN_OPEN_LEVEL=25  
 	def closedVentsSet=[]
+	def fullyCloseVents = (fullyCloseVentsFlag) ?: false
     
 	for (indiceRoom in 1..roomsCount) {
 		for (int j = 1;(j <= 5); j++)  {
@@ -1033,7 +1034,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	} /* end for rooms */
 	float ratioClosedVents=(nbClosedVents/totalVents*100)
     
-	if (ratioClosedVents > MAX_RATIO_CLOSED_VENTS) {
+	if ((!fullyCloseVents) && (ratioClosedVents > MAX_RATIO_CLOSED_VENTS)) {
 		log.debug("turn_off_all_other_vents>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
 		if (detailedNotif) {
 			send("ScheduleRoomTempControl>ratio of closed vents is too high (${ratioClosedVents.round()}%), opening ${closedVentsSet} at minimum level of ${MIN_OPEN_LEVEL}%")
