@@ -1722,13 +1722,11 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 				if (foundVentSwitch ==null) {
 					nbClosedVents++ 
 					closedVentsSet.add(ventSwitch)                        
-					log.debug("turn_off_all_other_vents>turned off ${ventSwitch} as requested to create the desired zone(s)")
 				} else {
 					def ventLevel= ventSwitch.getLevel()
 					if ((ventLevel) && (ventLevel < MIN_OPEN_LEVEL)) { // below minimum level is considered as closed.
 						nbClosedVents++ 
 						closedVentsSet.add(ventSwitch)                        
-						log.debug("turn_off_all_other_vents>${ventSwitch}'s level=${ventLevel} is lesser than minimum level ${MAX_OPEN_LEVEL}")
  					}                        
 				} /* else if foundSwitch==null */                    
 			}   /* end if ventSwitch */                  
@@ -1747,6 +1745,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	} else {
 		closedVentsSet.each {
 			it.off()
+			log.debug("turn_off_all_other_vents>turned off ${it} as requested to create the desired zone(s)")
 		}        
     
 	}        
