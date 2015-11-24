@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.4" 
+			paragraph "Version 1.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -65,6 +65,9 @@ def generalSetupPage() {
 		}
 		section("Do not set the thermostat setpoints in schedules [optional, default=The thermostat setpoints are set]") {
 			input (name:"noSetpointsFlag", title: "Do not set the thermostat setpoints?", type:"bool",required:false)
+		}
+		section("Close the vent totally [optional, default=some safeguards are implemented to avoid closing them totally ]") {
+			input (name:"fullyCloseVentsFlag", title: "Close the vents totally?", type:"bool",required:false)
 		}
         
 		section("What do I use for the Master on/off switch to enable/disable smartapp processing? [optional]") {
@@ -920,6 +923,8 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 	float currentTempAtTstat = thermostat?.currentTemperature.toFloat().round(1)
 	String mode = thermostat.currentThermostatMode.toString()
 
+	def fullyCloseVents = (fullyCloseVentsFlag) ?: false
+    
 	for (zone in zones) {
 
 		def zoneDetails=zone.split(':')
@@ -940,7 +945,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
         
 			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, desiredTemp=${desiredTemp}")
 
-			switchLevel =0	// initially set at zero for check later
+			switchLevel =null	// initially set at null for check later
 			def roomDetails=room.split(':')
 			indiceRoom = roomDetails[0]
 			def roomName = roomDetails[1]
@@ -953,22 +958,23 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 				def motionSensor = settings[key]
 				if (motionSensor != null) {
 					if (!isRoomOccupied(motionSensor, indiceRoom)) {
-						switchLevel =MIN_OPEN_LEVEL_SMALL // setLevel at a minimum as the room is not occupied.
+						switchLevel = (fullyCloseVents)? 0: MIN_OPEN_LEVEL_SMALL // setLevel at a minimum as the room is not occupied.
 						log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, in zone ${zoneName}, room = ${roomName},not occupied,vents set to mininum level=${switchLevel}")
 					}
 				}
 			} 
-			if (!switchLevel) {
+			if (switchLevel ==null) {
 				def tempAtSensor =getSensorTempForAverage(indiceRoom)			
 				if (tempAtSensor == null) {
 					tempAtSensor= currentTempAtTstat				            
 				}
+                
 				float temp_diff_at_sensor = tempAtSensor.toFloat().round(1) - desiredTemp 
 				log.debug("adjust_vent_settings_in_zone>thermostat mode = ${mode}, schedule ${scheduleName}, in zone ${zoneName}, room ${roomName}, temp_diff_at_sensor=${temp_diff_at_sensor}")
 				if (mode=='heat') {
-					switchLevel=(temp_diff_at_sensor >=0)? MIN_OPEN_LEVEL_SMALL: 100
+					switchLevel=(temp_diff_at_sensor >=0)? ((fullyCloseVents) ? 0: MIN_OPEN_LEVEL_SMALL): 100
 				} else if (mode =='cool') {
-					switchLevel=(temp_diff_at_sensor <=0)? MIN_OPEN_LEVEL_SMALL: 100
+					switchLevel=(temp_diff_at_sensor <=0)? ((fullyCloseVents) ? 0: MIN_OPEN_LEVEL_SMALL): 100
 				}                
 			} 
 			if (switchLevel >=10) {	
@@ -989,7 +995,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
 		} /* end for rooms */
 	} /* end for zones */
 
-	if ((closedAllVentsInZone) && (nbVents)) {
+	if ( (!fullyCloseVents) && (closedAllVentsInZone) && (nbVents)) {
 		    	
 		switchLevel=(nbVents>2)? MIN_OPEN_LEVEL_SMALL:MIN_OPEN_LEVEL_BIG        
 		ventSwitchesOnSet=control_vent_switches_in_zone(indiceSchedule, switchLevel)		    
