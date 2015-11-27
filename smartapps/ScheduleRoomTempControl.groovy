@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.5.1" 
+			paragraph "Version 1.5.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -945,7 +945,7 @@ private def adjust_vent_settings_in_zone(indiceSchedule) {
         
 			log.debug("adjust_vent_settings_in_zone>schedule ${scheduleName}, desiredTemp=${desiredTemp}")
 
-			switchLevel =null	// initially set at null for check later
+			switchLevel =null	// initially set to null for check later
 			def roomDetails=room.split(':')
 			indiceRoom = roomDetails[0]
 			def roomName = roomDetails[1]
@@ -1027,7 +1027,6 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 				if (foundVentSwitch ==null) {
 					nbClosedVents++ 
 					closedVentsSet.add(ventSwitch)                        
-					log.debug("turn_off_all_other_vents>about to turn off ${ventSwitch} as requested to create the desired zone(s)")
 				}                    
 			}   /* end if ventSwitch */                  
 		}  /* end for ventSwitch */         
@@ -1045,6 +1044,7 @@ private def turn_off_all_other_vents(ventSwitchesOnSet) {
 	} else {
 		closedVentsSet.each {
 			it.off()
+			log.debug("turn_off_all_other_vents>turn off ${it} as requested to create the desired zone(s)")
 		}        
     
 	}        
