@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.6.2" 
+			paragraph "Version 1.6.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -66,7 +66,7 @@ def generalSetupPage() {
 		section("Do not set the thermostat setpoints in schedules [optional, default=The thermostat setpoints are set]") {
 			input (name:"noSetpointsFlag", title: "Do not set the thermostat setpoints?", type:"bool",required:false)
 		}
-		section("Close the vent totally [optional, default=some safeguards are implemented to avoid closing them totally ]") {
+		section("Close the vent totally [optional, default=some safeguards are implemented to avoid damaging your HVAC]") {
 			input (name:"fullyCloseVentsFlag", title: "Close the vents totally?", type:"bool",required:false)
 		}
         
