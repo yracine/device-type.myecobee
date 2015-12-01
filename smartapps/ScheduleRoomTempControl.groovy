@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.5.2" 
+			paragraph "Version 1.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -84,58 +84,93 @@ def generalSetupPage() {
 	}
 }
 
-
-
-
-
-
 def roomsSetupPage() {
 
-	dynamicPage(name: "roomsSetup", title: "Rooms Setup", uninstall: true, nextPage: zonesSetupPage) {
-
-		for (int indiceRoom = 1;
-			((indiceRoom <= settings.roomsCount) && (indiceRoom <= 16)); indiceRoom++) {
-            
-			section("Room ${indiceRoom} Setup") {
-				input "roomName${indiceRoom}", title: "Room Name", "string"
+	dynamicPage(name: "roomsSetupPage", title: "Room Setup", nextPage: zonesSetupPage) {
+		section("Room") {
+			for (int i = 1; i <= settings.roomsCount; i++) {
+				href(name: "toRoomPage$i", page: "roomsSetup", params: [indiceRoom: i], required:false, description: roomHrefDescription(i), title: roomHrefTitle(i), state: roomPageState(i) )
 			}
-			section("Room ${indiceRoom}-TempSensor [optional]") {
-				input "tempSensor${indiceRoom}", title: "Temp sensor for better temp adjustment", "capability.temperatureMeasurement", 
-					required: false, description: "Optional"
-
-			}
-			section("Room ${indiceRoom}-Vents Setup [optional]")  {
-				for (int j = 1;(j <= 5); j++)  {
-					input "ventSwitch${j}${indiceRoom}", title: "Vent switch no ${j} in room", "capability.switch", 
-						required: false, description: "Optional"
-				}           
-			}           
-			section("Room ${indiceRoom}-MotionSensor [optional]") {
-				input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
-                			required: false, description: "Optional"
-
-			}
-			section("Room ${indiceRoom}-Do vent adjustment when occupied room only [optional, vent will be partially closed otherwise]") {
-				input "needOccupiedFlag${indiceRoom}", title: "Will do vent adjustement only when Occupied [default=false]", "bool",  
-                			required: false, description: "Optional"
-
-			}
-			section("Room ${indiceRoom}-Do vent adjustment with this occupied's threshold [optional]") {
-				input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
-               				required: false, description: "Optional"
-
-			}
-			section() {
-				paragraph "**** DONE FOR ROOM ${indiceRoom} **** "
-
-			}                
-		} /* end for */
+		}            
 		section {
 			href(name: "toGeneralSetupPage", title: "Back to General Setup Page", page: "generalSetupPage")
 		}
-
 	}
+}        
 
+def roomPageState(i) {
+
+	if (settings."roomName${i}" != null) {
+		return 'complete'
+	} else {
+		return 'incomplete'
+	}
+  
+}
+
+def roomHrefTitle(i) {
+	def title = "Room ${i}"
+	return title
+}
+
+def roomHrefDescription(i) {
+	def description ="Room no ${i} "
+
+	if (settings."roomName${i}" !=null) {
+		description += settings."roomName${i}"		    	
+	}
+	return description
+}
+
+def roomsSetup(params) {
+	log.debug "params: $params"
+	def indiceRoom=0    
+
+	// Assign params to indiceZone.  Sometimes parameters are double nested.
+	if (params?.indiceRoom || params?.params?.indiceRoom) {
+
+		if (params.indiceRoom) {
+			indiceRoom = params.indiceRoom
+		} else {
+			indiceRoom = params.params.indiceRoom
+		}
+	}    
+ 
+	indiceRoom=indiceRoom.intValue()
+	log.debug "roomsSetup> indiceRoom=${indiceRoom}"
+
+	dynamicPage(name: "roomsSetup", title: "Rooms Setup", uninstall: true, nextPage: zonesSetupPage) {
+
+		section("Room ${indiceRoom} Setup") {
+			input "roomName${indiceRoom}", title: "Room Name", "string"
+		}
+		section("Room ${indiceRoom}-TempSensor [optional]") {
+			input "tempSensor${indiceRoom}", title: "Temp sensor for better temp adjustment", "capability.temperatureMeasurement", 
+				required: false, description: "Optional"
+
+		}
+		section("Room ${indiceRoom}-Vents Setup [optional]")  {
+			for (int j = 1;(j <= 5); j++)  {
+				input "ventSwitch${j}${indiceRoom}", title: "Vent switch no ${j} in room", "capability.switch", 
+					required: false, description: "Optional"
+			}           
+		}           
+		section("Room ${indiceRoom}-MotionSensor [optional]") {
+			input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
+				required: false, description: "Optional"
+		}
+		section("Room ${indiceRoom}-Do vent adjustment when occupied room only [optional, vent will be partially closed otherwise]") {
+			input "needOccupiedFlag${indiceRoom}", title: "Will do vent adjustement only when Occupied [default=false]", "bool",  
+				required: false, description: "Optional"
+		}
+		section("Room ${indiceRoom}-Do vent adjustment with this occupied's threshold [optional]") {
+			input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
+				required: false, description: "Optional"
+		}
+		section {
+			href(name: "toGeneralSetupPage", title: "Back to General Setup Page", page: "generalSetupPage")
+		}
+	}
 }
 
 def zoneHrefDescription(i) {
@@ -664,10 +699,10 @@ def setZoneSettings() {
 
 
 			key = "adjustVentsEveryCycleFlag$i"
-			def setVentSettings = (settings[key]) ?: false
+			def adjustVentSettings = (settings[key]) ?: false
 			log.debug "setZoneSettings>adjustVentsEveryCycleFlag=$setVentSettings"
 
-			if ((setVentSettings) || ((operatingState.toUpperCase() !='IDLE') ||
+			if ((adjustVentSettings) || ((operatingState.toUpperCase() !='IDLE') ||
 				((state?.operatingState.toUpperCase() =='HEATING') || (state?.operatingState.toUpperCase() =='COOLING'))))
 			{            
 				log.debug "setZoneSettings>thermostat ${thermostat}'s Operating State is ${operatingState} or was just recently " +
