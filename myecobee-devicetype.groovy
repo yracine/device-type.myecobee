@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.1.6
+ *  Version 3.2.1
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -217,6 +217,7 @@ metadata {
 		command "generateReportSensorStatsEvents"
 		command "getThermostatRevision"
 		command "generateRemoteSensorEvents"
+		command "getRemoteSensorUpdate"        
 	}        
 	simulator {
 		// TODO: define status and reply messages here
@@ -825,7 +826,7 @@ void poll() {
 	def thermostatId= determine_tstat_id("") 	    
 
 
-	def poll_interval=0.25   // set a 15 sec. poll interval to avoid unecessary load on ecobee servers
+	def poll_interval=2   // set a 2 min. poll interval to avoid unecessary load on ecobee servers
 	def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
 	if ((state?.lastPollTimestamp) && (state?.lastPollTimestamp > time_check_for_poll)) {
 		if (settings.trace) {
@@ -1196,7 +1197,7 @@ void resumeThisTstat() {
 	poll()
 }
 private void api(method, args, success = {}) {
-	def MAX_EXCEPTION_COUNT=5
+	def MAX_EXCEPTION_COUNT=25
 	String URI_ROOT = "${get_URI_ROOT()}/1"
 	if (!isLoggedIn()) {
 		login()
@@ -1320,7 +1321,7 @@ private void doRequest(uri, args, type, success) {
 //		may be set to null if not relevant for the given method
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
 private def build_body_request(method, tstatType="registered", thermostatId, tstatParams = [],
-	tstatSettings = []) {
+	tstatSettings = [], includeSensor=false) {
 	def selectionJson = null
 	def selection = null  
 	if (method == 'thermostatSummary') {
@@ -1350,7 +1351,14 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 			includeWeather: 'true',            
 			includeAlerts: 'true',
 			includeEvents: 'true',
-			includeEquipmentStatus: 'true',
+			includeEquipmentStatus: 'true'
+			]
+		]
+		selectionJson = new groovy.json.JsonBuilder(selection)
+		return selectionJson
+	} else if (method == 'remoteSensorUpdate') {
+		selection = [selection: [selectionType: 'thermostats',
+			selectionMatch: thermostatId,
 			includeSensors: 'true'
 			]
 		]
@@ -2850,7 +2858,9 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 	def minTemp=null
 	def minHum=null
     
-	if (thermostatId) {
+
+
+	if ((thermostatId!=null) && (thermostatId !="")) {
 		if (thermostatId.contains(",")) {
         
 			if (settings.trace) {
@@ -2859,10 +2869,29 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 			}                
 			return
 		}
-		getThermostatInfo(thermostatId)    
+	} else {
+		thermostatId = determine_tstat_id(thermostatId)
 	}
-	thermostatId = determine_tstat_id(thermostatId)
-
+	def poll_interval=5   // set a 5 min. poll interval to avoid unecessary load on ecobee servers
+	def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
+	if ((state?.lastUpdateRemoteSensorTimestamp) && (state?.lastUpdateRemoteSensorTimestamp > time_check_for_poll)) {
+		if (settings.trace) {
+			log.debug "generateRemoteSensorEvents>thermostatId = ${thermostatId},time_check_for_poll (${time_check_for_poll}) < state.lastPollTimestamp (${state.lastUpdateRemoteSensorTimestamp}), not refreshing data..."
+			sendEvent name: "verboseTrace", value:
+				"generateRemoteSensorEvents>thermostatId = ${thermostatId},time_check_for_poll (${time_check_for_poll} < state.lastUpdateRemoteSensorTimestamp (${state.lastUpdateRemoteSensorTimestamp}), not refreshing data..."
+		}
+		return
+	}
+	state.lastUpdateRemoteSensorTimestamp = now()
+	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
+    
+	if (!getThermostatRevision(ecobeeType,"")) {
+    
+		// if there are no changes in the thermostat, runtime or interval revisions, values at ecobee haven't changed since last update
+		return
+	}
+    
+	getRemoteSensorUpdate(thermostatId)    
 /* Reset all remote sensor data values */
 	def remoteData = []
 	def remoteTempData = ""
@@ -3035,6 +3064,55 @@ void getThermostatInfo(thermostatId=settings.thermostatId) {
 	} /* end while */
 }
 
+
+// thermostatId may be a list of serial# separated by ",", no spaces (ex. '123456789012,123456789013') 
+//	if no thermostatId is provided, it is defaulted to the current thermostatId 
+void getRemoteSensorUpdate(thermostatId=settings.thermostatId) {
+	if (settings.trace) {
+		log.debug "getRemoteSensorUpdate> about to call build_body_request for thermostatId = ${thermostatId}..."
+	}
+	def bodyReq = build_body_request('remoteSensorUpdate',null,thermostatId,null)
+	if (settings.trace) {
+		log.debug "getRemoteSensorUpdate> about to call api with body = ${bodyReq} for thermostatId = ${thermostatId}..."
+	}
+	def statusCode=true
+	int j=0    
+	while ((statusCode) && (j++ <2)) { // retries once if api call fails
+		api('thermostatInfo', bodyReq) {resp ->
+			statusCode = resp.data.status.code
+			def message = resp.data.status.message
+			if (!statusCode) {
+				data?.thermostatList = resp.data.thermostatList
+				def thermostatName = data.thermostatList[0].name
+				if (data.thermostatList[0].remoteSensors) {
+					if (settings.trace) {
+						log.debug "getRemoteSensorUpdate>found remote sensor values for thermostatId=${thermostatId},name=${thermostatName}"
+						sendEvent name: "verboseTrace", value:
+							"getRemoteSensorUpdate>found remote sensor values for thermostatId=${thermostatId},name=${thermostatName}"
+					}                            
+				} else {
+					if (settings.trace) {
+						log.debug "getRemoteSensorUpdate>No remote sensor values for thermostatId=${thermostatId},name=${thermostatName}"
+						sendEvent name: "verboseTrace", value:
+							"getRemoteSensorUpdate>No remote sensor values for thermostatId=${thermostatId},name=${thermostatName}"
+					}
+				}        
+				sendEvent name: "verboseTrace", value:
+					"getRemoteSensorUpdate>done for ${thermostatId}"
+			} else {
+				log.error 
+					"getRemoteSensorUpdate> error=${statusCode.toString()},message=${message} for ${thermostatId}"
+				sendEvent name: "verboseTrace", value:
+					"getRemoteSensorUpdate>error=${statusCode},message=${message} for ${thermostatId}"
+				// introduce a 1 second delay before re-attempting any other command                    
+				def cmd= []           
+				cmd << "delay 1000"                    
+				cmd            
+			} /* end if statusCode */                 
+		} /* end api call */
+	} /* end while */
+}
+
 // tstatType =managementSet or registered (no spaces). 
 // May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
 // thermostatId may be a single thermostat only
@@ -3187,18 +3265,19 @@ private def refresh_tokens() {
 		return false
 	}
 	// determine token's expire time
-	def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
+    
+	def authexptime = new Date((now() + (data.auth.expires_in  * 1000))).getTime()
 	data.auth.authexptime = authexptime
-
 	// If this thermostat was created by initialSetup, go and refresh the parent and all other children
 	if (data.auth.thermostatId) {		// Created by initalSetup, need to refresh Parent tokens and other children
 		refreshParentTokens()
-	}        
+	}   
 	if (settings.trace) {
-		log.debug "refresh_tokens> expires in ${data.auth.expires_in} minutes"
+		float authExpTimeInMin= (authexptime/60).toFloat().round(1)
+		log.debug "refresh_tokens> expires in ${authExpTimeInMin} minutes"
 		log.debug "refresh_tokens> data_auth.expires_in in time = ${authexptime}"
 		sendEvent name: "verboseTrace", value:
-			"refresh_tokens>expire in ${data.auth.expires_in} minutes"
+			"refresh_tokens>expire in ${authExpTimeInMin} minutes"
 	}
 	return true
 }
@@ -3358,7 +3437,7 @@ void setAuthTokens() {
 			return
 		}
 		// determine token's expire time
-		def authexptime = new Date((now() + (data.auth.expires_in * 60 * 1000))).getTime()
+		def authexptime = new Date((now() + (data.auth.expires_in  * 1000))).getTime()
 		data.auth.authexptime = authexptime
 		if (settings.trace) {
 			log.debug "setAuthTokens> expires in ${data.auth.expires_in} minutes"
