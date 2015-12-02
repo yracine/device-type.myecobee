@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 1.6.3" 
+			paragraph "Version 2.0" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -345,10 +345,11 @@ def takeAction() {
 	}
 
     
-	def MAX_EXCEPTION_COUNT=5
+	def MAX_EXCEPTION_COUNT=50
 	String exceptionCheck, msg 
 	try {        
-		ecobee.poll()
+		log.trace "takeAction>about to call generateRemoteSensorEvents()"
+		ecobee.generateRemoteSensorEvents("", 'false')	
 		exceptionCheck= ecobee.currentVerboseTrace.toString()
 		if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
 			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
@@ -363,25 +364,14 @@ def takeAction() {
 		state.exceptionCount=state.exceptionCount+1    
 		log.error "takeAction>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")))) {
+	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		// need to authenticate again    
-		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), you may need to re-authenticate at ecobee..." 
 		send "ecobee3RemoteSensorInit> ${msg}"
 		log.error msg
 		return        
 	}    
     
-	def newRuntimeRevision = ecobee.currentRuntimeRevision
-	log.debug ("ecobee3RemoteSensorInit>state.runtimeRevision=${state?.runtimeRevision},newRuntimeRevision=${newRuntimeRevision}")
-	if ((state?.runtimeRevision) && (state?.runtimeRevision == newRuntimeRevision)) { 
-		log.debug ("ecobee3RemoteSensorInit>no runtime revision change since last poll(), no update action required...")
-		return
-	}
-	state?.runtimeRevision = newRuntimeRevision
-    
-	log.trace "takeAction>about to call generateRemoteSensorEvents()"
-	ecobee.generateRemoteSensorEvents("", 'false')
-	    
 	updateMotionSensors()
 	updateTempSensors()    
 	updateHumiditySensors()
@@ -420,8 +410,6 @@ private updateMotionSensors() {
 		String ecobeeSensorValue = ecobeeSensorDetails[3].toString()
 
 		def dni = [app.id, ecobeeSensorName, getMotionSensorChildName(), ecobeeSensorId].join('.')
-
-		log.debug "updateMotionSensors>looking for $dni"
 
 		def device = getChildDevice(dni)
 
@@ -476,8 +464,6 @@ private updateTempSensors() {
 
 
 		def dni = [app.id, ecobeeSensorName, getTempSensorChildName(), ecobeeSensorId].join('.')
-
-		log.debug "updateTempSensors>looking for $dni"
 
 		def device = getChildDevice(dni)
 
@@ -539,8 +525,6 @@ private updateHumiditySensors() {
 
 
 		def dni = [app.id, ecobeeSensorName, getTempSensorChildName(), ecobeeSensorId].join('.')
-
-		log.debug "updateHumiditySensors>looking for $dni"
 
 		def device = getChildDevice(dni)
 
