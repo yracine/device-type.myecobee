@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.3.1" 
+			paragraph "Version 5.3.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -388,13 +388,12 @@ def schedulesSetup(params) {
 			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"bool",  title: "Override Fan Mode only when Threshold or Indoor Temp differential is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}
-/*		Y.R. Commented out as issue with Schedule page        
+/*		Y.R. Commented out as there is an issue with Schedule page for this parameter (not distinct)        
 		section("Schedule ${indiceSchedule}-Minimum Fan Time during the Schedule [optional]") {
-			input (name: "givenFanMinTime${indiceSchedule}", "number", title: "Minimum fan runtime for this schedule",
+			input (name: "givenFanMinTime${indiceSchedule}", "text", title: "Minimum fan runtime for this schedule",
 				required: false, defaultValue:settings."givenFanMinTime${indiceSchedule}", description: "Optional")
 		}                        
-*/
-
+*/        
 		section("Schedule ${indiceSchedule}-Set Zone/Room Thermostats Only Indicator [optional]") {
 			input (name:"setRoomThermostatsOnlyFlag${indiceSchedule}", type:"bool", title: "Set room thermostats only [default=false,main & room thermostats setpoints are set]", 
 				required: false, defaultValue:settings."setRoomThermostatsOnlyFlag${indiceSchedule}")
@@ -913,7 +912,7 @@ private void check_if_hold_justified() {
 	log.trace "check_if_hold_justified>state=${state}"
 	
 	boolean residentPresent= verify_presence_based_on_motion_in_rooms()   
-	if ((currentSetClimate.toUpperCase()=='AWAY')  && (residentPresent)) {
+	if ((currentSetClimate?.toUpperCase()=='AWAY')  && (residentPresent)) {
 		if ((state?.programHoldSet == 'Away') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 			log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resume ecobee program...")
 			thermostat.resumeProgram("")
@@ -924,7 +923,7 @@ private void check_if_hold_justified() {
 		}  else if (state?.programHoldSet == 'Away') {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
 		}
-	} else if ((currentSetClimate.toUpperCase()=='AWAY') && (!residentPresent)) {
+	} else if ((currentSetClimate?.toUpperCase()=='AWAY') && (!residentPresent)) {
 		if ((state?.programHoldSet == 'Away') && ((currentProgName.toUpperCase().contains('AWAY')) ||
 			(currentProgName.toUpperCase().contains('SLEEP')))) {       
 			thermostat.resumeProgram("")
@@ -941,7 +940,7 @@ private void check_if_hold_justified() {
 			thermostat.away()
 		}    
 	}
-	if ((currentSetClimate.toUpperCase()=='HOME') && (!residentPresent)) {
+	if ((currentSetClimate?.toUpperCase()=='HOME') && (!residentPresent)) {
 		if ((state?.programHoldSet == 'Home')  && (currentProgName.toUpperCase().contains('AWAY'))) {       
 			log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
 			thermostat.resumeProgram("")
@@ -952,7 +951,7 @@ private void check_if_hold_justified() {
 		} else if (state?.programHoldSet == 'Home') {	/* Climate was changed since the last climate set, just reset state program values */
 			reset_state_program_values()
 		}
-	} else if ((currentSetClimate.toUpperCase()=='HOME') && (residentPresent)) { 
+	} else if ((currentSetClimate?.toUpperCase()=='HOME') && (residentPresent)) { 
 		if ((state?.programHoldSet == 'Home')  && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 			thermostat.resumeProgram("")
 			reset_state_program_values()
@@ -1281,7 +1280,8 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 	def	key = "scheduleName$indiceSchedule"
 	def scheduleName = settings[key]
 
-/* YR commented out as issue with Schedule page (ST constraint?)
+/* Y.R. Commented out as the schedule parameter not distinct per schedule as excpected.
+
 	key = "givenFanMinTime${indiceSchedule}"
 	def fanMinTime=settings[key]
 
@@ -1294,8 +1294,7 @@ private def set_fan_mode(indiceSchedule, overrideThreshold=false) {
 			send ("ecobeeSetZoneWithSchedule>minimum Fan Time set for this $scheduleName schedule is now $fanMinTime minutes")             
 		}            
 	}    
-*/
-    
+*/    
 	key = "fanMode$indiceSchedule"
 	def fanMode = settings[key]
         
