@@ -39,7 +39,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 2.3.3\n\n" 
+			paragraph "Version 2.4.2\n" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -52,7 +52,7 @@ def about() {
 
 def otherSettings() {
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
-		section("Polling at which interval in minutes (range=[5..59],default=10 min.)?") {
+		section("Polling at which interval in minutes (range=[10..59],default=20 min.)?") {
 			input "givenInterval", "number", title:"Interval", required: false
 		}
 		section("Notifications") {
@@ -373,8 +373,8 @@ def initialize() {
 	delete_child_devices()	
 	create_child_devices()
     
-	Integer delay = givenInterval ?: 10 // By default, do it every 10 min.
-	if ((delay < 5) || (delay>59)) {
+	Integer delay = givenInterval ?: 20 // By default, do it every 20 min.
+	if ((delay < 10) || (delay>59)) {
 		state?.msg= "MyEcobeeInit>scheduling interval not in range (${delay} min), exiting..."
 		log.debug state.msg
 		runIn(30, "sendMsgWithDelay")
@@ -394,7 +394,7 @@ def initialize() {
 
 def rescheduleIfNeeded(evt) {
 	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
-	Integer delay = givenInterval ?: 10 // By default, do poll every 10 min.
+	Integer delay = givenInterval ?: 20 // By default, do poll every 20 min.
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
 	if (lastPollTime != currentTime) {    
@@ -416,9 +416,9 @@ def rescheduleIfNeeded(evt) {
 def takeAction() {
 	log.trace "takeAction>begin"
 	def msg, exceptionCheck    
-	def MAX_EXCEPTION_COUNT=5
+	def MAX_EXCEPTION_COUNT=50
 
-	Integer delay = givenInterval ?: 10 // By default, the poll is done every 10 min.
+	Integer delay = givenInterval ?: 20 // By default, the poll is done every 20 min.
 	state?.poll["last"] = now()
 		
 	//schedule the rescheduleIfNeeded() function
@@ -450,11 +450,17 @@ def takeAction() {
 			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 		}
 	}
-	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")))) {
+	if ((exceptionCheck) && (exceptionCheck.contains("Unauthorized"))) {
 		// need to authenticate again    
 		atomicState.authToken=null                    
 		state?.oauthTokenProvided=false
-		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), press on 'ecobee' and re-login..." 
+		msg="$exceptionCheck (${state?.exceptionCount} errors), press on 'ecobee' and re-login..." 
+		send "MyEcobeeInit> ${msg}"
+		log.error msg
+
+	}
+	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors so far), you may need to press on 'ecobee' and re-login..." 
 		send "MyEcobeeInit> ${msg}"
 		log.error msg
 	}    
@@ -539,7 +545,7 @@ def swapToken() {
 	atomicState.authToken = jsonMap.access_token
 	atomicState.expiresIn=jsonMap.expires_in
 	atomicState.tokenType = jsonMap.token_type
-	def authexptime = new Date((now() + (atomicState.expiresIn * 60 * 1000))).getTime()
+	def authexptime = new Date((now() + (atomicState.expiresIn * 1000))).getTime()
 	atomicState.authexptime = authexptime
 
 
