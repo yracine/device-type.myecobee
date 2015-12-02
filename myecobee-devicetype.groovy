@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  linkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.2.1
+ *  Version 3.2.2
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -2883,9 +2883,8 @@ void generateRemoteSensorEvents(thermostatId,postData='false') {
 		return
 	}
 	state.lastUpdateRemoteSensorTimestamp = now()
-	ecobeeType = determine_ecobee_type_or_location(ecobeeType)
     
-	if (!getThermostatRevision(ecobeeType,"")) {
+	if (!getThermostatRevision("","")) {
     
 		// if there are no changes in the thermostat, runtime or interval revisions, values at ecobee haven't changed since last update
 		return
