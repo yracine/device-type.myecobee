@@ -44,7 +44,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleTstatZones, the smartapp that enables Heating/Cooling zoned settings at selected thermostat(s) coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.3.2" 
+			paragraph "Version 5.3.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -63,6 +63,14 @@ def generalSetupPage() {
 		}
 		section("Schedules count") {
 			input (name:"schedulesCount", title: "Schedules count (max=12)?", type: "number",refreshAfterSelection: true)
+		}
+		if (thermostat) {
+			section {
+				href(name: "toRoomPage", title: "Room Setup", page: "roomsSetupPage")
+				href(name: "toZonePage", title: "Zone Setup", page: "zonesSetupPage")
+				href(name: "toSchedulePage", title: "Schedule Setup", page: "schedulesSetupPage")
+				href(name: "toNotificationsPage", title: "Notification & Options Setup", page: "NotificationsPage")
+			}                
 		}
 		section("Set your main thermostat to [Away,Present] based on all Room Motion Sensors [default=false] ") {
 			input (name:"setAwayOrPresentFlag", title: "Set Main thermostat to [Away,Present]?", type:"bool",required:false)
@@ -88,14 +96,6 @@ def generalSetupPage() {
 		}       
 		section("What do I use for the Master on/off switch to enable/disable smartapp processing? [optional]") {
 			input (name:"powerSwitch", type:"capability.switch", required: false,description: "Optional")
-		}
-		if (thermostat) {
-			section {
-				href(name: "toRoomPage", title: "Room Setup", page: "roomsSetupPage")
-				href(name: "toZonePage", title: "Zone Setup", page: "zonesSetupPage")
-				href(name: "toSchedulePage", title: "Schedule Setup", page: "schedulesSetupPage")
-				href(name: "toNotificationsPage", title: "Notifications Setup", page: "NotificationsPage")
-			}                
 		}
 	}
 }
