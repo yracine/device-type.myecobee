@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.3.4" 
+			paragraph "Version 5.3.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -68,7 +68,7 @@ def generalSetupPage() {
 				href(name: "toRoomPage", title: "Room Setup", page: "roomsSetupPage")
 				href(name: "toZonePage", title: "Zone Setup", page: "zonesSetupPage")
 				href(name: "toSchedulePage", title: "Schedule Setup", page: "schedulesSetupPage")
-				href(name: "toNotificationsPage", title: "Notifications Setup", page: "NotificationsPage")
+				href(name: "toNotificationsPage", title: "Notification & Options Setup", page: "NotificationsPage")
 			}                
 		}
 		section("Set your main thermostat to [Away,Present] based on all Room Motion Sensors [default=false] ") {
@@ -356,7 +356,7 @@ def schedulesSetup(params) {
 			input (name:"scheduleName${indiceSchedule}", title: "Schedule Name", type: "text",
 				defaultValue:settings."scheduleName${indiceSchedule}")
 		}
-		section("Schedule ${indiceSchedule}-Select the climate/program scheduled at ecobee thermostat to be set for the included zone(s)") {
+		section("Schedule ${indiceSchedule}-Select the climate/program scheduled at ecobee thermostat for the included zone(s)") {
 			input (name:"givenClimate${indiceSchedule}", type:"enum", title: "Which ecobee climate/program? ", options: ecobeePrograms,  
 				defaultValue:settings."givenClimate${indiceSchedule}")
 		}
@@ -385,7 +385,7 @@ def schedulesSetup(params) {
 				required: false, defaultValue:settings."fanMode${indiceSchedule}", description: "Optional")
 			input (name:"moreFanThreshold${indiceSchedule}", type:"decimal", title: "Outdoor temp's threshold for Fan Mode", required: false,
 				defaultValue:settings."moreFanThreshold${indiceSchedule}", description: "Optional")			                
-			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"bool",  title: "Override Fan Mode only when Threshold or Indoor Temp differential is reached(default=false)", 
+			input (name:"fanModeForThresholdOnlyFlag${indiceSchedule}", type:"bool",  title: "Override Fan Mode only when Outdoor Threshold or Indoor Temp differential is reached(default=false)", 
 				required: false, defaultValue:settings."fanModeForThresholdOnlyFlag${indiceSchedule}")
 		}
 /*		Y.R. Commented out as there is an issue with Schedule page for this parameter (not distinct)        
