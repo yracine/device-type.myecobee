@@ -38,7 +38,7 @@ b) Hit the "+New Device Type" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) Copy and paste the code from ecobee.devicetype.groovy under 
+d) Copy and paste the code  (you can use the 'raw' button to avoid 'forking' the code) under 
 
 https://github.com/yracine/device-type.myecobee/blob/master/myecobee-devicetype.groovy
 
@@ -59,7 +59,7 @@ b) Hit the "+New SmartApp" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) Copy and paste the code from My ecobee Init
+d) Copy and paste the code from My ecobee Init (you can use the 'raw' button to avoid 'forking' the code)
 under http://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
 e) Hit the create button at the bottom
