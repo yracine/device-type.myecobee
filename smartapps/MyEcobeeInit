@@ -39,7 +39,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 2.4.2\n" 
+			paragraph "Version 2.5.1\n" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -341,10 +341,6 @@ private def create_child_devices() {
 			def tstat_info  = dni.tokenize('.')
 			def thermostatId = tstat_info.last()
  			def name = tstat_info[1]
-/*            
-			i++		// Used to simulate many thermostats
-			def labelName = 'My ecobee ' + "${name}_${i}"
-*/                    
 			def labelName = 'My ecobee ' + "${name}"
 			log.debug "create_child_devices>about to create child device with id $dni, thermostatId = $thermostatId, name=  ${name}"
 			d = addChildDevice(getChildNamespace(), getChildName(), dni, null,
@@ -373,7 +369,7 @@ def initialize() {
 	delete_child_devices()	
 	create_child_devices()
     
-	Integer delay = givenInterval ?: 20 // By default, do it every 20 min.
+	Integer delay = givenInterval ?: 20 // By default, do it every 10 min.
 	if ((delay < 10) || (delay>59)) {
 		state?.msg= "MyEcobeeInit>scheduling interval not in range (${delay} min), exiting..."
 		log.debug state.msg
@@ -394,7 +390,7 @@ def initialize() {
 
 def rescheduleIfNeeded(evt) {
 	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
-	Integer delay = givenInterval ?: 20 // By default, do poll every 20 min.
+	Integer delay = givenInterval ?: 20 // By default, do poll every 10 min.
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
 	if (lastPollTime != currentTime) {    
@@ -418,7 +414,7 @@ def takeAction() {
 	def msg, exceptionCheck    
 	def MAX_EXCEPTION_COUNT=50
 
-	Integer delay = givenInterval ?: 20 // By default, the poll is done every 20 min.
+	Integer delay = givenInterval ?: 20 // By default, the poll is done every 10 min.
 	state?.poll["last"] = now()
 		
 	//schedule the rescheduleIfNeeded() function
@@ -446,20 +442,19 @@ def takeAction() {
 				state?.exceptionCount=0       
 			}                
 		} catch (e) {
-			state.exceptionCount=state.exceptionCount+1    
+//			state.exceptionCount=state.exceptionCount+1    
 			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 		}
 	}
-	if ((exceptionCheck) && (exceptionCheck.contains("Unauthorized"))) {
+	if ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")) && (state?.exceptionCount>=MAX_EXCEPTION_COUNT)) {
 		// need to authenticate again    
 		atomicState.authToken=null                    
 		state?.oauthTokenProvided=false
-		msg="$exceptionCheck (${state?.exceptionCount} errors), press on 'ecobee' and re-login..." 
+		msg="$exceptionCheck after ${state?.exceptionCount} errors, press on 'ecobee' and re-login..." 
 		send "MyEcobeeInit> ${msg}"
 		log.error msg
 
-	}
-	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+	} else if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
 		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors so far), you may need to press on 'ecobee' and re-login..." 
 		send "MyEcobeeInit> ${msg}"
 		log.error msg
