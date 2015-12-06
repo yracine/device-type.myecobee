@@ -20,8 +20,8 @@ definition(
 	author: "Yves Racine",
 	description: "Enable better temp control in rooms based on Smart Vents",
 	category: "My Apps",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
+	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience%402x.png"
 )
 
 
@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ScheduleRoomTempControl, the smartapp that enables better temp control in rooms based on Smart Vents"
-			paragraph "Version 1.6.5" 
+			paragraph "Version 1.6.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -653,7 +653,7 @@ def setZoneSettings() {
 		}            
 		if ((currTime > endTimeToday.time) && (endTimeToday.time < startTimeToday.time)) {
 			endTimeToday = endTimeToday +1        
-			log.debug "setZoneSettings>schedule ${scheduleName} added + 1 day, new endTime=${endTimeToday.time}"
+			log.debug "setZoneSettings>schedule ${scheduleName}, added + 1 day, new endTime=${endTimeToday.time}"
 		}        
 		String startInLocalTime = startTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
 		String endInLocalTime = endTimeToday.format("yyyy-MM-dd HH:mm", location.timeZone)
@@ -870,7 +870,7 @@ private def set_thermostat_setpoint_in_zone(indiceSchedule) {
 		if ((climateName) && (thermostat.hasCommand("setClimate"))) {
 			try {
 				thermostat.setClimate("", climateName)
-				thermostat.poll() // to get the latest setpoints
+				thermostat.refresh() // to get the latest setpoints
 			} catch (any) {
 				if (detailedNotif) {
 					send("ScheduleRoomTempControl>schedule ${scheduleName}:not able to set climate ${climateName} for heating at the thermostat ${thermostat}")
@@ -902,7 +902,7 @@ private def set_thermostat_setpoint_in_zone(indiceSchedule) {
 		if ((climateName) && (thermostat.hasCommand("setClimate"))) {
 			try {
 				thermostat?.setClimate("", climateName)
-				thermostat.poll() // to get the latest setpoints
+				thermostat.refresh() // to get the latest setpoints
 			} catch (any) {
 				if (detailedNotif) {
 					send("ScheduleRoomTempControl>schedule ${scheduleName},not able to set climate ${climateName} for cooling at the thermostat(s) ${thermostat}")
