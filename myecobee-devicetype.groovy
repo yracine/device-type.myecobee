@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.4.2
+ *  Version 3.4.3
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -3016,6 +3016,10 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.remoteSensorData[0].remoteSensors[i].capability[j]} at j=${j}"
 				}
 				if (data.remoteSensorData[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
+					if (!data.remoteSensorData[0].remoteSensors[i].capability[j].value.isInteger()) {
+						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found temp value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
+                    	continue
+					}                    
 					// Divide the sensor temperature by 10 
 					value =(data.remoteSensorData[0].remoteSensors[i].capability[j].value.toFloat()/10).round(1)
  					remoteTempData = remoteTempData + data.remoteSensorData[0].remoteSensors[i].id + "," +
@@ -3026,6 +3030,10 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 					minTemp = (minTemp==null)? value: Math.min(value,minTemp)
 					nbTempSensorInUse++
 				} else if (data.remoteSensorData[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
+					if (!data.remoteSensorData[0].remoteSensors[i].capability[j].value.isInteger()) {
+						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found hum value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
+                    	continue
+					}                    
 					remoteHumData = remoteHumData + data.remoteSensorData[0].remoteSensors[i].id + "," + 
 						data.remoteSensorData[0].remoteSensors[i].name + "," +
 						data.remoteSensorData[0].remoteSensors[i].capability[j].type + "," + data.remoteSensorData[0].remoteSensors[i].capability[j].value + ",,"
