@@ -3018,7 +3018,7 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 				if (data.remoteSensorData[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
 					if (!data.remoteSensorData[0].remoteSensors[i].capability[j].value.isInteger()) {
 						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found temp value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
-                    	continue
+						continue
 					}                    
 					// Divide the sensor temperature by 10 
 					value =(data.remoteSensorData[0].remoteSensors[i].capability[j].value.toFloat()/10).round(1)
@@ -3032,7 +3032,7 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 				} else if (data.remoteSensorData[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
 					if (!data.remoteSensorData[0].remoteSensors[i].capability[j].value.isInteger()) {
 						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found hum value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
-                    	continue
+						continue
 					}                    
 					remoteHumData = remoteHumData + data.remoteSensorData[0].remoteSensors[i].id + "," + 
 						data.remoteSensorData[0].remoteSensors[i].name + "," +
