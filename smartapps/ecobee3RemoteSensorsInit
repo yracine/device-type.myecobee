@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 2.1" 
+			paragraph "Version 2.1.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -414,10 +414,10 @@ private updateMotionSensors() {
 		def device = getChildDevice(dni)
 
 		if (device) {
-			log.debug "updateTempSensors>ecobeeSensorId=$ecobeeSensorId"
-			log.debug "updateTempSensors>ecobeeSensorName=$ecobeeSensorName"
-			log.debug "updateTempSensors>ecobeeSensorType=$ecobeeSensorType"
-			log.debug "updateTempSensors>ecobeeSensorValue=$ecobeeSensorValue"
+			log.debug "updateMotionSensors>ecobeeSensorId=$ecobeeSensorId"
+			log.debug "updateMotionSensors>ecobeeSensorName=$ecobeeSensorName"
+			log.debug "updateMotionSensors>ecobeeSensorType=$ecobeeSensorType"
+			log.debug "updateMotionSensors>ecobeeSensorValue=$ecobeeSensorValue"
 
 			String status = (ecobeeSensorValue.contains('false')) ? "inactive" : "active"
 			def isChange = device.isStateChange(device, "motion", status)
