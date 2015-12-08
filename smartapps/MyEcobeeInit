@@ -39,7 +39,7 @@ def about() {
  	dynamicPage(name: "about", install: false, uninstall: true) {
  		section("About") {	
 			paragraph "My Ecobee Init, the smartapp that connects your Ecobee thermostat to SmartThings via cloud-to-cloud integration"
-			paragraph "Version 2.5.1\n" 
+			paragraph "Version 2.6\n" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -54,6 +54,9 @@ def otherSettings() {
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
 		section("Polling at which interval in minutes (range=[10..59],default=20 min.)?") {
 			input "givenInterval", "number", title:"Interval", required: false
+		}
+		section("Handle/Notify any exception proactively") {
+			input "handleExceptionFlag", "bool", title: "Handle exceptions proactively?", required: false
 		}
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
@@ -369,7 +372,7 @@ def initialize() {
 	delete_child_devices()	
 	create_child_devices()
     
-	Integer delay = givenInterval ?: 20 // By default, do it every 10 min.
+	Integer delay = givenInterval ?: 20 // By default, do it every 20 min.
 	if ((delay < 10) || (delay>59)) {
 		state?.msg= "MyEcobeeInit>scheduling interval not in range (${delay} min), exiting..."
 		log.debug state.msg
@@ -390,7 +393,7 @@ def initialize() {
 
 def rescheduleIfNeeded(evt) {
 	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
-	Integer delay = givenInterval ?: 20 // By default, do poll every 10 min.
+	Integer delay = givenInterval ?: 20 // By default, do poll every 20 min.
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
 	if (lastPollTime != currentTime) {    
@@ -413,8 +416,9 @@ def takeAction() {
 	log.trace "takeAction>begin"
 	def msg, exceptionCheck    
 	def MAX_EXCEPTION_COUNT=50
-
-	Integer delay = givenInterval ?: 20 // By default, the poll is done every 10 min.
+	boolean handleException = (handleExceptionFlag)?: false
+    
+	Integer delay = givenInterval ?: 20 // By default, the poll is done every 20 min.
 	state?.poll["last"] = now()
 		
 	//schedule the rescheduleIfNeeded() function
@@ -432,33 +436,36 @@ def takeAction() {
 		try {        
 			d.poll()
 			exceptionCheck = d.currentVerboseTrace.toString()
-			if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
-				(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
-			// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
-				state.exceptionCount=state.exceptionCount+1    
-				log.error "found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
-			} else {             
-				// reset exception counter            
-				state?.exceptionCount=0       
-			}                
+			if (handleException) {            
+				if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+					(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
+				// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
+					state.exceptionCount=state.exceptionCount+1    
+					log.error "found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
+				} else {             
+					// reset exception counter            
+					state?.exceptionCount=0      
+				}                    
+			}   /* end if handleException */             
 		} catch (e) {
-//			state.exceptionCount=state.exceptionCount+1    
+			state.exceptionCount=state.exceptionCount+1    
 			log.error "MyEcobeeInit>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
 		}
 	}
-	if ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")) && (state?.exceptionCount>=MAX_EXCEPTION_COUNT)) {
-		// need to authenticate again    
-		atomicState.authToken=null                    
-		state?.oauthTokenProvided=false
-		msg="$exceptionCheck after ${state?.exceptionCount} errors, press on 'ecobee' and re-login..." 
-		send "MyEcobeeInit> ${msg}"
-		log.error msg
-
-	} else if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
-		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors so far), you may need to press on 'ecobee' and re-login..." 
-		send "MyEcobeeInit> ${msg}"
-		log.error msg
-	}    
+	if (handleException) {    
+		if ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")) && (state?.exceptionCount>=MAX_EXCEPTION_COUNT)) {
+			// need to authenticate again    
+			atomicState.authToken=null                    
+			state?.oauthTokenProvided=false
+			msg="$exceptionCheck after ${state?.exceptionCount} errors, press on 'ecobee' and re-login..." 
+			send "MyEcobeeInit> ${msg}"
+			log.error msg
+		} else if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+			msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors so far), you may need to press on 'ecobee' and re-login..." 
+			send "MyEcobeeInit> ${msg}"
+			log.error msg
+		}
+	} /* end if handleException */        
 	log.trace "takeAction>end"
 
 }
