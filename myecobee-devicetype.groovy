@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.4.3
+ *  Version 3.4.6
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -457,10 +457,12 @@ metadata {
 			state "default", action: "refresh", icon: "st.secondary.refresh"
 		}
 		main "summary"
-		details("summary", "name", "groups", "mode",  "switchProgram", "resProgram", "fanMode",
+		details("summary", "name","humidity",
+//        	"groups",
+			"mode",  "switchProgram", "resProgram", "fanMode",
  			"heatLevelUp", "coolLevelUp", "heatingSetpoint", "coolingSetpoint", "heatLevelDown", "coolLevelDown",
  			 "programEndTimeMsg", "alerts","weatherDateTime", "weatherConditions",
-			"humidity","fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
+			"fanMinOnTime", "programScheduleName", "programType", "programCoolTemp",
 			"programHeatTemp",             
 			"weatherIcon", "weatherTemperature", "weatherRelativeHumidity", "weatherTempHigh",
 			"weatherTempLow", "weatherPressure", "weatherWindDirection",
@@ -949,7 +951,7 @@ private def refresh_thermostat(thermostatId) {
 		programCoolTempDisplay:(currentClimate.coolTemp / 10),								// divided by 10 for display
 		programHeatTempDisplay:(currentClimate.heatTemp / 10),
 		alerts: getAlerts(),
-		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
+//		groups: (ecobeeType.toUpperCase() == 'REGISTERED')? getThermostatGroups(thermostatId) : 'No groups',
 		climateList: getClimateList(),
 		presence: (currentClimateTemplate.toUpperCase()!='AWAY')? "present":"not present",
 		heatStages:data.thermostatList[0].settings.heatStages.toString(),
@@ -1115,7 +1117,7 @@ private def getAlerts() {
 	if (data.thermostatList[0].alerts.size() > 0) {
 		alerts = 'Alert(s) '
 		for (i in 0..data.thermostatList[0].alerts.size() - 1) {
-			alerts = (i > 0) ? '\n' + ' ' + alerts + data.thermostatList[0].alerts[i].notificationType :
+			alerts = (i > 0) ? '\n' + ' ' + alerts + ',' + data.thermostatList[0].alerts[i].notificationType :
 				alerts +
 				data.thermostatList[0].alerts[i].notificationType
 		}
@@ -1225,12 +1227,12 @@ private void api(method, args, success = {}) {
 			log.debug "api>need to refresh tokens"
 		}
 		if (!refresh_tokens()) {
-			login()
 			def exceptionCheck=device.currentValue("verboseTrace")
-			if (exceptionCheck.contains("exception")) {
+			if ((exceptionCheck) && (state.exceptionCount >= MAX_EXCEPTION_COUNT) && (exceptionCheck.contains("Unauthorized"))) {
 				log.error ("api>$exceptionCheck, not able to renew the refresh token; if recurrent exception, may need to re-login to ecobee via MyEcobeeInit....")         
 				sendEvent (name: "verboseTrace", value:"api>$exceptionCheck, not able to renew the refresh token;  if recurrent exception, may need to re-login to ecobee via MyEcobeeInit....")         
 			}
+			login()
             
 		} else {
         
@@ -1238,14 +1240,6 @@ private void api(method, args, success = {}) {
 			state.exceptionCount=0
 		}            
 	}
-	if (state.exceptionCount >= MAX_EXCEPTION_COUNT) {
-
-		log.error ("api>error: found a high number of exceptions (${state.exceptionCount}), will try to refresh tokens, it it fails, you should run MyEcobeeInit and re-login to ecobee....")
-		sendEvent (name: "verboseTrace", 
-			value: "api>error: found a high number of exceptions (${state.exceptionCount}) , will try to refresh tokens, it it fails, you should run MyEcobeeInit and re-login to ecobee....")         
-		refresh_tokens()        
-		state.exceptionCount=0
-	}    
 	def args_encoded = java.net.URLEncoder.encode(args.toString(), "UTF-8")
 	def methods = [
 		'thermostatSummary': 
@@ -1284,6 +1278,14 @@ private void api(method, args, success = {}) {
 			"api> about to call doRequest with (unencoded) args = ${args}"
 	}
 	doRequest(request.uri, args_encoded, request.type, success)
+    
+	def exceptionCheck=device.currentValue("verboseTrace")
+	if ((state.exceptionCount >= MAX_EXCEPTION_COUNT) && ((exceptionCheck) && (exceptionCheck.contains("exception")))) {
+
+		log.error ("api>error: found a high number of exceptions (${state.exceptionCount}), last exceptionCheck=${exceptionCheck}")
+		sendEvent (name: "verboseTrace", 
+			value: "api>error: found a high number of exceptions (${state.exceptionCount}), last exceptionCheck=${exceptionCheck}")         
+	}    
 }
 
 // Need to be authenticated in before this is called. So don't call this. Call api.
@@ -1314,6 +1316,7 @@ private void doRequest(uri, args, type, success) {
 		}
 		/* when success, reset the exception counter */
 		state.exceptionCount=0
+		sendEvent name: "verboseTrace", value: "doRequest>done with ${type}"
 
 	} catch (java.net.UnknownHostException e) {
 		log.error "doRequest> Unknown host - check the URL " + params.uri
@@ -2954,7 +2957,7 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 		}
     	
 	if (!bypassThrottling) {    
-		def poll_interval=3   // set a 3 min. poll interval to avoid unecessary load on ecobee servers
+		def poll_interval=5   // set a 5 min. poll interval to avoid unecessary load on ecobee servers
 		def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
 		if ((state?.lastPollTimestamp) && (state?.lastPollTimestamp > time_check_for_poll)) {
 			if (settings.trace) {
