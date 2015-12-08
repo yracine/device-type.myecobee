@@ -29,7 +29,7 @@ preferences {
 	page(name: "selectThermostat", title: "Ecobee Thermostat", install: false, uninstall: true, nextPage: "selectMotionSensors") {
 		section("About") {
 			paragraph "ecobeeRemoteSensorsInit, the smartapp that creates individual ST sensors for your ecobee3's remote Sensors and polls them on a regular basis"
-			paragraph "Version 2.1.1" 
+			paragraph "Version 2.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -47,7 +47,10 @@ preferences {
 	}
 	page(name: "selectMotionSensors", title: "Ecobee Motion Sensors", content: "selectMotionSensors", nextPage: "selectTempSensors")
 	page(name: "selectTempSensors", title: "Ecobee Temperature/Humidity Sensors", content: "selectTempSensors", nextPage: "Notifications")
-	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: true) {
+	page(name: "Notifications", title: "Other Options", install: true, uninstall: true) {
+		section("Handle/Notify any exception proactively") {
+			input "handleExceptionFlag", "bool", title: "Handle exceptions proactively?", required: false
+		}
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 			input "phone", "phone", title: "Send a Text Message?", required: false
@@ -331,6 +334,7 @@ def rescheduleIfNeeded(evt) {
 }
 
 def takeAction() {
+	boolean handleException = (handleExceptionFlag)?: false
 	log.trace "takeAction>begin"
 	Integer delay = givenInterval ?: 30 // By default, do poll every 30 min.
 	state?.poll["last"] = now()
@@ -351,25 +355,28 @@ def takeAction() {
 		log.trace "takeAction>about to call generateRemoteSensorEvents()"
 		ecobee.generateRemoteSensorEvents("", false)	
 		exceptionCheck= ecobee.currentVerboseTrace.toString()
-		if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
-			(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
-		// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
-			state?.exceptionCount=state.exceptionCount+1    
-			log.error "takeAction>found exception/error after polling, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
-		} else {             
-			// reset exception counter            
-			state?.exceptionCount=0       
-		}                
+		if (handleException) {            
+			if ((exceptionCheck) && ((exceptionCheck.contains("exception") || (exceptionCheck.contains("error")) && 
+				(!exceptionCheck.contains("Java.util.concurrent.TimeoutException"))))) {  
+			// check if there is any exception or an error reported in the verboseTrace associated to the device (except the ones linked to rate limiting).
+				state?.exceptionCount=state.exceptionCount+1    
+				log.error "takeAction>found exception/error after calling generateRemoteSensorEvents, exceptionCount= ${state?.exceptionCount}: $exceptionCheck" 
+			} else {             
+				// reset exception counter            
+				state?.exceptionCount=0       
+			}
+		} /* end if handleException */            
 	} catch (e) {
-//		state.exceptionCount=state.exceptionCount+1    
-		log.error "takeAction>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
+    	state.exceptionCount=state.exceptionCount+1    
+		log.error "takeAction>exception $e while trying to generateRemoteSensorEvents on device $d, exceptionCount= ${state?.exceptionCount}" 
 	}
-	if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
-		// need to authenticate again    
-		msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), you may need to re-authenticate at ecobee..." 
-		send "ecobee3RemoteSensorInit> ${msg}"
-		log.error msg
-		return        
+	if (handleException) {            
+		if (state?.exceptionCount>=MAX_EXCEPTION_COUNT) {
+			// may need to authenticate again    
+			msg="too many exceptions/errors, $exceptionCheck (${state?.exceptionCount} errors), you may need to re-authenticate at ecobee..." 
+			send "ecobee3RemoteSensorInit> ${msg}"
+			log.error msg
+		}            
 	}    
     
 	updateMotionSensors()
