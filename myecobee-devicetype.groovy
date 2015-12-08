@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.4.6
+ *  Version 3.4.8
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -1376,7 +1376,8 @@ private def build_body_request(method, tstatType="registered", thermostatId, tst
 			includeWeather: 'true',            
 			includeAlerts: 'true',
 			includeEvents: 'true',
-			includeEquipmentStatus: 'true'
+			includeEquipmentStatus: 'true',
+			includeSensors: 'true'
 			]
 		]
 		selectionJson = new groovy.json.JsonBuilder(selection)
@@ -2924,6 +2925,7 @@ void getRemoteSensorUpdate(thermostatId=settings.thermostatId) {
 		} /* end api call */
 	} /* end while */
 }
+// getThermostatInfo() must be called before calling generateRemoteSensorEvents
 // thermostatId shall refer to a single thermostat to avoid processing too much data
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // postData may be true or false, by default the latter
@@ -2954,8 +2956,8 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 		}
 	} else {	
 			thermostatId = determine_tstat_id(thermostatId)
-		}
-    	
+	}
+/*    	
 	if (!bypassThrottling) {    
 		def poll_interval=5   // set a 5 min. poll interval to avoid unecessary load on ecobee servers
 		def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
@@ -2982,78 +2984,80 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 		log.error "generateRemoteSensorEvents>>$exceptionCheck" 
 		return    
 	}
-    
+*/
+     	
 	/* Reset all remote sensor data values */
 	def remoteData = []
 	def remoteTempData = ""
 	def remoteHumData = ""
 	def remoteOccData = ""
     
-	if (data.remoteSensorData[0].remoteSensors) {
-		for (i in 0..data.remoteSensorData[0].remoteSensors.size() - 1) {
+	if (data.thermostatList[0].remoteSensors) {
+		for (i in 0..data.thermostatList[0].remoteSensors.size() - 1) {
 			if (settings.trace) {
-				log.debug "generateRemoteSensorEvents>found sensor ${data.remoteSensorData[0].remoteSensors[i]} at (${i})"
+				log.debug "generateRemoteSensorEvents>found sensor ${data.thermostatList[0].remoteSensors[i]} at (${i})"
 			}
-			if ((data.remoteSensorData[0].remoteSensors[i]?.type != REMOTE_SENSOR_TYPE) &&
-			 (data.remoteSensorData[0].remoteSensors[i]?.type != REMOTE_THERMOSTAT_TYPE)) {
+			if ((data.thermostatList[0].remoteSensors[i]?.type != REMOTE_SENSOR_TYPE) &&
+			 (data.thermostatList[0].remoteSensors[i]?.type != REMOTE_THERMOSTAT_TYPE)) {
 				if (settings.trace) {
-					log.debug "generateRemoteSensorEvents>found sensor type ${data.remoteSensorData[0].remoteSensors[i].type} at (${i}, skipping it)"
+					log.debug "generateRemoteSensorEvents>found sensor type ${data.thermostatList[0].remoteSensors[i].type} at (${i}, skipping it)"
 				}
  				// not a remote sensor
  				continue
 			}
-			if (!data.remoteSensorData[0].remoteSensors[i].capability) {
+			if (!data.thermostatList[0].remoteSensors[i].capability) {
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>looping i=${i}, no capability values found..."
 				}
 				continue            
 			}            
-			if (postData) {
+			if (postData == 'true') {
 				if (settings.trace) {
-					log.debug "generateRemoteSensorEvents>adding ${data.remoteSensorData[0].remoteSensors[i]} to remoteData"
+					log.debug "generateRemoteSensorEvents>adding ${data.thermostatList[0].remoteSensors[i]} to remoteData"
 				}
-				remoteData << data.remoteSensorData[0].remoteSensors[i]  // to be transformed into Json later
+				remoteData << data.thermostatList[0].remoteSensors[i]  // to be transformed into Json later
 			} 
-			for (j in 0..data.remoteSensorData[0].remoteSensors[i].capability.size()-1) {
+			for (j in 0..data.thermostatList[0].remoteSensors[i].capability.size()-1) {
 				if (settings.trace) {
-					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.remoteSensorData[0].remoteSensors[i].capability[j]} at j=${j}"
+					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.thermostatList[0].remoteSensors[i].capability[j]} at j=${j}"
 				}
-				if (data.remoteSensorData[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
-					if (!data.remoteSensorData[0].remoteSensors[i].capability[j].value.isInteger()) {
+				if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
+					if (!data.remoteSensorData[0].thermostatList[i].capability[j].value.isInteger()) {
 						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found temp value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
 						continue
 					}                    
 					// Divide the sensor temperature by 10 
-					value =(data.remoteSensorData[0].remoteSensors[i].capability[j].value.toFloat()/10).round(1)
- 					remoteTempData = remoteTempData + data.remoteSensorData[0].remoteSensors[i].id + "," +
-						data.remoteSensorData[0].remoteSensors[i].name + "," +
-						data.remoteSensorData[0].remoteSensors[i].capability[j].type + "," + value.toString() + ",,"
+					value =(data.thermostatList[0].remoteSensors[i].capability[j].value.toFloat()/10).round(1)
+ 					remoteTempData = remoteTempData + data.thermostatList[0].remoteSensors[i].id + "," +
+						data.thermostatList[0].remoteSensors[i].name + "," +
+						data.thermostatList[0].remoteSensors[i].capability[j].type + "," + value.toString() + ",,"
 					totalTemp = totalTemp + value
 					maxTemp = Math.max(value,maxTemp)
 					minTemp = (minTemp==null)? value: Math.min(value,minTemp)
 					nbTempSensorInUse++
-				} else if (data.remoteSensorData[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
-					if (!data.remoteSensorData[0].remoteSensors[i].capability[j].value.isInteger()) {
+				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
+					if (!data.thermostatList[0].remoteSensors[i].capability[j].value.isInteger()) {
 						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found hum value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
 						continue
 					}                    
-					remoteHumData = remoteHumData + data.remoteSensorData[0].remoteSensors[i].id + "," + 
-						data.remoteSensorData[0].remoteSensors[i].name + "," +
-						data.remoteSensorData[0].remoteSensors[i].capability[j].type + "," + data.remoteSensorData[0].remoteSensors[i].capability[j].value + ",,"
-					value =data.remoteSensorData[0].remoteSensors[i].capability[j].value.toFloat()
+					remoteHumData = remoteHumData + data.thermostatList[0].remoteSensors[i].id + "," + 
+						data.thermostatList[0].remoteSensors[i].name + "," +
+						data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
+					value =data.thermostatList[0].remoteSensors[i].capability[j].value.toFloat()
 					totalHum = totalHum + value
 					maxHum = Math.max(value,maxHum)
 					minHum = (minHum==null)? value: Math.min(value,minHum)
 					nbHumSensorInUse++
-				} else if (data.remoteSensorData[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_OCCUPANCY) {
-					remoteOccData = remoteOccData + data.remoteSensorData[0].remoteSensors[i].id + "," + 
-						data.remoteSensorData[0].remoteSensors[i].name + "," +
-						data.remoteSensorData[0].remoteSensors[i].capability[j].type + "," + data.remoteSensorData[0].remoteSensors[i].capability[j].value + ",,"
+				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_OCCUPANCY) {
+					remoteOccData = remoteOccData + data.thermostatList[0].remoteSensors[i].id + "," + 
+						data.thermostatList[0].remoteSensors[i].name + "," +
+						data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
 				} 
 				                        
 			} /* end for remoteSensor Capabilites */
 		} /* end for remoteSensor data */
 	}                        
+
 	if (nbTempSensorInUse >0) {
 		avgTemp = (totalTemp / nbTempSensorInUse).round(1)
 		if (settings.trace) {
