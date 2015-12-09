@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.5
+ *  Version 3.5.1
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -1328,6 +1328,7 @@ private void doRequest(uri, args, type, success) {
 		state.exceptionCount = state.exceptionCount +1            
 	} catch (groovyx.net.http.HttpResponseException e) {
 		log.debug "doRequest> trapped exception $e, but continue processing for " + params.uri
+		sendEvent name: "verboseTrace", value: "doRequest>continue processing"
 	} catch (e) {
 		log.debug "doRequest>exception $e for " + params.uri
 		sendEvent name: "verboseTrace", value:
@@ -3306,6 +3307,7 @@ private def refresh_tokens() {
 		data.auth.expires_in = resp.data.expires_in
 		data.auth.token_type = resp.data.token_type
 		data.auth.scope = resp.data.scope
+		sendEvent name: "verboseTrace", value: "refresh_tokens>done"
 	}
 	try {
 		httpPostJson(method, successRefreshTokens)
@@ -3321,6 +3323,7 @@ private def refresh_tokens() {
 		return false
 	} catch (groovyx.net.http.HttpResponseException e) {
 		log.debug "doRequest> trapped exception $e and continue processing"
+		sendEvent name: "verboseTrace", value: "refresh_tokens>continue processing"
 	} catch (e) {
 		log.debug "refresh_tokens>exception $e at " + method.uri
 		sendEvent name: "verboseTrace", value:
