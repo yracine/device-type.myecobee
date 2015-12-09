@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.5.1
+ *  Version 3.5.2
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -1280,6 +1280,9 @@ private void api(method, args, success = {}) {
 	doRequest(request.uri, args_encoded, request.type, success)
     
 	def exceptionCheck=device.currentValue("verboseTrace")
+	if ((exceptionCheck) && (exceptionCheck.contains("Unauthorized"))) {
+		state.exceptionCount = state.exceptionCount +1     
+	}    
 	if ((state.exceptionCount >= MAX_EXCEPTION_COUNT) && ((exceptionCheck) && (exceptionCheck.contains("exception")))) {
 
 		log.error ("api>error: found a high number of exceptions (${state.exceptionCount}), last exceptionCheck=${exceptionCheck}")
@@ -3029,7 +3032,8 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.thermostatList[0].remoteSensors[i].capability[j]} at j=${j}"
 				}
 				if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
-					if (!data.remoteSensorData[0].thermostatList[i].capability[j].value.isInteger()) {
+					if ((data.remoteSensorData[0].thermostatList[i].capability[j].value==null) || 
+						(!data.remoteSensorData[0].thermostatList[i].capability[j].value.isInteger())) {
 						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found temp value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
 						continue
 					}                    
@@ -3043,7 +3047,8 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 					minTemp = (minTemp==null)? value: Math.min(value,minTemp)
 					nbTempSensorInUse++
 				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
-					if (!data.thermostatList[0].remoteSensors[i].capability[j].value.isInteger()) {
+					if ((data.remoteSensorData[0].thermostatList[i].capability[j].value==null) || 
+						(!data.thermostatList[0].remoteSensors[i].capability[j].value.isInteger())) {
 						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found hum value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
 						continue
 					}                    
@@ -3056,6 +3061,10 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 					minHum = (minHum==null)? value: Math.min(value,minHum)
 					nbHumSensorInUse++
 				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_OCCUPANCY) {
+					if (data.remoteSensorData[0].thermostatList[i].capability[j].value==null) {
+						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found occ value, not valid: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
+						continue
+					}                    
 					remoteOccData = remoteOccData + data.thermostatList[0].remoteSensors[i].id + "," + 
 						data.thermostatList[0].remoteSensors[i].name + "," +
 						data.thermostatList[0].remoteSensors[i].capability[j].type + "," + data.thermostatList[0].remoteSensors[i].capability[j].value + ",,"
