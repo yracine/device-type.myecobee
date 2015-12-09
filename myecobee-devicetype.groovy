@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.4.8
+ *  Version 3.4.9
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -2894,7 +2894,7 @@ void getRemoteSensorUpdate(thermostatId=settings.thermostatId) {
 			statusCode = resp.data.status.code
 			def message = resp.data.status.message
 			if (!statusCode) {
-				data?.remoteSensorData = resp.data.thermostatList
+				data?.thermostatList = resp.data.thermostatList
 				def thermostatName = data.remoteSensorData[0].name
 				if (data.remoteSensorData[0].remoteSensors) {
 					if (settings.trace) {
@@ -2925,7 +2925,7 @@ void getRemoteSensorUpdate(thermostatId=settings.thermostatId) {
 		} /* end api call */
 	} /* end while */
 }
-// getThermostatInfo() must be called before calling generateRemoteSensorEvents
+// getThermostatInfo() or getRemoteSensorUpdate() must be called before calling generateRemoteSensorEvents
 // thermostatId shall refer to a single thermostat to avoid processing too much data
 //	if no thermostatId is provided, it is defaulted to the current thermostatId 
 // postData may be true or false, by default the latter
@@ -2957,6 +2957,10 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 	} else {	
 			thermostatId = determine_tstat_id(thermostatId)
 	}
+	if (bypassThrottling) {      
+		getRemoteSensorUpdate(thermostatId)    
+	}
+	    
 /*    	
 	if (!bypassThrottling) {    
 		def poll_interval=5   // set a 5 min. poll interval to avoid unecessary load on ecobee servers
