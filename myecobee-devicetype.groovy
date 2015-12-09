@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.4.9
+ *  Version 3.5
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -1326,6 +1326,8 @@ private void doRequest(uri, args, type, success) {
 		log.error "doRequest> No route to host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> No route to host ${params.uri}"
 		state.exceptionCount = state.exceptionCount +1            
+	} catch (groovyx.net.http.HttpResponseException e) {
+		log.debug "doRequest> trapped exception $e, but continue processing for " + params.uri
 	} catch (e) {
 		log.debug "doRequest>exception $e for " + params.uri
 		sendEvent name: "verboseTrace", value:
@@ -2895,8 +2897,8 @@ void getRemoteSensorUpdate(thermostatId=settings.thermostatId) {
 			def message = resp.data.status.message
 			if (!statusCode) {
 				data?.thermostatList = resp.data.thermostatList
-				def thermostatName = data.remoteSensorData[0].name
-				if (data.remoteSensorData[0].remoteSensors) {
+				def thermostatName = data.thermostatList[0].name
+				if (data.thermostatList[0].remoteSensors) {
 					if (settings.trace) {
 						log.debug "getRemoteSensorUpdate>found remote sensor values for thermostatId=${thermostatId},name=${thermostatName}"
 						sendEvent name: "verboseTrace", value:
@@ -3317,6 +3319,8 @@ private def refresh_tokens() {
 		sendEvent name: "verboseTrace", value: "refresh_tokens> exception $e, no route to host ${method.uri}"
 		state.exceptionCount = state.exceptionCount +1     
 		return false
+	} catch (groovyx.net.http.HttpResponseException e) {
+		log.debug "doRequest> trapped exception $e and continue processing"
 	} catch (e) {
 		log.debug "refresh_tokens>exception $e at " + method.uri
 		sendEvent name: "verboseTrace", value:
