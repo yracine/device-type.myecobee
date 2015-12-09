@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.5.2
+ *  Version 3.5.3
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -1280,14 +1280,13 @@ private void api(method, args, success = {}) {
 	doRequest(request.uri, args_encoded, request.type, success)
     
 	def exceptionCheck=device.currentValue("verboseTrace")
-	if ((exceptionCheck) && (exceptionCheck.contains("Unauthorized"))) {
-		state.exceptionCount = state.exceptionCount +1     
-	}    
-	if ((state.exceptionCount >= MAX_EXCEPTION_COUNT) && ((exceptionCheck) && (exceptionCheck.contains("exception")))) {
+	if ((state.exceptionCount >= MAX_EXCEPTION_COUNT) && ((exceptionCheck) && (exceptionCheck.contains("exception")) &&
+		(!exceptionCheck.contains("Unauthorized")))) {
 
-		log.error ("api>error: found a high number of exceptions (${state.exceptionCount}), last exceptionCheck=${exceptionCheck}")
+		log.error ("api>error: found a high number of exceptions (${state.exceptionCount}), last exceptionCheck=${exceptionCheck}, about to reset counter")
 		sendEvent (name: "verboseTrace", 
-			value: "api>error: found a high number of exceptions (${state.exceptionCount}), last exceptionCheck=${exceptionCheck}")         
+			value: "api>error: found a high number of exceptions (${state.exceptionCount}), last exceptionCheck=${exceptionCheck}, about to reset counter")         
+		state.exceptionCount = 0  // reset the counter as long it's not unauthorized exception
 	}    
 }
 
@@ -1322,16 +1321,25 @@ private void doRequest(uri, args, type, success) {
 		sendEvent name: "verboseTrace", value: "doRequest>done with ${type}"
 
 	} catch (java.net.UnknownHostException e) {
-		log.error "doRequest> Unknown host - check the URL " + params.uri
+		log.error "doRequest>Unknown host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> Unknown host ${params.uri}"
 		state.exceptionCount = state.exceptionCount +1     
 	} catch (java.net.NoRouteToHostException e) {
-		log.error "doRequest> No route to host - check the URL " + params.uri
+		log.error "doRequest>No route to host - check the URL " + params.uri
 		sendEvent name: "verboseTrace", value: "doRequest> No route to host ${params.uri}"
 		state.exceptionCount = state.exceptionCount +1            
 	} catch (groovyx.net.http.HttpResponseException e) {
-		log.debug "doRequest> trapped exception $e, but continue processing for " + params.uri
-		sendEvent name: "verboseTrace", value: "doRequest>continue processing"
+		sendEvent name: "verboseTrace", value:
+			"doRequest>exception $e for " + params.uri
+		def exceptionCheck=device.currentValue("verboseTrace")
+		if (exceptionCheck.contains("Unauthorized")) {
+			state.exceptionCount = state.exceptionCount +1     
+			log.debug "doRequest>exception $e"
+		} else {
+			log.debug "doRequest>trapped exception $e, and continue processing"
+			sendEvent name: "verboseTrace", value:
+				"doRequest>continue processing"
+		}    
 	} catch (e) {
 		log.debug "doRequest>exception $e for " + params.uri
 		sendEvent name: "verboseTrace", value:
@@ -3031,10 +3039,10 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 				if (settings.trace) {
 					log.debug "generateRemoteSensorEvents>looping i=${i},found ${data.thermostatList[0].remoteSensors[i].capability[j]} at j=${j}"
 				}
-				if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
-					if ((data.remoteSensorData[0].thermostatList[i].capability[j].value==null) || 
-						(!data.remoteSensorData[0].thermostatList[i].capability[j].value.isInteger())) {
-						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found temp value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
+				if (data.thermostatList[0].remoteSensors.capability[j].type == REMOTE_SENSOR_TEMPERATURE) {
+					if ((data.thermostatList[0].remoteSensors.capability[j].value==null) || 
+						(!data.thermostatList[0].remoteSensors.capability[j].value.isInteger())) {
+						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found temp value, not valid integer: ${data.thermostatList[0].remoteSensors[i].capability[j].value}"
 						continue
 					}                    
 					// Divide the sensor temperature by 10 
@@ -3047,9 +3055,9 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 					minTemp = (minTemp==null)? value: Math.min(value,minTemp)
 					nbTempSensorInUse++
 				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_HUMIDITY) {
-					if ((data.remoteSensorData[0].thermostatList[i].capability[j].value==null) || 
-						(!data.thermostatList[0].remoteSensors[i].capability[j].value.isInteger())) {
-						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found hum value, not valid integer: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
+					if ((data.thermostatList[0].remoteSensors.capability[j].value==null) || 
+						(!data.thermostatList[0].remoteSensors.capability[j].value.isInteger())) {
+						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found hum value, not valid integer: ${data.thermostatList[0].remoteSensors[i].capability[j].value}"
 						continue
 					}                    
 					remoteHumData = remoteHumData + data.thermostatList[0].remoteSensors[i].id + "," + 
@@ -3061,8 +3069,8 @@ void generateRemoteSensorEvents(thermostatId,postData=false,bypassThrottling=fal
 					minHum = (minHum==null)? value: Math.min(value,minHum)
 					nbHumSensorInUse++
 				} else if (data.thermostatList[0].remoteSensors[i].capability[j].type == REMOTE_SENSOR_OCCUPANCY) {
-					if (data.remoteSensorData[0].thermostatList[i].capability[j].value==null) {
-						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found occ value, not valid: ${data.remoteSensorData[0].remoteSensors[i].capability[j].value}"
+					if (data.thermostatList[0].remoteSensors.capability[j].value==null) {
+						log.debug "generateRemoteSensorEvents>looping i=${i},j=${j}; found occ value, not valid: ${data.thermostatList[0].remoteSensors[i].capability[j].value}"
 						continue
 					}                    
 					remoteOccData = remoteOccData + data.thermostatList[0].remoteSensors[i].id + "," + 
@@ -3326,13 +3334,22 @@ private def refresh_tokens() {
 		state.exceptionCount = state.exceptionCount +1     
 		return false
 	} catch (java.net.NoRouteToHostException e) {
-		log.error "refresh_tokens> No route to host - check the URL " + method.uri
+		log.error "refresh_tokens>No route to host - check the URL " + method.uri
 		sendEvent name: "verboseTrace", value: "refresh_tokens> exception $e, no route to host ${method.uri}"
 		state.exceptionCount = state.exceptionCount +1     
 		return false
 	} catch (groovyx.net.http.HttpResponseException e) {
-		log.debug "doRequest> trapped exception $e and continue processing"
-		sendEvent name: "verboseTrace", value: "refresh_tokens>continue processing"
+		sendEvent name: "verboseTrace", value:
+			"refresh_tokens>>exception $e for " + params.uri
+		def exceptionCheck=device.currentValue("verboseTrace")
+		if (exceptionCheck.contains("Unauthorized")) {
+			state.exceptionCount = state.exceptionCount +1     
+			log.debug "refresh_tokens>>exception $e"
+		} else {
+			log.debug "doRequest>trapped exception $e, and continue processing"
+			sendEvent name: "verboseTrace", value:
+				"refresh_tokens>continue processing"
+		}    
 	} catch (e) {
 		log.debug "refresh_tokens>exception $e at " + method.uri
 		sendEvent name: "verboseTrace", value:
@@ -3355,8 +3372,8 @@ private def refresh_tokens() {
 	}   
 	if (settings.trace) {
 		double authExpTimeInMin= (authexptime/60000).toDouble().round(1)
-		log.debug "refresh_tokens> expires in ${authExpTimeInMin.toString()} minutes"
-		log.debug "refresh_tokens> data_auth.expires_in in time = ${authexptime}"
+		log.debug "refresh_tokens>expires in ${authExpTimeInMin.toString()} minutes"
+		log.debug "refresh_tokens>data_auth.expires_in in time = ${authexptime}"
 		sendEvent name: "verboseTrace", value:
 			"refresh_tokens>expire in ${authExpTimeInMin} minutes"
 	}
@@ -3445,7 +3462,7 @@ void getEcobeePinAndAuth() {
 		sendEvent name: "verboseTrace", value: "getEcobeePin> Unknown host " +
 			method.uri
 		return
-	} catch (java.net.NoRouteToHostException t) {
+	} catch (java.net.NoRouteToHostException e) {
 		log.error "getEcobeePinAndAuth> No route to host - check the URL " + method.uri
 		sendEvent name: "verboseTrace", value: "getEcobeePin> No route to host " +
 			method.uri
