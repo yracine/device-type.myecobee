@@ -2,7 +2,7 @@
  *  My Ecobee Device
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- *  Version 3.5.4
+ *  Version 3.5.5
  *  Refer to readme file for installation instructions.
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights,
@@ -801,6 +801,9 @@ void setThisTstatClimate(climateName) {
 	if (currentProgram.toUpperCase() != climateName.trim().toUpperCase()) {
     
 		resumeProgram("")
+		def cmd= []           
+		cmd << "delay 2000"                    
+		cmd            
 		setClimate(thermostatId, climateName)
 		def exceptionCheck=device.currentValue("verboseTrace")
 		if (exceptionCheck.contains("setClimate>done")) {
@@ -813,6 +816,9 @@ void setThisTstatClimate(climateName) {
 				sendEvent(name: "presence", value: "present")
 			}
 		}            
+		cmd= []           
+		cmd << "delay 2000"                    
+		cmd            
 		refresh_thermostat(thermostatId) // to refresh the values in the UI
 	}
 }
@@ -1009,7 +1015,7 @@ void poll() {
     
 	def thermostatId= determine_tstat_id("") 	    
 
-	def poll_interval=3   // set a 3 min. poll interval to avoid unecessary load on ecobee servers
+	def poll_interval=4   // set a 4 min. poll interval to avoid unecessary load on ecobee servers
 	def time_check_for_poll = (now() - (poll_interval * 60 * 1000))
 	if ((state?.lastPollTimestamp) && (state?.lastPollTimestamp > time_check_for_poll)) {
 		if (settings.trace) {
@@ -1212,6 +1218,9 @@ private def getClimateList(thermostatId) {
 void resumeThisTstat() {
 	def thermostatId= determine_tstat_id("") 	    
 	resumeProgram("") 
+	def cmd= []           
+	cmd << "delay 2000"                    
+	cmd            
 	refresh_thermostat(thermostatId)
 }
 
@@ -1329,6 +1338,7 @@ private void doRequest(uri, args, type, success) {
 		sendEvent name: "verboseTrace", value: "doRequest> No route to host ${params.uri}"
 		state.exceptionCount = state.exceptionCount +1            
 	} catch (groovyx.net.http.HttpResponseException e) {
+		state.lastPollTimestamp = now()  // Introduce a poll delay if there is an exception
 		sendEvent name: "verboseTrace", value:
 			"doRequest>exception $e for " + params.uri
 		def exceptionCheck=device.currentValue("verboseTrace")
@@ -1340,7 +1350,12 @@ private void doRequest(uri, args, type, success) {
 			sendEvent name: "verboseTrace", value:
 				"doRequest>continue processing"
 		}    
+		def cmd= []           
+		cmd << "delay 5000"                    
+		cmd            
+        
 	} catch (e) {
+		state.lastPollTimestamp = now() // introduce a poll delay to avoid subsequent exceptions
 		log.debug "doRequest>exception $e for " + params.uri
 		sendEvent name: "verboseTrace", value:
 			"doRequest>exception $e for " + params.uri
@@ -3219,15 +3234,22 @@ def getThermostatRevision(tstatType, thermostatId) {
 				log.debug "getThermostatRevision>done for ${thermostatId},intervalRevision=$intervalRevision,runtimeRevision=$runtimeRevision,thermostatRevision=$thermostatRevision," +
 					"state.intervalRevision=${state?.intervalRevision},state.runtimeRevision=${state?.runtimeRevision},state.thermostatRevision=${state?.thermostatRevision}"
 			}
-			if ((state?.runtimeRevision != runtimeRevision) || 
-				(state?.intervalRevision != intervalRevision) ||
-				(state?.thermostatRevision != thermostatRevision)) {
+			if ((state?.runtimeRevision == runtimeRevision) &&
+				(state?.intervalRevision == intervalRevision) &&
+				(state?.thermostatRevision == thermostatRevision)) {
+				if (settings.trace) {	
+					log.debug "getThermostatRevision>same revisions, no changes at ecobee for thermostatId ${thermostatId}"
+				}
+				return false
+			} else {
+				if (settings.trace) {	
+					log.debug "getThermostatRevision>found revision changes at ecobee for thermostatId ${thermostatId} "  + 
+						"state.intervalRevision=${state?.intervalRevision},state.runtimeRevision=${state?.runtimeRevision},state.thermostatRevision=${state?.thermostatRevision}"
+				}
 				state?.intervalRevision=intervalRevision
 				state?.runtimeRevision=runtimeRevision
 				state?.thermostatRevision=thermostatRevision
 				return true
-			} else {
-				return false
 			}            
 		} else if (connected=='false') {
 			if (settings.trace) {	
@@ -3339,8 +3361,9 @@ private def refresh_tokens() {
 		state.exceptionCount = state.exceptionCount +1     
 		return false
 	} catch (groovyx.net.http.HttpResponseException e) {
+		state.lastPollTimestamp = now()  // Introduce a poll delay if there is an exception
 		sendEvent name: "verboseTrace", value:
-			"refresh_tokens>>exception $e for " + params.uri
+			"refresh_tokens>>exception $e for " + method.uri
 		def exceptionCheck=device.currentValue("verboseTrace")
 		if (exceptionCheck.contains("Unauthorized")) {
 			state.exceptionCount = state.exceptionCount +1     
@@ -3350,6 +3373,10 @@ private def refresh_tokens() {
 			sendEvent name: "verboseTrace", value:
 				"refresh_tokens>continue processing"
 		}    
+		def cmd= []           
+		cmd << "delay 5000"                    
+		cmd            
+        
 	} catch (e) {
 		log.debug "refresh_tokens>exception $e at " + method.uri
 		sendEvent name: "verboseTrace", value:
@@ -3371,8 +3398,8 @@ private def refresh_tokens() {
 		refreshParentTokens()
 	}   
 	if (settings.trace) {
-		double authExpTimeInMin= (authexptime/60000).toDouble().round(1)
-		log.debug "refresh_tokens>expires in ${authExpTimeInMin.toString()} minutes"
+		double authExpTimeInMin= ((data.auth.expires_in)/60).toDouble().round(0)
+		log.debug "refresh_tokens>expires in ${authExpTimeInMin.intValue()} minutes"
 		log.debug "refresh_tokens>data_auth.expires_in in time = ${authexptime}"
 		sendEvent name: "verboseTrace", value:
 			"refresh_tokens>expire in ${authExpTimeInMin} minutes"
@@ -3562,7 +3589,7 @@ private def isLoggedIn() {
 	return true
 }
 private def isTokenExpired() {
-	def buffer_time_expiration=25   // set a 25 min. buffer time before token expiration to avoid auth_err 
+	def buffer_time_expiration=10  // set a 10 min. buffer time before token expiration to avoid auth_err 
 	def time_check_for_exp = now() + (buffer_time_expiration * 60 * 1000);
 	if (settings.trace) {
 		log.debug "isTokenExpired> check expires_in: ${data.auth.authexptime} > time check for exp: ${time_check_for_exp}"
@@ -3666,7 +3693,6 @@ void initialSetup(device_client_id, auth_data, device_tstat_id) {
 	def ecobeeType=determine_ecobee_type_or_location("")
 	data.auth.ecobeeType = ecobeeType
 	state?.exceptionCount=0    
-	state?.lastPollTimestamp = now()
 }
 
 def toQueryString(Map m) {
