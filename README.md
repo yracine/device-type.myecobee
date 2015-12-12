@@ -10,7 +10,9 @@ Date:               2014-03-31
 
 /*********************************************************************************************
 
-If you like My Ecobee Device and related smartapps, please support the developer:
+please take note of the following statement:**
+
+**http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Notes_to_MyEcobee_Device_Users_-_Contribution_is_now_required**
 
 /*********************************************************************************************
 
@@ -40,7 +42,8 @@ c) Hit the "From Code" tab on the left corner
 
 d) Copy and paste the code  (you can use the 'raw' button to avoid 'forking' the code) under 
 
-https://github.com/yracine/device-type.myecobee/blob/master/myecobee-devicetype.groovy
+The code will send to you via a google drive temporary link (please send your donation to
+get the code).
 
 e) Hit the create button at the bottom
 
@@ -59,8 +62,8 @@ b) Hit the "+New SmartApp" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) Copy and paste the code from My ecobee Init (you can use the 'raw' button to avoid 'forking' the code)
-under http://github.com/yracine/device-type.myecobee/tree/master/smartapps
+d) The code will send to you via a google drive temporary link (please send your donation to
+get the code).
 
 e) Hit the create button at the bottom
 
