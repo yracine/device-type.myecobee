@@ -43,7 +43,7 @@ def generalSetupPage() {
 	dynamicPage(name: "generalSetupPage", uninstall: true, nextPage: roomsSetupPage) {
 		section("About") {
 			paragraph "ecobeeSetZoneWithSchedule, the smartapp that enables Heating/Cooling Zoned Solutions based on your ecobee schedule(s)- coupled with smart vents (optional) for better temp settings control throughout your home"
-			paragraph "Version 5.3.5" 
+			paragraph "Version 5.3.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -181,11 +181,11 @@ def roomsSetup(params) {
 			input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
 				required: false, description: "Optional"
 		}
-		section("Room ${indiceRoom}-Do vent adjustment when occupied room only [optional, vent will be partially closed otherwise]") {
-			input "needOccupiedFlag${indiceRoom}", title: "Will do vent adjustement only when Occupied [default=false]", "bool",  
+		section("Room ${indiceRoom}-Do temp/vent adjustment when occupied room only [optional, vent will be partially closed otherwise]") {
+			input "needOccupiedFlag${indiceRoom}", title: "Will do temp/vent adjustement only when Occupied [default=false]", "bool",  
 				required: false, description: "Optional"
 		}
-		section("Room ${indiceRoom}-Do vent adjustment with this occupied's threshold [optional]") {
+		section("Room ${indiceRoom}-Do temp/vent adjustment with this occupied's threshold [optional]") {
 			input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
 				required: false, description: "Optional"
 		}
