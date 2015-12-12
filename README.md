@@ -40,7 +40,7 @@ b) Hit the "+New Device Type" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) Copy and paste the code  (you can use the 'raw' button to avoid 'forking' the code) under 
+d) Copy and paste the code  
 
 <b>The code will send to you via a google drive temporary link (please send your donation to
 get the code).</b>
