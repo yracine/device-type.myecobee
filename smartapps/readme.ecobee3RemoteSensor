@@ -24,7 +24,9 @@ Setup time: about 5 minutes
 
 Grab the code at (using the 'raw' button to avoid forking the code): 
 
-https://github.com/yracine/device-type.myecobee/blob/master/myecobee-devicetype.groovy
+The code will send to you via a google drive temporary link (please send your donation to
+get the code).
+
 Click "Save" & Publish"
 
 If not already created, read the instructions at
@@ -44,7 +46,8 @@ Create a new Smartapp, click on new Smartapp on the right
 
 From there, use the "From code" tab, and grab the code (using the 'raw' button to avoid forking the code) at:
 
-https://github.com/yracine/device-type.myecobee/blob/master/smartapps/ecobee3RemoteSensorsInit
+The code will send to you via a google drive temporary link (please send your donation to
+get the code).
 
 Click "Save" & Publish"
 
