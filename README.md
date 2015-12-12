@@ -42,8 +42,8 @@ c) Hit the "From Code" tab on the left corner
 
 d) Copy and paste the code  (you can use the 'raw' button to avoid 'forking' the code) under 
 
-The code will send to you via a google drive temporary link (please send your donation to
-get the code).
+<b>The code will send to you via a google drive temporary link (please send your donation to
+get the code).</b>
 
 e) Hit the create button at the bottom
 
@@ -62,8 +62,8 @@ b) Hit the "+New SmartApp" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) The code will send to you via a google drive temporary link (please send your donation to
-get the code).
+d) <b>The code will send to you via a google drive temporary link (please send your donation to
+get the code).</b>
 
 e) Hit the create button at the bottom
 
