@@ -175,11 +175,11 @@ def roomsSetup(params) {
 			input "motionSensor${indiceRoom}", title: "Motion sensor (if any) to detect if room is occupied", "capability.motionSensor", 
 				required: false, description: "Optional"
 		}
-		section("Room ${indiceRoom}-Do vent adjustment when occupied room only [optional, vent will be partially closed otherwise]") {
-			input "needOccupiedFlag${indiceRoom}", title: "Will do vent adjustement only when Occupied [default=false]", "bool",  
+		section("Room ${indiceRoom}-Do temp/vent adjustment when occupied room only [optional, vent will be partially closed otherwise]") {
+			input "needOccupiedFlag${indiceRoom}", title: "Will do temp/vent adjustement only when Occupied [default=false]", "bool",  
 				required: false, description: "Optional"
 		}
-		section("Room ${indiceRoom}-Do vent adjustment with this occupied's threshold [optional]") {
+		section("Room ${indiceRoom}-Do temp/vent adjustment with this occupied's threshold [optional]") {
 			input "residentsQuietThreshold${indiceRoom}", title: "Threshold in minutes for motion detection [default=15 min]", "number", 
 				required: false, description: "Optional"
 		}
@@ -1843,5 +1843,4 @@ private send(msg) {
 	}
 	log.debug msg
 }
-
 
