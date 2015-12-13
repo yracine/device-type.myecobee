@@ -42,8 +42,9 @@ c) Hit the "From Code" tab on the left corner
 
 d) Copy and paste the code  
 
-<b>The code will be sent to you via a google drive temporary link (please send your donation to
-get the code).</b>
+
+e) <b>The code will be sent to you via your paypal verified email address (please send your donation to get the code using 
+a google drive temporary link).</b>
 
 e) Hit the create button at the bottom
 
@@ -62,8 +63,8 @@ b) Hit the "+New SmartApp" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) <b>The code will be sent to you via a google drive temporary link (please send your donation to
-get the code).</b>
+d) <b>The code will be sent to you via your paypal verified email address (please send your donation to get the code using 
+a google drive temporary link).</b>
 
 e) Hit the create button at the bottom
 
