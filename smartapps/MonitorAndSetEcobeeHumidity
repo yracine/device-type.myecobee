@@ -16,6 +16,7 @@
  *      set the humidifier/dehumidifier  to a target humidity level. 
  *      Use also HRV/ERV/dehumidifier to get fresh air (free cooling) when appropriate based on outdoor temperature.
  *
+ *  Software Distribution is restricted and shall be done only with Developer's written approval.
  */
 // Automatically generated. Make future change here.
 definition(
