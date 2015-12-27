@@ -8,3 +8,4 @@
  *  Agreement. However, the Customer shall make no commercial use of the Background technology without
  *  Developer's written consent.
  *
+ *  Software Distribution is restricted and shall be done only with Developer's written approval.
