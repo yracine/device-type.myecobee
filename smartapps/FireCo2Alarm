@@ -13,6 +13,8 @@
  *  Take a series of actions in case of smoke or CO2 alert, i.e. turn on/flash the lights, turn on the siren, unlock the doors, turn
  *  off the thermostat(s), turn off the alarm system, etc.
  *
+ *  Software Distribution is restricted and shall be done only with Developer's written approval.
+ *
  */
 // Automatically generated. Make future change here.
 definition(
