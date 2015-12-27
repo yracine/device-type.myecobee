@@ -17,6 +17,8 @@
  * at regular intervals (input parameter in minutes) according to heat/cool thresholds that you set (input parameters).
  * It also constantly monitors any 'holds' at the thermostat to make sure that these holds are justified according to
  * the motion sensors at home and the given thresholds.
+ *
+ *  Software Distribution is restricted and shall be done only with Developer's written approval.
  */
 definition(
 	name: "MonitorAndSetEcobeeTemp",
