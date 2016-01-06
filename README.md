@@ -22,7 +22,7 @@ You can now download the code at
 http://www.maisonsecomatiq.com/#!store/tc3yr 
 </b>
 
-P.S. Technical support packages are aslo available.
+P.S. Technical support packages are also available.
 **************************************************************************************************
 
 
