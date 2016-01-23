@@ -22,10 +22,8 @@ Setup time: about 5 minutes
 1) If needed, you may want to update the My ecobee device, save & publish in the IDE
 /*********************************************************************************************
 
-Grab the code at (using the 'raw' button to avoid forking the code): 
 
-
-<b>The code will be sent to you via your paypal verified email address (please send your donation to get the code using 
+<a>The code will be sent to you via your paypal verified email address (please send your donation to get the code using 
 a google drive temporary link).</b>
 
 Click "Save" & Publish"
@@ -45,7 +43,7 @@ https://graph.api.smartthings.com/ide/apps
 
 Create a new Smartapp, click on new Smartapp on the right
 
-From there, use the "From code" tab, and grab the code (using the 'raw' button to avoid forking the code) at:
+From there, use the "From code" tab, and copy & paste it from the source file:
 
 <b>The code will be sent to you via your paypal verified email address (please send your donation to get the code using 
 a google drive temporary link).</b>
@@ -53,36 +51,14 @@ a google drive temporary link).</b>
 Click "Save" & Publish"
 
 /*********************************************************************************************
-3) Prior to calling ecobee3RemoteSensorInit, you need to create 2 additional generic device types in your IDE:
+3) Prior to calling ecobee3RemoteSensorInit, you need to create My Remote Sensor device type in your IDE:
 /*********************************************************************************************
 
-----------------------------------------------------------------------------------------------
-- Motion Detector
-- Temperature Sensor
-----------------------------------------------------------------------------------------------
-
-Those are 2 devices types from SmartThings. 
-
-In order to do so,
-
-----------------------------------------------------------------------------------------------
 a) Go to https://graph.api.smartthings.com/ide/devices
-----------------------------------------------------------------------------------------------
 b) Click on new SmartDevice on the right
-----------------------------------------------------------------------------------------------
-c) On the new SmartDevice page, click on the "From Template" tab
-----------------------------------------------------------------------------------------------
-d) Scroll down to Temperature Sensor
-----------------------------------------------------------------------------------------------
-e) Click "create" at the bottom of the page
-----------------------------------------------------------------------------------------------
-f) Click Save and publish on the next page
-----------------------------------------------------------------------------------------------
-g) Do the same for Motion Detector
-----------------------------------------------------------------------------------------------
-h) Click "create" at the bottom of the page
-----------------------------------------------------------------------------------------------
-i) Click save and publish
+c) On the new SmartDevice page, click on the "From Code" tab
+d) Copy and paste the code from My Remote Sensor from the source file
+e) Click save and publish
 
 /*********************************************************************************************
 4) Enable tracing, activate live Logging & Execute ecobee3RemoteSensorInit
@@ -127,8 +103,7 @@ to detect them.
 e) If you have the following error msg in the logs:
 ----------------------------------------------------------------------------------------------
 
-physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Motion Detector' in namespace 'smartthings' not found
-physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'Temperature Sensor' in namespace 'smartthings' not found
+physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'My RemoteSensor' in namespace 'yracine' not found
 
 Then, it means that somehow, step 3 was not completed entirely.
 
@@ -153,7 +128,7 @@ After execution, you should be able to see the new Sensor objects under
 https://graph.api.smartthings.com/device/list
 
 /*********************************************************************************************
-5) The temp and motion sensors data should be updated according to the polling interval specified as input in the smartapp.
+5) The temp and motion values should be updated in MyRemote Sensor according to the polling interval specified as input in the smartapp.
 /*********************************************************************************************
 
 
