@@ -18,6 +18,16 @@
 
 Setup time: about 5 minutes
 
+Please take note of the following:
+
+You can now download the code at 
+
+<b>
+http://www.maisonsecomatiq.com/#!store/tc3yr 
+</b>
+
+P.S. Technical support packages are also available.
+
 /*********************************************************************************************
 1) If needed, you may want to update the My ecobee device, save & publish in the IDE
 /*********************************************************************************************
@@ -43,10 +53,7 @@ https://graph.api.smartthings.com/ide/apps
 
 Create a new Smartapp, click on new Smartapp on the right
 
-From there, use the "From code" tab, and copy & paste it from the source file:
-
-<b>The code will be sent to you via your paypal verified email address (please send your donation to get the code using 
-a google drive temporary link).</b>
+From there, use the "From code" tab, and copy & paste it from the source file
 
 Click "Save" & Publish"
 
