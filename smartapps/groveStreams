@@ -396,7 +396,7 @@ def processQueue() {
 						log.debug "GroveStreams logging failed, status = ${response.status}"
 					} else {
 						log.debug "GroveStreams accepted event(s)"
-					    state.queue = []
+						state.queue = []
 					}
 			}
 		} catch (groovyx.net.http.ResponseParseException e) {
@@ -405,7 +405,7 @@ def processQueue() {
 				log.error "Grovestreams: ${e}"
 			} else {
 				log.debug "GroveStreams accepted event(s)"
-			    state.queue = []
+				state.queue = []
 			}
             
 		} catch (e) {
