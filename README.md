@@ -118,6 +118,10 @@ You should see your device under
 
 https://graph.api.smartthings.com/device/list
 
+And 
+
+In the ST app, under myHome/Things.
+
 /*********************************************************************************************
 
 <b>6) To populate the UI fields for your newly created device(s)</b>
