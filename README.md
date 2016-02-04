@@ -85,7 +85,7 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 /*********************************************************************************************
 
-<b>Click on the Smartapps link in the upper section of the following Marketsspace screen (last icon at the bottom), and then MyApps (last item in the list).</b
+<b>Click on the Smartapps link in the upper section of the following Marketspace screen (last icon at the bottom), and then MyApps (last item in the list).</b
 
 /*********************************************************************************************
 
