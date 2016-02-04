@@ -85,8 +85,7 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 /*********************************************************************************************
 
-From your phone or tablet, within the smartThings app and on the main screen, click on the Smartapps link in the upper
-section of any of the following screens: Home & Marketspace, and then MyApps (last item in the list).</b>
+<b>Click on the Smartapps link in the upper section of the following Marketsspace screen (last icon at the bottom), and then MyApps (last item in the list).</b
 
 /*********************************************************************************************
 
