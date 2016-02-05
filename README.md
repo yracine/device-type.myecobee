@@ -34,12 +34,12 @@ INSTALLATION STEPS
 
 /*********************************************************************************************
 
-<b>1) Create a new device type (My Ecobee Device)</b>
+<b>1) Create a new device Handler (My Ecobee Device)</b>
 /*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/devices
 
-b) Hit the "+New Device Type" at the top right corner
+b) Hit the "+New Device Handler" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
