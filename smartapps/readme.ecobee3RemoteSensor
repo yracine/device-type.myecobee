@@ -58,12 +58,12 @@ From there, use the "From code" tab, and copy & paste it from the source file
 Click "Save" & Publish"
 
 /*********************************************************************************************
-3) Prior to calling ecobee3RemoteSensorInit, you need to create My Remote Sensor device type in your IDE:
+3) Prior to calling ecobee3RemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 /*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/devices
-b) Click on new SmartDevice on the right
-c) On the new SmartDevice page, click on the "From Code" tab
+b) Click on new Device Handler on the right
+c) On the new Device Handler page, click on the "From Code" tab
 d) Copy and paste the code from My Remote Sensor from the source file
 e) Click save and publish
 
