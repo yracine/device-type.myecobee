@@ -185,8 +185,7 @@ def rescheduleIfNeeded(evt) {
 	// Update rescheduled state
     
 	if (!evt) {
-    	def lastRescheduled = now()
-    	atomicState.poll["rescheduled"] = lastRescheduled    
+    	atomicState.poll["rescheduled"] = now()    
 	}        
 }    
 
@@ -379,8 +378,7 @@ def handleCostEvent(evt) {
 private queueValue(evt, Closure convert) {
 	def MAX_QUEUE_SIZE=95000
 	def jsonPayload = [compId: evt.displayName, streamId: evt.name, data: convert(evt.value), time: now()]
-	def lastPoll=now()    
-	atomicState?.poll["last"] = lastPoll
+	atomicState?.poll["last"] = now()
 	def queue
 
 	synchronized(atomicState.lock) {
@@ -420,7 +418,7 @@ def processQueue() {
 				httpPutJson([uri: url, body: queue]) {
 					response ->
 						if (response.status != 200) {
-						log.debug "GroveStreams logging failed, status = ${response.status}"
+							log.debug "GroveStreams logging failed, status = ${response.status}"
 						} else {
 							log.debug "GroveStreams accepted event(s)"
 							// reset the queue 
