@@ -30,7 +30,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.1.5" 
+		paragraph "Version 2.1.6" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -138,6 +138,12 @@ def initialize() {
 	def queue = []
 	atomicState.queue=queue
     
+	if (atomicState.lock==null) {
+         atomicState.lock = []
+	}    
+	if (atomicState.queue==null) {
+         atomicState.queue = []
+	}    
 	atomicState?.poll = [ last: 0, rescheduled: now() ]
 
 	Integer delay  = givenInterval ?: 5 // By default, schedule processQueue every 5 min.
@@ -178,7 +184,10 @@ def rescheduleIfNeeded(evt) {
 	}
 	// Update rescheduled state
     
-	if (!evt) atomicState.poll["rescheduled"] = now()    
+	if (!evt) {
+    	def lastRescheduled = now()
+    	atomicState.poll["rescheduled"] = lastRescheduled    
+	}        
 }    
 
 def handleTemperatureEvent(evt) {
@@ -370,14 +379,18 @@ def handleCostEvent(evt) {
 private queueValue(evt, Closure convert) {
 	def MAX_QUEUE_SIZE=95000
 	def jsonPayload = [compId: evt.displayName, streamId: evt.name, data: convert(evt.value), time: now()]
-	atomicState?.poll["last"] = now()
+	def lastPoll=now()    
+	atomicState?.poll["last"] = lastPoll
+	def queue
 
-	def queue = atomicState.queue
-	queue << jsonPayload
+	synchronized(atomicState.lock) {
+		queue = atomicState.queue
+		queue << jsonPayload
+		atomicState.queue = queue    
+	} /* end of synchronized block */
 	def queue_size = queue.toString().length()
 	def last_item_in_queue = queue[queue.size() -1]    
 	log.debug "queueValue>queue size in chars=${queue_size}, appending ${jsonPayload} to queue, last item in queue= $last_item_in_queue"
-	atomicState.queue = queue    
 	if (queue_size >  MAX_QUEUE_SIZE) {
 		processQueue()
 	}
@@ -402,36 +415,38 @@ def processQueue() {
 	if (queue != []) {
 		log.debug "Events to be sent to groveStreams: ${queue}"
 
-		try {
-			httpPutJson([uri: url, body: queue]) {
-				response ->
-					if (response.status != 200) {
+		synchronized(atomicState.lock) {
+			try {
+				httpPutJson([uri: url, body: queue]) {
+					response ->
+						if (response.status != 200) {
 						log.debug "GroveStreams logging failed, status = ${response.status}"
-					} else {
-						log.debug "GroveStreams accepted event(s)"
-			            // reset the queue 
-						queue =[]                         
-						atomicState.queue = queue                     
-					}
-			}
-		} catch (groovyx.net.http.ResponseParseException e) {
+						} else {
+							log.debug "GroveStreams accepted event(s)"
+							// reset the queue 
+							queue =[]                         
+							atomicState.queue = queue                     
+						}
+				}
+			} catch (groovyx.net.http.ResponseParseException e) {
 			// ignore error 200, bogus exception
-			if (e.statusCode != 200) {
-				log.error "Grovestreams: ${e}"
-			} else {
-				log.debug "GroveStreams accepted event(s)"
-			}
-            // reset the queue 
-			queue =[]                         
-			atomicState.queue = queue                      
+				if (e.statusCode != 200) {
+					log.error "Grovestreams: ${e}"
+				} else {
+					log.debug "GroveStreams accepted event(s)"
+				}
+				// reset the queue 
+				queue =[]                         
+				atomicState.queue = queue                      
             
-		} catch (e) {
-			def errorInfo = "Error sending value: ${e}"
-			log.error errorInfo
-            // reset the queue 
-			queue =[]                         
-			atomicState.queue = queue                        
-		}
+			} catch (e) {
+				def errorInfo = "Error sending value: ${e}"
+				log.error errorInfo
+				// reset the queue 
+				queue =[]                         
+				atomicState.queue = queue                        
+			}
+		} /* end of synchronized block */
 	}
 
 }
