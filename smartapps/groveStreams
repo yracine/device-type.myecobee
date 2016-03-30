@@ -30,7 +30,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.1.6" 
+		paragraph "Version 2.1.7" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -123,18 +123,18 @@ def initialize() {
 	subscribe(ecobees, "ventilatorRuntimeDaily", handleDailyStats)
 	subscribe(ecobees, "presence", handlePresenceEvent)
 	subscribe(ecobees, "compCool2RuntimeDaily", handleDailyStats)
-	subscribe(automatic, "yesterdayAvgTripConsumption",handleDailyStats)
-	subscribe(automatic, "yesterdayAvgTripDistance",handleDailyStats)
-	subscribe(automatic, "yesterdayAvgTripDuration",handleDailyStats)
-	subscribe(automatic, "yesterdayTotalDistance",handleDailyStats)
-	subscribe(automatic, "yesterdayAvgTripFuelVolume",handleDailyStats)
-	subscribe(automatic, "yesterdayTotalFuelVolume",handleDailyStats)
-	subscribe(automatic, "yesterdayTotalDuration",handleDailyStats)
-	subscribe(automatic, "yesterdayTotalNbTrip",handleDailyStats)
-	subscribe(automatic, "yesterdayTotalHardAcceleration",handleDailyStats)
-	subscribe(automatic, "yesterdayTotalHardBrake",handleDailyStats)
-	subscribe(automatic, "yesterdayAvgScoreSpeeding",handleDailyStats)
-	subscribe(automatic, "yesterdayAvgScoreEvents",handleDailyStats)
+	subscribe(automatic, "yesterdayTripsAvgAverageKmpl",handleDailyStats)
+	subscribe(automatic, "yesterdayTripsAvgDistanceM",handleDailyStats)
+	subscribe(automatic, "yesterdayTripsAvgDurationS",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalDistanceM",handleDailyStats)
+	subscribe(automatic, "yesterdayTripsAvgFuelVolumeL",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalFuelVolumeL",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalDurationS:",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalNbTrips",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalHardAccels",handleDailyStats)
+	subscribe(automatic, "yesterdayTotalHardBrakes:",handleDailyStats)
+	subscribe(automatic, "yesterdayTripsAvgScoreSpeeding",handleDailyStats)
+	subscribe(automatic, "yesterdayTripsAvgScoreEvents",handleDailyStats)
 	def queue = []
 	atomicState.queue=queue
     
