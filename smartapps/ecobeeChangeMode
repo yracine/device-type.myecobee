@@ -3,7 +3,7 @@
  *
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
- 
+ *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
  *  in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
  *  Developer grants a non exclusive perpetual license to use the Background technology in the Software developed for and delivered 
@@ -37,7 +37,7 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 1.9.1" 
+			paragraph "Version 1.9.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -47,6 +47,9 @@ preferences {
 		}
 		section("Change the following ecobee thermostat(s)...") {
 			input "thermostats", "device.myEcobeeDevice", title: "Which thermostat(s)", multiple: true
+		}
+		section("Do the mode change manually only (by pressing the arrow to execute the smartapp)") {
+			input "manualFlag", "bool", title: "Manual only [default=false]", description:"optional",required:false
 		}
 	}
 	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
@@ -86,13 +89,19 @@ def selectProgram() {
 
 
 def installed() {
-	subscribe(location, changeMode)
-	subscribe(app, changeMode)
+	initialize()	
 }
 
 def updated() {
 	unsubscribe()
-	subscribe(location, changeMode)
+	initialize()	
+}
+
+private def initialize() {
+
+	if (!manualFlag) {
+		subscribe(location, changeMode)
+	}
 	subscribe(app, changeMode)
 }
 
