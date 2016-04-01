@@ -139,10 +139,10 @@ def initialize() {
 	atomicState.queue=queue
     
 	if (atomicState.lock==null) {
-         atomicState.lock = []
+		atomicState.lock = []
 	}    
 	if (atomicState.queue==null) {
-         atomicState.queue = []
+		atomicState.queue = []
 	}    
 	atomicState?.poll = [ last: 0, rescheduled: now() ]
 
@@ -185,7 +185,7 @@ def rescheduleIfNeeded(evt) {
 	// Update rescheduled state
     
 	if (!evt) {
-    	atomicState.poll["rescheduled"] = now()    
+		atomicState.poll["rescheduled"] = now()    
 	}        
 }    
 
