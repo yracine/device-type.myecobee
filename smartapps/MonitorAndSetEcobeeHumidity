@@ -23,7 +23,7 @@
  */
 // Automatically generated. Make future change here.
 definition(
-	name: "MonitorAndSetEcobeeHumidity",
+	name: "MonitorAndSetEcobeeHumidity2",
 	namespace: "yracine",
 	author: "Yves Racine",
 	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV",
@@ -58,32 +58,32 @@ def humiditySettings() {
 			input "givenHumidityLevel", "number", title: "Humidity level (default=calculated based on outside temp)", required: false
 		}
 		section("At which interval in minutes (range=[10..59],default =59 min.)?") {
-			input "givenInterval", "number", title: "Interval", required: false
+			input "givenInterval", "number", title: "Interval",  required: false
 		}
 		section("Humidity differential for adjustments") {
 			input "givenHumidityDiff", "number", title: "Humidity Differential [default=5%]", required: false
 		}
 		section("Frost control for humidifier") {
-			input "frostControl", "bool", title: "Frost control [default=false]?", required: false
+			input "frostControl", "bool", title: "Frost control [default=false]?",  description: 'optional', required: false
 		}
 		section("Minimum fan runtime per hour in minutes") {
-			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
+			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]",  description: 'optional', required: false
 		}
-		section("Your dehumidifier as HRV input parameters section") {
+		section("Your dehumidifier as HRV input parameters section (optional)") {
 			input "useDehumidifierAsHRV", "bool", title: "Use Dehumidifier as HRV (By default=false)?", required: false
 			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime [default=20]", required: false
 		}
 		section("Minimum temperature for dehumidification (in Farenheits/Celsius)") {
-			input "givenMinTemp", "decimal", title: "Min Temp [default=10°F/-15°C]", required: false
+			input "givenMinTemp", "decimal", title: "Min Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
 		section("Free cooling using HRV/Dehumidifier [By default=false]") {
-			input "freeCooling", "bool", title: "Free Cooling?", required: false
+			input "freeCooling", "bool", title: "Free Cooling?", description: 'optional', required: false
 		}
 		section("Check energy consumption at [optional]") {
-			input "ted", "capability.powerMeter", title: "Power meter?", required: false
+			input "ted", "capability.powerMeter", title: "Power meter?", description: 'optional', required: false
 		}
 		section("Do not run any devices above this power consumption level at a given time [default=3000W]") {
-			input "givenPowerLevel", "number", title: "power?", required: false
+			input "givenPowerLevel", "number", title: "power?",  description: 'optional',required: false
 		}
 	}
 }
