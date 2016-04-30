@@ -66,8 +66,8 @@ def humiditySettings() {
 		section("Frost control for humidifier [optional]") {
 			input "frostControl", "bool", title: "Frost control [default=false]?",  description: 'optional', required: false
 		}
-		section("Minimum fan runtime per hour in minutes [optional]") {
-			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]",  description: 'optional', required: false
+		section("Minimum fan runtime per hour in minutes") {
+			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
 		}
 		section("Your dehumidifier as HRV input parameters section  [optional]") {
 			input "useDehumidifierAsHRV", "bool", title: "Use Dehumidifier as HRV (By default=false)?", description: 'optional', required: false
@@ -77,7 +77,7 @@ def humiditySettings() {
 			input "givenMinTemp", "decimal", title: "Min Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
 		section("Free cooling using HRV/Dehumidifier [By default=false]") {
-			input "freeCooling", "bool", title: "Free Cooling?", description: 'optional', required: false
+			input "freeCooling", "bool", title: "Free Cooling?", required: false
 		}
 		section("Check energy consumption at [optional]") {
 			input "ted", "capability.powerMeter", title: "Power meter?", description: 'optional', required: false
@@ -87,6 +87,7 @@ def humiditySettings() {
 		}
 	}
 }
+
 
 def sensorSettings() {
 	dynamicPage(name: "sensorSettings", title: "Sensors to be used", install: false, nextPage: otherSettings) {
