@@ -467,7 +467,7 @@ def setHumidityLevel() {
 
 
 	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'true' && hasErv == 'false' && hasHrv == 'false')) &&
-		(outdoorTemp < indoorTemp) && (freeCoolingFlag == 'true')) {
+		(outdoorTemp < indoorTemp) && (freeCoolingFlag)) {
 
 		//      If mode is cooling and outdoor temp is lower than inside, then just use dehumidifier for better cooling if any available
 
@@ -479,8 +479,7 @@ def setHumidityLevel() {
 		send "MonitorEcobeeHumidity>Outdoor temp is lower than inside, using dehumidifier for more efficient cooling"
 
 
-	} else if ((ecobeeMode == 'cool' && (hasHrv == 'true')) && (outdoorTemp < indoorTemp) &&
-		(freeCoolingFlag == 'true')) {
+	} else if ((ecobeeMode == 'cool' && (hasHrv == 'true')) && (outdoorTemp < indoorTemp) && (freeCoolingFlag)) {
 
 		log.trace("In cooling mode, outdoor temp is lower than inside, using the HRV to get fresh air")
 
