@@ -23,7 +23,7 @@
  */
 // Automatically generated. Make future change here.
 definition(
-	name: "MonitorAndSetEcobeeHumidity2",
+	name: "MonitorAndSetEcobeeHumidity",
 	namespace: "yracine",
 	author: "Yves Racine",
 	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV",
