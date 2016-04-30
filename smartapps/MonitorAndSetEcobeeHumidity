@@ -79,7 +79,7 @@ def humiditySettings() {
 		section("Free cooling using HRV/Dehumidifier [By default=false]") {
 			input "freeCooling", "bool", title: "Free Cooling?", required: false
 		}
-		section("Check energy consumption at [optional]") {
+		section("Check energy consumption at [optional, to avoid using HRV/ERV/Humidifier/Dehumidifier at peak]") {
 			input "ted", "capability.powerMeter", title: "Power meter?", description: 'optional', required: false
 		}
 		section("Do not run any devices above this power consumption level at a given time [default=3000W]") {
@@ -87,7 +87,6 @@ def humiditySettings() {
 		}
 	}
 }
-
 
 def sensorSettings() {
 	dynamicPage(name: "sensorSettings", title: "Sensors to be used", install: false, nextPage: otherSettings) {
