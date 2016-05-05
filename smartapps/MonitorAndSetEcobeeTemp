@@ -714,8 +714,7 @@ private def check_if_hold_justified() {
 	log.trace "check_if_hold_justified> currentProgName = $currentProgName"
 	log.trace "check_if_hold_justified> currentSetClimate = $currentSetClimate"
 	log.trace "check_if_hold_justified> outdoorTemp = $outdoorTemp°"
-	
-    log.trace "check_if_hold_justified> state.tempSensors = $state.tempSensors"
+	log.trace "check_if_hold_justified> state.tempSensors = $state.tempSensors"
 	log.trace "check_if_hold_justified> ecobee's indoorTemp = $ecobeeTemp°"
 	log.trace "check_if_hold_justified> indoorTemps = $indoorTemps"
 	log.trace "check_if_hold_justified> avgIndoorTemp = $avg_indoor_temp°"
