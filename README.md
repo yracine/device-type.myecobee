@@ -45,8 +45,7 @@ c) Hit the "From Code" tab on the left corner
 
 d) Copy and paste the code  
 
-
-e) <b>The code will be sent to you via your paypal verified email address.</b>
+<b>The code will be sent to you via your paypal verified email address.</b>
 
 e) Hit the create button at the bottom
 
@@ -65,7 +64,9 @@ b) Hit the "+New SmartApp" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
 
-d) <b>The code will be sent to you via your paypal verified email address.</b>
+d) Copy and paste the code  
+
+<b>The code will be sent to you via your paypal verified email address.</b>
 
 e) Hit the create button at the bottom
 
