@@ -30,7 +30,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.1.7" 
+		paragraph "Version 2.1.8" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -42,7 +42,7 @@ preferences {
 		input "temperatures", "capability.temperatureMeasurement", title: "Temperatures", required: false, multiple: true
 		input "thermostats", "capability.thermostat", title: "Thermostats", required: false, multiple: true
 		input "ecobees", "device.myEcobeeDevice", title: "Ecobees", required: false, multiple: true
-		input "automatic", "device.myAutomaticDevice", title: "Automatic Connected Device(s)", required: false, multiple: true
+		input "automatic", "capability.presenceSensor", title: "Automatic Connected Device(s)", required: false, multiple: true
 		input "detectors", "capability.smokeDetector", title: "Smoke/CarbonMonoxide Detectors", required: false, multiple: true
 		input "humidities", "capability.relativeHumidityMeasurement", title: "Humidity sensors", required: false, multiple: true
 		input "waters", "capability.waterSensor", title: "Water sensors", required: false, multiple: true
