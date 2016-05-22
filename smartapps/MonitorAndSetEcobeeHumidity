@@ -43,7 +43,7 @@ def humiditySettings() {
 	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 2.1.5"
+			paragraph "Version 2.1.6"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -255,7 +255,7 @@ def setHumidityLevel() {
 
 	//  Polling of all devices
 
-	def MAX_EXCEPTION_COUNT=50
+	def MAX_EXCEPTION_COUNT=10
 	String exceptionCheck, msg 
 	try {        
 		ecobee.poll()
@@ -341,7 +341,7 @@ def setHumidityLevel() {
 
 	def target_humidity = givenHumidityLevel ?: find_ideal_indoor_humidity(outdoorTemp)
 
-	String ecobeeMode = ecobee.currentThermostatMode
+	String ecobeeMode = ecobee.currentThermostatMode.toString()
 	log.debug "ecobee Mode = $ecobeeMode"
 
 	outdoorHumidity = (scale == 'C') ?
@@ -380,7 +380,7 @@ def setHumidityLevel() {
 
 		send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode, using ERV/HRV"
 
-	} else if (((ecobeeMode == 'heat') || (ecobeeMode == 'off') && (hasHrv == 'false' && hasErv == 'false' && hasDehumidifier == 'true')) &&
+	} else if (((ecobeeMode in ['heat','off', 'auto']) && (hasHrv == 'false' && hasErv == 'false' && hasDehumidifier == 'true')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
 		(ecobeeHumidity >= outdoorHumidity - min_humidity_diff) &&
 		(outdoorTemp > min_temp)) {
@@ -395,7 +395,7 @@ def setHumidityLevel() {
 			])
 
 		send "MonitorEcobeeHumidity>dehumidify to ${target_humidity}% in ${ecobeeMode} mode"
-	} else if (((ecobeeMode == 'heat') || (ecobeeMode == 'off') && ((hasHrv == 'true' || hasErv == 'true') && hasDehumidifier == 'false')) &&
+	} else if (((ecobeeMode in ['heat','off', 'auto']) && ((hasHrv == 'true' || hasErv == 'true') && hasDehumidifier == 'false')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
 		(ecobeeHumidity >= outdoorHumidity - min_humidity_diff) &&
 		(outdoorTemp > min_temp)) {
@@ -408,7 +408,7 @@ def setHumidityLevel() {
 		ecobee.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}", 'vent': 'minontime', 'ventilatorMinOnTime': "${min_vent_time}"])
 
 		send "MonitorEcobeeHumidity>use HRV/ERV to dehumidify ${target_humidity}% in ${ecobeeMode} mode"
-	} else if (((ecobeeMode == 'heat') || (ecobeeMode == 'off') && (hasHrv == 'true' || hasErv == 'true' || hasDehumidifier == 'true')) &&
+	} else if (((ecobeeMode in ['heat','off', 'auto']) && (hasHrv == 'true' || hasErv == 'true' || hasDehumidifier == 'true')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
 		(ecobeeHumidity >= outdoorHumidity - min_humidity_diff) &&
 		(outdoorTemp <= min_temp)) {
@@ -426,7 +426,7 @@ def setHumidityLevel() {
 		if (detailedNotif) {
 			send "MonitorEcobeeHumidity>Too cold (${outdoorTemp}°) to dehumidify to ${target_humidity}"
 		}
-	} else if ((((ecobeeMode == 'heat' || ecobeeMode == 'off') && hasHumidifier == 'true')) &&
+	} else if ((((ecobeeMode in ['heat','off', 'auto']) && hasHumidifier == 'true')) &&
 		(ecobeeHumidity < (target_humidity - min_humidity_diff))) {
 
 		log.trace("In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house")
