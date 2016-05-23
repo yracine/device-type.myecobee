@@ -115,7 +115,7 @@ def changeMode(evt) {
 
 	if (delay) {
 		try {
-    		unschedule()
+			unschedule()
 		} catch (e) {
 			log.debug ("ecobeeChangeMode>exception when trying to unschedule: $e")    
 		}    
