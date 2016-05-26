@@ -37,7 +37,7 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 1.9.4" 
+			paragraph "Version 1.9.5" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -104,7 +104,7 @@ def updated() {
 private def initialize() {
 
 	if (!manualFlag) {
-		subscribe(location, changeMode)
+		subscribe(location, "mode", changeMode)
 	}
 	subscribe(app, changeMode)
 }
@@ -115,11 +115,12 @@ def changeMode(evt) {
 
 	if (delay) {
 		try {
-			unschedule()
+			unschedule(takeAction)
 		} catch (e) {
 			log.debug ("ecobeeChangeMode>exception when trying to unschedule: $e")    
 		}    
 	}    
+    
 	Boolean foundMode=false        
 	newMode.each {
         
@@ -127,6 +128,7 @@ def changeMode(evt) {
 			foundMode=true            
 		}            
 	}        
+	log.debug ("changeMode>location.mode= $location.mode, newMode=${newMode}")
         
 	if ((newMode != null) && (!foundMode)) {
         
@@ -134,7 +136,8 @@ def changeMode(evt) {
 		return			
 	}
 
-	if (!delay) {
+	if ((!delay) || (delay==null)) {
+		log.debug ("changeMode>about to call takeAction()")
 		takeAction()    
 	} else {
 		runIn((delay*60), "takeAction")   
@@ -144,7 +147,8 @@ def changeMode(evt) {
 private void takeAction() {
 	message = "ecobeeChangeMode>setting the thermostat(s) to $givenClimate.."
 	send(message)
-
+	log.debug (message)
+    
 	thermostats?.setThisTstatClimate(givenClimate)
 }
 
