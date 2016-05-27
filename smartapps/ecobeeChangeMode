@@ -37,7 +37,7 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 1.9.5" 
+			paragraph "Version 1.9.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -106,12 +106,17 @@ private def initialize() {
 	if (!manualFlag) {
 		subscribe(location, "mode", changeMode)
 	}
-	subscribe(app, changeMode)
+	subscribe(app, changeModeManual)
+}
+
+def changeModeManual(evt) {
+	takeAction() 
 }
 
 
 def changeMode(evt) {
 	def message
+
 
 	if (delay) {
 		try {
