@@ -30,7 +30,6 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-dashboardPage
 preferences {
 
 	page(name: "dashboardPage", title: "Dashboard")
