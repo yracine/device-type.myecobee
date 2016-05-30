@@ -120,7 +120,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.0.3"
+			paragraph "Version 3.0.4"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -147,7 +147,7 @@ def sensorSettings() {
 
 
 def humidifySettings() {
-	dynamicPage(name: "humidifySettings", install: false, uninstall: true, nextPage: dehumidifySettings) {
+	dynamicPage(name: "humidifySettings", install: false, uninstall: false, nextPage: dehumidifySettings) {
 		section("Frost control for humidifier [optional]") {
 			input "frostControl", "bool", title: "Frost control [default=false]?",  description: 'optional', required: false
 		}
@@ -161,7 +161,7 @@ def humidifySettings() {
 }
 
 def dehumidifySettings() {
-	dynamicPage(name: "dehumidifySettings", install: false, uninstall: true, nextPage: ventilatorSettings) {
+	dynamicPage(name: "dehumidifySettings", install: false, uninstall: false, nextPage: ventilatorSettings) {
 		section("Free cooling using HRV/Dehumidifier [By default=false]") {
 			input "freeCooling", "bool", title: "Free Cooling?", required: false
 		}
@@ -179,7 +179,7 @@ def dehumidifySettings() {
 }
 
 def ventilatorSettings() {
-	dynamicPage(name: "ventilatorSettings", install: false, uninstall: true, nextPage: otherSettings) {
+	dynamicPage(name: "ventilatorSettings", install: false, uninstall: false, nextPage: otherSettings) {
 		section("Free cooling using HRV [By default=false]") {
 			input "freeCooling", "bool", title: "Free Cooling?", required: false
 			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime [default=20]", description: 'optional',required: false
