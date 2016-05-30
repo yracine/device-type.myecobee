@@ -102,7 +102,7 @@ def dashboardPage() {
 		}            
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 3.0" 
+			paragraph "Version 3.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -131,6 +131,12 @@ def tempSensorSettings() {
  
 def motionSensorSettings() {
 	dynamicPage(name: "motionSensorSettings", title: "Motion Sensors for setting thermostat to Away/Present", install: false, nextPage: thresholdSettings) {
+		section("Set your ecobee thermostat to [Away,Present] based on all Room Motion Sensors [default=false] ") {
+			input (name:"setAwayOrPresentFlag", title: "Set Main thermostat to [Away,Present]?", type:"bool",required:false)
+		}
+		section("Choose additional indoor motion sensors for setting ecobee climate to [Away, Home] [optional]") {
+			input "motions", "capability.motionSensor", title: "Any other motion sensors?",  multiple: true, required: false
+		}
 		section("Choose additional indoor motion sensors for setting ecobee climate to [Away, Home] [optional]") {
 			input "motions", "capability.motionSensor", title: "Any other motion sensors?",  multiple: true, required: false
 		}
@@ -597,7 +603,8 @@ private def check_if_hold_needed() {
 		}
 	}
 	reset_state_motions()
-	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
+	def setAwayOrPresent = (setAwayOrPresentFlag)?:false
+	if ((setAwayOrPresent) && (state.motions != [])) {  // the following logic is done only if motion sensors are provided as input parameters
   
   		boolean residentAway=residentsHaveBeenQuiet()
 		if ((!currentProgName.toUpperCase().contains('AWAY')) && (!residentAway)) {
@@ -628,7 +635,6 @@ private def check_if_hold_needed() {
 
 		}
 	} /* end if state.motions */
-    
     
 	if ((location.mode.toUpperCase().contains('AWAY')) || (currentProgName.toUpperCase()=='SLEEP')) { 
     
@@ -822,7 +828,8 @@ private def check_if_hold_justified() {
 		}
 	}
 	reset_state_motions()
-	if (state.motions != []) {  // the following logic is done only if motion sensors are provided as input parameters
+	def setAwayOrPresent = (setAwayOrPresentFlag)?:false
+	if ((setAwayOrPresent) && (state.motions != [])) {  // the following logic is done only if motion sensors are provided as input parameters
   		boolean residentAway=residentsHaveBeenQuiet()
 		if ((currentSetClimate.toUpperCase()=='AWAY') && (!residentAway)) {
 			if ((state?.programHoldSet == 'Away') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
