@@ -33,26 +33,19 @@ definition(
 )
 
 preferences {
-	page(name: "humiditySettings", title: "HumiditySettings")
+	page(name: "dashboardPage", title: "DashboardPage")
+	page(name: "humidifySettings", title: "HumidifySettings")
+	page(name: "dehumidifySettings", title: "DehumidifySettings")
+	page(name: "ventilatorSettings", title: "ventilatorSettings")
 	page(name: "sensorSettings", title: "SensorSettings")
 	page(name: "otherSettings", title: "OtherSettings")
 
 }
 
-def humiditySettings() {
-	dynamicPage(name: "humiditySettings", install: false, uninstall: true, nextPage: "sensorSettings") {
-		section("About") {
-			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 2.1.6"
-			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
-				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
-					title:"Paypal donation..."
-			paragraph "Copyright©2014 Yves Racine"
-				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
- 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
-		}
-		section("Monitor & set the ecobee thermostat's dehumidifer/humidifier/HRV/ERV") {
-			input "ecobee", "capability.thermostat", title: "Ecobee?"
+def dashboardPage() {
+	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeHumidity-Dashboard", uninstall: true, nextPage:humidifySettings, submitOnChange: true) {
+		section("Monitor & set the ecobee thermostat's dehumidifer/humidifier/HRV/ERV settings") {
+			input "ecobee", "capability.thermostat", title: "Which Ecobee?"
 		}
 		section("To this humidity level") {
 			input "givenHumidityLevel", "number", title: "Humidity level (default=calculated based on outside temp)", required: false
@@ -63,11 +56,114 @@ def humiditySettings() {
 		section("Humidity differential for adjustments") {
 			input "givenHumidityDiff", "number", title: "Humidity Differential [default=5%]", required: false
 		}
+		section("Press Next in the upper section for Initial setup") {
+			if (ecobee) {            
+				def scale= getTemperatureScale()
+				String currentProgName = ecobee?.currentClimateName
+				String currentProgType = ecobee?.currentProgramType
+				def scheduleProgramName = ecobee?.currentProgramScheduleName
+				String mode =ecobee?.currentThermostatMode.toString()
+				def operatingState=ecobee?.currentThermostatOperatingState                
+				def ecobeeHumidity = ecobee.currentHumidity
+				def indoorTemp = ecobee.currentTemperature
+				def hasDehumidifier = (ecobee.currentHasDehumidifier) ? ecobee.currentHasDehumidifier : 'false'
+				def hasHumidifier = (ecobee.currentHasHumidifier) ? ecobee.currentHasHumidifier : 'false'
+				def hasHrv = (ecobee.currentHasHrv) ? ecobee.currentHasHrv : 'false'
+				def hasErv = (ecobee.currentHasErv) ? ecobee.currentHasErv : 'false'
+				def heatingSetpoint,coolingSetpoint
+				switch (mode) { 
+					case 'cool':
+						coolingSetpoint = ecobee?.currentValue('coolingSetpoint')
+					break                        
+ 					case 'auto': 
+						coolingSetpoint = ecobee?.currentValue('coolingSetpoint')
+					case 'heat':
+					case 'emergency heat':
+					case 'auto': 
+					case 'off': 
+ 						heatingSetpoint = ecobee?.currentValue('heatingSetpoint')
+					break
+				}                        
+
+				def dParagraph = "TstatMode: $mode\n" +
+						"TstatOperatingState $operatingState\n" + 
+						"EcobeeClimateSet: $currentProgName\n" +
+						"EcobeeProgramType: $currentProgType\n" +
+                        "EcobeeHasHumidifier: $hasHumidifier\n" +
+                        "EcobeeHasDeHumidifier: $hasDehumidifier\n" +
+                        "EcobeeHasHRV: $hasHrv\n" +
+                        "EcobeeHasERV: $hasErv\n" +
+                        "EcobeeHumidity: $ecobeeHumidity%\n" +
+                        "TstatTemperature: $indoorTemp${scale}\n"
+				if (coolingSetpoint)  { 
+					 dParagraph = dParagraph + "CoolingSetpoint: ${coolingSetpoint}$scale\n"
+				}     
+				if (heatingSetpoint)  { 
+					dParagraph = dParagraph + "HeatingSetpoint: ${heatingSetpoint}$scale\n" 
+				}
+				paragraph dParagraph 
+                
+			} /* end if ecobee */ 		
+		}
+		send ("About to call setup page")        
+		section("Humififier/Dehumidifier/HRV/ERV Setup") {
+			send ("About to call Sensors setup page")        
+			href(name: "toSensorsPage",  title: "Configure your sensors", description: "Tap to Configure...", image: getImagePath() + "HumiditySensor.png", page: "sensorSettings") 
+			send ("About to call Humidify setup page")        
+			href(name: "toHumidifyPage",  title: "Configure your humidifier settings", description: "Tap to Configure...", image: getImagePath() + "Humidifier.jpg", page: "humidifySettings") 
+			send ("About to call Dehumidify setup page")        
+			href(name: "toDehumidifyPage", title: "Configure your dehumidifier settings", description: "Tap to Configure...", image: getImagePath() + "dehumidifier.png", page: "dehumidifySettings") 
+			send ("About to call Ventilator setup page")        
+			href(name: "toVentilatorPage", title: "Configure your HRV/ERV settings", description: "Tap to Configure...", image: getImagePath() + "HRV.jpg", page: "ventilatorSettings") 
+			send ("About to call Other Settings page")        
+			href(name: "toNotificationsPage", title: "Other Options & Notification Setup",  description: "Tap to Configure...", image: getImagePath() + "Fan.png", page: "otherSettings")
+		}            
+		section("About") {
+			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
+			paragraph "Version 3.0"
+			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
+				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
+					title:"Paypal donation..."
+			paragraph "Copyright©2014 Yves Racine"
+				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+ 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+		}
+	} /* end dashboardPage */ 
+} 
+
+def sensorSettings() {
+	dynamicPage(name: "sensorSettings", title: "Sensors to be used", install: false, nextPage: humidifySettings) {
+		section("Choose Indoor humidity sensor to be used for better adjustment (optional, default=ecobee sensor)") {
+			input "indoorSensor", "capability.relativeHumidityMeasurement", title: "Indoor Humidity Sensor", required: false
+		}
+		section("Choose Outdoor humidity sensor to be used") {
+			input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
+		}
+		section {
+			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
+		}
+	}
+}
+
+
+def humidifySettings() {
+	dynamicPage(name: "humidifySettings", install: false, uninstall: true, nextPage: dehumidifySettings) {
 		section("Frost control for humidifier [optional]") {
 			input "frostControl", "bool", title: "Frost control [default=false]?",  description: 'optional', required: false
 		}
 		section("Minimum fan runtime per hour in minutes") {
 			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
+		}
+		section {
+			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
+		}
+	}
+}
+
+def dehumidifySettings() {
+	dynamicPage(name: "dehumidifySettings", install: false, uninstall: true, nextPage: ventilatorSettings) {
+		section("Frost control for humidifier [optional]") {
+			input "frostControl", "bool", title: "Frost control [default=false]?",  description: 'optional', required: false
 		}
 		section("Your dehumidifier as HRV input parameters section  [optional]") {
 			input "useDehumidifierAsHRV", "bool", title: "Use Dehumidifier as HRV (By default=false)?", description: 'optional', required: false
@@ -85,24 +181,35 @@ def humiditySettings() {
 		section("Do not run any devices above this power consumption level at a given time [default=3000W]") {
 			input "givenPowerLevel", "number", title: "power?",  description: 'optional',required: false
 		}
+		section {
+			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
+		}
 	}
 }
 
-def sensorSettings() {
-	dynamicPage(name: "sensorSettings", title: "Sensors to be used", install: false, nextPage: otherSettings) {
-		section("Choose Indoor humidity sensor to be used for better adjustment (optional, default=ecobee sensor)") {
-			input "indoorSensor", "capability.relativeHumidityMeasurement", title: "Indoor Humidity Sensor", required: false
+def ventilatorSettings() {
+	dynamicPage(name: "ventilatorSettings", install: false, uninstall: true, nextPage: otherSettings) {
+		section("Free cooling using HRV [By default=false]") {
+			input "freeCooling", "bool", title: "Free Cooling?", required: false
+			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime [default=20]", description: 'optional',required: false
 		}
-		section("Choose Outdoor humidity sensor to be used") {
-			input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
+		section {
+			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
 	}
 }
+
 
 
 def otherSettings() {
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
-
+		section("Minimum fan runtime per hour in minutes") {
+			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
+		}
+		section("Check energy consumption at [optional, to avoid using HRV/ERV/Humidifier/Dehumidifier at peak]") {
+			input "ted", "capability.powerMeter", title: "Power meter?", description: 'optional', required: false
+			input "givenPowerLevel", "number", title: "power?",  description: 'optional',required: false
+		}
 		section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
 			input "powerSwitch", "capability.switch", required: false
 		}
@@ -117,6 +224,9 @@ def otherSettings() {
 		}
 		section([mobileOnly: true]) {
 			label title: "Assign a name for this SmartApp", required: false
+		}
+		section {
+			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
 	}
 }
@@ -663,3 +773,7 @@ def cToF(temp) {
 def fToC(temp) {
 		return (temp - 32) / 1.8
 }
+
+def getImagePath() {
+	return "http://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
+}    
