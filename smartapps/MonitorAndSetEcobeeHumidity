@@ -84,7 +84,7 @@ def dashboardPage() {
  						heatingSetpoint = ecobee?.currentValue('heatingSetpoint')
 					break
 				}                        
-
+				def detailedNotifFlag = (detailedNotif)? 'true':'false' 
 				int min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
 				int min_fan_time = (givenFanMinTime) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
 				def dParagraph = "TstatMode: $mode\n" +
@@ -104,7 +104,8 @@ def dashboardPage() {
 					"EcobeeHasHRV: $hasHrv\n" +
 					"EcobeeHasERV: $hasErv\n" +
 					"EcobeeHumidity: $ecobeeHumidity%\n" +
-					"MinFanTime: ${min_fan_time} min.\n"
+					"MinFanTime: ${min_fan_time} min.\n" +
+					"detailedNotification: ${detailedNotif}\n"
 				paragraph dParagraph 
 				if (hasDehumidifier=='true') {
 					def min_temp = (givenMinTemp) ? givenMinTemp : ((scale=='C') ? -15 : 10)
@@ -127,10 +128,16 @@ def dashboardPage() {
 					dParagraph = dParagraph + "\nFreeCooling: $freeCoolingFlag"                     
 					paragraph dParagraph 
 				}
+				if (ted) {                
+					int max_power = givenPowerLevel ?: 3000 // Do not run above 3000w consumption level by default
+					dParagraph = "PowerMeter: $ted" + 
+						"\nPowerMax: ${max_power}W"
+					paragraph dParagraph 
+				}
                 
 			} /* end if ecobee */ 		
 		}
-		section("Humififier/Dehumidifier/HRV/ERV Setup") {
+		section("Humidifier/Dehumidifier/HRV/ERV Setup") {
 			href(name: "toSensorsPage",  title: "Configure your sensors", description: "Tap to Configure...", image: getImagePath() + "HumiditySensor.png", page: "sensorSettings") 
 			href(name: "toHumidifyPage",  title: "Configure your humidifier settings", description: "Tap to Configure...", image: getImagePath() + "Humidifier.jpg", page: "humidifySettings") 
 			href(name: "toDehumidifyPage", title: "Configure your dehumidifier settings", description: "Tap to Configure...", image: getImagePath() + "dehumidifier.png", page: "dehumidifySettings") 
@@ -139,7 +146,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.0.7"
+			paragraph "Version 3.0.8"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
