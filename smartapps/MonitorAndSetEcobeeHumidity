@@ -85,8 +85,17 @@ def dashboardPage() {
 					break
 				}                        
 
+				int min_fan_time = (givenFanMinTime) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
 				def dParagraph = "TstatMode: $mode\n" +
 						"TstatOperatingState $operatingState\n" + 
+                        "TstatTemperature: $indoorTemp${scale}\n" 
+				if (coolingSetpoint)  { 
+					 dParagraph = dParagraph + "CoolingSetpoint: ${coolingSetpoint}$scale\n"
+				}     
+				if (heatingSetpoint)  { 
+					dParagraph = dParagraph + "HeatingSetpoint: ${heatingSetpoint}$scale\n" 
+				}
+                dParagraph = dParagraph +
 						"EcobeeClimateSet: $currentProgName\n" +
 						"EcobeeProgramType: $currentProgType\n" +
                         "EcobeeHasHumidifier: $hasHumidifier\n" +
@@ -94,18 +103,34 @@ def dashboardPage() {
                         "EcobeeHasHRV: $hasHrv\n" +
                         "EcobeeHasERV: $hasErv\n" +
                         "EcobeeHumidity: $ecobeeHumidity%\n" +
-                        "TstatTemperature: $indoorTemp${scale}\n"
-				if (coolingSetpoint)  { 
-					 dParagraph = dParagraph + "CoolingSetpoint: ${coolingSetpoint}$scale\n"
-				}     
-				if (heatingSetpoint)  { 
-					dParagraph = dParagraph + "HeatingSetpoint: ${heatingSetpoint}$scale\n" 
-				}
+                        "MinFanTime: ${min_fan_time} min.\n"
 				paragraph dParagraph 
+				if (hasDehumidifier=='true') {
+					def min_temp = (givenMinTemp) ? givenMinTemp : ((scale=='C') ? -15 : 10)
+					def useDehumidifierAsHRVFlag = (useDehumidifierAsHRV) ? 'true' : 'false'
+					dParagraph=  "UseDehumidifierAsHRV: $useDehumidifierAsHRVFlag" +
+						"\nMinDehumidifyTemp: $min_temp${scale}"
+					if (useDehumidifierAsHRVFlag=='true') {
+						int min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+ 						dParagraph= dParagraph + "\nMinVentTime $min_vent_time min." 
+					}
+					paragraph dParagraph 
+				}
+				if (hasHumidifier=='true') {
+					def frostControlFlag = (frostControl) ? 'true' : 'false'
+					dParagraph = "HumidifyFrostControl: $frostControlFlag" 
+					paragraph dParagraph 
+				}
+				if ((hasHrv=='true') || (hasErv=='true')) {
+					int min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+					dParagraph=  "MinVentTime $min_vent_time min."
+					def freeCoolingFlag= (freeCooling) ? 'true' : 'false'
+					dParagraph = dParagraph + "\nFreeCooling: $freeCoolingFlag"                     
+					paragraph dParagraph 
+				}
                 
 			} /* end if ecobee */ 		
 		}
-		send ("About to call setup page")        
 		section("Humififier/Dehumidifier/HRV/ERV Setup") {
 			href(name: "toSensorsPage",  title: "Configure your sensors", description: "Tap to Configure...", image: getImagePath() + "HumiditySensor.png", page: "sensorSettings") 
 			href(name: "toHumidifyPage",  title: "Configure your humidifier settings", description: "Tap to Configure...", image: getImagePath() + "Humidifier.jpg", page: "humidifySettings") 
@@ -115,7 +140,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.0.6"
+			paragraph "Version 3.0.7"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -123,15 +148,17 @@ def dashboardPage() {
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
  					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
+       
 	} /* end dashboardPage */ 
-} 
+    
+}
 
 def sensorSettings() {
 	dynamicPage(name: "sensorSettings", title: "Sensors to be used", install: false, nextPage: humidifySettings) {
 		section("Choose Indoor humidity sensor to be used for better adjustment (optional, default=ecobee sensor)") {
 			input "indoorSensor", "capability.relativeHumidityMeasurement", title: "Indoor Humidity Sensor", required: false
 		}
-		section("Choose Outdoor humidity sensor to be used") {
+		section("Choose Outdoor humidity sensor to be used (weatherStation or sensor)") {
 			input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
 		}
 		section {
@@ -145,9 +172,6 @@ def humidifySettings() {
 	dynamicPage(name: "humidifySettings", install: false, uninstall: false, nextPage: dehumidifySettings) {
 		section("Frost control for humidifier [optional]") {
 			input "frostControl", "bool", title: "Frost control [default=false]?",  description: 'optional', required: false
-		}
-		section("Minimum fan runtime per hour in minutes") {
-			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
 		}
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
@@ -177,8 +201,11 @@ def ventilatorSettings() {
 	dynamicPage(name: "ventilatorSettings", install: false, uninstall: false, nextPage: otherSettings) {
 		section("Free cooling using HRV [By default=false]") {
 			input "freeCooling", "bool", title: "Free Cooling?", required: false
-			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime [default=20]", description: 'optional',required: false
 		}
+		section("Minimum HRV/ERV runtime in minutes") {
+			input "givenVentMinTime", "number", title: "Minimum HRV/ERV [default=20 min.]", description: 'optional',required: false
+		}
+
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
@@ -334,18 +361,18 @@ def setHumidityLevel() {
 		return
 	}
 	def min_humidity_diff = givenHumidityDiff ?: 5 //  5% humidity differential by default
-	Integer min_fan_time = (givenFanMinTime != null) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
-	Integer min_vent_time = (givenVentMinTime != null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+	Integer min_fan_time = (givenFanMinTime) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
+	Integer min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
 	def freeCoolingFlag = (freeCooling != null) ? freeCooling : false // Free cooling using the Hrv/Erv/dehumidifier
 	def frostControlFlag = (frostControl != null) ? frostControl : false // Frost Control for humdifier, by default=false
 	def min_temp // Min temp in Farenheits for using HRV/ERV,otherwise too cold
 
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
-		min_temp = (givenMinTemp != null) ? givenMinTemp : -15 // Min. temp in Celcius for using HRV/ERV,otherwise too cold
+		min_temp = (givenMinTemp) ? givenMinTemp : -15 // Min. temp in Celcius for using HRV/ERV,otherwise too cold
 	} else {
 
-		min_temp = (givenMinTemp != null) ? givenMinTemp : 10 // Min temp in Farenheits for using HRV/ERV,otherwise too cold
+		min_temp = (givenMinTemp) ? givenMinTemp : 10 // Min temp in Farenheits for using HRV/ERV,otherwise too cold
 	}
 	Integer max_power = givenPowerLevel ?: 3000 // Do not run above 3000w consumption level by default
 
@@ -642,63 +669,68 @@ def setHumidityLevel() {
 	}
 
 	if (useDehumidifierAsHRVFlag) {
-		Date now = new Date()
-		String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
-		Calendar oneHourAgoCal = new GregorianCalendar()
-		oneHourAgoCal.add(Calendar.HOUR, -1)
-		Date oneHourAgo = oneHourAgoCal.getTime()
-		if (detailedNotif) {
-			log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
-				"oneHourAgo's date/time in UTC= ${String.format('%tF %<tT',oneHourAgo)}")
-		}
-
-
-		// Get the dehumidifier's runtime 
-		ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier", 'false', 'true')
-		ecobee.generateReportRuntimeEvents("dehumidifier", oneHourAgo, now, 0, null, 'lastHour')
-		float dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
-		float diffVentTimeInMin = min_vent_time - dehumidifierRunInMin as Float
-		def equipStatus = ecobee.currentEquipmentStatus
-		if (detailedNotif) {
-			send "MonitorEcobeeHumidity>dehumidifier runtime in the last hour is ${dehumidifierRunInMin.toString()} min. vs. desired ventilatorMinOnTime =${min_vent_time.toString()} minutes"
-			log.debug "equipStatus = $equipStatus"
-		}
-		if (equipStatus.contains("dehumidifier")) {
-			if (detailedNotif) {
-				log.trace("dehumidifier should be running (${equipStatus}), time left to run = ${diffVentTimeInMin.toString()} min. within the current cycle")
-				send "MonitorEcobeeHumidity>dehumidifier (used as HRV) already running,time left to run = ${diffVentTimeInMin.toString()} min."
-			}
-		}
-
-		if ((diffVentTimeInMin > 0) && (!equipStatus.contains("dehumidifier"))) {
-			if (detailedNotif) {
-				send "MonitorEcobeeHumidity>About to turn the dehumidifier on for ${diffVentTimeInMin.toString()} min. within the next hour..."
-			}
-
-			ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': '25',
-					'fanMinOnTime': "${min_fan_time}"
-				])
-				// calculate the delay to turn off the dehumidifier according to the scheduled monitoring cycle
-
-			float delay = ((min_vent_time.toFloat() / 60) * scheduleInterval.toFloat()).round()
-			int delayInt = delay.toInteger()
-			delayInt = (delayInt > 1) ? delayInt : 1 // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
-			send "MonitorEcobeeHumidity>turning off the dehumidifier (used as HRV) in ${delayInt} minute(s)..."
-				// save the current setpoints before scheduling the dehumidifier to be turned off
-			runIn((delayInt * 60), "turn_off_dehumidifier") // turn off the dehumidifier after delay
-		} else if (diffVentTimeInMin <= 0) {
-			if (detailedNotif) {
-				send "MonitorEcobeeHumidity>dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle"
-				log.trace("dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle")
-			}
-
-		} else if (equipStatus.contains("dehumidifier")) {
-			turn_off_dehumidifier()
-		}
+		use_dehumidifer_as_HRV()    
 	} // end if useDehumidifierAsHRVFlag '
 
 	log.debug "End of Fcn"
 }
+
+private void use_dehumidifer_as_HRV() {
+	Date now = new Date()
+	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
+	Calendar oneHourAgoCal = new GregorianCalendar()
+	oneHourAgoCal.add(Calendar.HOUR, -1)
+	Date oneHourAgo = oneHourAgoCal.getTime()
+	if (detailedNotif) {
+		log.debug("local date/time= ${nowInLocalTime}, date/time now in UTC = ${String.format('%tF %<tT',now)}," +
+			"oneHourAgo's date/time in UTC= ${String.format('%tF %<tT',oneHourAgo)}")
+	}
+
+
+	// Get the dehumidifier's runtime 
+	ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier", 'false', 'true')
+	ecobee.generateReportRuntimeEvents("dehumidifier", oneHourAgo, now, 0, null, 'lastHour')
+	float dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
+	float diffVentTimeInMin = min_vent_time - dehumidifierRunInMin as Float
+	def equipStatus = ecobee.currentEquipmentStatus
+	if (detailedNotif) {
+		send "MonitorEcobeeHumidity>dehumidifier runtime in the last hour is ${dehumidifierRunInMin.toString()} min. vs. desired ventilatorMinOnTime =${min_vent_time.toString()} minutes"
+		log.debug "equipStatus = $equipStatus"
+	}
+	if (equipStatus.contains("dehumidifier")) {
+		if (detailedNotif) {
+			log.trace("dehumidifier should be running (${equipStatus}), time left to run = ${diffVentTimeInMin.toString()} min. within the current cycle")
+			send "MonitorEcobeeHumidity>dehumidifier (used as HRV) already running,time left to run = ${diffVentTimeInMin.toString()} min."
+		}
+	}
+
+	if ((diffVentTimeInMin > 0) && (!equipStatus.contains("dehumidifier"))) {
+		if (detailedNotif) {
+			send "MonitorEcobeeHumidity>About to turn the dehumidifier on for ${diffVentTimeInMin.toString()} min. within the next hour..."
+		}
+
+		ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': '25',
+				'fanMinOnTime': "${min_fan_time}"
+			])
+		// calculate the delay to turn off the dehumidifier according to the scheduled monitoring cycle
+
+		float delay = ((min_vent_time.toFloat() / 60) * scheduleInterval.toFloat()).round()
+		int delayInt = delay.toInteger()
+		delayInt = (delayInt > 1) ? delayInt : 1 // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
+		send "MonitorEcobeeHumidity>turning off the dehumidifier (used as HRV) in ${delayInt} minute(s)..."
+			// save the current setpoints before scheduling the dehumidifier to be turned off
+		runIn((delayInt * 60), "turn_off_dehumidifier") // turn off the dehumidifier after delay
+	} else if (diffVentTimeInMin <= 0) {
+		if (detailedNotif) {
+			send "MonitorEcobeeHumidity>dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle"
+			log.trace("dehumidifier has run for at least ${min_vent_time} min. within the last hour, waiting for the next cycle")
+		}
+
+	} else if (equipStatus.contains("dehumidifier")) {
+		turn_off_dehumidifier()
+	}
+}
+
 
 private void turn_off_dehumidifier() {
 
