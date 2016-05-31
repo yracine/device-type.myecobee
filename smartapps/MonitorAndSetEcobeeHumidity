@@ -85,25 +85,26 @@ def dashboardPage() {
 					break
 				}                        
 
+				int min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
 				int min_fan_time = (givenFanMinTime) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
 				def dParagraph = "TstatMode: $mode\n" +
-						"TstatOperatingState $operatingState\n" + 
-                        "TstatTemperature: $indoorTemp${scale}\n" 
+					"TstatOperatingState $operatingState\n" + 
+ 					"TstatTemperature: $indoorTemp${scale}\n" 
 				if (coolingSetpoint)  { 
 					 dParagraph = dParagraph + "CoolingSetpoint: ${coolingSetpoint}$scale\n"
 				}     
 				if (heatingSetpoint)  { 
 					dParagraph = dParagraph + "HeatingSetpoint: ${heatingSetpoint}$scale\n" 
 				}
-                dParagraph = dParagraph +
-						"EcobeeClimateSet: $currentProgName\n" +
-						"EcobeeProgramType: $currentProgType\n" +
-                        "EcobeeHasHumidifier: $hasHumidifier\n" +
-                        "EcobeeHasDeHumidifier: $hasDehumidifier\n" +
-                        "EcobeeHasHRV: $hasHrv\n" +
-                        "EcobeeHasERV: $hasErv\n" +
-                        "EcobeeHumidity: $ecobeeHumidity%\n" +
-                        "MinFanTime: ${min_fan_time} min.\n"
+				dParagraph = dParagraph +
+					"EcobeeClimateSet: $currentProgName\n" +
+					"EcobeeProgramType: $currentProgType\n" +
+					"EcobeeHasHumidifier: $hasHumidifier\n" +
+					"EcobeeHasDeHumidifier: $hasDehumidifier\n" +
+					"EcobeeHasHRV: $hasHrv\n" +
+					"EcobeeHasERV: $hasErv\n" +
+					"EcobeeHumidity: $ecobeeHumidity%\n" +
+					"MinFanTime: ${min_fan_time} min.\n"
 				paragraph dParagraph 
 				if (hasDehumidifier=='true') {
 					def min_temp = (givenMinTemp) ? givenMinTemp : ((scale=='C') ? -15 : 10)
@@ -111,7 +112,6 @@ def dashboardPage() {
 					dParagraph=  "UseDehumidifierAsHRV: $useDehumidifierAsHRVFlag" +
 						"\nMinDehumidifyTemp: $min_temp${scale}"
 					if (useDehumidifierAsHRVFlag=='true') {
-						int min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
  						dParagraph= dParagraph + "\nMinVentTime $min_vent_time min." 
 					}
 					paragraph dParagraph 
@@ -122,7 +122,6 @@ def dashboardPage() {
 					paragraph dParagraph 
 				}
 				if ((hasHrv=='true') || (hasErv=='true')) {
-					int min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
 					dParagraph=  "MinVentTime $min_vent_time min."
 					def freeCoolingFlag= (freeCooling) ? 'true' : 'false'
 					dParagraph = dParagraph + "\nFreeCooling: $freeCoolingFlag"                     
