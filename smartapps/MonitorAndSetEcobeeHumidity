@@ -107,20 +107,15 @@ def dashboardPage() {
 		}
 		send ("About to call setup page")        
 		section("Humififier/Dehumidifier/HRV/ERV Setup") {
-			send ("About to call Sensors setup page")        
 			href(name: "toSensorsPage",  title: "Configure your sensors", description: "Tap to Configure...", image: getImagePath() + "HumiditySensor.png", page: "sensorSettings") 
-			send ("About to call Humidify setup page")        
 			href(name: "toHumidifyPage",  title: "Configure your humidifier settings", description: "Tap to Configure...", image: getImagePath() + "Humidifier.jpg", page: "humidifySettings") 
-			send ("About to call Dehumidify setup page")        
 			href(name: "toDehumidifyPage", title: "Configure your dehumidifier settings", description: "Tap to Configure...", image: getImagePath() + "dehumidifier.png", page: "dehumidifySettings") 
-			send ("About to call Ventilator setup page")        
 			href(name: "toVentilatorPage", title: "Configure your HRV/ERV settings", description: "Tap to Configure...", image: getImagePath() + "HRV.jpg", page: "ventilatorSettings") 
-			send ("About to call Other Settings page")        
 			href(name: "toNotificationsPage", title: "Other Options & Notification Setup",  description: "Tap to Configure...", image: getImagePath() + "Fan.png", page: "otherSettings")
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.0.5"
+			paragraph "Version 3.0.6"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
