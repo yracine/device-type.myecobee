@@ -131,7 +131,7 @@ def dashboardPage() {
 				if (ted) {                
 					int max_power = givenPowerLevel ?: 3000 // Do not run above 3000w consumption level by default
 					dParagraph = "PowerMeter: $ted" + 
-						"\nPowerMax: ${max_power}W"
+						"\nDoNotRunOver: ${max_power}W"
 					paragraph dParagraph 
 				}
                 
@@ -146,7 +146,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.0.8"
+			paragraph "Version 3.0.9"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
