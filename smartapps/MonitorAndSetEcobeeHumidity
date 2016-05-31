@@ -105,7 +105,7 @@ def dashboardPage() {
 					"EcobeeHasERV: $hasErv\n" +
 					"EcobeeHumidity: $ecobeeHumidity%\n" +
 					"MinFanTime: ${min_fan_time} min.\n" +
-					"detailedNotification: ${detailedNotif}\n"
+					"DetailedNotification: ${detailedNotif}\n"
 				paragraph dParagraph 
 				if (hasDehumidifier=='true') {
 					def min_temp = (givenMinTemp) ? givenMinTemp : ((scale=='C') ? -15 : 10)
