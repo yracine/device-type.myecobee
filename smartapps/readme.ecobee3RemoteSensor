@@ -76,9 +76,8 @@ in the IDE by following these steps:
 ----------------------------------------------------------------------------------------------
 a) Go to https://graph.api.smartthings.com/ide/logs
 ----------------------------------------------------------------------------------------------
-b) Run ecobee3RemoteSensorInit on your smartphone/tablet
+b) Under the ST app, run ecobee3RemoteSensorInit on your smartphone/tablet
 ----------------------------------------------------------------------------------------------
-
 
 
 <b>Click on the Smartapps link in the upper section of the following Marketsspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
