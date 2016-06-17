@@ -80,7 +80,7 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 /*********************************************************************************************
 
-<b>3) Execute My ecobee Init</b>
+<b>3) Under the ST app, execute My ecobee Init</b>
 
 /*********************************************************************************************
 
