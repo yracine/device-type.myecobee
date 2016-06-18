@@ -85,7 +85,7 @@ def initialize() {
 	subscribe(waters, "water", handleWaterEvent)
 	subscribe(detectors, "smoke", handleSmokeEvent)
 	subscribe(detectors, "carbonMonoxide", handleCarbonMonoxideEvent)
-	subscribe(illuminances, "IlluminanceMeasurement", handleIlluminanceEvent)
+	subscribe(illuminances, "illuminance", handleIlluminanceEvent)
 	subscribe(contacts, "contact", handleContactEvent)
 	subscribe(locks, "lock", handleLockEvent)
 	subscribe(accelerations, "acceleration", handleAccelerationEvent)
@@ -299,6 +299,7 @@ def handleCarbonMonoxideEvent(evt) {
 }
 
 def handleIlluminanceEvent(evt) {
+	log.debug ("handleIlluminanceEvent> $evt.name= $evt.value")
 	queueValue(evt) {
 		it.toString()
 	}
