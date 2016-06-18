@@ -85,7 +85,7 @@ def initialize() {
 	subscribe(waters, "water", handleWaterEvent)
 	subscribe(detectors, "smoke", handleSmokeEvent)
 	subscribe(detectors, "carbonMonoxide", handleCarbonMonoxideEvent)
-	subscribe(illuminances, "illuminanceMeasurement", handleIlluminanceEvent)
+	subscribe(illuminances, "IlluminanceMeasurement", handleIlluminanceEvent)
 	subscribe(contacts, "contact", handleContactEvent)
 	subscribe(locks, "lock", handleLockEvent)
 	subscribe(accelerations, "acceleration", handleAccelerationEvent)
