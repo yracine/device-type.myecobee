@@ -30,7 +30,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.1.9" 
+		paragraph "Version 2.2" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -138,9 +138,6 @@ def initialize() {
 	def queue = []
 	atomicState.queue=queue
     
-	if (atomicState.lock==null) {
-		atomicState.lock = []
-	}    
 	if (atomicState.queue==null) {
 		atomicState.queue = []
 	}    
@@ -382,11 +379,9 @@ private queueValue(evt, Closure convert) {
 	atomicState?.poll["last"] = now()
 	def queue
 
-	synchronized(atomicState.lock) {
-		queue = atomicState.queue
-		queue << jsonPayload
-		atomicState.queue = queue    
-	} /* end of synchronized block */
+	queue = atomicState.queue
+	queue << jsonPayload
+	atomicState.queue = queue    
 	def queue_size = queue.toString().length()
 	def last_item_in_queue = queue[queue.size() -1]    
 	log.debug "queueValue>queue size in chars=${queue_size}, appending ${jsonPayload} to queue, last item in queue= $last_item_in_queue"
@@ -400,52 +395,41 @@ def processQueue() {
 	atomicState?.poll["last"] = now()
 	def queue = atomicState.queue
     
-/*    
-	//schedule the rescheduleIfNeeded() function
-	if (((atomicState?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
-		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
-		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
-		// Update rescheduled state
-		atomicState?.poll["rescheduled"] = now()
-	}
-*/    
+   
 	def url = "https://grovestreams.com/api/feed?api_key=${channelKey}"
 	log.debug "processQueue"
 	if (queue != []) {
 		log.debug "Events to be sent to groveStreams: ${queue}"
 
-		synchronized(atomicState.lock) {
-			try {
-				httpPutJson([uri: url, body: queue]) {
-					response ->
-						if (response.status != 200) {
-							log.debug "GroveStreams logging failed, status = ${response.status}"
-						} else {
-							log.debug "GroveStreams accepted event(s)"
-							// reset the queue 
-							queue =[]                         
-							atomicState.queue = queue                     
-						}
-				}
-			} catch (groovyx.net.http.ResponseParseException e) {
-			// ignore error 200, bogus exception
-				if (e.statusCode != 200) {
-					log.error "Grovestreams: ${e}"
+		try {
+			httpPutJson([uri: url, body: queue]) {response ->
+				if (response.status != 200) {
+					log.debug "GroveStreams logging failed, status = ${response.status}"
 				} else {
 					log.debug "GroveStreams accepted event(s)"
+					// reset the queue 
+					queue =[]                         
+					atomicState.queue = queue                     
 				}
-				// reset the queue 
-				queue =[]                         
-				atomicState.queue = queue                      
-            
-			} catch (e) {
-				def errorInfo = "Error sending value: ${e}"
-				log.error errorInfo
-				// reset the queue 
-				queue =[]                         
-				atomicState.queue = queue                        
 			}
-		} /* end of synchronized block */
+		} catch (groovyx.net.http.ResponseParseException e) {
+			// ignore error 200, bogus exception
+			if (e.statusCode != 200) {
+				log.error "Grovestreams: ${e}"
+			} else {
+				log.debug "GroveStreams accepted event(s)"
+			}
+			// reset the queue 
+			queue =[]                         
+			atomicState.queue = queue                      
+            
+		} catch (e) {
+			def errorInfo = "Error sending value: ${e}"
+			log.error errorInfo
+			// reset the queue 
+			queue =[]                         
+			atomicState.queue = queue                        
+		}
 	}
 
 }
