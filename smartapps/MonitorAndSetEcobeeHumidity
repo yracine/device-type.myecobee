@@ -146,7 +146,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.0.9"
+			paragraph "Version 3.1"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -194,8 +194,8 @@ def dehumidifySettings() {
 			input "useDehumidifierAsHRV", "bool", title: "Use Dehumidifier as HRV (By default=false)?", description: 'optional', required: false
 			input "givenVentMinTime", "number", title: "Minimum HRV/ERV runtime [default=20]", description: 'optional',required: false
 		}
-		section("Minimum temperature for dehumidification (in Farenheits/Celsius) [optional]") {
-			input "givenMinTemp", "decimal", title: "Min Temp [default=10°F/-15°C]", description: 'optional', required: false
+		section("Minimum outdoor threshold for stopping dehumidification (in Farenheits/Celsius) [optional]") {
+			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
@@ -211,7 +211,9 @@ def ventilatorSettings() {
 		section("Minimum HRV/ERV runtime in minutes") {
 			input "givenVentMinTime", "number", title: "Minimum HRV/ERV [default=20 min.]", description: 'optional',required: false
 		}
-
+		section("Minimum outdoor threshold for stopping ventilation (in Farenheits/Celsius) [optional]") {
+			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
+		}
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
