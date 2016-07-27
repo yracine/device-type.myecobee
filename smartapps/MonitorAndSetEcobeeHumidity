@@ -406,7 +406,7 @@ def setHumidityLevel() {
 	}
 	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")))) {
 		// need to authenticate again    
-		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), need to re-authenticate at ecobee..." 
+		msg="too many exceptions/errors or unauthorized exception, $exceptionCheck (${state?.exceptionCount} errors), may need to re-authenticate at ecobee..." 
 		send "MonitorEcobeeHumidity> ${msg}"
 		log.error msg
 		return        
