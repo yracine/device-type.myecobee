@@ -29,7 +29,7 @@ P.S. Technical support packages are also available.
 Setup time: about 5 minutes
 
 =====================
-PRE-REQUISITES
+PREREQUISITES
 =====================
 
 - Your ecobee thermostat fully operational (and connected to wifi)
