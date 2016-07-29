@@ -34,7 +34,7 @@ PREREQUISITES
 
 - Your ecobee thermostat fully operational (and connected to wifi)
 - Your ecobee credentials (username/password)
-
+- Developer access to SmartThings (http://graph.api.smartthings.com/)
 
 =====================
 INSTALLATION STEPS
