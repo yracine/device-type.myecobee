@@ -18,7 +18,7 @@
  *      Monitor humidity level indoor vs. outdoor at a regular interval (in minutes) and 
  *      set the humidifier/dehumidifier  to a target humidity level. 
  *      Use also HRV/ERV/dehumidifier to get fresh air (free cooling) when appropriate based on outdoor temperature.
- *  N.B. Requires MyEcobee device avaiable at 
+ *  N.B. Requires MyEcobee device available at 
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
  */
 // Automatically generated. Make future change here.
