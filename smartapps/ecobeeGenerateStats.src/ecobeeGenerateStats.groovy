@@ -31,8 +31,8 @@ definition(
 
 preferences {
 	section("About") {
-		paragraph "ecobeeGenerateStats, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.0.3" 
+		paragraph "ecobeeGenerateStats, the smartapp that generates daily & weekly runtime reports about your ecobee components"
+		paragraph "Version 2.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -173,6 +173,8 @@ void generateStats() {
 	log.debug("generateStats>date at Midnight= ${dateAtMidnight}")
 	Date endDate = formatDate(dateAtMidnight) 
 	Date startDate = endDate -1
+	Date yesterday = startDate-1    
+	Date aWeekAgo= endDate -7    
         
 	def givenStartDate = (settings.givenStartDate) ?: startDate.format("yyyy-MM-dd", location.timeZone)
 	def givenStartTime=(settings.givenStartTime) ?:"00:00"    
@@ -189,10 +191,30 @@ void generateStats() {
 	// Get the auxHeat1's runtime for startDate-endDate period
 	def component = "auxHeat1"
 	generateRuntimeReport(component,startDate, endDate)
-	float runtimeTotalDaily = ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2)
+	float runtimeTotalDaily = (ecobee.currentAuxHeat1RuntimeDaily) ? ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2):0
 	if (detailedNotif ) {
 		send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
+    
+	log.debug("generateStats>yesterday: startDate in UTC = ${yesterday.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+	generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
+	float runtimeTotalYesterday = (ecobee.currentAuxHeat1RuntimeYesterday)? ecobee.currentAuxHeat1RuntimeYesterday.toFloat().round(2):0
+	if (detailedNotif ) {
+		send "ecobeeGenerateStats>generated $component's runtime stats for the day before=${runtimeTotalYesterday} min. for ${String.format('%tF', yesterday)}"
+	}     
+	log.debug("generateStats>weekly: startDate in UTC = ${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+	generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the week
+	float runtimeTotalAvgWeekly = (ecobee.currentAuxHeat1RuntimeAvgWeekly)? ecobee.currentAuxHeat1RuntimeAvgWeekly.toFloat().round(2):0
+	if (detailedNotif ) {
+		send "ecobeeGenerateStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+	}     
+
+	generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the week
+	runtimeTotalAvgWeekly = (ecobee.currentAuxHeat1RuntimeAvgWeekly)? ecobee.currentAuxHeat1RuntimeAvgWeekly.toFloat().round(2):0
+	if (detailedNotif ) {
+		send "ecobeeGenerateStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+	}     
+
 
 	int heatStages = ecobee.currentHeatStages.toInteger()
     
@@ -203,9 +225,21 @@ void generateStats() {
  	
 		component = "auxHeat2"
 		generateRuntimeReport(component,startDate, endDate)
-		runtimeTotalDaily = ecobee.currentAuxHeat2RuntimeDaily.toFloat().round(2)
+		runtimeTotalDaily = (ecobee.currentAuxHeat2RuntimeDaily)? ecobee.currentAuxHeat2RuntimeDaily.toFloat().round(2):0
 		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
+		}     
+		log.debug("generateStats>yesterday: startDate in UTC = ${yesterday.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
+		runtimeTotalYesterday = (ecobee.currentAuxHeat2RuntimeYesterday)? ecobee.currentAuxHeat2RuntimeYesterday.toFloat().round(2):0
+		if (detailedNotif ) {
+			send "ecobeeGenerateStats>generated $component's runtime stats for the day before=${runtimeTotalYesterday} min. for ${String.format('%tF', yesterday)}"
+		}     
+		log.debug("generateStats>weekly: startDate in UTC = ${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the week
+		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat2RuntimeAvgWeekly)? ecobee.currentAuxHeat2RuntimeAvgWeekly.toFloat().round(2):0
+		if (detailedNotif ) {
+			send "ecobeeGenerateStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
 		}     
 	}     
 
@@ -215,9 +249,21 @@ void generateStats() {
  	
 		component = "auxHeat3"
 		generateRuntimeReport(component,startDate, endDate)
-		runtimeTotalDaily = ecobee.currentAuxHeat3RuntimeDaily.toFloat().round(2)
+		runtimeTotalDaily = (ecobee.currentAuxHeat3RuntimeDaily)? ecobee.currentAuxHeat3RuntimeDaily.toFloat().round(2):0
 		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
+		}     
+		log.debug("generateStats>yesterday: startDate in UTC = ${yesterday.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
+		runtimeTotalYesterday = (ecobee.currentAuxHeat3RuntimeYesterday)? ecobee.currentAuxHeat3RuntimeYesterday.toFloat().round(2):0
+		if (detailedNotif ) {
+			send "ecobeeGenerateStats>generated $component's runtime stats for the day before=${runtimeTotalYesterday} min. for ${String.format('%tF', yesterday)}"
+		}     
+		log.debug("generateStats>weekly: startDate in UTC = ${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the week
+		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat3RuntimeAvgWeekly)? ecobee.currentAuxHeat3RuntimeAvgWeekly.toFloat().round(2):0
+		if (detailedNotif ) {
+			send "ecobeeGenerateStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
 		}     
 	}     
 
@@ -227,9 +273,19 @@ void generateStats() {
 
 	component = "compCool1"
 	generateRuntimeReport(component,startDate, endDate)
-	runtimeTotalDaily = ecobee.currentCompCool1RuntimeDaily.toFloat().round(2)
+	runtimeTotalDaily = (ecobee.currentCompCool1RuntimeDaily)? ecobee.currentCompCool1RuntimeDaily.toFloat().round(2):0
 	if (detailedNotif) {
 		send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
+	}     
+	generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for the day before
+	runtimeTotalYesterday = (ecobee.currentCompCool1RuntimeYesterday)? ecobee.currentCompCool1RuntimeYesterday.toFloat().round(2):0
+	if (detailedNotif ) {
+		send "ecobeeGenerateStats>generated $component's runtime stats for the day before=${runtimeTotalYesterday} min. for ${String.format('%tF', yesterday)}"
+	}     
+	generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the week
+	runtimeTotalAvgWeekly = (ecobee.currentCompCool1RuntimeAvgWeekly)? ecobee.currentCompCool1RuntimeAvgWeekly.toFloat().round(2):0
+	if (detailedNotif ) {
+		send "ecobeeGenerateStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
 	}     
     
 //	Get the compCool2's runtime for startDate-endDate period
@@ -237,17 +293,27 @@ void generateStats() {
 	if (coolStages >1) { 
 		component = "compCool2"
 		generateRuntimeReport(component,startDate, endDate)
-		runtimeTotalDaily = ecobee.currentCompCool2RuntimeDaily.toFloat().round(2)
+		runtimeTotalDaily = (ecobee.currentCompCool2RuntimeDaily)? ecobee.currentCompCool2RuntimeDaily.toFloat().round(2):0
 		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		} 
+		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for the day before
+		runtimeTotalYesterday = (ecobee.currentCompCool2RuntimeYesterday)? ecobee.currentCompCool2RuntimeYesterday.toFloat().round(2):0
+		if (detailedNotif ) {
+			send "ecobeeGenerateStats>generated $component's runtime stats for the day before=${runtimeTotalYesterday} min. for ${String.format('%tF', yesterday)}"
+		}     
+		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the week
+		runtimeTotalAvgWeekly = (ecobee.currentCompCool2RuntimeAvgWeekly)? ecobee.currentCompCool2RuntimeAvgWeekly.toFloat().round(2):0
+		if (detailedNotif ) {
+			send "ecobeeGenerateStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+		}     
 	} 
 
 
 // 	Get the fan's runtime for startDate-endDate period
  	component = "fan"
 	generateRuntimeReport(component,startDate, endDate)
-	runtimeTotalDaily = ecobee.currentFanRuntimeDaily.toFloat().round(2)
+	runtimeTotalDaily = (ecobee.currentFanRuntimeDaily)? ecobee.currentFanRuntimeDaily.toFloat().round(2):0
 	if (detailedNotif) {
 		send "ecobeeGenerateStats>generated $component's runtime Daily=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 	}     
@@ -261,7 +327,7 @@ void generateStats() {
 	 	// Get the humidifier's runtime for startDate-endDate period
 		component = "humidifier"
 		generateRuntimeReport(component,startDate, endDate)
-		runtimeTotalDaily = ecobee.currentHumidifierRuntimeDaily.toFloat().round(2)
+		runtimeTotalDaily = (ecobee.currentHumidifierRuntimeDaily)? ecobee.currentHumidifierRuntimeDaily.toFloat().round(2):0
 		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
@@ -272,7 +338,7 @@ void generateStats() {
 	// Get the dehumidifier's for startDate-endDate period
 		component = "dehumidifier"
 		generateRuntimeReport(component,startDate, endDate)
-		runtimeTotalDaily = ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2)
+		runtimeTotalDaily = (ecobee.currentDehumidifierRuntimeDaily)? ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2):0
 		if (detailedNotif ) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
@@ -282,7 +348,7 @@ void generateStats() {
  	// Get the ventilator's runtime for  startDate-endDate period
 		component = "ventilator"
 		generateRuntimeReport(component,startDate, endDate)
-		runtimeTotalDaily = ecobee.currentVentilatorRuntimeDaily.toFloat().round(2)
+		runtimeTotalDaily = (ecobee.currentVentilatorRuntimeDaily)? ecobee.currentVentilatorRuntimeDaily.toFloat().round(2):0
 		if (detailedNotif) {
 			send "ecobeeGenerateStats>generated $component's runtime stats=${runtimeTotalDaily} min. for ${String.format('%tF', startDate)}"
 		}     
@@ -292,10 +358,10 @@ void generateStats() {
 
 }
 
-private void generateRuntimeReport(component, startDate, endDate) {
+private void generateRuntimeReport(component, startDate, endDate, frequence='daily') {
 
 	ecobee.getReportData("", startDate, endDate, null, null, component,false)
-	ecobee.generateReportRuntimeEvents(component, startDate,endDate, 0, null,'daily')
+	ecobee.generateReportRuntimeEvents(component, startDate,endDate, 0, null,frequence)
 
 }
 
