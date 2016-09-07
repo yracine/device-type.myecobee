@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateStats, the smartapp that generates daily & weekly runtime reports about your ecobee components"
-		paragraph "Version 2.2.3" 
+		paragraph "Version 2.2.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -184,7 +184,7 @@ private def formatDate(dateString) {
 	return aDate
 }
 
-private def get_nextComponentStats(component=null) {
+private def get_nextComponentStats(component='') {
 	def nextInLine=[:]
 
 	def components = [
@@ -431,9 +431,9 @@ void generateStats() {
 	def hasHrv = (ecobee.currentHasHrv)? ecobee.currentHasHrv : 'false' 
 	def hasErv = (ecobee.currentHasErv)? ecobee.currentHasErv : 'false' 
 
+	component = "humidifier"
 	if (hasHumidifier=='true' && (nextComponent.position <= 6)) {
 	 	// Get the humidifier's runtime for startDate-endDate period
-		component = "humidifier"
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentHumidifierRuntimeDaily)? ecobee.currentHumidifierRuntimeDaily.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
