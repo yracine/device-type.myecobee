@@ -95,8 +95,6 @@ def initialize() {
 	subscribe(location, "mode", rescheduleIfNeeded)
 	subscribe(location, "sunsetTime", rescheduleIfNeeded)
 
-//	generate the stats every day at 2:00 (am)
-
 	rescheduleIfNeeded()   
 }
 
@@ -113,7 +111,9 @@ def rescheduleIfNeeded(evt) {
 	}
 	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
 		log.info "rescheduleIfNeeded>scheduling dailyRun in ${delay} minutes.."
-		schedule("0 0 2 * * ?", dailyRun)    
+//		generate the stats every day at 0:05 
+
+		schedule("0 5 0 * * ?", dailyRun)    
 	}
     
 	// Update rescheduled state
@@ -138,7 +138,7 @@ void dailyRun() {
     
 	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
-		schedule("0 15 0 * * ?", rescheduleIfNeeded)    
+		schedule("0 5 0 * * ?", rescheduleIfNeeded)    
 		// Update rescheduled state
 		state?.poll["rescheduled"] = now()
 	}
