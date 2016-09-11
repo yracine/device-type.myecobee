@@ -13,6 +13,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *
  *  Software Distribution is restricted and shall be done only with Developer's written approval.
+ *  N.B. Only works with MyEcobee device v5.0 and higher.
  */
 definition(
     name: "ecobeeGetTips",
