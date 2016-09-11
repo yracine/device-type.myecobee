@@ -15,7 +15,7 @@
  *
  *  Software Distribution is restricted and shall be done only with Developer's written approval.
  * 
- *  N.B. Requires MyEcobee device available at 
+ *  N.B. Requires MyEcobee device ( v5.0 and higher) available at 
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
  */
 import java.text.SimpleDateFormat 
