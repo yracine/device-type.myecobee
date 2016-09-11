@@ -13,7 +13,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *
  *  Software Distribution is restricted and shall be done only with Developer's written approval.
- *  N.B. Required My Ecobee device ( v5.0 and higher) available at:
+ *  N.B. Requires My Ecobee device ( v5.0 and higher) available at:
  *      http://www.ecomatiqhomes.com/store
  */
 definition(
