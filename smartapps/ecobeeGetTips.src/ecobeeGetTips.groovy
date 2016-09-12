@@ -30,18 +30,33 @@ definition(
 preferences {
 
 	page (name: "generalSetupPage", title: "General Setup", uninstall:true, nextPage: "displayTipsPage") {
+		section("About") {
+			paragraph "ecobeeGetTips, the smartapp that Get Comfort & Energy Saving Tips from My Ecobee device"
+			paragraph "Version 1.0.1" 
+			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
+				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
+					title:"Paypal donation..."
+			paragraph "Copyright©2016 Yves Racine"
+				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+		}
 		section("Get tips for this ecobee thermostat") {
 			input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
 		}  
 		section("Level Of Tip") {
-			input (name:"level", title: "Which level ([1..4], 4 is the highest, but not always applicable, ex. for multi-stage heating/cooling systems)?", type:"number", required:true)
+			input (name:"level", title: "Which level ([1..4], 4 is the highest, but not always applicable, ex. for multi-stage heating/cooling systems)?", type:"number", 
+    			required:false, description:"optional")
 		}  
 		section("Tip processing reset") {
 			input (name:"resetTipFlag", title: "Do you want to re-start over and reset tips?", type:"bool")
 		}  
 	}
-	page (name: "displayTipsPage", content: "displayTipsPage", install: true, uninstall:true)
-
+	page (name: "displayTipsPage", content: "displayTipsPage", install: false, uninstall:true)
+	page(name: "OtherOptions", title: "Other Options", install: true, uninstall: true) {
+        section([mobileOnly:true]) {
+			label title: "Assign a name for this SmartApp", required: false
+		}
+	}
 }
 
 def displayTipsPage() {
@@ -62,7 +77,7 @@ def displayTipsPage() {
 	def tip4Level = ecobee.currentTip4Level    
 	def tip5Level = ecobee.currentTip5Level
     
-	return dynamicPage (name: "displayTipsPage", title: "Display Current Tips") {
+	return dynamicPage (name: "displayTipsPage", title: "Display Current Tips",  nextPage: "OtherOptions") {
     
 		section("Tips") {
 	        
