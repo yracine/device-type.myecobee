@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeGenerateWeeklyStats, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.0" 
+		paragraph "Version 1.0.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -295,7 +295,7 @@ void generateStats() {
 			send("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
-		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat2RuntimeAvgwWeekly)? ecobee.currentAuxHeat2RuntimeAvgWeekly.toFloat().round(2):0
+		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat2RuntimeAvgWeekly)? ecobee.currentAuxHeat2RuntimeAvgWeekly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
 		if (detailedNotif ) {
 			send "generateWeeklyStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
