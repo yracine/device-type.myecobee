@@ -20,7 +20,7 @@
  */
 import java.text.SimpleDateFormat 
 definition(
-    name: "ecobeeGenerateWeeklyStats",
+    name: "${get_APP_NAME()}",
     namespace: "yracine",
     author: "Yves Racine",
     description: "This smartapp allows a ST user to generate weekly runtime stats (by scheduling or based on custom dates) on their devices controlled by ecobee such as a heating & cooling component,fan, dehumidifier/humidifier/HRV/ERV. ",
@@ -31,8 +31,8 @@ definition(
 
 preferences {
 	section("About") {
-		paragraph "ecobeeGenerateWeeklyStats, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.0.1" 
+		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
+		paragraph "Version 1.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -58,7 +58,11 @@ preferences {
 	section("Detailed Notifications") {
 		input "detailedNotif", "bool", title: "Detailed Notifications?", required:false
     }
-    
+	section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
+		input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
+			description:"optional",required:false)
+	}
+     
 }
 
 def installed() {
@@ -106,7 +110,7 @@ def rescheduleIfNeeded(evt) {
 	}
 	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
 		log.info "rescheduleIfNeeded>scheduling dailyRun in ${delay} minutes.."
-//		generate the stats every day at 0:20 
+//		generate the stats every day at 0:30 
 		schedule("0 30 0 * * ?", dailyRun)    
 	}
     
@@ -125,7 +129,7 @@ def appTouch(evt) {
 void reRunIfNeeded() {
 	if (detailedNotif) {    
 		log.debug("reRunIfNeeded>About to call generateStats() with state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
-		send("generateWeeklyStats>>About to call generateStats() with state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		send (">About to call generateStats() with state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
 	}    
 	generateStats()
    
@@ -148,7 +152,7 @@ void dailyRun() {
 	settings.givenEndTime=null
 	if (detailedNotif) {    
 		log.debug("dailyRun>About to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
-		send("generateWeeklyStats>About to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
+		send ("About to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
 	generateStats()
     
@@ -177,7 +181,7 @@ private def formatDate(dateString) {
 private def get_nextComponentStats(component='') {
 	if (settings.trace) {
 		log.debug "get_nextComponentStats>About to get ${component}'s next component from components table"
-		send "get_nextComponentStats>About to get ${component}'s next component from components table"
+		send "get_nextComponentStats,About to get ${component}'s next component from components table"
 	}
 
 	def nextInLine=[:]
@@ -212,7 +216,7 @@ private def get_nextComponentStats(component='') {
 	}          
 	if (settings.trace) {
 		log.debug "get_nextComponentStats>got ${component}'s next component from components table= ${nextInLine}"
-		send "get_nextComponentStats>got ${component}'s next component from components table= ${nextInLine}"
+		send "get_nextComponentStats,got ${component}'s next component from components table= ${nextInLine}"
 	}
 	return nextInLine
 		            
@@ -231,15 +235,15 @@ void generateStats() {
 	} catch (e) {
     
 		if (detailedNotif) {    
-			log.debug("generateWeeklyStats>Exception $e while unscheduling reRunIfNeeded")
-			send("generateWeeklyStats>Exception $e while unscheduling reRunIfNeeded")
+			log.debug("${get_APP_NAME()}>Exception $e while unscheduling reRunIfNeeded")
+			send ("Exception $e while unscheduling reRunIfNeeded")
 		}    	
 	}  
 	def component = state?.componentAlreadyProcessed   
 	def nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (detailedNotif) {    
-		log.debug("generateWeeklyStats>About to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
-		send("generateWeeklyStats>About to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		log.debug("${get_APP_NAME()}>About to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		send ("About to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
 	}    	
 	if (state?.timestamp == dateInLocalTime && nextComponent.position >=MAX_POSITION) {
 		return // the weekly stats are already generated 
@@ -251,8 +255,8 @@ void generateStats() {
 	String timezone = new Date().format("zzz", location.timeZone)
 	String dateAtMidnight = dateInLocalTime + " 00:00 " + timezone    
 	if (detailedNotif) {    
-		log.debug("generateWeeklyStats>date at Midnight= ${dateAtMidnight}")
-		send("generateWeeklyStats>date at Midnight= ${dateAtMidnight}")
+		log.debug("${get_APP_NAME()}>date at Midnight= ${dateAtMidnight}")
+		send ("date at Midnight= ${dateAtMidnight}")
 	}        
 	Date endDate = formatDate(dateAtMidnight) 
             
@@ -262,8 +266,8 @@ void generateStats() {
 	endDate = formatDate(dateTime)
 	Date aWeekAgo= endDate -7   
 	if (detailedNotif) {    
-		log.debug("generateWeeklyStats>end dateTime = ${dateTime}, endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-		send("generateWeeklyStats>end dateTime = ${dateTime}, endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+		log.debug("${get_APP_NAME()}>end dateTime = ${dateTime}, endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+		send ("end dateTime = ${dateTime}, endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 	}
 
 
@@ -272,14 +276,14 @@ void generateStats() {
 
 	if (nextComponent.position <= 1) { 
 		if (detailedNotif) {
-			log.debug("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat1RuntimeAvgWeekly)? ecobee.currentAuxHeat1RuntimeAvgWeekly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-		if (detailedNotif ) {
-			send "generateWeeklyStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+		if (runtimeTotalAvgWeekly) {
+			send ("generated ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 	}
 	int heatStages = ecobee.currentHeatStages.toInteger()
@@ -291,14 +295,14 @@ void generateStats() {
 //	Get the auxHeat2's runtime for startDate-endDate period
  	
 		if (detailedNotif) {
-			log.debug("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat2RuntimeAvgWeekly)? ecobee.currentAuxHeat2RuntimeAvgWeekly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-		if (detailedNotif ) {
-			send "generateWeeklyStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+		if (runtimeTotalAvgWeekly) {
+			send ("generated ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 
 	}     
@@ -309,14 +313,14 @@ void generateStats() {
 //	Get the auxHeat3's runtime for startDate-endDate period
  	
 		if (detailedNotif) {
-			log.debug("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat3RuntimeAvgWeekly)? ecobee.currentAuxHeat3RuntimeAvgWeekly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-		if (detailedNotif ) {
-			send "generateWeeklyStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+		if (runtimeTotalAvgWeekly) {
+			send ("generated ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 	}     
 
@@ -330,35 +334,35 @@ void generateStats() {
 
 	if (coolStages >1 && nextComponent.position <= 4) {
 		if (detailedNotif) {
-			log.debug("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool2RuntimeAvgWeekly)? ecobee.currentCompCool2RuntimeAvgWeekly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-		if (detailedNotif ) {
-			send "generateWeeklyStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+		if (runtimeTotalAvgWeekly) {
+			send ("generated ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 	} 
     
 	component = 'compCool1'
 	if (nextComponent.position <= 5) {
 		if (detailedNotif) {
-			log.debug("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send("generateWeeklyStats>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool1RuntimeAvgWeekly)? ecobee.currentCompCool1RuntimeAvgWeekly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-		if (detailedNotif ) {
-			send "generateWeeklyStats>generated $component avg weekly's runtime  stats=${runtimeTotalAvgWeekly} min. since ${String.format('%tF', aWeekAgo)}"
+		if (runtimeTotalAvgWeekly) {
+			send ("generated ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 	}        
     
 	component= state?.componentAlreadyProcessed   
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (nextComponent?.position >=MAX_POSITION) {
-		send "ecobeeGenerateWeeklyStats>generated all stats since ${String.format('%tF', aWeekAgo)}"
+		send "generated all stats since ${String.format('%tF', aWeekAgo)}"
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
 		state?.timestamp = dateInLocalTime // save the date to avoid re-execution.
 	}
@@ -369,27 +373,38 @@ private void generateRuntimeReport(component, startDate, endDate, frequence='dai
 
 //	if (detailedNotif) {
 //		log.debug("generateRuntimeReport>For component ${component}, about to call getReportData with endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-//		send("generateWeeklyStats>For component ${component}, about to call getReportData with aWeekAgo in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+//		send ("For component ${component}, about to call getReportData with aWeekAgo in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 //	}        
 	ecobee.getReportData("", startDate, endDate, null, null, component,false)
 //	if (detailedNotif) {
 //		log.debug("generateRuntimeReport>For component ${component}, about to call generateReportRuntimeEvents with endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-//		send("generateWeeklyStats>For component ${component}, about to call generateReportRuntimeEvents with aWeekAgo in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+//		send ("For component ${component}, about to call generateReportRuntimeEvents with aWeekAgo in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 //	}        
 	ecobee.generateReportRuntimeEvents(component, startDate,endDate, 0, null,frequence)
 
 }
 
-private send(msg) {
-	if ( sendPushMessage != "No" ) {
-		log.debug( "sending push message" )
-		sendPush( msg )
-       
-	}
-	if ( phoneNumber ) {
-		log.debug( "sending text message" )
- 		sendSms( phoneNumber, msg )
-	}
+private send(msg, askAlexa=false) {
+	def message = "${get_APP_NAME()}>${msg}"
 
+	if (sendPushMessage != "No") {
+		
+		if (askAlexa) {
+			sendLocationEvent(name: "AskAlexaMsgQueue", value: "${get_APP_NAME()}", isStateChange: true, descriptionText: msg)        
+		} else {        
+			sendPush(message)
+		}            
+	}
+	
+	if (phone) {
+		log.debug("sending text message")
+		sendSms(phone, message)
+	}
+    
 	log.debug msg
+    
+}
+
+private def get_APP_NAME() {
+	return "ecobeeGenerateWeeklyStats"
 }
