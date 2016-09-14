@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates monthly runtime reports about your ecobee components"
-		paragraph "Version 1.6" 
+		paragraph "Version 1.6.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -350,7 +350,7 @@ void generateStats() {
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	int endPosition= (mode=='heat') ? ((heatStages>2) ? 4 : (heatStages>1)? 3:2) :MAX_POSITION     
 	if (nextComponent.position >=endPosition) {
-		send "for $ecobee, generated all stats since ${String.format('%tF', aMonthAgo)}"
+		send "for $ecobee, generated all ${ecobee}'s monthly stats since ${String.format('%tF', aMonthAgo)}"
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
 		state?.timestamp = dateInLocalTime // save the date to avoid re-execution.
 	}
