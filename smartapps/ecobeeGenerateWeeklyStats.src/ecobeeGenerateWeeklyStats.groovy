@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.3" 
+		paragraph "Version 1.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -151,8 +151,8 @@ void dailyRun() {
 	settings.givenEndDate=null
 	settings.givenEndTime=null
 	if (detailedNotif) {    
-		log.debug("dailyRun>About to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
-		send ("About to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
+		log.debug("dailyRun>for $ecobee,about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
+		send ("for $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
 	generateStats()
     
@@ -296,7 +296,7 @@ void generateStats() {
  	
 		if (detailedNotif) {
 			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("for ${ecobee} ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat2RuntimeAvgWeekly)? ecobee.currentAuxHeat2RuntimeAvgWeekly.toFloat().round(2):0
@@ -314,7 +314,7 @@ void generateStats() {
  	
 		if (detailedNotif) {
 			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("for ${ecobee} ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat3RuntimeAvgWeekly)? ecobee.currentAuxHeat3RuntimeAvgWeekly.toFloat().round(2):0
@@ -335,7 +335,7 @@ void generateStats() {
 	if (coolStages >1 && nextComponent.position <= 4) {
 		if (detailedNotif) {
 			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("for ${ecobee} ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool2RuntimeAvgWeekly)? ecobee.currentCompCool2RuntimeAvgWeekly.toFloat().round(2):0
@@ -349,7 +349,7 @@ void generateStats() {
 	if (nextComponent.position <= 5) {
 		if (detailedNotif) {
 			log.debug("${get_APP_NAME()}>For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
-			send ("For component ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
+			send ("for ${ecobee} ${component}, about to call generateRuntimeReport with aWeekAgo in UTC =${aWeekAgo.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		}        
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool1RuntimeAvgWeekly)? ecobee.currentCompCool1RuntimeAvgWeekly.toFloat().round(2):0
