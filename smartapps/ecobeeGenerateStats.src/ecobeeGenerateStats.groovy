@@ -309,7 +309,7 @@ void generateStats() {
 		}        
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentAuxHeat1RuntimeDaily) ? ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2):0
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 		if (detailedNotif) {
@@ -338,7 +338,7 @@ void generateStats() {
 		}        
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentAuxHeat2RuntimeDaily)? ecobee.currentAuxHeat2RuntimeDaily.toFloat().round(2):0
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 		if (detailedNotif) {
@@ -364,7 +364,7 @@ void generateStats() {
 		}        
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentAuxHeat3RuntimeDaily)? ecobee.currentAuxHeat3RuntimeDaily.toFloat().round(2):0
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 		if (detailedNotif) {
@@ -390,7 +390,7 @@ void generateStats() {
 		}        
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentCompCool1RuntimeDaily)? ecobee.currentCompCool1RuntimeDaily.toFloat().round(2):0
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 		if (detailedNotif) {
@@ -415,7 +415,7 @@ void generateStats() {
 		}        
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentCompCool2RuntimeDaily)? ecobee.currentCompCool2RuntimeDaily.toFloat().round(2):0
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 		if (detailedNotif) {
@@ -442,7 +442,7 @@ void generateStats() {
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentHumidifierRuntimeDaily)? ecobee.currentHumidifierRuntimeDaily.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
     
@@ -454,7 +454,7 @@ void generateStats() {
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentDehumidifierRuntimeDaily)? ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 
@@ -465,7 +465,7 @@ void generateStats() {
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentVentilatorRuntimeDaily)? ecobee.currentVentilatorRuntimeDaily.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 
@@ -478,7 +478,7 @@ void generateStats() {
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentFanRuntimeDaily)? ecobee.currentFanRuntimeDaily.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
-        if (runtimeTotalDaily) {
+		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 	}     
