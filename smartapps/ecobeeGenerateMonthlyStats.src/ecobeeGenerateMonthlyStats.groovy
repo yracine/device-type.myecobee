@@ -275,7 +275,7 @@ void generateStats() {
 		runtimeTotalAvgMonthly = (ecobee.currentAuxHeat1RuntimeAvgMonthly)? ecobee.currentAuxHeat1RuntimeAvgMonthly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgMonthly) {
-			send "generated ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
 		}     
 	}
     
@@ -291,7 +291,7 @@ void generateStats() {
 		runtimeTotalAvgMonthly = (ecobee.currentAuxHeat2RuntimeAvgMonthly)? ecobee.currentAuxHeat2RuntimeAvgMonthly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgMonthly) {
-			send "generated ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
 		}     
 	}     
 
@@ -304,7 +304,7 @@ void generateStats() {
 		runtimeTotalAvgMonthly = (ecobee.currentAuxHeat3RuntimeAvgMonthly)? ecobee.currentAuxHeat3RuntimeAvgMonthly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgMonthly) {
-			send "generated ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
 		}     
 	}     
 
@@ -320,7 +320,7 @@ void generateStats() {
 		runtimeTotalAvgMonthly = (ecobee.currentCompCool2RuntimeAvgMonthly)? ecobee.currentCompCool2RuntimeAvgMonthly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgMonthly) {
-			send "generated ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
 		}     
 	} 
 	component = 'compCool1'
@@ -329,7 +329,7 @@ void generateStats() {
 		runtimeTotalAvgMonthly = (ecobee.currentCompCool1RuntimeAvgMonthly)? ecobee.currentCompCool1RuntimeAvgMonthly.toFloat().round(2):0
 		state?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgMonthly) {
-			send "generated ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
 		}     
 	}        
         
