@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.3" 
+		paragraph "Version 2.3.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -152,8 +152,8 @@ void dailyRun() {
 	settings.givenEndDate=null
 	settings.givenEndTime=null
 	if (detailedNotif) {    
-		log.debug("dailyRun>About to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
-		send("About to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
+		log.debug("dailyRun>for $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
+		send("for $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
 	generateStats()
     
@@ -260,8 +260,8 @@ void generateStats() {
 	def component=state?.componentAlreadyProcessed    // use logic to restart the batch process if needed due to ST rate limiting
 	def nextComponent  = get_nextComponentStats(component) // get next Component To Be Processed	
 	if (detailedNotif) {    
-		log.debug("${get_APP_NAME()}>About to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
-		send("About to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		log.debug("${get_APP_NAME()}>for $ecobee, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		send("for $ecobee, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
 	}    	
 	if (state?.timestamp == dateInLocalTime && nextComponent.position >=MAX_POSITION) {
 		return // the daily stats are already generated 
