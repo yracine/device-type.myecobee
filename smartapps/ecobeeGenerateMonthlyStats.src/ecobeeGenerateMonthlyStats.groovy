@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates monthly runtime reports about your ecobee components"
-		paragraph "Version 1.6.5" 
+		paragraph "Version 1.6.6"
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -82,6 +82,7 @@ def updated() {
 def initialize() {
 	state?.timestamp=''
 	state?.componentAlreadyProcessed=''
+	state?.retries=0  
 
 
 	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
@@ -152,6 +153,7 @@ void dailyRun() {
 		log.debug("dailyRun>For $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
 	state?.componentAlreadyProcessed=''
+	state?.retries=0  
 	generateStats()
     
 }
@@ -223,19 +225,27 @@ void generateStats() {
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
 	def delay = 2  // 2-minute delay for rerun
 	def MAX_POSITION=6    
+	def MAX_RETRIES=4    
 	float runtimeTotalAvgMonthly    
 	String mode= ecobee.currentThermostatMode    
-    
+	state?.retries=	((state?.retries==null) ?:0) +1
+
 	try {
 		unschedule(reRunIfNeeded)
 	} catch (e) {
     
 		if (detailedNotif) {    
 			log.debug("${get_APP_NAME()}>Exception $e while unscheduling reRunIfNeeded")
-			send ("Exception $e while unscheduling reRunIfNeeded")
 		}    	
 	}    
-	def component = state?.componentAlreadyProcessed
+    
+	if (state?.retries >= MAX_RETRIES) { 
+		if (detailedNotif) {    
+			log.debug("${get_APP_NAME()}>Max retries reached, exiting")
+			send("max retries reached ${state?.retries}), exiting")
+		}    	
+	}    	
+   	def component = state?.componentAlreadyProcessed
 	def nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (detailedNotif) {    
 		log.debug("${get_APP_NAME()}>for $ecobee, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
