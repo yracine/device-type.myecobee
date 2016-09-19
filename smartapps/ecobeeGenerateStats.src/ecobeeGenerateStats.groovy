@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.3.5" 
+		paragraph "Version 2.3.6" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -116,9 +116,9 @@ def rescheduleIfNeeded(evt) {
 	}
 	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
 		log.info "rescheduleIfNeeded>scheduling dailyRun in ${delay} minutes.."
-//		generate the stats every day at 4:30
+//		generate the stats every day at 0:05
 
-		schedule("0 30 4 * * ?", dailyRun)    
+		schedule("0 5 0 * * ?", dailyRun)    
 	}
     
 	// Update rescheduled state
@@ -143,7 +143,7 @@ void dailyRun() {
     
 	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
-		schedule("0 30 4 * * ?", rescheduleIfNeeded)    
+		schedule("0 5 0 * * ?", rescheduleIfNeeded)    
 		// Update rescheduled state
 		state?.poll["rescheduled"] = now()
 	}
@@ -154,6 +154,7 @@ void dailyRun() {
 	if (detailedNotif) {    
 		log.debug("dailyRun>for $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
+	state?.componentAlreadyProcessed=''
 	generateStats()
     
 }
