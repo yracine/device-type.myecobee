@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 4 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.0.1" 
+		paragraph "Version 2.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -49,12 +49,6 @@ preferences {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 		input "phone", "phone", title: "Send a Text Message?", required: false
 	}
-	section("Delay between notifications [default=1 minute]") {
-		input "frequency", "number", title: "Number of minutes", description: "", required: false
-	}
-	section("Maximum number of notifications [default=5]") {
-		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "", required: false
-	}
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", required: false, multiple: true
 	}
@@ -66,6 +60,12 @@ preferences {
 	}
 	section("Turn off the thermostat(s) after the delay;revert this action when closed [optional]") {
 		input "tstats", "capability.thermostat", multiple: true, required: false
+	}
+	section("Delay between notifications [default=1 minute]") {
+		input "frequency", "number", title: "Number of minutes", description: "", required: false
+	}
+	section("Maximum number of notifications [default=5, not used when thermostats are specified]") {
+		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "", required: false
 	}
 
 }
@@ -534,9 +534,8 @@ def clearStatus(indice=0) {
 
 
 private void save_tstats_mode() {
-	state.lastThermostatMode = ""
 
-	if (!tstats) {
+	if ((!tstats)  || (state.lastThermostatMode)) { // If state already saved, then keep it
 		return    
 	} 
 	tstats.each {
@@ -556,6 +555,7 @@ private void restore_tstats_mode() {
 		return    
 	}    
 	for (int j = 0;(j < MAX_CONTACT); j++)  {
+		if (!theSensor[j]) continue
 		def contactState = theSensor[j].currentState("contact")
 		log.trace "restore_tstats_mod>For ${theSensor[j]}, Contact's status = ${contactState.value}, indice=$j"
 		if (contactState.value == "open") {
