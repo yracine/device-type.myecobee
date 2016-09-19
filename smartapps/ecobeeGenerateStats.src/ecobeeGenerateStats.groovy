@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.3.7" 
+		paragraph "Version 2.3.8" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -287,8 +287,6 @@ void generateStats() {
 	}    	
 	Date endDate = formatDate(dateAtMidnight) 
 	Date startDate = endDate -1
-	Date yesterday = startDate-1    
-	Date aWeekAgo= endDate -7    
         
 	def reportStartDate = (settings.givenStartDate) ?: startDate.format("yyyy-MM-dd", location.timeZone)
 	def reportStartTime=(settings.givenStartTime) ?:"00:00"    
@@ -301,6 +299,7 @@ void generateStats() {
 	def reportEndTime=(settings.givenEndTime) ?:"00:00"    
 	dateTime = reportEndDate + " " + reportEndTime + " " + timezone
 	endDate = formatDate(dateTime)
+	Date yesterday = startDate-1    
 	if (detailedNotif) {    
 		log.debug("${get_APP_NAME()}>end dateTime = ${dateTime}, endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 	}
