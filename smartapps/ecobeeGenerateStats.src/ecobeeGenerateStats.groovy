@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.3.6" 
+		paragraph "Version 2.3.7" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -90,6 +90,7 @@ def initialize() {
 
 	state?.timestamp=''
 	state?.componentAlreadyProcessed=''
+	state?.retries=0    
 
 	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
 	subscribe(app, appTouch)
@@ -116,9 +117,9 @@ def rescheduleIfNeeded(evt) {
 	}
 	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
 		log.info "rescheduleIfNeeded>scheduling dailyRun in ${delay} minutes.."
-//		generate the stats every day at 0:05
+//		generate the stats every day at 0:10
 
-		schedule("0 5 0 * * ?", dailyRun)    
+		schedule("0 10 0 * * ?", dailyRun)    
 	}
     
 	// Update rescheduled state
@@ -143,7 +144,7 @@ void dailyRun() {
     
 	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
-		schedule("0 5 0 * * ?", rescheduleIfNeeded)    
+		schedule("0 10 0 * * ?", rescheduleIfNeeded)    
 		// Update rescheduled state
 		state?.poll["rescheduled"] = now()
 	}
@@ -155,6 +156,7 @@ void dailyRun() {
 		log.debug("dailyRun>for $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
 	state?.componentAlreadyProcessed=''
+	state?.retries=0
 	generateStats()
     
 }
@@ -242,10 +244,13 @@ private def get_nextComponentStats(component='') {
 
 void generateStats() {	
 	def MAX_POSITION=10
+	def MAX_RETRIES=4
 	float runtimeTotalYesterday,runtimeTotalDaily    
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
 	def delay = 2
     
+	state?.retries=	((state?.retries==null) ?:0) +1
+
 	try {
 		unschedule(reRunIfNeeded)
 	} catch (e) {
@@ -254,6 +259,14 @@ void generateStats() {
 			log.debug("${get_APP_NAME()}>Exception $e while unscheduling reRunIfNeeded")
 		}    	
 	}    
+    
+	if (state?.retries >= MAX_RETRIES) { 
+		if (detailedNotif) {    
+			log.debug("${get_APP_NAME()}>Max retries reached, exiting")
+			send("max retries reached ${state?.retries}), exiting")
+		}    	
+	}    	
+    
 	def component=state?.componentAlreadyProcessed    // use logic to restart the batch process if needed due to ST rate limiting
 	def nextComponent  = get_nextComponentStats(component) // get next Component To Be Processed	
 	if (detailedNotif) {    
