@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.3.8" 
+		paragraph "Version 2.3.9" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -88,13 +88,13 @@ def updated() {
 
 def initialize() {
 
-	state?.timestamp=''
-	state?.componentAlreadyProcessed=''
-	state?.retries=0    
+	atomicState?.timestamp=''
+	atomicState?.componentAlreadyProcessed=''
+	atomicState?.retries=0    
 
 	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
 	subscribe(app, appTouch)
-	state?.poll = [ last: 0, rescheduled: now() ]
+	atomicState?.poll = [ last: 0, rescheduled: now() ]
 
 	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
 	subscribe(location, "sunset", rescheduleIfNeeded)
@@ -109,13 +109,13 @@ def rescheduleIfNeeded(evt) {
 	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
 	Integer delay = (24*60) // By default, do it every day
 	BigDecimal currentTime = now()    
-	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	BigDecimal lastPollTime = (currentTime - (atomicState?.poll["last"]?:0))  
  
 	if (lastPollTime != currentTime) {    
 		Double lastPollTimeInMinutes = (lastPollTime/60000).toDouble().round(1)      
 		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
 	}
-	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+	if (((atomicState?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
 		log.info "rescheduleIfNeeded>scheduling dailyRun in ${delay} minutes.."
 //		generate the stats every day at 0:10
 
@@ -129,8 +129,8 @@ def rescheduleIfNeeded(evt) {
    
 
 def appTouch(evt) {
-	state?.timestamp=''
-	state?.componentAlreadyProcessed=''
+	atomicState?.timestamp=''
+	atomicState?.componentAlreadyProcessed=''
 	generateStats()
 }
 
@@ -138,15 +138,15 @@ def appTouch(evt) {
 
 void dailyRun() {
 	Integer delay = (24*60) // By default, do it every day
-	state?.poll["last"] = now()
+	atomicState?.poll["last"] = now()
 		
 	//schedule the rescheduleIfNeeded() function
     
-	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+	if (((atomicState?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
 		schedule("0 10 0 * * ?", rescheduleIfNeeded)    
 		// Update rescheduled state
-		state?.poll["rescheduled"] = now()
+		atomicState?.poll["rescheduled"] = now()
 	}
 	settings.givenStartDate=null
 	settings.givenStartTime=null
@@ -155,15 +155,15 @@ void dailyRun() {
 	if (detailedNotif) {    
 		log.debug("dailyRun>for $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
-	state?.componentAlreadyProcessed=''
-	state?.retries=0
+	atomicState?.componentAlreadyProcessed=''
+	atomicState?.retries=0
 	generateStats()
     
 }
 
 void reRunIfNeeded() {
 	if (detailedNotif) {    
-		log.debug("reRunIfNeeded>About to call generateStats() with state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		log.debug("reRunIfNeeded>About to call generateStats() with state.componentAlreadyProcessed=${atomicState?.componentAlreadyProcessed}")
 	}    
 	generateStats()
    
@@ -249,7 +249,7 @@ void generateStats() {
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
 	def delay = 2
     
-	state?.retries=	((state?.retries==null) ?:0) +1
+	atomicState?.retries=	((atomicState?.retries==null) ?:0) +1
 
 	try {
 		unschedule(reRunIfNeeded)
@@ -260,19 +260,19 @@ void generateStats() {
 		}    	
 	}    
     
-	if (state?.retries >= MAX_RETRIES) { 
+	if (atomicState?.retries >= MAX_RETRIES) { 
 		if (detailedNotif) {    
 			log.debug("${get_APP_NAME()}>Max retries reached, exiting")
-			send("max retries reached ${state?.retries}), exiting")
+			send("max retries reached ${atomicState?.retries}), exiting")
 		}    	
 	}    	
     
-	def component=state?.componentAlreadyProcessed    // use logic to restart the batch process if needed due to ST rate limiting
+	def component=atomicState?.componentAlreadyProcessed    // use logic to restart the batch process if needed due to ST rate limiting
 	def nextComponent  = get_nextComponentStats(component) // get next Component To Be Processed	
 	if (detailedNotif) {    
-		log.debug("${get_APP_NAME()}>for $ecobee, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		log.debug("${get_APP_NAME()}>for $ecobee, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${atomicState?.componentAlreadyProcessed}")
 	}    	
-	if (state?.timestamp == dateInLocalTime && nextComponent.position >=MAX_POSITION) {
+	if (atomicState?.timestamp == dateInLocalTime && nextComponent.position >=MAX_POSITION) {
 		return // the daily stats are already generated 
 	} else {    	
 		// schedule a rerun till the stats are generated properly
@@ -292,6 +292,8 @@ void generateStats() {
 	def reportStartTime=(settings.givenStartTime) ?:"00:00"    
 	def dateTime = reportStartDate + " " + reportStartTime + " " + timezone
 	startDate = formatDate(dateTime)
+	Date yesterday = startDate-1    
+
 	if (detailedNotif) {
 		log.debug("${get_APP_NAME()}>start dateTime = ${dateTime}, startDate in UTC = ${startDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 	}    
@@ -299,7 +301,6 @@ void generateStats() {
 	def reportEndTime=(settings.givenEndTime) ?:"00:00"    
 	dateTime = reportEndDate + " " + reportEndTime + " " + timezone
 	endDate = formatDate(dateTime)
-	Date yesterday = startDate-1    
 	if (detailedNotif) {    
 		log.debug("${get_APP_NAME()}>end dateTime = ${dateTime}, endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 	}
@@ -316,7 +317,7 @@ void generateStats() {
     
 		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
 		runtimeTotalYesterday = (ecobee.currentAuxHeat1RuntimeYesterday)? ecobee.currentAuxHeat1RuntimeYesterday.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (detailedNotif ) {
 			send "${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes for ${String.format('%tF', yesterday)}"
 		}     
@@ -336,7 +337,7 @@ void generateStats() {
 		}     
 		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
 		runtimeTotalYesterday = (ecobee.currentAuxHeat2RuntimeYesterday)? ecobee.currentAuxHeat2RuntimeYesterday.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (detailedNotif ) {
 			send "${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes for ${String.format('%tF', yesterday)}"
 		}     
@@ -372,7 +373,7 @@ void generateStats() {
 		}     
 		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for the day before
 		runtimeTotalYesterday = (ecobee.currentCompCool1RuntimeYesterday)? ecobee.currentCompCool1RuntimeYesterday.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (detailedNotif ) {
 			send "${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes for ${String.format('%tF', yesterday)}"
 		}     
@@ -389,7 +390,7 @@ void generateStats() {
 		}     
 		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for the day before
 		runtimeTotalYesterday = (ecobee.currentCompCool2RuntimeYesterday)? ecobee.currentCompCool2RuntimeYesterday.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (detailedNotif ) {
 			send "${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes for ${String.format('%tF', yesterday)}"
 		}     
@@ -406,7 +407,7 @@ void generateStats() {
 	 	// Get the humidifier's runtime for startDate-endDate period
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentHumidifierRuntimeDaily)? ecobee.currentHumidifierRuntimeDaily.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
@@ -418,7 +419,7 @@ void generateStats() {
 	// Get the dehumidifier's for startDate-endDate period
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentDehumidifierRuntimeDaily)? ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
@@ -429,7 +430,7 @@ void generateStats() {
  	// Get the ventilator's runtime for  startDate-endDate period
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentVentilatorRuntimeDaily)? ecobee.currentVentilatorRuntimeDaily.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
@@ -442,19 +443,20 @@ void generateStats() {
 
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentFanRuntimeDaily)? ecobee.currentFanRuntimeDaily.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalDaily) {
 			send "${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes for ${String.format('%tF', startDate)}", settings.askAlexaFlag
 		}     
 	}     
 
-	component=state?.componentAlreadyProcessed        
+	component=atomicState?.componentAlreadyProcessed        
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (nextComponent.position >= MAX_POSITION) {
 		send "generated ${ecobee}'s daily stats done for ${String.format('%tF', startDate)} - ${String.format('%tF', endDate)} period"
-		state?.timestamp = dateInLocalTime // save the local date to avoid re-execution    
+		atomicState?.timestamp = dateInLocalTime // save the local date to avoid re-execution    
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
-		        
+		atomicState?.componentAlreadyProcessed=''
+		atomicState?.retries=0		        
 	}
 	
 }
