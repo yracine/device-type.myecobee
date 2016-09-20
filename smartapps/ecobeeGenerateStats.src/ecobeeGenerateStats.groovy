@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.3.9" 
+		paragraph "Version 2.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -455,7 +455,6 @@ void generateStats() {
 		send "generated ${ecobee}'s daily stats done for ${String.format('%tF', startDate)} - ${String.format('%tF', endDate)} period"
 		atomicState?.timestamp = dateInLocalTime // save the local date to avoid re-execution    
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
-		atomicState?.componentAlreadyProcessed=''
 		atomicState?.retries=0		        
 	}
 	
