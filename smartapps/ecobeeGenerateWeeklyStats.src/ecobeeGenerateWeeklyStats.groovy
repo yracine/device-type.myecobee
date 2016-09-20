@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.6.3" 
+		paragraph "Version 1.6.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -82,13 +82,13 @@ def updated() {
 def initialize() {
 
 
-	state?.timestamp=''
-	state?.componentAlreadyProcessed=''
-	state?.retries=0
+	atomicState?.timestamp=''
+	atomicState?.componentAlreadyProcessed=''
+	atomicState?.retries=0
 
 	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
 	subscribe(app, appTouch)
-	state?.poll = [ last: 0, rescheduled: now() ]
+	atomicState?.poll = [ last: 0, rescheduled: now() ]
 
 	//Subscribe to different events (ex. sunrise and sunset events) to trigger rescheduling if needed
 	subscribe(location, "sunset", rescheduleIfNeeded)
@@ -103,13 +103,13 @@ def rescheduleIfNeeded(evt) {
 	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
 	Integer delay = (24*60) // By default, do it every day
 	BigDecimal currentTime = now()    
-	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
+	BigDecimal lastPollTime = (currentTime - (atomicState?.poll["last"]?:0))  
  
 	if (lastPollTime != currentTime) {    
 		Double lastPollTimeInMinutes = (lastPollTime/60000).toDouble().round(1)      
 		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
 	}
-	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+	if (((atomicState?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
 		log.info "rescheduleIfNeeded>scheduling dailyRun in ${delay} minutes.."
 //		generate the stats every day at 0:15
 		schedule("0 15 0 * * ?", dailyRun)    
@@ -122,14 +122,14 @@ def rescheduleIfNeeded(evt) {
    
 
 def appTouch(evt) {
-	state?.timestamp=''
-	state?.componentAlreadyProcessed=''
+	atomicState?.timestamp=''
+	atomicState?.componentAlreadyProcessed=''
 	generateStats()
 }
 
 void reRunIfNeeded() {
 	if (detailedNotif) {    
-		log.debug("reRunIfNeeded>About to call generateStats() with state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		log.debug("reRunIfNeeded>About to call generateStats() with state.componentAlreadyProcessed=${atomicState?.componentAlreadyProcessed}")
 	}    
 	generateStats()
    
@@ -138,23 +138,23 @@ void reRunIfNeeded() {
 
 void dailyRun() {
 	Integer delay = (24*60) // By default, do it every day
-	state?.poll["last"] = now()
+	atomicState?.poll["last"] = now()
 		
 	//schedule the rescheduleIfNeeded() function
     
-	if (((state?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+	if (((atomicState?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${delay} minutes.."
 		schedule("0 15 0 * * ?", rescheduleIfNeeded)    
 		// Update rescheduled state
-		state?.poll["rescheduled"] = now()
+		atomicState?.poll["rescheduled"] = now()
 	}
 	settings.givenEndDate=null
 	settings.givenEndTime=null
 	if (detailedNotif) {    
 		log.debug("dailyRun>for $ecobee,about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
-	state?.componentAlreadyProcessed=''
-	state?.retries=0
+	atomicState?.componentAlreadyProcessed=''
+	atomicState?.retries=0
 	generateStats()
     
 }
@@ -229,7 +229,7 @@ void generateStats() {
 	float runtimeTotalAvgWeekly
     
 	def delay = 2 // 2-minute delay for rerun
-	state?.retries=	((state?.retries==null) ?:0) +1
+	atomicState?.retries=	((atomicState?.retries==null) ?:0) +1
 
 	try {
 		unschedule(reRunIfNeeded)
@@ -239,19 +239,19 @@ void generateStats() {
 			log.debug("${get_APP_NAME()}>Exception $e while unscheduling reRunIfNeeded")
 		}    	
 	}    
-	if (state?.retries >= MAX_RETRIES) { 
+	if (atomicState?.retries >= MAX_RETRIES) { 
 		if (detailedNotif) {    
 			log.debug("${get_APP_NAME()}>Max retries reached, exiting")
-			send("max retries reached ${state?.retries}), exiting")
+			send("max retries reached ${atomicState?.retries}), exiting")
 		}    	
 	}    	
       
-	def component = state?.componentAlreadyProcessed   
+	def component = atomicState?.componentAlreadyProcessed   
 	def nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (detailedNotif) {    
-		log.debug("${get_APP_NAME()}>For ${ecobee}, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${state?.componentAlreadyProcessed}")
+		log.debug("${get_APP_NAME()}>For ${ecobee}, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${atomicState?.componentAlreadyProcessed}")
 	}    	
-	if (state?.timestamp == dateInLocalTime && nextComponent.position >=MAX_POSITION) {
+	if (atomicState?.timestamp == dateInLocalTime && nextComponent.position >=MAX_POSITION) {
 		return // the weekly stats are already generated 
 	} else {    	
 		// schedule a rerun till the stats are generated properly
@@ -281,7 +281,7 @@ void generateStats() {
 	if (nextComponent.position <= 1) { 
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat1RuntimeAvgWeekly)? ecobee.currentAuxHeat1RuntimeAvgWeekly.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
@@ -296,7 +296,7 @@ void generateStats() {
  	
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat2RuntimeAvgWeekly)? ecobee.currentAuxHeat2RuntimeAvgWeekly.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
@@ -310,7 +310,7 @@ void generateStats() {
  	
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat3RuntimeAvgWeekly)? ecobee.currentAuxHeat3RuntimeAvgWeekly.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
@@ -327,7 +327,7 @@ void generateStats() {
 	if (coolStages >1 && nextComponent.position <= 4) {
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool2RuntimeAvgWeekly)? ecobee.currentCompCool2RuntimeAvgWeekly.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
@@ -337,18 +337,19 @@ void generateStats() {
 	if (nextComponent.position <= 5) {
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool1RuntimeAvgWeekly)? ecobee.currentCompCool1RuntimeAvgWeekly.toFloat().round(2):0
-		state?.componentAlreadyProcessed=component
+		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 	}        
     
-	component= state?.componentAlreadyProcessed   
+	component= atomicState?.componentAlreadyProcessed   
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (nextComponent?.position >=MAX_POSITION) {
 		send " generated all ${ecobee}'s weekly stats since ${String.format('%tF', aWeekAgo)}"
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
-		state?.timestamp = dateInLocalTime // save the date to avoid re-execution.
+		atomicState?.timestamp = dateInLocalTime // save the date to avoid re-execution.
+		atomicState?.retries=0
         
 	}
 
