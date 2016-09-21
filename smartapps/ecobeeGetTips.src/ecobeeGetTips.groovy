@@ -32,7 +32,7 @@ preferences {
 	page (name: "generalSetupPage", title: "General Setup", uninstall:true, nextPage: "displayTipsPage") {
 		section("About") {
 			paragraph "ecobeeGetTips, the smartapp that Get Comfort & Energy Saving Tips from My Ecobee device"
-			paragraph "Version 1.0.1" 
+			paragraph "Version 1.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -85,7 +85,8 @@ def displayTipsPage() {
 				paragraph image: "${getCustomImagePath()}/tip.jpg","** Tip1 - Level $tip1Level **\n\n ${tip1}\n"
                 
 			} else {
-				paragraph image: "${getCustomImagePath()}/tip.jpg", "Based on the input data available, no tips may apply at this time. You can try later!"
+				paragraph image: "${getCustomImagePath()}/tip.jpg", "Based on the input data available, no tips may apply at this time for this level. " +
+					"You can try with a different level of tips or later when the indoor/outdoor conditions have changed!"
 			}            
 			            
 			if (tip2) {    
