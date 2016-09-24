@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.6.4" 
+		paragraph "Version 1.6.5" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -117,7 +117,7 @@ def rescheduleIfNeeded(evt) {
     
 	// Update rescheduled state
     
-	if (!evt) state.poll["rescheduled"] = now()
+	if (!evt) atomicState?.poll["rescheduled"] = now()
 }
    
 
