@@ -35,6 +35,9 @@ PREREQUISITES
 - Your ecobee thermostat fully operational (and connected to wifi)
 - Your ecobee credentials (username/password)
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
+- Location set for your ST account 
+Click on the 3-horizontal lines- "hamburger"- menu in the upper right corner, and then the "gear'" icon to review your location.
+
 - Determine your shard, please consult this thread:
 
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
