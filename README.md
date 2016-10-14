@@ -44,7 +44,7 @@ Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in t
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
 
 If you are on a different shard, you need to change the links below for your right shard. 
-As an example, in the North America,
+As an example, in North America,
 
 replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-useast1.api.smartthings.com
 
