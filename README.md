@@ -36,7 +36,8 @@ PREREQUISITES
 - Your ecobee credentials (username/password)
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
 - Location set for your ST account 
-Click on the 3-horizontal lines- "hamburger"- menu in the upper right corner, and then the "gear'" icon to review your location.
+
+Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper right corner, and then the "gear'" icon to review your location.
 
 - Determine your shard, please consult this thread:
 
