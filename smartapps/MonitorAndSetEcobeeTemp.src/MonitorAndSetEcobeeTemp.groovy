@@ -104,7 +104,7 @@ def dashboardPage() {
 		}            
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 3.1.2" 
+			paragraph "Version 3.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -247,7 +247,7 @@ def initialize() {
 	}    	
 	// Resume program every time a install/update is done to remote any holds at thermostat (reset).
     
-	ecobee.resumeProgram("")
+	ecobee.resumeThisTstat()
     
 	subscribe(app, appTouch)
     
@@ -833,7 +833,7 @@ private def check_if_hold_justified() {
 		if ((currentSetClimate.toUpperCase()=='AWAY') && (!residentAway)) {
 			if ((state?.programHoldSet == 'Away') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
 				log.trace("check_if_hold_justified>it's not been quiet since ${state.programSetTimestamp},resumed ${currentProgName} program")
-				ecobee.resumeProgram("")
+				ecobee.resumeThisTstat()
 				send("MonitorEcobeeTemp>resumed ${currentProgName} program, motion detected")
 				reset_state_program_values()
 				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Home' hold or more heat because of outside temp ) 
@@ -844,7 +844,7 @@ private def check_if_hold_justified() {
  			}
 		} else if ((currentSetClimate.toUpperCase()=='AWAY') && (residentAway)) {
 			if ((state?.programHoldSet == 'Away') && (currentProgName.toUpperCase().contains('AWAY'))) {       
-				ecobee.resumeProgram("")
+				ecobee.resumeThisTstat()
 				reset_state_program_values()
 				if (detailedNotif) {
 					send("MonitorEcobeeTemp>'Away' hold no longer needed, resumed ${currentProgName} program ")
@@ -859,7 +859,7 @@ private def check_if_hold_justified() {
 		if ((currentSetClimate.toUpperCase()=='HOME') && (residentAway)) {
 			if ((state?.programHoldSet == 'Home') && (currentProgName.toUpperCase().contains('AWAY'))) {       
 				log.trace("check_if_hold_justified>it's been quiet since ${state.programSetTimestamp},resume program...")
-				ecobee.resumeProgram("")
+				ecobee.resumeThisTstat()
 				send("MonitorEcobeeTemp>it's been quiet since ${state.programSetTimestamp}, resumed ${currentProgName} program")
 				reset_state_program_values()
 				check_if_hold_needed()   // check if another type of hold is now needed (ex. 'Away' hold or more heat b/c of low outdoor temp ) 
@@ -869,7 +869,7 @@ private def check_if_hold_justified() {
 			}
 		} else if ((currentSetClimate.toUpperCase()=='HOME') && (!residentAway)) { 
 			if ((state?.programHoldSet == 'Home') && (!currentProgName.toUpperCase().contains('AWAY'))) {       
-				ecobee.resumeProgram("")
+				ecobee.resumeThisTstat()
 				reset_state_program_values()
 				if (detailedNotif) {
 					send("MonitorEcobeeTemp>'Away' hold no longer needed,resumed ${currentProgName} program")
@@ -911,7 +911,7 @@ private def check_if_hold_justified() {
 			if ((outdoorTemp > less_cool_threshold) && (outdoorTemp < more_cool_threshold) &&
 				(outdoorHumidity < humidity_threshold)) {
 				send("MonitorEcobeeTemp>resuming program, ${less_cool_threshold}° < outdoorTemp <${more_cool_threshold}°")
-				ecobee.resumeProgram("")
+				ecobee.resumeThisTstat()
 			} else {
 				if (detailedNotif) {
 					send("MonitorEcobeeTemp>Hold justified, cooling setPoint=${coolTemp}°")
@@ -955,7 +955,7 @@ private def check_if_hold_justified() {
 			if ((outdoorTemp > more_heat_threshold) && (outdoorTemp < less_heat_threshold) && 
 				(outdoorHumidity < humidity_threshold)) {
 				send("MonitorEcobeeTemp>resuming program, ${less_heat_threshold}° < outdoorTemp > ${more_heat_threshold}°")
-				ecobee.resumeProgram("")
+				ecobee.resumeThisTstat()
 			} else {
 				if (detailedNotif) {
 					send("MonitorEcobeeTemp>Hold justified, heating setPoint=${heatTemp}°")
