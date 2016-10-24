@@ -34,7 +34,7 @@ preferences {
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
 			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
-			paragraph "Version 2.1.1" 
+			paragraph "Version 2.1.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -185,7 +185,7 @@ def presence(evt) {
 
 def takeActions() {
 	def message = "EcobeeResumeProg>resumed program at ecobee..."
-	ecobee.resumeProgram()
+	ecobee.resumeThisTstat()
 	send(message)
 }
 
