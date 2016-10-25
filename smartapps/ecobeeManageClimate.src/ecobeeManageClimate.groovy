@@ -31,7 +31,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeManageClimate, the smartapp that manages your ecobee climates ['creation', 'update', 'delete']" 
-		paragraph "Version 1.9.2"
+		paragraph "Version 1.9.3"
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -67,13 +67,14 @@ preferences {
 	section("Cool Fan Mode [default=auto]") {
 		input "givenCoolFanMode", "enum", title: "Cool Fan Mode ?", metadata: [values: ["auto", "on"]], required: false
 	}
-	section("Heat Fan Mode [default=false]") {
+	section("Heat Fan Mode [default=auto]") {
 		input "givenHeatFanMode", "enum", title: "Heat Fan Mode ?", metadata: [values: ["auto", "on"]], required: false
 	}
 	section("Notifications") {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 		input "phoneNumber", "phone", title: "Send a text message?", required: false
 	}
+    
 
 }
 
@@ -81,8 +82,8 @@ preferences {
 
 def installed() {
 
-	ecobee.poll()
 	subscribe(app, appTouch)
+	takeAction()    
 
 }
 
@@ -90,14 +91,18 @@ def installed() {
 def updated() {
 
 
-	ecobee.poll()
 	unsubscribe()    
 	subscribe(app, appTouch)
+	takeAction()    
 
 
 }
 
-def appTouch(evt) {
+def appTouch(evt) {  
+	takeAction()
+}
+
+def takeAction() {
 
 	def heatTemp, coolTemp
 	if (scale == 'C') {
@@ -122,12 +127,12 @@ def appTouch(evt) {
 
 	if (deleteClimateFlag == 'true') {
 		send("ecobeeManageClimate>about to delete climateName = ${climateName}")
-		ecobee.deleteClimate(null, climateName, subClimateName)
+		ecobee.deleteClimate("", climateName, subClimateName)
 
 	} else {
 
 		send("ecobeeManageClimate>about to create or update climateName = ${climateName}")
-		ecobee.updateClimate(null, climateName, deleteClimateFlag, subClimateName,
+		ecobee.updateClimate("", climateName, deleteClimateFlag, subClimateName,
 			coolTemp, heatTemp, isOptimized, isOccupied, coolFanMode, heatFanMode)
 	}
 
