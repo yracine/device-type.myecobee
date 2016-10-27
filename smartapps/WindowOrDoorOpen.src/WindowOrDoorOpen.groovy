@@ -586,14 +586,7 @@ private void restore_tstats_mode() {
 			}
 			i++
 		}
-	} else {
-		tstats.auto()
-		msg = "thermostats $tstats set to auto"
-		send("WindowOrDoorOpen>${msg}")
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-			theVoice.speak(msg)
-		}
-	}
+	}        
 	state.lastThermostatMode = ""
 }
 
