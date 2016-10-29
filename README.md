@@ -169,7 +169,7 @@ You only need to edit the following parameters
     (b) <holdType> set to nextTransition or indefinite (by default, no spaces) 
     see http://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml 
     for more details 
-    (c) <logFilter> [Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]?
+    (c) <logFilter:1..5> Values=[Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]
 /*********************************************************************************************
 
 <b>8) Use some of the Smartapps available (optional)</b>
