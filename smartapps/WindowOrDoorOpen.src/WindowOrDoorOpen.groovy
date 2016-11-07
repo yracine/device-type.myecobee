@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 4 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.1" 
+		paragraph "Version 2.2" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -52,7 +52,10 @@ preferences {
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", required: false, multiple: true
 	}
-	section("What do I use as the Master on/off switch for voice notifications? [optional]") {
+	section("What do I use as the Master on/off switch to enable/disable other smartapps' processing? [optional,ex.for zoned heating/cooling solutions]") {
+		input (name:"masterSwitch", type:"capability.switch", required: false, description: "Optional")
+	}
+	section("What do I use as the on/off switch for voice notifications? [optional]") {
 		input "powerSwitch", "capability.switch", required: false
 	}
 	section("And, when contact is left open for more than this delay in minutes [default=5 min.]") {
@@ -264,10 +267,7 @@ def sensorTriggered(evt, indice=0) {
 	def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
 
 	if (evt.value == "closed") {
-		def openMinutesCount = state.count[indice] * delay
-		if ((tstats) && (openMinutesCount > max_open_time_in_min)) {
-			restore_tstats_mode()
-		}		            
+		restore_tstats_mode()
 		def msg = "your ${theSensor[indice]} is now closed"
 		send("WindowOrDoorOpen>${msg}")
 		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
@@ -489,6 +489,10 @@ def takeAction(indice=0) {
 		def openMinutesCount = state.count[indice] * delay
 		msg = "your ${theSensor[indice]} has been open for more than ${openMinutesCount} minute(s)!"
 		send("WindowOrDoorOpen>${msg}")
+		if ((masterSwitch) && (masterSwitch?.currentSwitch=="on")) {
+			log.debug "master switch ${masterSwitch} is now off"
+			masterSwitch.off() // set the master switch to off as there is an open contact        
+		}        
 		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
 			theVoice.setLevel(30)
 			theVoice.speak(msg)
@@ -498,6 +502,7 @@ def takeAction(indice=0) {
 						        
 			save_tstats_mode()        
 			tstats.off()
+			            
 			msg = "thermostats are now turned off after ${max_open_time_in_min} minutes"
 			send("WindowDoorOpen>${msg}")
 		}
@@ -515,10 +520,7 @@ def takeAction(indice=0) {
 		log.debug msg            
 		runIn(freq, "${takeActionMethod}", [overwrite: false])
 	} else if (contactState.value == "closed") {
-		def openMinutesCount = state.count[indice] * delay
-		if ((tstats) && (openMinutesCount > max_open_time_in_min)) {
-			restore_tstats_mode()
-		}		            
+		restore_tstats_mode()
 		clearStatus(indice)
 		takeActionMethod= "takeAction${indice}"       
 		unschedule("${takeActionMethod}")
@@ -551,24 +553,32 @@ private void restore_tstats_mode() {
 	def msg
 	def MAX_CONTACT=30
     
-	if (!tstats) {
-		return    
-	}    
+	log.debug "restore_tstats_mode>checking if all contacts are closed..."
 	for (int j = 0;(j < MAX_CONTACT); j++)  {
 		if (!theSensor[j]) continue
 		def contactState = theSensor[j].currentState("contact")
-		log.trace "restore_tstats_mod>For ${theSensor[j]}, Contact's status = ${contactState.value}, indice=$j"
+		log.trace "restore_tstats_mode>For ${theSensor[j]}, Contact's status = ${contactState.value}, indice=$j"
 		if (contactState.value == "open") {
 			return
 		}
+	}  
+	if ((masterSwitch) && (masterSwitch?.currentSwitch=="off")) {
+			log.debug "master switch ${masterSwitch} is back on"
+			masterSwitch.on() // set the master switch to off as there is no more any open contacts        
 	}        
+
+	if (!tstats) {
+		return    
+	}    
+
 	if (state.lastThermostatMode) {
 		def lastThermostatMode = state.lastThermostatMode.toString().split(',')
 		int i = 0
+        
 		tstats.each {
 			def lastSavedMode = lastThermostatMode[i].trim()
 			if (lastSavedMode) {
-				log.debug "restore_tstats_mod>about to set ${it}, back to saved thermostatMode=${lastSavedMode}"
+				log.debug "restore_tstats_mode>about to set ${it}, back to saved thermostatMode=${lastSavedMode}"
 				if (lastSavedMode == 'cool') {
 					it.cool()
 				} else if (lastSavedMode.contains('heat')) {
@@ -583,6 +593,7 @@ private void restore_tstats_mode() {
 				if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
 					theVoice.speak(msg)
 				}
+                
 			}
 			i++
 		}
