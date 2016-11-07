@@ -104,7 +104,7 @@ def dashboardPage() {
 		}            
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 3.2" 
+			paragraph "Version 3.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -237,6 +237,7 @@ def initialize() {
 	subscribe(ecobee, "programHeatTemp", programHeatEvtHandler)
 	subscribe(ecobee, "programCoolTemp", programCoolEvtHandler)
 	subscribe(ecobee, "setClimate", setClimateEvtHandler)
+	subscribe(ecobee, "thermostatMode", changeModeHandler)
 
 	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
@@ -259,7 +260,6 @@ def initialize() {
 	subscribe(location, "mode", rescheduleIfNeeded)
 	subscribe(location, "sunriseTime", rescheduleIfNeeded)
 	subscribe(location, "sunsetTime", rescheduleIfNeeded)
-
 	rescheduleIfNeeded()   
 }
 
@@ -284,6 +284,14 @@ def rescheduleIfNeeded(evt) {
 	if (!evt) state.poll["rescheduled"] = now()
 }
     
+
+
+def changeModeHandler(evt) {
+	log.debug "changeModeHandler>$evt.name: $evt.value"
+	ecobee.resumeThisTstat()    
+	rescheduleIfNeeded(evt)   // Call rescheduleIfNeeded to work around ST scheduling issues
+	monitorAdjustTemp()  
+}
 
 def appTouch(evt) {
 	monitorAdjustTemp()
