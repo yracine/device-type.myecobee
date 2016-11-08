@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 4 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.2" 
+		paragraph "Version 2.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 				title:"Paypal donation..."
@@ -276,7 +276,6 @@ def sensorTriggered(evt, indice=0) {
 		}
 		clearStatus(indice)
 	} else if ((evt.value == "open") && (state?.status[indice] != "scheduled")) {
-		save_tstats_mode()
 		def takeActionMethod= "takeAction${indice}"       
 		runIn(freq, "${takeActionMethod}",[overwrite: false])
 		state?.status[indice] = "scheduled"
