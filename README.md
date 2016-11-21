@@ -162,6 +162,8 @@ Click on the My ecobee device that you just created
 
 Click on Preferences (edit)
 
+N.B. You can also edit the preferences under Things/Your Ecobee device/Edit Device using the ST mobile app.
+
 You only need to edit the following parameters
 
 
@@ -170,6 +172,8 @@ You only need to edit the following parameters
     see http://www.ecobee.com/home/developer/api/documentation/v1/functions/SetHold.shtml 
     for more details 
     (c) <logFilter:1..5> Values=[Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]
+    
+    
 /*********************************************************************************************
 
 <b>8) Use some of the Smartapps available (optional)</b>
