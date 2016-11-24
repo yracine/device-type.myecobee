@@ -146,7 +146,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.1.1"
+			paragraph "Version 3.1.2"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -699,7 +699,8 @@ private void use_dehumidifer_as_HRV() {
 	// Get the dehumidifier's runtime 
 	ecobee.getReportData("", oneHourAgo, now, null, null, "dehumidifier", 'false', 'true')
 	ecobee.generateReportRuntimeEvents("dehumidifier", oneHourAgo, now, 0, null, 'lastHour')
-	float dehumidifierRunInMin = ecobee.currentDehumidifierRuntimeInPeriod.toFloat().round()
+	def dehumidifierRunInMinString=ecobee.currentDehumidifierRuntimeInPeriod    
+	float dehumidifierRunInMin = (dehumidifierRunInMinString)? dehumidifierRunInMinString.toFloat().round():0
 	float diffVentTimeInMin = min_vent_time - dehumidifierRunInMin as Float
 	def equipStatus = ecobee.currentEquipmentStatus
 	if (detailedNotif) {
