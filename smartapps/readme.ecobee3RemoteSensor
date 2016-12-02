@@ -138,14 +138,13 @@ f) If you have the following error msg in the logs:
 
 'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
 
-This could mean that the old Device Type is still in the cache..
+This could mean that you're using the wrong Device Type Handler (stock ecobee device or old version)..
 
 - Kill your smartThings app, clean the cache under your OS (android or iOS) and reload 
 the app (as the old device is cached)
 
 - For iOS devices, in order to clear the cache, you'd need to uninstall & reinstall the smartThings app,
 otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSensor smartapp.
-
 
 
 After execution, you should be able to see the new Sensor objects under
