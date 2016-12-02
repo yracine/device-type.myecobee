@@ -115,7 +115,7 @@ If you have a blank page in ecobee3RemoteSensorInit or "a unexpected error occur
 executing the smartapp:
 
 ----------------------------------------------------------------------------------------------
-d) Make sure that you have the latest firmware (at least v3.6) as motion sensors
+d) Make sure that you have the latest ecobee firmware (at least v3.6) at the tstat as motion sensors
 are not detected prior to that firmware version.  
 ----------------------------------------------------------------------------------------------
 
