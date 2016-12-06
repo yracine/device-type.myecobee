@@ -146,7 +146,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.1.2"
+			paragraph "Version 3.2"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
 					title:"Paypal donation..."
@@ -223,6 +223,8 @@ def ventilatorSettings() {
 
 
 def otherSettings() {
+	def enumModes=location.modes.collect{ it.name }
+
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
 		section("Minimum fan runtime per hour in minutes") {
 			input "givenFanMinTime", "number", title: "Minimum fan runtime [default=20]", required: false
@@ -242,6 +244,10 @@ def otherSettings() {
 		section("Detailed Notifications") {
 			input "detailedNotif", "bool", title: "Detailed Notifications?", required:
 				false
+		}
+		section("Set Humidity Level only for specific mode(s) [default=all]")  {
+			input (name:"selectedMode", type:"enum", title: "Choose Mode", options: enumModes, 
+				required: false, multiple:true, description: "Optional")
 		}
 		section([mobileOnly: true]) {
 			label title: "Assign a name for this SmartApp", required: false
@@ -345,9 +351,8 @@ def onHandler(evt) {
 def setHumidityLevel() {
 	Integer scheduleInterval = givenInterval ?: 59 // By default, do it every hour
 	state?.poll["last"] = now()
-		
+	
 	//schedule the rescheduleIfNeeded() function
-    
 	if (((state?.poll["rescheduled"]?:0) + (scheduleInterval * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${scheduleInterval} minutes.."
 		schedule("0 0/${scheduleInterval} * * * ?", rescheduleIfNeeded)
@@ -355,6 +360,17 @@ def setHumidityLevel() {
 		state?.poll["rescheduled"] = now()
 	}
 
+	boolean foundMode=selectedMode.find{it == (location.currentMode as String)} 
+	if ((selectedMode != null) && (!foundMode)) {
+		if (detailedNotif) {    
+			log.trace("setHumidityLevel does not apply,location.mode= $location.mode, selectedMode=${selectedMode},foundMode=${foundMode}, turning off all equipments")
+		}
+		ecobee.setThermostatSettings("", ['dehumidifierMode': 'off', 'humidifierMode': 'off', 'dehumidifyWithAC': 'false',
+			'vent': 'off', 'ventilatorFreeCooling': 'false'
+			])
+		return			
+	}    
+    
 	if (detailedNotif) {
 		send("MonitorEcobeeHumidity>monitoring every ${scheduleInterval} minute(s)")
 		log.debug "Scheduling Humidity Monitoring & Change every ${scheduleInterval}  minutes"
