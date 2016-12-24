@@ -35,9 +35,9 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.2" 
+		paragraph "Version 2.2.2" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
-			href url: "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yracine%40yahoo%2ecom&lc=US&item_name=Maisons%20ecomatiq&no_note=0&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest",
+			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
 		paragraph "Copyright©2014 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
@@ -381,7 +381,6 @@ def handleCostEvent(evt) {
 private queueValue(evt, Closure convert) {
 	def MAX_QUEUE_SIZE=95000
 	def jsonPayload = [compId: evt.displayName, streamId: evt.name, data: convert(evt.value), time: now()]
-	atomicState?.poll["last"] = now()
 	def queue
 
 	queue = atomicState.queue
@@ -398,6 +397,14 @@ private queueValue(evt, Closure convert) {
 def processQueue() {
 	Integer delay  = givenInterval ?: 5 // By default, schedule processQueue every 5 min.
 	atomicState?.poll["last"] = now()
+
+	if (((atomicState?.poll["rescheduled"]?:0) + (delay * 60000)) < now()) {
+		log.info "processQueue>scheduling rescheduleIfNeeded() in ${delay} minutes.."
+		schedule("0 0/${delay} * * * ?", rescheduleIfNeeded)
+		// Update rescheduled state
+		atomicState?.poll["rescheduled"] = now()
+	}
+
 	def queue = atomicState.queue
     
    
