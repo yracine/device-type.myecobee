@@ -120,7 +120,7 @@ If needed, watch "how to setup ecobee" video (but use My ecobee Init instead of 
 
 http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
-After being connected, click 'Next' and select your ecobee thermostat(s) (SMART, SMART-SI, ecobee3, EMS) 
+After being connected, click 'Next' and select your ecobee thermostat(s) (ecobee lite, ecobee3, SMART, SMART-SI, EMS) 
 that you want to control from Smartthings and, then press 'Next' for the 'Other Settings &Notification' page, 
 and then 'Done' when finished.
 
