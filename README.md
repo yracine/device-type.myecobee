@@ -175,7 +175,7 @@ You only need to edit the following parameters
     
     P.S. Don't enter any values for the thermostat's serial number or for the appKey as the values are only
     used for the PIN authentication method (not with the Service Manager).  If you do it, you may
-    experience authentication issues.
+    experience authentication issues when used with MyEcobeeInit smartapp.
     
 /*********************************************************************************************
 
