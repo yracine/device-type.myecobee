@@ -173,6 +173,9 @@ You only need to edit the following parameters
     for more details 
     (c) <logFilter:1..5> Values=[Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]
     
+    P.S. Don't enter any values for the thermostat's serial number or for the appKey as the values are only
+    used for the PIN authentication method (not with the Service Manager).  If you do it, you may
+    experience authentication issues.
     
 /*********************************************************************************************
 
