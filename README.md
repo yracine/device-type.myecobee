@@ -26,7 +26,7 @@ P.S. Technical support packages are also available.
 **************************************************************************************************
 
 
-Setup time: about 5 minutes
+Setup time: about 5-10 minutes depending on your ST skills.
 
 =====================
 PREREQUISITES
