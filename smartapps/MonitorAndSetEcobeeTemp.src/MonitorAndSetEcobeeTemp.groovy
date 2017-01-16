@@ -90,7 +90,7 @@ def dashboardPage() {
 		section("Monitor indoor/outdoor temp & adjust the ecobee thermostat's setpoints") {
 			input "ecobee", "capability.thermostat", title: "For which Ecobee?"
 		}
-		section("At which interval in minutes (range=[10..59],default=59 min.)?") {
+		section("At which interval in minutes (range=[10..59],default=10 min.)?") {
 			input "givenInterval", "number", title:"Interval", required: false
 		}
 		section("Maximum Temp adjustment in Farenheits/Celsius") {
@@ -104,7 +104,7 @@ def dashboardPage() {
 		}            
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 3.3" 
+			paragraph "Version 3.3.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -219,7 +219,7 @@ def initialize() {
 	reset_state_tempSensors()
 	state?.exceptionCount=0    
     
-	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	Integer delay = givenInterval ?: 10 // By default, do it every 10 minutes
 	if ((delay < 10) || (delay>59)) {
 		def msg= "MonitorAndSetEcobeeTemp>Scheduling delay not in range (${delay} min), exiting..."
 		log.debug msg
@@ -266,7 +266,7 @@ def initialize() {
 
 def rescheduleIfNeeded(evt) {
 	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
-	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	Integer delay = givenInterval ?: 10 // By default, do it every 10 minutes
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
 	if (lastPollTime != currentTime) {    
@@ -400,7 +400,7 @@ private isProgramScheduleSet(climateName, threshold) {
 
 def monitorAdjustTemp() {
 	
-	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	Integer delay = givenInterval ?: 10 // By default, do it every 10 minutes
 
 	state?.poll["last"] = now()
 
@@ -775,7 +775,7 @@ private def check_if_hold_justified() {
 	float more_heat_threshold, more_cool_threshold
 	float less_heat_threshold, less_cool_threshold
 	float max_temp_diff
-	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	Integer delay = givenInterval ?: 10 // By default, do it every 10 minutes
 
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
