@@ -146,7 +146,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.2.2"
+			paragraph "Version 3.3"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -245,6 +245,10 @@ def otherSettings() {
 			input "detailedNotif", "bool", title: "Detailed Notifications?", required:
 				false
 		}
+		section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
+			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
+				description:"optional",required:false)
+		}        
 		section("Set Humidity Level only for specific mode(s) [default=all]")  {
 			input (name:"selectedMode", type:"enum", title: "Choose Mode", options: enumModes, 
 				required: false, multiple:true, description: "Optional")
@@ -350,8 +354,18 @@ def onHandler(evt) {
 
 def setHumidityLevel() {
 	Integer scheduleInterval = givenInterval ?: 59 // By default, do it every hour
+
+	def todayDay = new Date().format("dd",location.timeZone)
+	if ((!state?.today) || (todayDay != state?.today)) {
+		state?.exceptionCount=0   
+		state?.sendExceptionCount=0        
+		state?.today=todayDay        
+	}   
+
 	state?.poll["last"] = now()
 	
+    
+    
 	//schedule the rescheduleIfNeeded() function
 	if (((state?.poll["rescheduled"]?:0) + (scheduleInterval * 60000)) < now()) {
 		log.info "takeAction>scheduling rescheduleIfNeeded() in ${scheduleInterval} minutes.."
@@ -800,20 +814,40 @@ private def calculate_corr_humidity(t1, rh1, t2) {
 }
 
 
-private send(msg) {
+private send(msg, askAlexa=false) {
+int MAX_EXCEPTION_MSG_SEND=5
+
+	// will not send exception msg when the maximum number of send notifications has been reached
+	if ((msg.contains("exception")) || (msg.contains("error"))) {
+		state?.sendExceptionCount=state?.sendExceptionCount+1         
+		if (detailedNotif) {        
+			log.debug "checking sendExceptionCount=${state?.sendExceptionCount} vs. max=${MAX_EXCEPTION_MSG_SEND}"
+		}            
+		if (state?.sendExceptionCount >= MAX_EXCEPTION_MSG_SEND) {
+			log.debug "send>reached $MAX_EXCEPTION_MSG_SEND exceptions, exiting"
+			return        
+		}        
+	}    
+	def message = "${get_APP_NAME()}>${msg}"
+
 	if (sendPushMessage != "No") {
-		log.debug("sending push message")
-		sendPush(msg)
-
+		if (location.contactBookEnabled && recipients) {
+			log.debug "contact book enabled"
+			sendNotificationToContacts(message, recipients)
+    	} else {
+			sendPush(message)
+		}            
 	}
-
+	if (askAlexa) {
+		sendLocationEvent(name: "AskAlexaMsgQueue", value: "${get_APP_NAME()}", isStateChange: true, descriptionText: msg)        
+	}        
+	
 	if (phoneNumber) {
 		log.debug("sending text message")
-		sendSms(phoneNumber, msg)
+		sendSms(phoneNumber, message)
 	}
-
-	log.debug msg
 }
+
 
 private int find_ideal_indoor_humidity(outsideTemp) {
 
@@ -839,4 +873,9 @@ def fToC(temp) {
 
 def getImagePath() {
 	return "http://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
-}    
+} 
+
+def get_APP_NAME() {
+	return "MonitorAndSetEcobeeHumidity"
+} 
+
