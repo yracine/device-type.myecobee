@@ -22,9 +22,7 @@ Please take note of the following:
 
 You can now download the code at 
 
-<b>
 http://www.maisonsecomatiq.com/#!store/tc3yr 
-</b>
 
 P.S. Technical support packages are also available.
 
@@ -48,11 +46,10 @@ As an example, in North America,
 replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-useast1.api.smartthings.com
 
 
-<b>
+
 /*********************************************************************************************
 1) If needed, you may want to update the My ecobee device, save & publish in the IDE
 /*********************************************************************************************
-</b>
 
 <a>The code will be sent to you via your paypal verified email address.</b>
 
@@ -62,11 +59,10 @@ If not already created, read the instructions at
 
 https://github.com/yracine/device-type.myecobee
 
-<b>
 /*********************************************************************************************
 2) Create a new smartapp called ecobee3RemoteSensorInit, grab the code from the related txt file, save & publish
 /*********************************************************************************************
-</b>
+
 Go to 
 
 https://graph.api.smartthings.com/ide/apps
@@ -77,22 +73,19 @@ From there, use the "From code" tab, and copy & paste it from the source file
 
 Click "Save" & Publish"
 
-<b>
 /*********************************************************************************************
 3) Prior to calling ecobee3RemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 /*********************************************************************************************
-</b>
+
 a) Go to https://graph.api.smartthings.com/ide/devices
 b) Click on new Device Handler on the right
 c) On the new Device Handler page, click on the "From Code" tab
 d) Copy and paste the code from My Remote Sensor from the source file
 e) Click save and publish
 
-<b>
 /*********************************************************************************************
 4) Enable tracing, activate live Logging & Execute ecobee3RemoteSensorInit
 /*********************************************************************************************
-</b>
 
 for better support, just active the live logging and get more tracing
 in the IDE by following these steps:
@@ -155,17 +148,13 @@ After execution, you should be able to see the new Sensor objects under
 
 https://graph.api.smartthings.com/device/list
 
-<b>
 /*********************************************************************************************
 5) The temp and motion values should be updated in MyRemote Sensor according to the polling interval specified as input in the smartapp.
 /*********************************************************************************************
-</b>
 
-<b>
 /*********************************************************************************************
 6) Repeat step 5b for each ecobee3 thermostat
 /*********************************************************************************************
-</b>
 
 If you have many ecobee3 thermostats, you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
 name each time at the last page (Notifications And Other Settings):
