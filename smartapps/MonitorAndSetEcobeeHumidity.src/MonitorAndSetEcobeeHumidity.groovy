@@ -495,7 +495,7 @@ def setHumidityLevel() {
 
 	// use the readings from another sensor if better precision neeeded
 	if (indoorSensor) {
-		if (IndoorSensor.hasCapability("Refresh")) {
+		if (indoorSensor.hasCapability("Refresh")) {
 			indoorSensor.refresh()            
  		}        
 		indoorHumidity = indoorSensor.currentHumidity
