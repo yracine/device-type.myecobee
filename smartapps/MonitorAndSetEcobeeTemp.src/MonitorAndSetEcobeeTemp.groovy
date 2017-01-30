@@ -104,7 +104,7 @@ def dashboardPage() {
 		}            
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 3.4" 
+			paragraph "Version 3.4.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -523,6 +523,9 @@ private void addAllTempsForAverage(indoorTemps) {
 		if (sensor != null) {
 			if (detailedNotif) {        
 				log.debug "addAllTempsForAverage>found sensor $sensor in $tempSensors"
+			}                
+			if (sensor.hasCapability("Refresh")) {
+				sensor.refresh()            
 			}                
 			def currentTemp =sensor.currentTemperature
 			if (currentTemp != null) {            
