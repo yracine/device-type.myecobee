@@ -146,7 +146,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.3.1"
+			paragraph "Version 3.3.2"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -495,9 +495,13 @@ def setHumidityLevel() {
 
 	// use the readings from another sensor if better precision neeeded
 	if (indoorSensor) {
+		if (IndoorSensor.hasCapability("Refresh")) {
+			indoorSensor.refresh()            
+ 		}        
 		indoorHumidity = indoorSensor.currentHumidity
 		indoorTemp = indoorSensor.currentTemperature
 	}
+    
 	def outdoorSensorHumidity = outdoorSensor.currentHumidity
 	def outdoorTemp = outdoorSensor.currentTemperature
 		// by default, the humidity level is calculated based on a sliding scale target based on outdoorTemp
