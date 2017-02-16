@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.4.2" 
+		paragraph "Version 2.4.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -58,7 +58,7 @@ preferences {
 		input "givenEndTime", "text", title: "End time [default=00:00]", required: false
 	}        
 	section( "Notifications" ) {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false
+		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false, default:"No"
 		input "phoneNumber", "phone", title: "Send a text message?", required: false
     }
 	section("Detailed Notifications") {
