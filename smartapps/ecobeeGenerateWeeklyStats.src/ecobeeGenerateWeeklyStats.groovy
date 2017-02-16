@@ -57,7 +57,7 @@ preferences {
 	}
 	section("Detailed Notifications") {
 		input "detailedNotif", "bool", title: "Detailed Notifications?", required:false
-    }
+	}
 	section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
 		input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
 			description:"optional",required:false)
