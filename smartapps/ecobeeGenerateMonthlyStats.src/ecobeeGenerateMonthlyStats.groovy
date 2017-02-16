@@ -54,10 +54,10 @@ preferences {
 	section( "Notifications" ) {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false, default:"No"
 		input "phoneNumber", "phone", title: "Send a text message?", required: false
-    }
+	}
 	section("Detailed Notifications") {
 		input "detailedNotif", "bool", title: "Detailed Notifications?", required:false
-    }
+	}
 	section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
 		input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
 			description:"optional",required:false)
