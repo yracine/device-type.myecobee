@@ -37,7 +37,7 @@ PREREQUISITES
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
 - Location set for your ST account 
 
-Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper right corner, and then the "gear'" icon to review your location and save it.
+Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
 
 - Determine your shard, please consult this thread:
 
