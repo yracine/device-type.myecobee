@@ -212,8 +212,9 @@ def takeActions() {
 				send(msg)
 			}
 		}
-		ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
-
+		ecobee.each {
+			it.poll() //* Just poll the ecobee thermostat to keep it alive
+		}
 		if ((givenClimateName != null) && (givenClimateName != "")) {
 			ecobee.each {
 				it.setClimate('', givenClimateName) // Set to the climateName
@@ -226,7 +227,7 @@ def takeActions() {
 			}               
 		}
 
-		msg = "AwayFromHome>ecobee's settings are now lower"
+		msg = "AwayFromHome>{ecobee} thermostats' settings are now lower"
 		if (detailedNotif ) {
 			send(msg)
 		}
