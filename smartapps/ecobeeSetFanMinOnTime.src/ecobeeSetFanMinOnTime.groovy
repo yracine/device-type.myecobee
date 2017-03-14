@@ -98,7 +98,7 @@ def changeFanMinOnTime(evt) {
 	}    
 	Integer min_fan_time = (givenFanMinTime != null) ? givenFanMinTime : 10 //  10 min. fan time per hour by default
     
-	def message = "ecobeeSetFanMinOnTime>changing fanMinOnTime to ${min_fan_time}.."
+	def message = "ecobeeSetFanMinOnTime>changing fanMinOnTime to ${min_fan_time} at ${thermostats}.."
 	send(message)
 
 	thermostats.each {
