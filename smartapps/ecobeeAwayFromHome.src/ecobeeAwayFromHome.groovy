@@ -227,7 +227,7 @@ def takeActions() {
 			}               
 		}
 
-		msg = "AwayFromHome>{ecobee} thermostats' settings are now lower"
+		msg = "AwayFromHome>${ecobee} thermostats' settings are now lower"
 		if (detailedNotif ) {
 			send(msg)
 		}
