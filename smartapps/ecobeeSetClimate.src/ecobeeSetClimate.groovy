@@ -146,7 +146,7 @@ def setClimate() {
 		ecobee.each {
 			it.setThisTstatClimate(climateName)
 		}            
-		send("ecobeeSetClimate>set ecobee thermostat(s) to ${climateName} program as requested")
+		send("ecobeeSetClimate>set ${ecobee} to ${climateName} program as requested")
 	} else {
 		log.debug "climate change to ${climateName} not scheduled for today."
 	}
