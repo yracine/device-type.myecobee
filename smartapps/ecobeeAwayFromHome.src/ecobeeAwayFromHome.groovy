@@ -35,7 +35,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeAwayFromHome, the smartapp that sets your ecobee thermostat to 'Away' or to some specific settings when all presences leave your home"
-		paragraph "Version 1.9.3" 
+		paragraph "Version 1.9.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 		paragraph "Copyright©2014 Yves Racine"
@@ -215,11 +215,15 @@ def takeActions() {
 		ecobee.poll() //* Just poll the ecobee thermostat to keep it alive
 
 		if ((givenClimateName != null) && (givenClimateName != "")) {
-			ecobee.setClimate('', givenClimateName) // Set to the climateName
+			ecobee.each {
+				it.setClimate('', givenClimateName) // Set to the climateName
+			}                
 		} else {
 
 			// Set heating and cooling points at ecobee
-			ecobee.setHold('', minCoolTemp, minHeatTemp, null, null)
+			ecobee.each {
+ 	           it.setHold('', minCoolTemp, minHeatTemp, null, null)
+			}               
 		}
 
 		msg = "AwayFromHome>ecobee's settings are now lower"
