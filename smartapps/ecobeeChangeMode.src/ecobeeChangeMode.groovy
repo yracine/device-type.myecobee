@@ -40,7 +40,7 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 1.9.8" 
+			paragraph "Version 1.9.9" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -161,7 +161,9 @@ private void takeAction() {
 	send(message)
 	log.debug (message)
     
-	thermostats?.setThisTstatClimate(givenClimate)
+	thermostats.each {
+		it?.setThisTstatClimate(givenClimate)
+	}        
 }
 
 
