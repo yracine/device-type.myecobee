@@ -222,7 +222,7 @@ def takeActions() {
 
 			// Set heating and cooling points at ecobee
 			ecobee.each {
- 	           it.setHold('', minCoolTemp, minHeatTemp, null, null)
+				it.setHold('', minCoolTemp, minHeatTemp, null, null)
 			}               
 		}
 
