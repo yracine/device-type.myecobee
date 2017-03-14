@@ -38,7 +38,7 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeSetClimate, the smartapp that sets your ecobee thermostat to a given climate at a given day & time"
-			paragraph "Version 1.1.5" 
+			paragraph "Version 1.1.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -143,7 +143,9 @@ def setClimate() {
 	if (doChange == true) {
 		log.debug "setClimate, location.mode = $location.mode, newMode = $newMode, location.modes = $location.modes"
 
-		ecobee.setThisTstatClimate(climateName)
+		ecobee.each {
+			it.setThisTstatClimate(climateName)
+		}            
 		send("ecobeeSetClimate>set ecobee thermostat(s) to ${climateName} program as requested")
 	} else {
 		log.debug "climate change to ${climateName} not scheduled for today."
