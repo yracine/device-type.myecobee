@@ -184,7 +184,7 @@ def presence(evt) {
 }
 
 def takeActions() {
-	def message = "EcobeeResumeProg>resumed program at ecobee..."
+	def message = "EcobeeResumeProg>resumed program at ${ecobee} thermostats..."
 	ecobee.each {
 		it.resumeThisTstat()
 	}        
