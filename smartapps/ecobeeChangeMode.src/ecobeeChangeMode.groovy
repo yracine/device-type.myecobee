@@ -157,7 +157,7 @@ def changeMode(evt) {
 }
 
 private void takeAction() {
-	def message = "ecobeeChangeMode>setting the thermostat(s) to $givenClimate.."
+	def message = "ecobeeChangeMode>setting ${thermostats} to ${givenClimate}.."
 	send(message)
 	log.debug (message)
     
