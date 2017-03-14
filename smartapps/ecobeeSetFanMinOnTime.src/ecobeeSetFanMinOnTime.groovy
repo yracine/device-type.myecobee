@@ -33,7 +33,7 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeSetFanMinOnTime, the smartapp that sets your ecobee's fan to circulate for a minimum time (in minutes) per hour." 
-			paragraph "Version 1.1" 
+			paragraph "Version 1.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes"
 					title:"Paypal donation..."
@@ -101,8 +101,9 @@ def changeFanMinOnTime(evt) {
 	def message = "ecobeeSetFanMinOnTime>changing fanMinOnTime to ${min_fan_time}.."
 	send(message)
 
-	thermostats?.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}"])
-
+	thermostats.each {
+		it?.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}"])
+	}
 }
 
 private send(msg) {
