@@ -34,7 +34,7 @@ preferences {
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
 			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
-			paragraph "Version 2.1.6" 
+			paragraph "Version 2.1.7" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -146,6 +146,9 @@ def changeMode(evt) {
 		log.debug "changeMode>location.mode= $location.mode, newMode=${newMode},foundMode=${foundMode}, not resuming program"
 		return			
 	}
+	def message = "EcobeeResumeProg>${newMode} has just been triggered, about to take actions.."
+	log.info message
+	send(message)
 	takeActions()
 }
 
@@ -163,16 +166,15 @@ def presence(evt) {
 				it.value == "not present"
 			}
 			if (!recentNotPresent) {
-				message = "EcobeeResumeProg> ${person.displayName} just arrived,take actions.."
+				message = "EcobeeResumeProg>${person.displayName} just arrived,take actions.."
 				log.info message
 				send(message)
 				takeActions()
 			}
 		} else {
-			message = "EcobeeResumeProg> Somebody just arrived,take actions.."
+			message = "EcobeeResumeProg>somebody just arrived at home, but she/he is not been selected for resuming the ecobee program."
 			log.info message
 			send(message)
-			takeActions()
 
 		}
 	}
