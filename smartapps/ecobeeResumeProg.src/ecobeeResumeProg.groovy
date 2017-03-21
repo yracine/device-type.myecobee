@@ -34,7 +34,7 @@ preferences {
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
 			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
-			paragraph "Version 2.1.5" 
+			paragraph "Version 2.1.6" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -110,7 +110,7 @@ def initialize() {
 
 def motionEvtHandler(evt) {
 	if ((evt.value == "active") && residentsHaveJustBeenActive()) {
-		message = "EcobeeResumeProg>Recent motion just detected at home, do it"
+		def message = "EcobeeResumeProg>Recent motion just detected at home, do it"
 		log.info message
 		send(message)
 		takeActions()
@@ -152,35 +152,30 @@ def changeMode(evt) {
 def presence(evt) {
 	log.debug "evt.name: $evt.value"
 	def threshold = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? (falseAlarmThreshold*60*1000) as Long : 3*60*1000L
-	def message = null
+	def message
 
-	if ((location.mode == newMode) || (newMode == null) || (newMode.trim() == '')) {
-		def t0 = new Date(now() - threshold)
-		if (evt.value == "present") {
+	def t0 = new Date(now() - threshold)
+	if (evt.value == "present") {
 
-			def person = getPerson(evt)
-			if (person != null) {
-				def recentNotPresent = person.statesSince("presence", t0).find {
-					it.value == "not present"
-				}
-				if (!recentNotPresent) {
-					message = "EcobeeResumeProg> ${person.displayName} just arrived,take actions.."
-					log.info message
-					send(message)
-					takeActions()
-				}
-			} else {
-				message = "EcobeeResumeProg> Somebody just arrived,take actions.."
+		def person = getPerson(evt)
+		if (person != null) {
+			def recentNotPresent = person.statesSince("presence", t0).find {
+				it.value == "not present"
+			}
+			if (!recentNotPresent) {
+				message = "EcobeeResumeProg> ${person.displayName} just arrived,take actions.."
 				log.info message
 				send(message)
 				takeActions()
-
 			}
-		}
-	} else {
-		log.debug "mode is not the same, not evaluating"
-	}
+		} else {
+			message = "EcobeeResumeProg> Somebody just arrived,take actions.."
+			log.info message
+			send(message)
+			takeActions()
 
+		}
+	}
 }
 
 def takeActions() {
