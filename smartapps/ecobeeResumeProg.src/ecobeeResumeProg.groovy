@@ -87,6 +87,12 @@ def selectModes() {
 	}
 }
 
+def appTouch(evt) {
+	log.debug ("appTouch>location.mode= $location.mode, about to takeAction (manual appTouch)")
+
+	takeActions() 
+}
+
 
 def installed() {
 	log.debug "Installed with settings: ${settings}"
@@ -102,7 +108,7 @@ def updated() {
 def initialize() {
 	log.debug "Current mode = ${location.mode}, people = ${people.collect{it.label + ': ' + it.currentPresence}}"
 	subscribe(location, changeMode)
-	subscribe(app, changeMode)
+	subscribe(app, appTouch)
 	subscribe(people, "presence", presence)
 	subscribe(motions, "motion", motionEvtHandler)
 
@@ -151,6 +157,7 @@ def changeMode(evt) {
 	send(message)
 	takeActions()
 }
+
 
 def presence(evt) {
 	log.debug "evt.name: $evt.value"
