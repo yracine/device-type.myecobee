@@ -31,7 +31,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeManageVacation, the smartapp that manages your ecobee vacation settings ['creation', 'update', 'delete']"
-		paragraph "Version 1.9.2" 
+		paragraph "Version 1.9.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -41,7 +41,7 @@ preferences {
 	}
 
 	section("For the Ecobee thermostat(s)") {
-		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat", multiple:true
 	}
 	section("Create this Vacation Name") {
 		input "vacationName", "text", title: "Vacation Name"
@@ -120,13 +120,16 @@ def takeAction() {
 		// You may want to change to ecobee.createVacation('serial number list',....) if you own EMS thermostat(s)
 
 		log.debug("About to call iterateCreateVacation for ${vacationName}")
-		ecobee.iterateCreateVacation(null, vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime,
+		ecobee.each {        
+			it.createVacation("", vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime,
 			vacationEndDateTime)
-		send("ecobeeManageVacation> vacationName ${vacationName} created")
+		}            
+		send("ecobeeManageVacation> vacationName ${vacationName} created at ${ecobee}")
 	} else {
-
-		ecobee.iterateDeleteVacation(null, vacationName)
-		send("ecobeeManageVacation> vacationName ${vacationName} deleted")
+		ecobee.each {
+			it.deleteVacation("", vacationName)
+		}                
+		send("ecobeeManageVacation> vacationName ${vacationName} deleted at ${ecobee}")
 
 	}
 
