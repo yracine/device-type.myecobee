@@ -41,8 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-
-
+def get_APP_VERSION() { return "3.4.2"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -104,7 +103,7 @@ def dashboardPage() {
 		}            
 		section("About") {	
 			paragraph "MonitorAndSetEcobeeTemp,the smartapp that adjusts your programmed ecobee's setpoints based on indoor/outdoor sensors"
-			paragraph "Version 3.4.1" 
+			paragraph "Version ${get_APP_VERSION()}" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -250,7 +249,7 @@ def initialize() {
 	if (detailedNotif) {    
 		log.debug("initialize state=$state")	
 	}    	
-	// Resume program every time a install/update is done to remote any holds at thermostat (reset).
+	// Resume program every time a install/update is done to remove any holds at thermostat (reset).
     
 	ecobee.resumeThisTstat()
     
@@ -371,6 +370,9 @@ private residentsHaveBeenQuiet() {
 	def threshold = residentsQuietThreshold ?: 15   // By default, the delay is 15 minutes
 	def t0 = new Date(now() - (threshold * 60 *1000))
 	for (sensor in motions) {
+		if (sensor.hasCapability("Refresh"))  { // to get the latest motion values
+			sensor.refresh()
+		}	            
 		def recentStates = sensor.statesSince("motion", t0)
 		if (recentStates.find{it.value == "active"}) {
 			log.debug "residentsHaveBeenQuiet: false, found motion at $sensor"
@@ -378,6 +380,9 @@ private residentsHaveBeenQuiet() {
 		}	
 	}
 	for (sensor in indoorSensors) {
+		if (sensor.hasCapability("Refresh"))  { // to get the latest motion values
+			sensor.refresh()
+		}	            
 		def recentStates = sensor.statesSince("motion", t0)
 		if (recentStates.find{it.value == "active"}) {
 			log.debug "residentsHaveBeenQuiet: false, found motion at $sensor"
