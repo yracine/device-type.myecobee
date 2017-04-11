@@ -60,7 +60,7 @@ If not already created, read the instructions at
 https://github.com/yracine/device-type.myecobee
 
 /*********************************************************************************************
-2) Create a new smartapp called ecobee3RemoteSensorInit, grab the code from the related txt file, save & publish
+2) Create a new smartapp called ecobeeRemoteSensorInit, grab the code from the related txt file, save & publish
 /*********************************************************************************************
 
 Go to 
@@ -74,7 +74,7 @@ From there, use the "From code" tab, and copy & paste it from the source file
 Click "Save" & Publish"
 
 /*********************************************************************************************
-3) Prior to calling ecobee3RemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
+3) Prior to calling ecobeeRemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 /*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/devices
@@ -84,7 +84,7 @@ d) Copy and paste the code from My Remote Sensor from the source file
 e) Click save and publish
 
 /*********************************************************************************************
-4) Enable tracing, activate live Logging & Execute ecobee3RemoteSensorInit
+4) Enable tracing, activate live Logging & Execute ecobeeRemoteSensorInit
 /*********************************************************************************************
 
 for better support, just active the live logging and get more tracing
@@ -93,22 +93,22 @@ in the IDE by following these steps:
 ----------------------------------------------------------------------------------------------
 a) Go to https://graph.api.smartthings.com/ide/logs
 ----------------------------------------------------------------------------------------------
-b) Under the ST app, run ecobee3RemoteSensorInit on your smartphone/tablet
+b) Under the ST app, run ecobeeRemoteSensorInit on your smartphone/tablet
 ----------------------------------------------------------------------------------------------
 
 
 <b>Click on the Smartapps link in the upper section of the following Marketsspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
 
-Scroll down to ecobee3RemoteSensorInit and click on it to execute it.
+Scroll down to ecobeeRemoteSensorInit and click on it to execute it.
 
 The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
 
 ----------------------------------------------------------------------------------------------
-c) Watch for any errors in the logs for My Ecobee Device and ecobee3RemoteSensorInit
+c) Watch for any errors in the logs for My Ecobee Device and ecobeeRemoteSensorInit
 ----------------------------------------------------------------------------------------------
 
 
-If you have a blank page in ecobee3RemoteSensorInit or "a unexpected error occurred" while
+If you have a blank page in ecobeeRemoteSensorInit or "a unexpected error occurred" while
 executing the smartapp:
 
 ----------------------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ This could mean that you're using the wrong Device Type Handler (stock ecobee de
 the app (as the old device is cached)
 
 - For iOS devices, in order to clear the cache, you'd need to uninstall & reinstall the smartThings app,
-otherwise, you may encounter the blank page issue within the ecobee3RemoteInitSensor smartapp.
+otherwise, you may encounter the blank page issue within the ecobeeRemoteInitSensor smartapp.
 
 
 After execution, you should be able to see the new Sensor objects under
@@ -153,10 +153,10 @@ https://graph.api.smartthings.com/device/list
 /*********************************************************************************************
 
 /*********************************************************************************************
-6) Repeat step 5b for each ecobee3 thermostat
+6) Repeat step 5b for each ecobee thermostat
 /*********************************************************************************************
 
-If you have many ecobee3 thermostats, you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
+If you have many ecobee thermostats (Lite Or Ecobee3), you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
 name each time at the last page (Notifications And Other Settings):
 
 "Assign a name for this SmartApp"
