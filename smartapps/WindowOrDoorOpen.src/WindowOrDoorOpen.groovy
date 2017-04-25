@@ -33,8 +33,8 @@ preferences {
 	section("About") {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed." +
-    		"The smartapp can track up to 30 contacts and can keep track of 4 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.4" 
+    		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
+		paragraph "Version 2.4.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -48,15 +48,12 @@ preferences {
 	section("Notifications") {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 		input "phone", "phone", title: "Send a Text Message?", required: false
+		input "frequency", "number", title: "Delay between notifications in minutes", description: "", required: false
+		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "", required: false
 	}
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", required: false, multiple: true
-	}
-	section("What do I use as the Master on/off switch to enable/disable other smartapps' processing? [optional,ex.for zoned heating/cooling solutions]") {
-		input (name:"masterSwitch", type:"capability.switch", required: false, description: "Optional")
-	}
-	section("What do I use as the on/off switch for voice notifications? [optional]") {
-		input "powerSwitch", "capability.switch", required: false
+		input "powerSwitch", "capability.switch", title: "On/off switch for Voice notifications? [optional]", required: false
 	}
 	section("And, when contact is left open for more than this delay in minutes [default=5 min.]") {
 		input "maxOpenTime", "number", title: "Minutes?", required:false
@@ -64,11 +61,8 @@ preferences {
 	section("Turn off the thermostat(s) after the delay;revert this action when closed [optional]") {
 		input "tstats", "capability.thermostat", multiple: true, required: false
 	}
-	section("Delay between notifications [default=1 minute]") {
-		input "frequency", "number", title: "Number of minutes", description: "", required: false
-	}
-	section("Maximum number of notifications [default=5, not used when thermostats are specified]") {
-		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "", required: false
+	section("What do I use as the Master on/off switch to enable/disable other smartapps' processing? [optional,ex.for zoned heating/cooling solutions]") {
+		input (name:"masterSwitch", type:"capability.switch", required: false, description: "Optional")
 	}
 
 }
@@ -563,7 +557,7 @@ private void restore_tstats_mode() {
 	}  
 	if ((masterSwitch) && (masterSwitch?.currentSwitch=="off")) {
 			log.debug "master switch ${masterSwitch} is back on"
-			masterSwitch.on() // set the master switch to off as there is no more any open contacts        
+			masterSwitch.on() // set the master switch to on as there is no more any open contacts        
 	}        
 
 	if (!tstats) {
