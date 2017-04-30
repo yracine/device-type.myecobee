@@ -32,6 +32,8 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
+def get_APP_VERSION() {return "3.3.4"}
+
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
 	page(name: "humidifySettings", title: "HumidifySettings")
@@ -85,8 +87,8 @@ def dashboardPage() {
 					break
 				}                        
 				def detailedNotifFlag = (detailedNotif)? 'true':'false' 
-				int min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
-				int min_fan_time = (givenFanMinTime) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
+				int min_vent_time = (givenVentMinTime!=null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+				int min_fan_time = (givenFanMinTime!=null) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
 				def dParagraph = "TstatMode: $mode\n" +
 					"TstatOperatingState $operatingState\n" + 
  					"TstatTemperature: $indoorTemp${scale}\n" 
@@ -146,7 +148,7 @@ def dashboardPage() {
 		}            
 		section("About") {
 			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
-			paragraph "Version 3.3.2"
+			paragraph "Version ${get_APP_VERSION()}"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -399,8 +401,8 @@ def setHumidityLevel() {
 		return
 	}
 	def min_humidity_diff = givenHumidityDiff ?: 5 //  5% humidity differential by default
-	Integer min_fan_time = (givenFanMinTime) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
-	Integer min_vent_time = (givenVentMinTime) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+	Integer min_fan_time = (givenFanMinTime!=null) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
+	Integer min_vent_time = (givenVentMinTime!=null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
 	def freeCoolingFlag = (freeCooling != null) ? freeCooling : false // Free cooling using the Hrv/Erv/dehumidifier
 	def frostControlFlag = (frostControl != null) ? frostControl : false // Frost Control for humdifier, by default=false
 	def min_temp // Min temp in Farenheits for using HRV/ERV,otherwise too cold
@@ -495,7 +497,7 @@ def setHumidityLevel() {
 
 	// use the readings from another sensor if better precision neeeded
 	if (indoorSensor) {
-		if (indoorSensor.hasCapability("Refresh")) {
+		if (IndoorSensor.hasCapability("Refresh")) {
 			indoorSensor.refresh()            
  		}        
 		indoorHumidity = indoorSensor.currentHumidity
