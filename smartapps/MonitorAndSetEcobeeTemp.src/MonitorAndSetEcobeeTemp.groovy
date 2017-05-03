@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.2"}
+def get_APP_VERSION() { return "3.4.3"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -370,19 +370,26 @@ private residentsHaveBeenQuiet() {
 	def threshold = residentsQuietThreshold ?: 15   // By default, the delay is 15 minutes
 	def t0 = new Date(now() - (threshold * 60 *1000))
 	for (sensor in motions) {
+/* Removed the refresh following some ST platform changes which cause "offline" issues to some temp/motion sensors.
+
 		if (sensor.hasCapability("Refresh"))  { // to get the latest motion values
 			sensor.refresh()
 		}	            
+*/        
 		def recentStates = sensor.statesSince("motion", t0)
 		if (recentStates.find{it.value == "active"}) {
 			log.debug "residentsHaveBeenQuiet: false, found motion at $sensor"
 			return false
 		}	
 	}
+    
+    
 	for (sensor in indoorSensors) {
+/* Removed the refresh following some ST platform changes which cause "offline" issues to some temp/motion sensors.
 		if (sensor.hasCapability("Refresh"))  { // to get the latest motion values
 			sensor.refresh()
 		}	            
+*/        
 		def recentStates = sensor.statesSince("motion", t0)
 		if (recentStates.find{it.value == "active"}) {
 			log.debug "residentsHaveBeenQuiet: false, found motion at $sensor"
@@ -463,6 +470,9 @@ def monitorAdjustTemp() {
 		log.error msg
 		return        
 	}
+    
+/* Removed the refresh following some ST platform changes which cause "offline" issues to some temp/motion sensors.
+    
 	if ((outdoorSensor) && (outdoorSensor.hasCapability("Refresh"))) {
     
 		try {    
@@ -471,7 +481,7 @@ def monitorAdjustTemp() {
 			log.debug("not able to refresh ${outdoorSensor}'s temp value")
 		}    	
 	}   	 
-    
+*/    
 	String currentProgType = ecobee.currentProgramType
 	log.trace("program Type= ${currentProgType}")
 	if (currentProgType.toUpperCase().contains("HOLD")) { 						
@@ -528,10 +538,13 @@ private void addAllTempsForAverage(indoorTemps) {
 		if (sensor != null) {
 			if (detailedNotif) {        
 				log.debug "addAllTempsForAverage>found sensor $sensor in $tempSensors"
-			}                
+			} 
+/* Removed the refresh following some ST platform changes which cause "offline" issues to some temp/motion sensors.
+            
 			if (sensor.hasCapability("Refresh")) {
 				sensor.refresh()            
 			}                
+*/            
 			def currentTemp =sensor.currentTemperature
 			if (currentTemp != null) {            
 				indoorTemps.add(currentTemp) // Add indoor temp to calculate the average based on all sensors
