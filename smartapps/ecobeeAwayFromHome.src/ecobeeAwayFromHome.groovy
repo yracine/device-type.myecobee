@@ -237,7 +237,7 @@ def takeActions() {
 			send(msg)
 		}
 
-		locks ?.lock() // lock the locks 		
+		locks?.lock() // lock the locks 		
 		msg = "AwayFromHome>Locked the locks"
 		if ((locks) && (detailedNotif)) {
 			log.info msg
