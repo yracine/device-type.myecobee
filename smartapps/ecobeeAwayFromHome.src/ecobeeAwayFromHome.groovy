@@ -35,7 +35,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeAwayFromHome, the smartapp that sets your ecobee thermostat to 'Away' or to some specific settings when all presences leave your home"
-		paragraph "Version 1.9.4" 
+		paragraph "Version 1.9.5" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 		paragraph "Copyright©2014 Yves Racine"
@@ -108,6 +108,7 @@ private initialize() {
 	if (motions != null && motions != "") {
 		subscribe(motions, "motion", motionEvtHandler)
 	}
+	subscribe(app, appTouch)    
 }
 
 
@@ -187,6 +188,12 @@ def presence(evt) {
 	}
 }
 
+def appTouch(evt) {
+	log.debug ("ecobeeAwayFromHome>location.mode= $location.mode, givenClimate=${givenClimateName}, about to takeAction")
+
+	takeActions() 
+}
+
 
 def takeActions() {
 	Integer thresholdMinutes = 2 // check that the security alarm is close in a 2-minute delay
@@ -205,15 +212,12 @@ def takeActions() {
 
 	if (everyoneIsAway() && residentsHaveBeenQuiet()) {
 		send("AwayFromHome>Nobody is at home, and it's quiet, about to take actions")
-		if (alarmSwitch ?.currentContact == "open") {
-			log.debug "alarm is not set, arm it..."
+		if (alarmSwitch?.currentContact == "open") {
 			alarmSwitch.on() // arm the alarm system
 			if (detailedNotif) {
+				log.debug "alarm is not set, arm it..."
 				send(msg)
 			}
-		}
-		ecobee.each {
-			it.poll() //* Just poll the ecobee thermostat to keep it alive
 		}
 		if ((givenClimateName != null) && (givenClimateName != "")) {
 			ecobee.each {
@@ -229,31 +233,31 @@ def takeActions() {
 
 		msg = "AwayFromHome>${ecobee} thermostats' settings are now lower"
 		if (detailedNotif ) {
+			log.info msg
 			send(msg)
 		}
-		log.info msg
 
 		locks ?.lock() // lock the locks 		
 		msg = "AwayFromHome>Locked the locks"
-		if (detailedNotif) {
+		if ((locks) && (detailedNotif)) {
+			log.info msg
 			send(msg)
 		}
-		log.info msg
 
 		switches?.off() // turn off the lights		
 		msg = "AwayFromHome>Switched off all switches"
-		if (detailedNotif) {
+		if ((switches) && (detailedNotif)) {
+			log.info msg
 			send(msg)
 		}
-		log.info msg
 
 
 		cameras?.alarmOn() // arm the cameras
 		msg = "AwayFromHome>cameras are now armed"
-		if (detailedNotif) {
+		if ((cameras) && (detailedNotif)) {
+			log.info msg
 			send(msg)
 		}
-		log.info msg
 		if (alarmSwitch) {
 			runIn(delay, "checkAlarmSystem", [overwrite: false]) // check that the alarm system is armed
 		}
