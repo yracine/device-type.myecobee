@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.6.9a" 
+		paragraph "Version 1.6.9b" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -373,13 +373,12 @@ void generateRuntimeReport(component, startDate, endDate, frequence='daily') {
 private send(msg, askAlexa=false) {
 	def message = "${get_APP_NAME()}>${msg}"
 	if (sendPushMessage == "Yes") {
-		
-		if (askAlexa) {
-			sendLocationEvent(name: "AskAlexaMsgQueue", value: "${get_APP_NAME()}", isStateChange: true, descriptionText: msg)        
-		} else {        
 			sendPush(message)
-		}            
 	}
+	if (askAlexa) {
+		sendLocationEvent(name: "AskAlexaMsgQueue", value: "${get_APP_NAME()}", isStateChange: true, descriptionText: msg)        
+	} 
+	
 	
 	if (phone) {
 		log.debug("sending text message")
