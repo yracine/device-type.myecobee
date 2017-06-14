@@ -32,7 +32,7 @@ definition(
 
 preferences {
 	section("About") {
-		paragraph "ecobeeControlPlug, the smartapp that control your ecobee connected sensor or plug"
+		paragraph "ecobeeControlPlug, the smartapp that controls your ecobee connected sensor or plug"
 		paragraph "Version 1.1.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
