@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates monthly runtime reports about your ecobee components"
-		paragraph "Version 1.7.5"
+		paragraph "Version 1.8"
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -58,9 +58,12 @@ preferences {
 	section("Detailed Notifications") {
 		input "detailedNotif", "bool", title: "Detailed Notifications?", required:false
 	}
-	section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
-		input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
+	section("Enable Amazon Echo/Ask Alexa Notifications for ecobee stats reporting (optional)") {
+		input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
 			description:"optional",required:false)
+		input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
+			description:"optional")            
+		input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
 	}
     
 }
@@ -94,7 +97,17 @@ def initialize() {
 	subscribe(location, "mode", rescheduleIfNeeded)
 	subscribe(location, "sunsetTime", rescheduleIfNeeded)
 
+	subscribe(location, "askAlexaMQ", askAlexaMQHandler)
 	rescheduleIfNeeded()   
+}
+
+def askAlexaMQHandler(evt) {
+	if (!evt) return
+	switch (evt.value) {
+		case "refresh":
+		state?.askAlexaMQ = evt.jsonData && evt.jsonData?.queues ? evt.jsonData.queues : []
+		break
+	}
 }
 
 
@@ -370,8 +383,19 @@ private send(msg, askAlexa=false) {
 			sendPush(message)
 	}
 	if (askAlexa) {
-		sendLocationEvent(name: "AskAlexaMsgQueue", value: "${get_APP_NAME()}", isStateChange: true, descriptionText: msg)        
-	} 
+		def expiresInDays=(AskAlexaExpiresInDays)?:2    
+		sendLocationEvent(
+			name: "AskAlexaMsgQueue", 
+			value: "${get_APP_NAME()}", 
+			isStateChange: true, 
+			descriptionText: msg, 
+			data:[
+				queues: listOfMQs,
+				expires: (expiresInDays*24*60*60)  /* Expires after 2 days by default */
+			]
+		)
+	} /* End if Ask Alexa notifications*/
+
 	if (phone) {
 		log.debug("sending text message")
 		sendSms(phone, message)
