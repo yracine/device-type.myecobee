@@ -106,6 +106,7 @@ def askAlexaMQHandler(evt) {
 	switch (evt.value) {
 		case "refresh":
 		state?.askAlexaMQ = evt.jsonData && evt.jsonData?.queues ? evt.jsonData.queues : []
+		log.info("askAlexaMQHandler>refresh value=$state?.askAlexaMQ")        
 		break
 	}
 }
