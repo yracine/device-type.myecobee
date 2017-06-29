@@ -39,6 +39,8 @@ PREREQUISITES
 
 Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
 
+https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
+
 - Determine your shard, please consult this thread:
 
 
