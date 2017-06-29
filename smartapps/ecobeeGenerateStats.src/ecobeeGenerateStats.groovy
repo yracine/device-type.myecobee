@@ -421,7 +421,7 @@ void generateStats() {
 		runtimeTotalDaily = (ecobee.currentHumidifierRuntimeDaily)? ecobee.currentHumidifierRuntimeDaily.toFloat().round(2):0
 		atomicState?.componentAlreadyProcessed=component
 		if (runtimeTotalDaily) {
-			send "On ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes", settings.askAlexaFlag
+			send "On ${String.format('%tF', startDate)}, ${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes", settings.askAlexaFlag
 		}     
     
 	}
