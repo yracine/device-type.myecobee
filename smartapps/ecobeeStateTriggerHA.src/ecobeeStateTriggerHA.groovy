@@ -137,7 +137,7 @@ def askAlexaMQHandler(evt) {
 }
 
 def thermostatOperatingHandler(evt) {
-	def msg = "ecobeeTriggerHA>${thermostat} has triggered ${evt.value} event..."
+	def msg = "${thermostat} has triggered ${evt.value} event..."
 	log.debug msg
 	if (detailedNotif) {
 		send msg    
@@ -153,7 +153,7 @@ private boolean check_event(eventType) {
 	log.debug "check_event>eventType=${eventType}, givenEvents list=${givenEvents}"
 	if ((givenEvents.contains(eventType))) {
 		foundEvent=true    
-		msg = "ecobeeTriggerHA>${thermostat} has triggered ${eventType}, about to ${switchMode} ${switches}"
+		msg = "${thermostat} has triggered ${eventType}, about to ${switchMode} ${switches}"
 		log.debug msg
 		if (detailedNotif) {
 			send msg    
@@ -169,7 +169,7 @@ private boolean check_event(eventType) {
 			}	
 		}
 		if (phrase) {
-			msg = "ecobeeTriggerHA>${thermostat} has triggered ${eventType}, about to trigger $phrase"
+			msg = "${thermostat} has triggered ${eventType}, about to trigger $phrase routine"
 			log.debug msg
 			if (detailedNotif) {
 				send msg    
