@@ -1,7 +1,7 @@
 /**
  * ecobeeStateTriggerHA
  *
- *  Copyright 2015 Yves Racine
+ *  Copyright 2017 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -29,6 +29,9 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
+
+def get_APP_VERSION() {return "1.0"}
+
 preferences {
 
 	page(name: "HASettingsPage", title: "Home Automation Settings")
@@ -44,6 +47,7 @@ def HASettingsPage() {
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
+			paragraph "Version ${get_APP_VERSION()}\n" + 
 			paragraph "Copyright©2017 Yves Racine"
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
@@ -51,7 +55,7 @@ def HASettingsPage() {
 		section("For this ecobee thermostat") {
 			input (name:"thermostat", type: "capability.thermostat", title: "My Ecobee Thermostat")
 		}
-		section("And, when the following operatingState are triggered") {
+		section("And, when the following operatingStates are triggered") {
 			input "givenEvents", "enum",
 				title: "Which Events(s)?",
 				multiple: true,
