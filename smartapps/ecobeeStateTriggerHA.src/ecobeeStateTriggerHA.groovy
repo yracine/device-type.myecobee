@@ -47,7 +47,7 @@ def HASettingsPage() {
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
-			paragraph "Version ${get_APP_VERSION()}\n" + 
+			paragraph "Version ${get_APP_VERSION()}\n"
 			paragraph "Copyright©2017 Yves Racine"
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
