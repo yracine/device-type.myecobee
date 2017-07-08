@@ -30,7 +30,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.0"}
+def get_APP_VERSION() {return "1.1"}
 
 preferences {
 
@@ -47,7 +47,7 @@ def HASettingsPage() {
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
-			paragraph "Version ${get_APP_VERSION()}\n"
+			paragraph "Version ${get_APP_VERSION()}"
 			paragraph "Copyright©2017 Yves Racine"
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
@@ -138,9 +138,9 @@ def askAlexaMQHandler(evt) {
 
 def thermostatOperatingHandler(evt) {
 	def msg = "${thermostat} has triggered ${evt.value} event..."
-	log.debug msg
 	if (detailedNotif) {
-		send msg    
+		log.debug msg
+		send (msg,settings.askAlexaFlag)    
 	}
 	check_event(evt.value)
 }
@@ -150,13 +150,15 @@ private boolean check_event(eventType) {
 	def msg
   	boolean foundEvent=false  
     
-	log.debug "check_event>eventType=${eventType}, givenEvents list=${givenEvents}"
+	if (detailedNotif) {
+		log.debug "check_event>eventType=${eventType}, givenEvents list=${givenEvents}"
+	}        
 	if ((givenEvents.contains(eventType))) {
 		foundEvent=true    
 		msg = "${thermostat} has triggered ${eventType}, about to ${switchMode} ${switches}"
-		log.debug msg
 		if (detailedNotif) {
-			send msg    
+			log.debug msg
+			send (msg,settings.askAlexaFlag)    
 		}
 		        
 		if (switches) {
@@ -170,9 +172,9 @@ private boolean check_event(eventType) {
 		}
 		if (phrase) {
 			msg = "${thermostat} has triggered ${eventType}, about to trigger $phrase routine"
-			log.debug msg
 			if (detailedNotif) {
-				send msg    
+				log.debug msg
+				send (msg,settings.askAlexaFlag)    
 			}
 			location.helloHome?.execute(phrase)        
 		}        
@@ -187,18 +189,26 @@ private flashLights() {
 	def offFor = offFor ?: 1000
 	def numFlashes = numFlashes ?: 3
 
-	log.debug "LAST ACTIVATED IS: ${state.lastActivated}"
+	if (detailedNotif) {
+		log.debug "LAST ACTIVATED IS: ${state.lastActivated}"
+	}        
 	if (state.lastActivated) {
 		def elapsed = now() - state.lastActivated
 		def sequenceTime = (numFlashes + 1) * (onFor + offFor)
 		doFlash = elapsed > sequenceTime
-		log.debug "DO FLASH: $doFlash, ELAPSED: $elapsed, LAST ACTIVATED: ${state.lastActivated}"
+		if (detailedNotif) {
+			log.debug "DO FLASH: $doFlash, ELAPSED: $elapsed, LAST ACTIVATED: ${state.lastActivated}"
+		}            
 	}
 
 	if (doFlash) {
-		log.debug "FLASHING $numFlashes times"
+		if (detailedNotif) {
+			log.debug "FLASHING $numFlashes times"
+		}            
 		state.lastActivated = now()
-		log.debug "LAST ACTIVATED SET TO: ${state.lastActivated}"
+		if (detailedNotif) {
+			log.debug "LAST ACTIVATED SET TO: ${state.lastActivated}"
+		}            
 		def initialActionOn = switches.collect {
 			it.currentSwitch != "on"
 		}
@@ -214,7 +224,9 @@ private flashLights() {
 					}
 			}
 			delay += onFor
-			log.trace "Switch off after $delay msec"
+			if (detailedNotif) {
+				log.trace "Switch off after $delay msec"
+			}                
 			switches.eachWithIndex {
 				s, i ->
 					if (initialActionOn[i]) {
