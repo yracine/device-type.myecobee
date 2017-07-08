@@ -30,7 +30,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.1"}
+def get_APP_VERSION() {return "1.2"}
 
 preferences {
 
@@ -158,8 +158,8 @@ private boolean check_event(eventType) {
 		msg = "${thermostat} has triggered ${eventType}, about to ${switchMode} ${switches}"
 		if (detailedNotif) {
 			log.debug msg
-			send (msg,settings.askAlexaFlag)    
 		}
+		send (msg,settings.askAlexaFlag)    
 		        
 		if (switches) {
 			if (switchMode?.equals("Turn On")) {
@@ -174,8 +174,8 @@ private boolean check_event(eventType) {
 			msg = "${thermostat} has triggered ${eventType}, about to trigger $phrase routine"
 			if (detailedNotif) {
 				log.debug msg
-				send (msg,settings.askAlexaFlag)    
 			}
+			send (msg,settings.askAlexaFlag)    
 			location.helloHome?.execute(phrase)        
 		}        
 	}
