@@ -1,6 +1,6 @@
 
  
- readme.ecobee3RemoteSensorsInit
+ readme.ecobeeRemoteSensorsInit
  ================================
  
  Copyright 2015 Yves Racine
