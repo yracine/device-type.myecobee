@@ -35,13 +35,13 @@ PREREQUISITES
 - Your ecobee thermostat fully operational (and connected to wifi)
 - Your ecobee credentials (username/password)
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
-- Location set for your ST account 
+- <b>Location set for your ST account  </b>
 
 Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
 
 https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
 
-- Determine your shard, please consult this thread:
+-  <b>Determine your shard, please consult this thread: </b>
 
 
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
@@ -50,8 +50,8 @@ Or the SmartThings documentation here:
 
 http://docs.smartthings.com/en/latest/publishing/index.html#ensure-proper-location
 
-If you are on a different shard, you need to change the links below for your right shard. 
-As an example, in North America,
+<b>If you are on a different shard, you need to change the links below for your right shard. 
+As an example, in North America, </b>
 
 replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-useast1.api.smartthings.com
 
