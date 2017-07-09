@@ -128,9 +128,11 @@ After execution, you should be able to see the new Sensor objects under
 
 https://graph.api.smartthings.com/device/list
 
-# 5) The temp and motion values should be updated in MyRemote Sensor according to the polling interval specified as input in the smartapp.
+# 5) Motion and temp Updates 
 
-# 6) Repeat step 5b for each ecobee thermostat
+The temp and motion values should be updated in MyRemote Sensor according to the polling interval specified as input in the smartapp.
+
+# 6) Repeat step 4b for each ecobee thermostat
 
 If you have many ecobee thermostats (Lite Or Ecobee3), you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
 name each time at the last page (Notifications And Other Settings):
