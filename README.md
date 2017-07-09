@@ -60,11 +60,9 @@ INSTALLATION STEPS
 =====================
 
 
-/*********************************************************************************************
 
 # 1) Create a new device Handler (My Ecobee Device)
 
-/*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/devices
 
@@ -83,11 +81,9 @@ f) Hit the "publish/for me" button at the top right corner (in the code window)
 
 
 
-/*********************************************************************************************
 
 # 2) Create a new smartapp (My ecobee Init)
 
-/*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/apps
 
@@ -110,20 +106,16 @@ f) Make sure that enable OAuth in Smartapp is active
 g) Go back to the code window, and hit the "publish/for me" button at the top right corner 
 
 
-/*********************************************************************************************
 
 # 3) Under the ST app, execute My ecobee Init
 
-/*********************************************************************************************
 
 
 <b>Click on the Smartapps link in the upper section of the following Marketspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
 
-/*********************************************************************************************
 
 # 4) Connect Smartthings to the Ecobee portal
 
-/*********************************************************************************************
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
 
@@ -140,11 +132,9 @@ and then 'Done' when finished.
 If you get a blank screen after pressing 'Next or you get the following error: " Error - bad state. Unable to complete page configuration", you'd need to enable oAuth as specified in step 2f) above.
 
 
-/*********************************************************************************************
 
 # 5) Your device(s) should now be ready to process your commands
 
-/*********************************************************************************************
 
 You should see your device under
 
@@ -154,21 +144,17 @@ And
 
 In the ST app, under myHome/Things.
 
-/*********************************************************************************************
 
 # 6) To populate the UI fields for your newly created device(s)
 
-/*********************************************************************************************
 
 You may have to hit the My Ecobee device 'refresh' button several times as the smartThings app is not always responsive. 
 You may want to stop and restart your smartthings app if needed.
 
 
-/*********************************************************************************************
 
 # 7) Update device's preferences (optional, input parameters)
 
-/*********************************************************************************************
 
 Go to https://graph.api.smartthings.com/device/list
 
@@ -191,15 +177,9 @@ You only need to edit the following parameters
     used for the PIN authentication method (not with the Service Manager).  If you do it, you may
     experience authentication issues when used with MyEcobeeInit smartapp.
     
-/*********************************************************************************************
 
 # 8) Use some of the Smartapps available (optional)
 
-/*********************************************************************************************
-
-You can also use some of my smartapps that I've developed.
-
-http://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
 Amongst others:
 
