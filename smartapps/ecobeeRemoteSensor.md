@@ -57,7 +57,6 @@ If not already created, read the instructions at
 https://github.com/yracine/device-type.myecobee
 
 # 2) Create a new smartapp called ecobeeRemoteSensorInit, grab the code from the related txt file, save & publish
-
 <b>a) Go to </b> 
 
 https://graph.api.smartthings.com/ide/apps
@@ -67,7 +66,6 @@ https://graph.api.smartthings.com/ide/apps
 <b>c) From there, use the "From code" tab, and copy & paste it from the source file</b>
 
 <b>d) Click "Save" & Publish (upper right)"</b>
-
 # 3) Prior to calling ecobeeRemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 
 <b>a) Go to https://graph.api.smartthings.com/ide/devices</b>
@@ -79,7 +77,6 @@ https://graph.api.smartthings.com/ide/apps
 <b>d) Copy and paste the code from My Remote Sensor from the source file</b>
 
 <b>e) Click save and publish</b>
-
 # 4) Enable tracing, activate live Logging & Execute ecobeeRemoteSensorInit
 
 for better support, just active the live logging and get more tracing
@@ -137,7 +134,7 @@ https://graph.api.smartthings.com/device/list
 
 # 5) Motion and temp Updates 
 
-The temp and motion values should be updated in MyRemote Sensor according to the polling interval specified as input in the smartapp.
+The temp and motion values will be updated in MyRemote Sensor according to the polling interval specified as input in the smartapp.
 
 # 6) Repeat step 4b for each ecobee thermostat
 
