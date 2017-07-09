@@ -50,9 +50,7 @@ INSTALLATION STEPS
 
 # 1) If needed, you may want to update the My ecobee device, save & publish in the IDE
 
-<a>The code will be sent to you via your paypal verified email address.</b>
-
-Click "Save" & Publish"
+<b>The code will be sent to you via your paypal verified email address.</b>
 
 If not already created, read the instructions at
 
@@ -60,15 +58,15 @@ https://github.com/yracine/device-type.myecobee
 
 # 2) Create a new smartapp called ecobeeRemoteSensorInit, grab the code from the related txt file, save & publish
 
-Go to 
+<b>a) Go to </b> 
 
 https://graph.api.smartthings.com/ide/apps
 
-Create a new Smartapp, click on new Smartapp on the right
+<b>b) Create a new Smartapp, click on new Smartapp on the right</b>
 
-From there, use the "From code" tab, and copy & paste it from the source file
+<b>c) From there, use the "From code" tab, and copy & paste it from the source file</b>
 
-Click "Save" & Publish"
+<b>d) Click "Save" & Publish (upper right)"</b>
 
 # 3) Prior to calling ecobeeRemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 
