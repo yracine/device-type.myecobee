@@ -22,7 +22,7 @@ http://www.maisonsecomatiq.com/#!store/tc3yr
 
 P.S. Technical support packages are also available.
 
-= PREREQUISITES
+=== PREREQUISITES
 
 - Your ecobee thermostat fully operational (and connected to wifi)
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
@@ -64,9 +64,13 @@ Click "Save" & Publish"
 # 3) Prior to calling ecobeeRemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 
 <b>a) Go to https://graph.api.smartthings.com/ide/devices</b>
+
 <b>b) Click on new Device Handler on the right</b>
+
 <b>c) On the new Device Handler page, click on the "From Code" tab</b>
+
 <b>d) Copy and paste the code from My Remote Sensor from the source file</b>
+
 <b>e) Click save and publish</b>
 
 # 4) Enable tracing, activate live Logging & Execute ecobeeRemoteSensorInit
