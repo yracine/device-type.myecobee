@@ -148,7 +148,7 @@ In the ST app, under myHome/Things.
 # 6) To populate the UI fields for your newly created device(s)
 
 
-You may have to hit the My Ecobee device 'refresh' button several times as the smartThings app is not always responsive. 
+If needed, you may have to hit the My Ecobee device 'refresh' button several times as the smartThings app is not always responsive. 
 You may want to stop and restart your smartthings app if needed.
 
 
