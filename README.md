@@ -153,7 +153,7 @@ You may want to stop and restart your smartthings app if needed.
 
 
 
-# 7) Update device's preferences (optional, input parameters)
+# 7) (Optional) Set device's preferences 
 
 
 Go to https://graph.api.smartthings.com/device/list
@@ -251,7 +251,15 @@ This smartapp allows a ST user to set the ecobee thermostat(s) to a given climat
 
 /****************************************************
 
-<b>g) ecobeeSetZoneWithSchedule</b>
+<b>g) ecobeeStateTriggerHA</b>
+
+/****************************************************
+
+The above smartapp allows a ST user to trigger some switch(es) (turn on/off or flash) and/or trigger a hello phrase routine when the thermostat is cooling/heating/running the fan/or idle.
+
+/****************************************************
+
+<b>h) ecobeeSetZoneWithSchedule</b>
 
 /****************************************************
 
