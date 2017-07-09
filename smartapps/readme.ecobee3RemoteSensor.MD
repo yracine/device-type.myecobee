@@ -1,16 +1,16 @@
 /*********************************************************************************************
  readme.ecobee3RemoteSensorsInit
- * Copyright 2015 Yves Racine
- * LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
+ Copyright 2015 Yves Racine
+ LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
 
- *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
- *  in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
- *  Developer grants a non exclusive perpetual license to use the Background technology in the Software developed for and delivered 
- *  to Customer under this Agreement. However, the Customer shall make no commercial use of the Background technology without
- *  Developer's written consent.
+ Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
+ in the Background technology. May be subject to consulting fees under the Agreement between the Developer and the Customer. 
+ Developer grants a non exclusive perpetual license to use the Background technology in the Software developed for and delivered 
+ to Customer under this Agreement. However, the Customer shall make no commercial use of the Background technology without
+ Developer's written consent.
  
- *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 
 Setup time: about 5-15 minutes depending on your ST skills
 
@@ -22,7 +22,7 @@ http://www.maisonsecomatiq.com/#!store/tc3yr
 
 P.S. Technical support packages are also available.
 
-== PREREQUISITES
+= PREREQUISITES
 
 - Your ecobee thermostat fully operational (and connected to wifi)
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
