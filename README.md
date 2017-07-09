@@ -156,11 +156,11 @@ You may want to stop and restart your smartthings app if needed.
 # 7) (Optional) Set device's preferences 
 
 
-Go to https://graph.api.smartthings.com/device/list
+a) Go to https://graph.api.smartthings.com/device/list
 
-Click on the My ecobee device that you just created
+b) Click on the My ecobee device that you just created
 
-Click on Preferences (edit)
+c) Click on Preferences (edit)
 
 N.B. You can also edit the preferences under Things/Your Ecobee device/Edit Device using the ST mobile app.
 
