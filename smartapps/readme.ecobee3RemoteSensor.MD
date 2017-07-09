@@ -1,6 +1,7 @@
 /*********************************************************************************************
  
  readme.ecobee3RemoteSensorsInit
+ ================================
  
  Copyright 2015 Yves Racine
  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
