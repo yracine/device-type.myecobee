@@ -59,9 +59,11 @@ replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-usea
 INSTALLATION STEPS
 =====================
 
+
 /*********************************************************************************************
 
-<b>1) Create a new device Handler (My Ecobee Device)</b>
+# 1) Create a new device Handler (My Ecobee Device)
+
 /*********************************************************************************************
 
 a) Go to https://graph.api.smartthings.com/ide/devices
@@ -79,9 +81,11 @@ e) Hit the create button at the bottom
 f) Hit the "publish/for me" button at the top right corner (in the code window)
 
 
+
+
 /*********************************************************************************************
 
-<b>2) Create a new smartapp (My ecobee Init)</b>
+# 2) Create a new smartapp (My ecobee Init)
 
 /*********************************************************************************************
 
@@ -105,17 +109,19 @@ f) Make sure that enable OAuth in Smartapp is active
 
 g) Go back to the code window, and hit the "publish/for me" button at the top right corner 
 
-/*********************************************************************************************
-
-<b>3) Under the ST app, execute My ecobee Init</b>
 
 /*********************************************************************************************
+
+# 3) Under the ST app, execute My ecobee Init
+
+/*********************************************************************************************
+
 
 <b>Click on the Smartapps link in the upper section of the following Marketspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
 
 /*********************************************************************************************
 
-<b>4) Connect Smartthings to the Ecobee portal</b>
+# 4) Connect Smartthings to the Ecobee portal
 
 /*********************************************************************************************
 
@@ -136,7 +142,7 @@ If you get a blank screen after pressing 'Next or you get the following error: "
 
 /*********************************************************************************************
 
-<b>5) Your device(s) should now be ready to process your commands</b>
+# 5) Your device(s) should now be ready to process your commands
 
 /*********************************************************************************************
 
@@ -144,13 +150,14 @@ You should see your device under
 
 https://graph.api.smartthings.com/device/list
 
-And 
+And
 
 In the ST app, under myHome/Things.
 
 /*********************************************************************************************
 
-<b>6) To populate the UI fields for your newly created device(s)</b>
+# 6) To populate the UI fields for your newly created device(s)
+
 /*********************************************************************************************
 
 You may have to hit the My Ecobee device 'refresh' button several times as the smartThings app is not always responsive. 
@@ -159,7 +166,7 @@ You may want to stop and restart your smartthings app if needed.
 
 /*********************************************************************************************
 
-<b>7) Update device's preferences (optional, input parameters)</b>
+# 7) Update device's preferences (optional, input parameters)
 
 /*********************************************************************************************
 
@@ -186,7 +193,8 @@ You only need to edit the following parameters
     
 /*********************************************************************************************
 
-<b>8) Use some of the Smartapps available (optional)</b>
+# 8) Use some of the Smartapps available (optional)
+
 /*********************************************************************************************
 
 You can also use some of my smartapps that I've developed.
