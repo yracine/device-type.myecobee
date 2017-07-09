@@ -1,6 +1,5 @@
 /*********************************************************************************************
  *  readme.ecobee3RemoteSensorsInit
- *
  *  Copyright 2015 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
@@ -12,7 +11,6 @@
  *
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *
  */
 
 
@@ -67,20 +65,20 @@ Click "Save" & Publish"
 
 # 3) Prior to calling ecobeeRemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 
-a) Go to https://graph.api.smartthings.com/ide/devices
-b) Click on new Device Handler on the right
-c) On the new Device Handler page, click on the "From Code" tab
-d) Copy and paste the code from My Remote Sensor from the source file
-e) Click save and publish
+<b>a) Go to https://graph.api.smartthings.com/ide/devices</b>
+<b>b) Click on new Device Handler on the right</b>
+<b>c) On the new Device Handler page, click on the "From Code" tab</b>
+<b>d) Copy and paste the code from My Remote Sensor from the source file</b>
+<b>e) Click save and publish</b>
 
 # 4) Enable tracing, activate live Logging & Execute ecobeeRemoteSensorInit
 
 for better support, just active the live logging and get more tracing
 in the IDE by following these steps:
 
-a) Go to https://graph.api.smartthings.com/ide/logs
+<b>a) Go to https://graph.api.smartthings.com/ide/logs</b>
 
-b) Under the ST app, run ecobeeRemoteSensorInit on your smartphone/tablet
+<b>b) Under the ST app, run ecobeeRemoteSensorInit on your smartphone/tablet</b>
 
 
 <b>Click on the Smartapps link in the upper section of the following Marketsspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
@@ -90,28 +88,28 @@ Scroll down to ecobeeRemoteSensorInit and click on it to execute it.
 The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
 
 
-c) Watch for any errors in the logs for My Ecobee Device and ecobeeRemoteSensorInit
+<b>c) Watch for any errors in the logs for My Ecobee Device and ecobeeRemoteSensorInit</b>
 
 
 
 If you have a blank page in ecobeeRemoteSensorInit or "a unexpected error occurred" while
 executing the smartapp:
 
-d) Make sure that you have the latest ecobee firmware (at least v3.6) at the tstat as motion sensors
-are not detected prior to that firmware version.  
+<b>d) Make sure that you have the latest ecobee firmware (at least v3.6) at the tstat as motion sensors
+are not detected prior to that firmware version. </b> 
 
 And, of course, make sure that all your remote sensors are actually reporting to the physical thermostat...
 In some cases, remote sensors may have some connection issues with your physical thermostat, and my code is not able 
 to detect them.
 
 
-e) If you have the following error msg in the logs:
+<b>e) If you have the following error msg in the logs:</b>
 
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'My RemoteSensor' in namespace 'yracine' not found
 
 Then, it means that somehow, step 3 was not completed entirely.
 
-f) If you have the following error msg in the logs:
+<b>f) If you have the following error msg in the logs:</b>
 
 'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
 
