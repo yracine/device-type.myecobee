@@ -1,5 +1,6 @@
 /*********************************************************************************************
  readme.ecobee3RemoteSensorsInit
+ 
  Copyright 2015 Yves Racine
  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
 
@@ -22,7 +23,8 @@ http://www.maisonsecomatiq.com/#!store/tc3yr
 
 P.S. Technical support packages are also available.
 
-=== PREREQUISITES
+PREREQUISITES
+=====================
 
 - Your ecobee thermostat fully operational (and connected to wifi)
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
@@ -38,6 +40,11 @@ If you are on a different shard, you need to change the links below for your rig
 As an example, in North America,
 
 replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-useast1.api.smartthings.com
+
+
+INSTALLATION STEPS
+=====================
+
 
 # 1) If needed, you may want to update the My ecobee device, save & publish in the IDE
 
