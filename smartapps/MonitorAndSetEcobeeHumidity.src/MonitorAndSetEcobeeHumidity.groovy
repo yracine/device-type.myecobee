@@ -347,7 +347,7 @@ def askAlexaMQHandler(evt) {
 	switch (evt.value) {
 		case "refresh":
 		state?.askAlexaMQ = evt.jsonData && evt.jsonData?.queues ? evt.jsonData.queues : []
-		traceEvent(settings.logFilter,"askAlexaMQHandler>new refresh value=$evt.jsonData?.queues", detailedNotif, get_LOG_INFO())
+		log.debug ("askAlexaMQHandler>new refresh value=$evt.jsonData?.queues")
 		break
 	}
 }
@@ -896,23 +896,17 @@ private send(String msg, askAlexa=false) {
 	// will not send exception msg when the maximum number of send notifications has been reached
 	if (msg.contains("exception")) {
 		atomicState?.sendExceptionCount=atomicState?.sendExceptionCount+1         
-		traceEvent(settings.logFilter,"checking sendExceptionCount=${atomicState?.sendExceptionCount} vs. max=${MAX_EXCEPTION_MSG_SEND}", detailedNotif)
+		log.debug ("checking sendExceptionCount=${atomicState?.sendExceptionCount} vs. max=${MAX_EXCEPTION_MSG_SEND}")
 		if (atomicState?.sendExceptionCount >= MAX_EXCEPTION_MSG_SEND) {
-			traceEvent(settings.logFilter,"send>reached $MAX_EXCEPTION_MSG_SEND exceptions, exiting", detailedNotif)
+			log.warn ("send>reached $MAX_EXCEPTION_MSG_SEND exceptions, exiting")
 			return        
 		}        
 	}    
 	def message = "${get_APP_NAME()}>${msg}"
 
 
-	if (sendPushMessage != "No") {
-		if (location.contactBookEnabled && recipients) {
-			traceEvent(settings.logFilter,"contact book enabled", false, get_LOG_INFO())
-			sendNotificationToContacts(message, recipients)
-		} else {
-			traceEvent(settings.logFilter,"contact book not enabled", false, get_LOG_INFO())
-			sendPush(message)
-		}            
+	if (sendPushMessage == "Yes") {
+		sendPush(message)
 	}
 	if (askAlexa) {
 		def expiresInDays=(AskAlexaExpiresInDays)?:2    
