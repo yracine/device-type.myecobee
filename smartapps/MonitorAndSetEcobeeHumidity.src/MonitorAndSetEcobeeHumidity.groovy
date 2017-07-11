@@ -32,7 +32,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.3.5"}
+def get_APP_VERSION() {return "3.3.6"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -60,19 +60,36 @@ def dashboardPage() {
 		}
 		section("Press Next in the upper section for Initial setup") {
 			if (ecobee) {            
+				ecobee.refresh()            
 				def scale= getTemperatureScale()
 				String currentProgName = ecobee?.currentClimateName
+				String currentSetClimateName = ecobee?.currentSetClimate
 				String currentProgType = ecobee?.currentProgramType
 				def scheduleProgramName = ecobee?.currentProgramScheduleName
+				def outdoorHumidity,outdoorTemp,idealIndoorHum, indoorHumidity, indoorTemp                 
+                
 				String mode =ecobee?.currentThermostatMode.toString()
 				def operatingState=ecobee?.currentThermostatOperatingState                
-				def ecobeeHumidity = ecobee.currentHumidity
-				def indoorTemp = ecobee.currentTemperature
+				indoorHumidity = ecobee.currentHumidity
+				indoorTemp = ecobee.currentTemperature
 				def hasDehumidifier = (ecobee.currentHasDehumidifier) ? ecobee.currentHasDehumidifier : 'false'
 				def hasHumidifier = (ecobee.currentHasHumidifier) ? ecobee.currentHasHumidifier : 'false'
 				def hasHrv = (ecobee.currentHasHrv) ? ecobee.currentHasHrv : 'false'
 				def hasErv = (ecobee.currentHasErv) ? ecobee.currentHasErv : 'false'
+				def dehumidifyWithACString=(dehumidifyWithACFlag)? 'true': 'false'                
 				def heatingSetpoint,coolingSetpoint
+				if (indoorSensor) {
+					indoorHumidity = indoorSensor.currentHumidity
+					indoorTemp = indoorSensor.currentTemperature
+				}
+				if (outdoorSensor) {
+					outdoorHumidity=outdoorSensor.currentHumidity                
+					outdoorTemp=outdoorSensor.currentTemperature                
+					idealIndoorHum = (scale == 'C') ?
+						calculate_corr_humidity(outdoorTemp, outdoorHumidity, indoorTemp).round() :
+						calculate_corr_humidity(fToC(outdoorTemp), outdoorHumidity, fToC(indoorTemp)).round()
+				}                        
+                
 				switch (mode) { 
 					case 'cool':
 						coolingSetpoint = ecobee?.currentValue('coolingSetpoint')
@@ -99,15 +116,24 @@ def dashboardPage() {
 					dParagraph = dParagraph + "HeatingSetpoint: ${heatingSetpoint}$scale\n" 
 				}
 				dParagraph = dParagraph +
-					"EcobeeClimateSet: $currentProgName\n" +
+					"DetailedNotification: ${detailedNotif}\n" +
+					"EcobeeCurrentProgram: $currentProgName\n" +
+					"EcobeeClimateSet: $currentSetClimateName\n" +
 					"EcobeeProgramType: $currentProgType\n" +
 					"EcobeeHasHumidifier: $hasHumidifier\n" +
 					"EcobeeHasDeHumidifier: $hasDehumidifier\n" +
+					"DeHumidifyWithAC: $dehumidifyWithACString\n" +
 					"EcobeeHasHRV: $hasHrv\n" +
 					"EcobeeHasERV: $hasErv\n" +
-					"EcobeeHumidity: $ecobeeHumidity%\n" +
 					"MinFanTime: ${min_fan_time} min.\n" +
-					"DetailedNotification: ${detailedNotif}\n"
+					"IndoorHumidity: ${indoorHumidity}%\n" +
+					"IndoorTemp: ${indoorTemp}$scale\n" 
+				if (outdoorSensor) {
+					dParagraph=  dParagraph +                   
+					"OudoorHumidity: $outdoorHumidity%\n" +
+					"OudoorTemp: ${outdoorTemp}$scale\n" +
+					"IdealIndoorHumidity: $idealIndoorHum%\n" 
+				}
 				paragraph dParagraph 
 				if (hasDehumidifier=='true') {
 					def min_temp = (givenMinTemp) ? givenMinTemp : ((scale=='C') ? -15 : 10)
@@ -199,6 +225,10 @@ def dehumidifySettings() {
 		section("Minimum outdoor threshold for stopping dehumidification (in Farenheits/Celsius) [optional]") {
 			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
+		section("¨Dehumidify With AC - Use your AC to dehumidify when humidity is high and dehumidier is not available [optional]") {
+			input "dehumidifyWithACFlagi 1", "bool", title: "Use AC as dehumidifier (By default=false)?", description: 'optional', required: false
+		}
+		        
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
@@ -610,7 +640,7 @@ def setHumidityLevel() {
 		def humidifierMode = (frostControlFlag) ? 'auto' : 'manual'
 		ecobee.setThermostatSettings("", ['humidifierMode': "${humidifierMode}", 'humidity': "${target_humidity}", 'dehumidifierMode': 'off'])
 
-	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
+	} else if (((ecobeeMode == 'cool' && dehumidifyWithACFlag==true) && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
 		(outdoorHumidity > target_humidity)) {
 
@@ -623,6 +653,23 @@ def setHumidityLevel() {
 		//      If mode is cooling and outdoor humidity is too high then use the A/C to lower humidity in the house if there is no dehumidifier
 
 		ecobee.setThermostatSettings("", ['dehumidifyWithAC': 'true', 'dehumidifierLevel': "${target_humidity}",
+			'dehumidiferMode': 'off', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
+			])
+
+
+	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
+		(ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
+		(outdoorHumidity > target_humidity)) {
+
+
+		if (detailedNotif) {
+			log.trace("Ecobee humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, because normalized outdoor humidity is too high=${outdoorHumidity}")
+			send "dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and normalized outdoor humidity (${outdoorHumidity}%) is too high to dehumidify"
+
+		}
+		//      If mode is cooling and outdoor humidity is too high then use the A/C to lower humidity in the house if there is no dehumidifier
+
+		ecobee.setThermostatSettings("", ['dehumidifyWithAC': 'false', 'dehumidifierLevel': "${target_humidity}",
 			'dehumidiferMode': 'off', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
 			])
 
