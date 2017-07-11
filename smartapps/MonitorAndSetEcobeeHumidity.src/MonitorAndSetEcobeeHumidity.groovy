@@ -23,7 +23,7 @@
  */
 // Automatically generated. Make future change here.
 definition(
-	name: "MonitorAndSetEcobeeHumidity",
+	name: "${get_APP_NAME()}",
 	namespace: "yracine",
 	author: "Yves Racine",
 	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV",
@@ -173,7 +173,7 @@ def dashboardPage() {
 			href(name: "toNotificationsPage", title: "Other Options & Notification Setup",  description: "Tap to Configure...", image: getImagePath() + "Fan.png", page: "otherSettings")
 		}            
 		section("About") {
-			paragraph "MonitorAndSetEcobeeHumdity, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
+			paragraph "${get_APP_NAME()}, the smartapp that can control your house's humidity via your connected humidifier/dehumidifier/HRV/ERV"
 			paragraph "Version ${get_APP_VERSION()}"
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
