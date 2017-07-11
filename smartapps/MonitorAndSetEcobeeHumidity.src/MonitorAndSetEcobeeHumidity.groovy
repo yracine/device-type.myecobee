@@ -382,13 +382,6 @@ def rescheduleIfNeeded(evt) {
 
 
 
-private def sendNotifDelayNotInRange() {
-
-	send "scheduling delay (${givenInterval} min.) not in range, please restart..."
-
-}
-
-
 def offHandler(evt) {
 	log.debug "$evt.name: $evt.value"
 }
