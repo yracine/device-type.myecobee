@@ -225,7 +225,7 @@ def dehumidifySettings() {
 		section("Minimum outdoor threshold for stopping dehumidification (in Farenheits/Celsius) [optional]") {
 			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
-		section("¨Dehumidify With AC - Use your AC to dehumidify when humidity is high and dehumidier is not available [optional]") {
+		section("¨Dehumidify With AC - Use your AC to dehumidify when humidity is high and dehumidifier is not available [optional]") {
 			input "dehumidifyWithACFlagi 1", "bool", title: "Use AC as dehumidifier (By default=false)?", description: 'optional', required: false
 		}
 		        
