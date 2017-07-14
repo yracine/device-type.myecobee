@@ -169,13 +169,16 @@ You only need to edit the following parameters
 
     (a) <trace> when needed, set to true to get more tracing (no spaces)
     (b) <holdType> set to nextTransition or indefinite (by default, no spaces) 
-    see http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Item_3b.29_Set_up_the_holdType_input_parameter
+   
     (c) <logFilter:1..5> Values=[Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]
     
     P.S. Don't enter any values for the thermostat's serial number or for the appKey as the values are only
     used for the PIN authentication method (not with the Service Manager).  If you do it, you may
     experience authentication issues when used with MyEcobeeInit smartapp.
-    
+ 
+ For more details on the holdType input parameter, refer to the ST community wiki:
+ 
+ http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Item_3b.29_Set_up_the_holdType_input_parameter
 
 # 8) Use some of the Smartapps available (optional)
 
