@@ -49,7 +49,7 @@ preferences {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 		input "phone", "phone", title: "Send a Text Message?", required: false
 		input "frequency", "number", title: "Delay between notifications in minutes", description: "", required: false
-		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "Only used if thermostat is provided as input", required: false
+		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "Only used if no thermostat is provided as input", required: false
 	}
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", required: false, multiple: true
