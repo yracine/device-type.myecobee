@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.4.1" 
+		paragraph "Version 2.4.2" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -49,7 +49,7 @@ preferences {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 		input "phone", "phone", title: "Send a Text Message?", required: false
 		input "frequency", "number", title: "Delay between notifications in minutes", description: "", required: false
-		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "", required: false
+		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "Only used if thermostat is provided as input", required: false
 	}
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", required: false, multiple: true
