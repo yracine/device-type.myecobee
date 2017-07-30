@@ -32,7 +32,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.3.9a"}
+def get_APP_VERSION() {return "3.3.9b"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -519,9 +519,7 @@ def setHumidityLevel() {
 					send (msg,askAlexaFlag)
 				}
 
-				ecobee.setThermostatSettings("", ['vent': 'off', 'dehumidifierMode': 'off', 'humidifierMode': 'off',
-					'dehumidifyWithAC': 'false'
-				])
+				ecobee.setThermostatSettings("", ['vent': 'off', 'dehumidifierMode': 'off', 'humidifierMode': 'off'])
 				return
 
 			}
