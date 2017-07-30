@@ -32,7 +32,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.3.9"}
+def get_APP_VERSION() {return "3.3.9a"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -76,7 +76,7 @@ def dashboardPage() {
 				def hasHumidifier = (ecobee.currentHasHumidifier) ? ecobee.currentHasHumidifier : 'false'
 				def hasHrv = (ecobee.currentHasHrv) ? ecobee.currentHasHrv : 'false'
 				def hasErv = (ecobee.currentHasErv) ? ecobee.currentHasErv : 'false'
-				def dehumidifyWithACString=(dehumidifyWithACFlag)? 'true': 'false'                
+				String dehumidifyWithACString=(settings.dehumidifyWithACFlag)? 'true': 'false'                
 				def heatingSetpoint,coolingSetpoint
 				if (indoorSensor) {
 					indoorHumidity = indoorSensor.currentHumidity
@@ -122,7 +122,7 @@ def dashboardPage() {
 					"EcobeeProgramType: $currentProgType\n" +
 					"EcobeeHasHumidifier: $hasHumidifier\n" +
 					"EcobeeHasDeHumidifier: $hasDehumidifier\n" +
-					"DeHumidifyWithAC: $dehumidifyWithACString\n" +
+					"DehumidifyWithAC: $dehumidifyWithACString\n" +
 					"EcobeeHasHRV: $hasHrv\n" +
 					"EcobeeHasERV: $hasErv\n" +
 					"MinFanTime: ${min_fan_time} min.\n" +
@@ -226,7 +226,7 @@ def dehumidifySettings() {
 			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
 		section("¨Dehumidify With AC - Use your AC to dehumidify when humidity is high and dehumidifier is not available [optional]") {
-			input "dehumidifyWithACFlagi 1", "bool", title: "Use AC as dehumidifier (By default=false)?", description: 'optional', required: false
+			input "dehumidifyWithACFlag", "bool", title: "Use AC as dehumidifier (By default=false)?", description: 'optional', required: false
 		}
 		        
 		section {
