@@ -14,7 +14,7 @@ For more details on the extensive features & capabilities of MyEcobee device, pl
 
 https://community.smartthings.com/t/release-my-ecobee-device-v5-the-smartest-thermostat-under-st-with-new-comfort-tips-features-and-unique-integration-with-echo-ask-alexa/56534
 
-It's the most comprehensive ecobee integration under the ST platform.
+<i>It's the most comprehensive ecobee integration under the ST platform.</i>
 
 please take note of the following statement:
 
