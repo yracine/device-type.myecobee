@@ -8,7 +8,7 @@ linkedIn profile:   ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
 
 Date:               2014-03-31
 
-/*********************************************************************************************
+_______________________________________________________________________________________
 
 For more details on the the extensive features & capabilities of MyEcobee device, please refer to this ST community thread:
 
@@ -20,7 +20,7 @@ please take note of the following statement:**
 
 **http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Notes_to_MyEcobee_Device_Users_-_Contribution_is_now_required**
 
-/*********************************************************************************************
+_______________________________________________________________________________________
 
 You can now download the code at 
 
