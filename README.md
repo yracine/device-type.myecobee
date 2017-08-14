@@ -10,13 +10,13 @@ Date:               2014-03-31
 
 _______________________________________________________________________________________
 
-For more details on the the extensive features & capabilities of MyEcobee device, please refer to this ST community thread:
+For more details on the extensive features & capabilities of MyEcobee device, please refer to this ST community thread:
 
 https://community.smartthings.com/t/release-my-ecobee-device-v5-the-smartest-thermostat-under-st-with-new-comfort-tips-features-and-unique-integration-with-echo-ask-alexa/56534
 
 It's the most comprehensive ecobee integration under the ST platform.
 
-please take note of the following statement:**
+please take note of the following statement:
 
 **http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Notes_to_MyEcobee_Device_Users_-_Contribution_is_now_required**
 
