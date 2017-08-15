@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.4.2" 
+		paragraph "Version 2.4.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -578,6 +578,8 @@ private void restore_tstats_mode() {
 					it.heat()
 				} else if (lastSavedMode == 'auto') {
 					it.auto()
+				} else if (lastSavedMode == 'eco') {
+					it.eco()
 				} else {
 					it.off()
 				}
