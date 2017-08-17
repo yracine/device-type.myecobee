@@ -86,8 +86,7 @@ in the IDE by following these steps:
 
 <b>b) Under the ST app, run ecobeeRemoteSensorInit on your smartphone/tablet</b>
 
-
-<b>Click on the Smartapps link in the upper section of the following Marketsspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
+<b>Click on the Smartapps link in the upper section of the following Marketspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
 
 Scroll down to ecobeeRemoteSensorInit and click on it to execute it.
 
