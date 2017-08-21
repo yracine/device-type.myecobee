@@ -32,7 +32,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.3.9b"}
+def get_APP_VERSION() {return "3.4"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -66,7 +66,7 @@ def dashboardPage() {
 				String currentSetClimateName = ecobee?.currentSetClimate
 				String currentProgType = ecobee?.currentProgramType
 				def scheduleProgramName = ecobee?.currentProgramScheduleName
-				def outdoorHumidity,outdoorTemp,idealIndoorHum, indoorHumidity, indoorTemp                 
+				def outdoorHumidity,outdoorTemp,corrOutdoorHum, indoorHumidity, indoorTemp                 
                 
 				String mode =ecobee?.currentThermostatMode.toString()
 				def operatingState=ecobee?.currentThermostatOperatingState                
@@ -85,11 +85,12 @@ def dashboardPage() {
 				if (outdoorSensor) {
 					outdoorHumidity=outdoorSensor.currentHumidity                
 					outdoorTemp=outdoorSensor.currentTemperature                
-					idealIndoorHum = (scale == 'C') ?
+					corrOutdoorHum = (scale == 'C') ?
 						calculate_corr_humidity(outdoorTemp, outdoorHumidity, indoorTemp).round() :
 						calculate_corr_humidity(fToC(outdoorTemp), outdoorHumidity, fToC(indoorTemp)).round()
 				}                        
-                
+				def idealIndoorHum= (scale == 'C')? find_ideal_indoor_humidity(outdoorTemp):
+					find_ideal_indoor_humidity(fToC(outdoorTemp)) 
 				switch (mode) { 
 					case 'cool':
 						coolingSetpoint = ecobee?.currentValue('coolingSetpoint')
@@ -106,8 +107,10 @@ def dashboardPage() {
 				def detailedNotifFlag = (detailedNotif)? 'true':'false' 
 				int min_vent_time = (givenVentMinTime!=null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
 				int min_fan_time = (givenFanMinTime!=null) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
+				def equipStatus=ecobee?.currentValue("equipmentStatus")                
 				def dParagraph = "TstatMode: $mode\n" +
-					"TstatOperatingState $operatingState\n" + 
+					"TstatOperatingState: $operatingState\n" + 
+					"TstatEquipStatus: $equipStatus\n" + 
  					"TstatTemperature: $indoorTemp${scale}\n" 
 				if (coolingSetpoint)  { 
 					 dParagraph = dParagraph + "CoolingSetpoint: ${coolingSetpoint}$scale\n"
@@ -132,6 +135,7 @@ def dashboardPage() {
 					dParagraph=  dParagraph +                   
 					"OudoorHumidity: $outdoorHumidity%\n" +
 					"OudoorTemp: ${outdoorTemp}$scale\n" +
+					"NormalizedOutHumidity: $corrOutdoorHum%\n" 
 					"IdealIndoorHumidity: $idealIndoorHum%\n" 
 				}
 				paragraph dParagraph 
@@ -583,7 +587,7 @@ def setHumidityLevel() {
 	}
 
 	if ((ecobeeMode == 'cool' && (hasHrv == 'true' || hasErv == 'true')) &&
-		(ecobeeHumidity >= (outdoorHumidity - min_humidity_diff)) &&
+		(ecobeeHumidity >= outdoorHumidity) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff))) {
 		if (detailedNotif) {
 			log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, " +
@@ -598,7 +602,7 @@ def setHumidityLevel() {
 
 	} else if (((ecobeeMode in ['heat','off', 'auto']) && (hasHrv == 'false' && hasErv == 'false' && hasDehumidifier == 'true')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
-		(ecobeeHumidity >= outdoorHumidity - min_humidity_diff) &&
+		(ecobeeHumidity >= outdoorHumidity) &&
 		(outdoorTemp > min_temp)) {
 
 		if (detailedNotif) {
@@ -615,7 +619,7 @@ def setHumidityLevel() {
 
 	} else if (((ecobeeMode in ['heat','off', 'auto']) && ((hasHrv == 'true' || hasErv == 'true') && hasDehumidifier == 'false')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
-		(ecobeeHumidity >= outdoorHumidity - min_humidity_diff) &&
+		(ecobeeHumidity >= outdoorHumidity) &&
 		(outdoorTemp > min_temp)) {
 
 		if (detailedNotif) {
@@ -630,7 +634,7 @@ def setHumidityLevel() {
 
 	} else if (((ecobeeMode in ['heat','off', 'auto']) && (hasHrv == 'true' || hasErv == 'true' || hasDehumidifier == 'true')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
-		(ecobeeHumidity >= outdoorHumidity - min_humidity_diff) &&
+		(ecobeeHumidity >= outdoorHumidity) &&
 		(outdoorTemp <= min_temp)) {
 
 
