@@ -137,7 +137,7 @@ The temp and motion values will be updated in MyRemote Sensor according to the p
 
 # 6) Repeat step 4b for each ecobee thermostat
 
-If you have many ecobee thermostats (Lite Or Ecobee3), you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
+If you have many ecobee thermostats, you'd need to execute ecobeeRemoteSensorInit for each one, but change the instance
 name each time at the last page (Notifications And Other Settings):
 
 "Assign a name for this SmartApp"
