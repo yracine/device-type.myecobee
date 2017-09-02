@@ -205,7 +205,7 @@ that you can use them in your automation scenarios.
 
 See the following readme file for instructions 
 
-http://github.com/yracine/device-type.myecobee/blob/master/smartapps/readme.ecobee3RemoteSensor
+https://github.com/yracine/device-type.myecobee/blob/master/smartapps/ecobeeRemoteSensor.md
 
 
 /****************************************************
