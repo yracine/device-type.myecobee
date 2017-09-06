@@ -1053,7 +1053,7 @@ int MAX_EXCEPTION_MSG_SEND=5
 		if (location.contactBookEnabled && recipients) {
 			log.debug "contact book enabled"
 			sendNotificationToContacts(message, recipients)
-    	} else {
+		} else {
 			sendPush(message)
 		}            
 	}
