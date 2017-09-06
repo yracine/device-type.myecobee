@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.3"}
+def get_APP_VERSION() { return "3.4.4"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -187,9 +187,12 @@ def otherSettings() {
 			input "detailedNotif", "bool", title: "Detailed Notifications?", required:
 				false
 		}
-		section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
-			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
+		section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
+			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
 				description:"optional",required:false)
+			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
+				description:"optional")            
+			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
 		}        
 		section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
@@ -241,6 +244,8 @@ def initialize() {
 	subscribe(ecobee, "programCoolTemp", programCoolEvtHandler)
 	subscribe(ecobee, "setClimate", setClimateEvtHandler)
 	subscribe(ecobee, "thermostatMode", changeModeHandler)
+	subscribe(location, "askAlexaMQ", askAlexaMQHandler)    
+    
 
 	if (powerSwitch) {
 		subscribe(powerSwitch, "switch.off", offHandler, [filterEvents: false])
@@ -264,6 +269,16 @@ def initialize() {
 	subscribe(location, "sunriseTime", rescheduleIfNeeded)
 	subscribe(location, "sunsetTime", rescheduleIfNeeded)
 	rescheduleIfNeeded()   
+}
+
+def askAlexaMQHandler(evt) {
+	if (!evt) return
+	switch (evt.value) {
+		case "refresh":
+		state?.askAlexaMQ = evt.jsonData && evt.jsonData?.queues ? evt.jsonData.queues : []
+		log.debug ("askAlexaMQHandler>new refresh value=$evt.jsonData?.queues")
+		break
+	}
 }
 
 
@@ -300,10 +315,6 @@ def appTouch(evt) {
 	monitorAdjustTemp()
 }
 
-private def sendNotifDelayNotInRange() {
-
-	send "scheduling delay (${givenInterval} min.) not in range, please restart..."    
-}
 
 def setClimateEvtHandler(evt) {
 	log.debug "SetClimateEvtHandler>$evt.name: $evt.value"
@@ -1038,7 +1049,7 @@ int MAX_EXCEPTION_MSG_SEND=5
 	}    
 	def message = "${get_APP_NAME()}>${msg}"
 
-	if (sendPushMessage != "No") {
+	if (sendPushMessage == "Yes") {
 		if (location.contactBookEnabled && recipients) {
 			log.debug "contact book enabled"
 			sendNotificationToContacts(message, recipients)
@@ -1047,8 +1058,18 @@ int MAX_EXCEPTION_MSG_SEND=5
 		}            
 	}
 	if (askAlexa) {
-		sendLocationEvent(name: "AskAlexaMsgQueue", value: "${get_APP_NAME()}", isStateChange: true, descriptionText: msg)        
-	}        
+		def expiresInDays=(AskAlexaExpiresInDays)?:2    
+		sendLocationEvent(
+			name: "AskAlexaMsgQueue", 
+			value: "${get_APP_NAME()}", 
+			isStateChange: true, 
+			descriptionText: msg, 
+			data:[
+				queues: listOfMQs,
+		        expires: (expiresInDays*24*60*60)  /* Expires after 2 days by default */
+		    ]
+		)
+	} /* End if Ask Alexa notifications*/
 	
 	if (phoneNumber) {
 		log.debug("sending text message")
