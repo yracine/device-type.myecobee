@@ -738,7 +738,7 @@ private def check_if_hold_needed() {
 				targetTstatTemp = (programCoolTemp + max_temp_diff).round(1)
 				ecobee.setCoolingSetpoint(targetTstatTemp)
 				send(
-					"cooling setPoint now=${targetTstatTemp}°, outdoor temp <=${less_cool_threshold}°,", askAlexaFlag
+					"cooling setPoint now=${targetTstatTemp}°, outdoor temp <=${less_cool_threshold}°", askAlexaFlag
 				)
 			}
 		} /* end if outdoorSensor */ 
