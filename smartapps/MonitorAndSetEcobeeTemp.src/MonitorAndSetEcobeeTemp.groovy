@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.5"}
+def get_APP_VERSION() { return "3.4.6"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -657,7 +657,7 @@ private def check_if_hold_needed() {
 	if ((setAwayOrPresent) && (state.motions != [])) {  // the following logic is done only if motion sensors are provided as input parameters
   
   		boolean residentAway=residentsHaveBeenQuiet()
-		if ((!currentProgName.toUpperCase().contains('AWAY')) && (!residentAway)) {
+		if ((currentProgName.toUpperCase().contains('AWAY')) && (!residentAway)) {
 
 			ecobee.present()            
 			send("Program now set to Home, motion detected", askAlexaFlag)
