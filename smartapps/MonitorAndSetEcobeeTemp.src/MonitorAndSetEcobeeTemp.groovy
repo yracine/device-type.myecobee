@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.6"}
+def get_APP_VERSION() { return "3.4.7"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -119,7 +119,7 @@ def tempSensorSettings() {
 			input "indoorSensors", "capability.motionSensor", title: "Which Indoor Motion/Temperature Sensor(s)", required: false, multiple:true
 		}		
 		section("Choose any other indoor temp sensors for avg temp adjustment [optional]") {
-			input "tempSensors", "capability.temperatureMeasurement", title: "Any other temp sensors?",  multiple: true, required: false
+			input "tempSensors", "capability.temperatureMeasurement", title: "Any other temp sensors with single capability (not temp/motion)",  multiple: true, required: false
 			
 		}
 		section {
@@ -136,7 +136,7 @@ def motionSensorSettings() {
 			input (name:"setAwayOrPresentFlag", title: "Set Main thermostat to [Away,Present]?", type:"bool",required:false)
 		}
 		section("Choose additional indoor motion sensors for setting ecobee climate to [Away, Home] [optional]") {
-			input "motions", "capability.motionSensor", title: "Any other motion sensors?",  multiple: true, required: false
+			input "motions", "capability.motionSensor", title: "Any other motion sensors with single capability (not temp/motion)",  multiple: true, required: false
 		}
 		section("Trigger climate/temp adjustment when motion or no motion has been detected for [default=15 minutes]") {	
 			input "residentsQuietThreshold", "number", title: "Time in minutes", required: false
