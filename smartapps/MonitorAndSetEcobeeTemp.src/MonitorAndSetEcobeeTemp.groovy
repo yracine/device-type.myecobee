@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.7"}
+def get_APP_VERSION() { return "3.4.8"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -694,7 +694,7 @@ private def check_if_hold_needed() {
 		return            
 	}   
     
-	if (ecobeeMode == 'cool') {
+	if (ecobeeMode in ['cool','auto']) {
 		if (outdoorSensor) {    	
 			Integer outdoorHumidity = outdoorSensor.currentHumidity
 			float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
@@ -753,7 +753,8 @@ private def check_if_hold_needed() {
 				send("cooling setPoint now =${targetTstatTemp}°,adjusted by temp diff (${temp_diff}°) between sensors", askAlexaFlag)
 			}   
 		}                
-	} else if (ecobeeMode in ['heat', 'emergency heat']) {
+	}                
+	if (ecobeeMode in ['heat', 'emergency heat', 'auto']) {
 		if (outdoorSensor) {    	
 			Integer outdoorHumidity = outdoorSensor.currentHumidity
 			float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
@@ -939,7 +940,7 @@ private def check_if_hold_justified() {
 		}            
 	}   // end if motions
     
-	if (ecobeeMode == 'cool') {
+	if (ecobeeMode in ['cool','auto']) {
 		if (outdoorSensor) {    	
 			Integer outdoorHumidity = outdoorSensor.currentHumidity
 			float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
@@ -983,8 +984,8 @@ private def check_if_hold_justified() {
 			send("Hold justified, avgIndoorTemp ($avg_indoor_temp°) > coolingSetpoint (${coolTemp}°)",askAlexaFlag)
 			return
 		}   
-        
-	} else if (ecobeeMode in ['heat', 'emergency heat']) {
+	}        
+	if (ecobeeMode in ['heat', 'emergency heat', 'auto']) {
 		if (outdoorSensor) {    	
 			Integer outdoorHumidity = outdoorSensor.currentHumidity
 			float outdoorTemp = outdoorSensor.currentTemperature.toFloat()
