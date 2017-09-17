@@ -743,7 +743,7 @@ private def check_if_hold_needed() {
 			}
 		} /* end if outdoorSensor */ 
 
-		if ((state.tempSensors) && (avg_indoor_temp > coolTemp)) {
+		if (state.tempSensors) {
 			temp_diff = (ecobee_temp - avg_indoor_temp).round(1) // adjust the coolingSetPoint at the ecobee tstat according to the avg indoor temp measured
                 
 			temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
@@ -799,7 +799,7 @@ private def check_if_hold_needed() {
 				send("heating setPoint now=${targetTstatTemp}°,outdoor temp>= ${less_heat_threshold}°",askAlexaFlag)
 			}
 		} /* if outdoorSensor */
-		if ((state.tempSensors) && (avg_indoor_temp < heatTemp)) {
+		if (state.tempSensors) {
 			temp_diff = (ecobeeTemp - avg_indoor_temp).round(1) // adjust the heatingSetPoint at the tstat according to the avg indoor temp measur
 			temp_diff = (temp_diff <0-max_temp_diff)?max_temp_diff:(temp_diff >max_temp_diff)?max_temp_diff:temp_diff // determine the temp_diff based on max_temp_diff
 			targetTstatTemp = (programHeatTemp + temp_diff).round(1)
