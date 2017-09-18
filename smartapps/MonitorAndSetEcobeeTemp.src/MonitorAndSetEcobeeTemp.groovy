@@ -34,7 +34,7 @@ definition(
 
 preferences {
 
-	page(name: "dashboardPage", title: "Dashboard")
+	page(name: "dashboardPage", title: "Dashboard)
 	page(name: "tempSensorSettings", title: "tempSensorSettings")
 	page(name: "motionSensorSettings", title: "motionSensorSettings")
 	page(name: "thresholdSettings", title: "ThresholdSettings")
