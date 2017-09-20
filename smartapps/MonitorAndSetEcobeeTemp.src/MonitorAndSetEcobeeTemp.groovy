@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.9a"}
+def get_APP_VERSION() { return "3.4.9b"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -183,8 +183,8 @@ def otherSettings() {
 				false
 			input "phoneNumber", "phone", title: "Send a text message?", required: false
 		}
-		section("Detailed Notifications") {
-			input "detailedNotif", "bool", title: "Detailed Notifications?", required:
+		section("Detailed Logging/Notifications") {
+			input "detailedNotif", "bool", title: "Detailed Logging/Notifications?", required:
 				false
 		}
 		section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
