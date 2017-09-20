@@ -32,7 +32,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.4"}
+def get_APP_VERSION() {return "3.4.1"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -277,8 +277,8 @@ def otherSettings() {
 				false
 			input "phoneNumber", "phone", title: "Send a text message?", required: false
 		}
-		section("Detailed Notifications") {
-			input "detailedNotif", "bool", title: "Detailed Notifications?", required:
+		section("Detailed Logging/Notifications") {
+			input "detailedNotif", "bool", title: "Detailed Logging/Notifications?", required:
 				false
 		}
 		section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
