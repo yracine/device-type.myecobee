@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.9c"}
+def get_APP_VERSION() { return "3.4.9d"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -624,8 +624,11 @@ private def check_if_hold_needed() {
 			log.trace("check_if_hold_needed>some occupied indoor Sensors added for avg calculation")
 		}
 	}
-	def indoorTemps = [ecobeeTemp]
-	addAllTempsForAverage(indoorTemps)        
+	def indoorTemps = []
+	addAllTempsForAverage(indoorTemps)
+	if (indoorTemps == []) {
+		indoorTemps.add(ecobeeTemp)    
+	}    
 	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).round(1) // this is the avg indoor temp based on indoor sensors
 	if (detailedNotif) {
 		log.trace "check_if_hold_needed> location.mode = $location.mode"
@@ -862,8 +865,12 @@ private def check_if_hold_justified() {
 		log.trace("check_if_hold_justified>some occupied indoor Sensors added for avg calculation")
 	}
     
-	def indoorTemps = [ecobeeTemp]
+	def indoorTemps = []
+    
 	addAllTempsForAverage(indoorTemps)
+	if (indoorTemps==[]) {
+		indoorTemps.add(ecobeeTemp)
+	}
 	log.trace("check_if_hold_justified> temps count=${indoorTemps.size()}")
 	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).round(1) // this is the avg indoor temp based on indoor sensors
 
