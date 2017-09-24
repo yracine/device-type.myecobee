@@ -865,7 +865,7 @@ private def check_if_hold_justified() {
 		indoorTemps.add(ecobeeTemp)
 	}
 	log.trace("check_if_hold_justified> temps count=${indoorTemps.size()}")
-	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).round(1) // this is the avg indoor temp based on indoor sensors
+	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).toFloat().round(1) // this is the avg indoor temp based on indoor sensors
 
 	String ecobeeMode = ecobee.currentThermostatMode.toString()
 	if (detailedNotif) {    
