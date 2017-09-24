@@ -41,7 +41,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.9d"}
+def get_APP_VERSION() { return "3.4.9e"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -515,7 +515,7 @@ private def reset_state_program_values() {
 
 private def reset_state_tempSensors() {
 
-	state.tempSensors=[]	
+	state?.tempSensors=[]	
 	settings.tempSensors.each {
 // 	By default, the 'static' temp Sensors are the ones used for temp avg calculation
 //	Other 'occupied' sensors may be added dynamically when needed 
@@ -525,7 +525,7 @@ private def reset_state_tempSensors() {
 }
 
 private def reset_state_motions() {
-	state.motions=[]
+	state?.motions=[]
 	if (settings.motions) {
 		settings.motions.each {
 			state.motions.add(it.device.id)        
@@ -629,7 +629,7 @@ private def check_if_hold_needed() {
 	if (indoorTemps == []) {
 		indoorTemps.add(ecobeeTemp)    
 	}    
-	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).round(1) // this is the avg indoor temp based on indoor sensors
+	float avg_indoor_temp = (indoorTemps.sum() / indoorTemps.size()).toFloat().round(1) // this is the avg indoor temp based on indoor sensors
 	if (detailedNotif) {
 		log.trace "check_if_hold_needed> location.mode = $location.mode"
 		log.trace "check_if_hold_needed> ecobee Mode = $ecobeeMode"
@@ -693,13 +693,6 @@ private def check_if_hold_needed() {
 		}
 	} /* end if state.motions */
     
-	if ((location.mode.toUpperCase().contains('AWAY')) || (currentProgName.toUpperCase()=='SLEEP')) { 
-    
-    	// Do not adjust cooling or heating settings if ST mode == Away or Program Schedule at ecobee == SLEEP
-        
-		log.debug "ST mode is $location.mode, current program is $currentProgName, no adjustment required, exiting..."
-		return            
-	}   
     
 	if (ecobeeMode in ['cool','auto']) {
 		if (outdoorSensor) {    	
