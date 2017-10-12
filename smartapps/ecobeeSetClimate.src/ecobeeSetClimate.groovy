@@ -1,7 +1,7 @@
 /**
- *  ecobeeSetFanMinOnTime
+ *  ecobeeSetClimate
  *
- *  Copyright 2015 Yves Racine
+ *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -13,37 +13,64 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *
- *  Software Distribution is restricted and shall be done only with Developer's written approval.
+ * Software Distribution is restricted and shall be done only with Developer's written approval.
+ * 
+ * You may want to create multiple instances of this smartapp (and rename them in SmartSetup) for each time
+ * you want to set a different Climate at a given day and time during the week.*
  *
  *  N.B. Requires MyEcobee device available at 
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
  */
 definition(
-    name: "ecobeeSetFanMinOnTime",
-    namespace: "yracine",
-    author: "Yves Racine",
-    description: "ecobeeSetFanMinOnTime, the smartapp that sets your ecobee's fan to circulate for a minimum time (in minutes) per hour",
-    category: "My Apps",
-	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
+	name: "ecobeeSetClimate",
+	namespace: "yracine",
+	author: "Yves Racine",
+	description: "This script allows an ecobee user to set a Climate at a given day & time",
+	category: "My Apps",
+ 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
+
+
+
 preferences {
 
-
-	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
+	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
 		section("About") {
-			paragraph "ecobeeSetFanMinOnTime, the smartapp that sets your ecobee's fan to circulate for a minimum time (in minutes) per hour." 
-			paragraph "Version 1.3" 
+			paragraph "ecobeeSetClimate, the smartapp that sets your ecobee thermostat to a given climate at a given day & time"
+			paragraph "Version 1.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
-				href url: "https://www.paypal.me/ecomatiqhomes"
+				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
-			paragraph "Copyright©2015 Yves Racine"
+			paragraph "Copyright©2014 Yves Racine"
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
-		section("Change the following ecobee thermostat(s)...") {
-			input "thermostats", "device.myEcobeeDevice", title: "Which thermostat(s)", multiple: true
+		section("Set the ecobee thermostat(s)") {
+			input "ecobee", "device.myEcobeeDevice", title: "Which ecobee thermostat(s)?", multiple: true
+
 		}
+		section("Configuration") {
+			input "dayOfWeek", "enum",
+				title: "Which day of the week?",
+				multiple: false,
+				metadata: [
+					values: [
+						'All Week',
+						'Monday to Friday',
+						'Saturday & Sunday',
+						'Monday',
+						'Tuesday',
+						'Wednesday',
+						'Thursday',
+						'Friday',
+						'Saturday',
+						'Sunday'
+					]
+				]
+			input "begintime", "time", title: "Beginning time"
+		}
+
 	}
 	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
 	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: true) {
@@ -52,69 +79,132 @@ preferences {
 				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
 		}
-		section([mobileOnly:true]) {
+        	section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
+			mode title: "Set for specific mode(s)", required: false
 		}
 	}
 }
 
 
 def selectProgram() {
-    def ecobeePrograms = thermostats[0].currentClimateList.toString().minus('[').minus(']').tokenize(',')
+	def ecobeePrograms = ecobee.currentClimateList.toString().minus('[').minus(']').tokenize(',')
 	log.debug "programs: $ecobeePrograms"
 
-	return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage:
-			"Notifications") {
-		section("Select Program") {
-			input "givenClimate", "enum", title: "When change to this ecobee program?", options: ecobeePrograms, required: true
-		}
-		section("Set the minimum fan runtime per hour for this program [default: 10 min. per hour]") {
-			input "givenFanMinTime", "number", title: "Minimum fan runtime in minutes", required: false
-		}
 
-        
+	return dynamicPage(name: "selectProgram", title: "Select Ecobee Program", install: false, uninstall: true, nextPage:
+		"Notifications") {
+		section("Select Program") {
+			input "givenClimate", "enum", title: "Which program?", options: ecobeePrograms, required: true
+		}
 	}
 }
+
 
 
 def installed() {
-	subscribe(thermostats,"setClimateName",changeFanMinOnTime)    
-	subscribe(app, changeFanMinOnTime)
+	// subscribe to these events
+	initialize()
 }
 
 def updated() {
+	// we have had an update
+	// remove everything and reinstall
 	unsubscribe()
-	subscribe(thermostats,"setClimateName",changeFanMinOnTime)    
-	subscribe(app, changeFanMinOnTime)
+	unschedule()    
+	initialize()
 }
 
+def initialize() {
 
-def changeFanMinOnTime(evt) {
+	log.debug "Scheduling setClimate for day " + dayOfWeek + " at begin time " + begintime
+	subscribe(ecobee, "climateList", climateListHandler)
+
+	schedule(begintime, setClimate)
+	subscribe(app, setClimateNow)    
+
+}
+def climateListHandler(evt) {
+	log.debug "thermostat's Climates List: $evt.value, $settings"
+}
+
+def setClimateNow(evt) {
+	setClimate()
+}
+
+def setClimate() {
+	def climateName = (givenClimate ?: 'Home').capitalize()
 
 
-	if ((evt.value != givenClimate) && (evt.value != 'touch')) {
-		log.debug ("changeFanMinOnTime>not right climate (${evt.value}), doing nothing...")
-		return
-	}    
-	Integer min_fan_time = (givenFanMinTime != null) ? givenFanMinTime : 10 //  10 min. fan time per hour by default
-    
-	def message = "ecobeeSetFanMinOnTime>changing fanMinOnTime to ${min_fan_time} at ${thermostats}.."
-	send(message)
+	def doChange = IsRightDayForChange()
 
-	thermostats.each {
-		it?.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}"])
+	// If we have hit the condition to schedule this then lets do it
+
+	if (doChange == true) {
+		log.debug "setClimate, location.mode = $location.mode, newMode = $newMode, location.modes = $location.modes"
+
+		ecobee.each {
+			it.setThisTstatClimate(climateName)
+		}            
+		send("ecobeeSetClimate>set ${ecobee} to ${climateName} program as requested")
+	} else {
+		log.debug "climate change to ${climateName} not scheduled for today."
 	}
+	log.debug "End of Fcn"
 }
+
+
+def IsRightDayForChange() {
+
+	def makeChange = false
+	String currentDay = new Date().format("E", location.timeZone)
+    
+	// Check the condition under which we want this to run now
+	// This set allows the most flexibility.
+	if (dayOfWeek == 'All Week') {
+		makeChange = true
+	} else if ((dayOfWeek == 'Monday' || dayOfWeek == 'Monday to Friday') && currentDay == 'Mon') {
+		makeChange = true
+	} else if ((dayOfWeek == 'Tuesday' || dayOfWeek == 'Monday to Friday') && currentDay == 'Tue') {
+		makeChange = true
+	} else if ((dayOfWeek == 'Wednesday' || dayOfWeek == 'Monday to Friday') && currentDay == 'Wed') {
+		makeChange = true
+	} else if ((dayOfWeek == 'Thursday' || dayOfWeek == 'Monday to Friday') && currentDay == 'Thu') {
+		makeChange = true
+	} else if ((dayOfWeek == 'Friday' || dayOfWeek == 'Monday to Friday') &&  currentDay == 'Fri') {
+		makeChange = true
+	} else if ((dayOfWeek == 'Saturday' || dayOfWeek == 'Saturday & Sunday') && currentDay == 'Sat') {
+		makeChange = true
+	} else if ((dayOfWeek == 'Sunday' || dayOfWeek == 'Saturday & Sunday') && currentDay == 'Sun' ) {
+		makeChange = true
+	}
+
+
+	// some debugging in order to make sure things are working correclty
+	log.debug "Calendar DOW: " + currentDay
+	log.debug "SET DOW: " + dayOfWeek
+
+	return makeChange
+}
+
 
 private send(msg) {
 	if (sendPushMessage != "No") {
 		log.debug("sending push message")
 		sendPush(msg)
 	}
-	if (phone) {
+
+	if (phoneNumber) {
 		log.debug("sending text message")
-		sendSms(phone, msg)
+		sendSms(phoneNumber, msg)
 	}
 
 	log.debug msg
+}
+
+
+
+// catchall
+def event(evt) {
+	log.debug "value: $evt.value, event: $evt, settings: $settings, handlerName: ${evt.handlerName}"
 }
