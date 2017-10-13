@@ -33,7 +33,7 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeSetFanMinOnTime, the smartapp that sets your ecobee's fan to circulate for a minimum time (in minutes) per hour." 
-			paragraph "Version 1.3" 
+			paragraph "Version 1.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes"
 					title:"Paypal donation..."
@@ -78,15 +78,22 @@ def selectProgram() {
 
 
 def installed() {
-	subscribe(thermostats,"setClimate",changeFanMinOnTime)    
-	subscribe(app, changeFanMinOnTime)
+	initialize()
 }
 
 def updated() {
 	unsubscribe()
-	subscribe(thermostats,"setClimate",changeFanMinOnTime)    
-	subscribe(app, changeFanMinOnTime)
+	initialize()    
 }
+
+def initialize()  {
+	subscribe(thermostats,"setClimate",changeFanMinOnTime)    
+	subscribe(thermostats,"climateName",changeFanMinOnTime)    
+	subscribe(app, changeFanMinOnTime)
+
+
+}
+
 
 
 def changeFanMinOnTime(evt) {
@@ -107,7 +114,7 @@ def changeFanMinOnTime(evt) {
 }
 
 private send(msg) {
-	if (sendPushMessage != "No") {
+	if (sendPushMessage == "Yes") {
 		log.debug("sending push message")
 		sendPush(msg)
 	}
