@@ -104,6 +104,7 @@ Refer to the ST community wiki, most of the use cases are documented with the in
 http://thingsthataresmart.wiki/index.php?title=ScheduleRoomTempControl#Prerequisites
 http://thingsthataresmart.wiki/index.php?title=ScheduleRoomTempControl#Configuration
 
+
 TROUBLESHOOTING
 =====================
 
