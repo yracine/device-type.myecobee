@@ -1,7 +1,11 @@
 ScheduleTstatZones
+
 Author: Yves Racine
+
 Email: services@maisonsecomatiq.com
+
 linkedIn profile: https://www.linkedin.com/in/yracine/
+
 Installation Setup time: about 5-10 minutes depending on your ST skills.
 
 
@@ -90,7 +94,8 @@ f) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 # 3) Under the ST app, execute ScheduleTstatZones
 
-If you don't see the smartapp, you probably installed it under the wrong shard. Please refer to the prerequisites above.
+
+If you don't see the smartapp, you probably installed it under the wrong shard or it's not been "published" in the IDE. Please refer to the prerequisites above.
 
 - Click on the Smartapps link in the upper section of the following Marketspace screen (last icon at the bottom), and then MyApps (last item in the list).
 
