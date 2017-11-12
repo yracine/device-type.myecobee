@@ -12,7 +12,7 @@ Installation Setup time: about 5-10 minutes depending on your ST skills.
 PREREQUISITES
 =====================
 
-- (a) Your ecobee thermostat fully operational (and connected to wifi)
+- (a) Your ecobee thermostat and slave thermostats (if any) fully operational (and connected to ST)
 - (b) My Ecobee device installed & fully operational
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
 - (d) Location set for your ST account  
