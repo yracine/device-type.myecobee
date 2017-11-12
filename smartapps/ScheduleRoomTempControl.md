@@ -67,7 +67,7 @@ e) Hit the create button at the bottom
 
 f) Hit the "publish/for me" button at the top right corner (in the code window)
 
-N.B. <b> In the step #2 below, for each zone that you want to expose as a virtual zone under ST, you'd need to
+N.B. <b> In the step #3 below, for each zone that you want to expose as a virtual zone under ST, you'd need to
 indicate it using the appropriate flag in ZonesSetup when you configure ScheduleTstatZones.
 
 If the virtual zones are not responsive to any commands (i.e., set target temp delta, make the zone active/inactive, switch to turn on/off vents in the zone) issued from the new virtual Zone device(s), just go back to ecobeeSetZoneWithSchedule under Automation/Smartapps in the ST mobile app and check your configuration again (rooms->zones->schedules->Notifications) till the final page and press done (to register the new events handler in the smartapp).</b>
