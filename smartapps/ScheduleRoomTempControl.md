@@ -1,8 +1,13 @@
 ScheduleRoomTempControl
+========================
+
 Author: Yves Racine
+
 Email: services@maisonsecomatiq.com
+
 linkedIn profile: https://www.linkedin.com/in/yracine/
-Installation Setup time: about 5-10 minutes depending on your ST skills.
+
+\Installation Setup time: about 5-10 minutes depending on your ST skills.
 
 
 PREREQUISITES
