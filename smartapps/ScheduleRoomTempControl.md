@@ -8,7 +8,7 @@ Installation Setup time: about 5-10 minutes depending on your ST skills.
 PREREQUISITES
 =====================
 
-- (a) Your master thermostat and slave thermostat(s) fully operational (and connected to wifi)
+- (a) Your thermostat fully operational (and connected to ST)
 - (b) (Optional) If ecobee thermostat used, my Ecobee device installed & fully operational
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
 - (d) Location set for your ST account  
@@ -17,10 +17,7 @@ Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in t
 
 https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
 
--  (e) <b> Determine your shard, please consult this thread: </b> 
-
-
-https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
+-  (e) <b> Determine your shard, please consult this thread: </bmartthings.com/t-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
 
 Or the SmartThings documentation here:
 
