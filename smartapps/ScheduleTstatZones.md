@@ -1,4 +1,4 @@
-ecobeeSetZoneWithSchedule
+ScheduleTstatZones
 Author: Yves Racine
 Email: services@maisonsecomatiq.com
 linkedIn profile: https://www.linkedin.com/in/yracine/
@@ -117,4 +117,4 @@ If needed, there are several support packages at my store.
 
 www.ecomatiqhomes.com/store
 
-Regards.
+
