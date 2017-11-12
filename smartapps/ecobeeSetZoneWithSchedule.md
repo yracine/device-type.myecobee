@@ -17,7 +17,7 @@ Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in t
 
 https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
 
--  (e) Determine your shard, please consult this thread:
+-  (e) <b> Determine your shard, please consult this thread: </b> 
 
 
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
@@ -65,10 +65,10 @@ e) Hit the create button at the bottom
 
 f) Hit the "publish/for me" button at the top right corner (in the code window)
 
-N.B. For each zone that you want to expose as a virtual zone under ST, you'd need to
+N.B. <b> For each zone that you want to expose as a virtual zone under ST, you'd need to
 indicate it in ZonesSetup when you configure ecobeeSetZoneWithSchedule.
 
-If the virtual zones are not responsive to any commands (i.e., set target temp delta, make the zone active/inactive, switch to turn on/off vents in the zone) issued from the new virtual Zone device(s), just go back to ecobeeSetZoneWithSchedule under Automation/Smartapps in the ST mobile app and check your configuration again (rooms->zones->schedules->Notifications) till the final page and press done.
+If the virtual zones are not responsive to any commands (i.e., set target temp delta, make the zone active/inactive, switch to turn on/off vents in the zone) issued from the new virtual Zone device(s), just go back to ecobeeSetZoneWithSchedule under Automation/Smartapps in the ST mobile app and check your configuration again (rooms->zones->schedules->Notifications) till the final page and press done.</b>
 
 
 # 2) Create a new smartapp (ecobeeSetZoneWithSchedule)
