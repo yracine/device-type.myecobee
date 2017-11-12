@@ -35,7 +35,7 @@ replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-usea
 Or use  https://consigliere-regional.api.smartthings.com/ to point to the right shard.
 
 
-=====================
+
 INSTALLATION STEPS
 =====================
 
@@ -97,18 +97,17 @@ If you don't see the smartapp, you probably installed it under the wrong shard. 
 
 CONFIGURATION STEPS
 =====================
+
 Refer to the ST community wiki, most of the use cases are documented with the input parameters needed.
 
 http://thingsthataresmart.wiki/index.php?title=EcobeeSetZoneWithSchedule#Prerequisites
 http://thingsthataresmart.wiki/index.php?title=EcobeeSetZoneWithSchedule#Configuration
 
-=====================
 TROUBLESHOOTING
 =====================
 
 http://thingsthataresmart.wiki/index.php?title=EcobeeSetZoneWithSchedule#Troubleshooting
 
-=========
 SUPPORT
 ========
 
