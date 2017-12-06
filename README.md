@@ -65,6 +65,13 @@ replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-usea
 Or use  https://consigliere-regional.api.smartthings.com/ to point to the right shard.
 
 
+-  (f) <b>To avoid confusion, remove EcobeeConnect</b>
+
+If you have installed EcobeeConnect before (stock ST device), remove the smartapp and related device(s) to
+avoid any confusion with My Ecobee Device. Both devices can run in parallel as they are totally distinct in their
+design & implementation.
+
+
 INSTALLATION STEPS
 =====================
 
