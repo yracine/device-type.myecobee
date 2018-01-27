@@ -80,7 +80,7 @@ INSTALLATION STEPS
 # 1) Create a new device Handler (My Ecobee Device)
 
 
-a) Go to https://graph.api.smartthings.com/ide/devices
+a) Go to https://graph.api.smartthings.com/ide/devices   (or whatever your shard is)
 
 b) Hit the "+New Device Handler" at the top right corner
 
@@ -101,7 +101,7 @@ f) Hit the "publish/for me" button at the top right corner (in the code window)
 # 2) Create a new smartapp (My ecobee Init)
 
 
-a) Go to https://graph.api.smartthings.com/ide/apps
+a) Go to https://graph.api.smartthings.com/ide/apps    (or whatever your shard is)
 
 b) Hit the "+New SmartApp" at the top right corner
 
@@ -154,7 +154,7 @@ If you get a blank screen after pressing 'Next or you get the following error: "
 
 You should see your device under
 
-https://graph.api.smartthings.com/device/list
+https://graph.api.smartthings.com/device/list   (or whatever your shard is)
 
 And
 
@@ -172,7 +172,7 @@ You may want to stop and restart your smartthings app if needed.
 # 7) (Optional) Set device's preferences 
 
 
-a) Go to https://graph.api.smartthings.com/device/list
+a) Go to https://graph.api.smartthings.com/device/list    (or whatever your shard is)
 
 b) Click on the My ecobee device that you just created
 
