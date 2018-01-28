@@ -135,7 +135,8 @@ g) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
 
-Go through the authentication process using My ecobee Init.
+Go through the authentication process using My ecobee Init. To do so, please press on the "ecobee> Required" button in the middle of
+the screen.
 
 If needed, watch "how to setup ecobee" video (but use My ecobee Init instead of the Smarttings labs script) as the authentication process is similar.
 
