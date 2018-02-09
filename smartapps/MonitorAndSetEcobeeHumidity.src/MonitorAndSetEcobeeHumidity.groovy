@@ -32,7 +32,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.4.1"}
+def get_APP_VERSION() {return "3.4.2"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -135,7 +135,7 @@ def dashboardPage() {
 					dParagraph=  dParagraph +                   
 					"OudoorHumidity: $outdoorHumidity%\n" +
 					"OudoorTemp: ${outdoorTemp}$scale\n" +
-					"NormalizedOutHumidity: $corrOutdoorHum%\n" 
+					"NormalizedOutHumidity: $corrOutdoorHum%\n" +
 					"IdealIndoorHumidity: $idealIndoorHum%\n" 
 				}
 				paragraph dParagraph 
