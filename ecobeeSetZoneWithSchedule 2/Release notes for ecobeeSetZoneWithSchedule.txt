@@ -1,0 +1,7 @@
+2018-01-05 v8.1.4 Added the ability to send 'eco' command to slave thermostats which support the command.
+2018-01-18 v8.2 correction to zone's delta temp application against the zone's setpoints
+2018-01-18 v8.2.1 corrected minor issues related to the max number of zones in ScheduleSetup
+2018-01-19 v8.2.2 Minor changes in tracing
+2018-01-29 v8.2.3 Minor change related to state?.lastScheduleName
+2018-02-03 v1.0.4 Virtual Zone DTH: added missing blank labels in up and down arrow tiles
+2018-02-12 v8.2.4 Minor change in check_use_alternative_cooling: use of coolingSetpoint at the thermostat

@@ -1,0 +1,23 @@
+2017-12-04 v5.9.9o Made some minor changes to save the tokens in data auth structure in multi-threading context
+
+2017-12-09 v5.9.9p Minor change in tracing/logging
+
+2017-12-11 v5.9.9r Minor changes in datatypes
+
+2017-12-18 v5.9.9s Added some features to be able to "replay" any relevant commands following any ST or ecobee outage over a period of an hour.
+
+017-12-19 v5.9.9t corrected "replay" logic for setters (resumeProgram, setThermostatSettings, setHold, createVacation, deleteVacation, setClimate) to be able to
+process more 'pending' commands (up to ten commands).
+
+2017-12-23 v5.9.9u Minor change to saved tile value in automatic mode
+
+2017-12-26 v5.9.9v Made some minor changes in case of outage (simplified error checking).  
+
+2017-12-28 v5.9.9w Made some minor changes in refresh_thermostat() to avoid numberFormatException   
+
+2018-01-05 v5.9.9x Made some minor changes in replay method to reset the replay buffer, use of thermostatSupportedModes for switchMode() routine in UI
+
+2018-01-07 v5.9.9y Added logic to produce summary report via Ask Alexa (last page of My ecobee Init), need to set Ask Alexa flag to true to produce Reports.
+                   For this feature, you'd need to update MyEcobee Device (v5.9.9y) and MyEcobeeInit (v3.4).
+
+2018-02-15 v5.9.9y.1 Minor UI changes for iOS since v2.14.0 of ST mobile app.
