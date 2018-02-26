@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5" 
+		paragraph "Version 2.5.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -504,7 +504,7 @@ def takeAction(indice=0) {
 		if ((tstats) && (openMinutesCount >= max_open_time_in_min)) {
 			set_tstats_off_or_away(max_open_time_in_min)			
 		}
-		if ((!tstats) && (state.count[indice] > maxNotif) && (!settings.awayFlag)) {
+		if (((!tstats) || (settings.awayFlag)) && (state.count[indice] > maxNotif) ) {
 			// stop the repeated notifications if there is no thermostats to be turned off and we've reached maxNotif
 			clearStatus(indice)
 			takeActionMethod= "takeAction${indice}"       
