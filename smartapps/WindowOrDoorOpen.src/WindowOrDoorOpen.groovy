@@ -640,7 +640,7 @@ private void restore_tstats_mode() {
 				theSpeaker*.playText(msg)
 			}
 		} 
-        if (settings.awayFlag) {  // set to present
+		if (settings.awayFlag) {  // set to present
 			it.present()				            
 			msg = "thermostat ${it}'s mode is now set back to present"
 			send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
