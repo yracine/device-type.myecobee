@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.3" 
+		paragraph "Version 2.5.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -634,7 +634,6 @@ private void restore_tstats_mode() {
 				it.off()
 			}
 			tstatList = tstatList + it + ' '            
-			send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
 			if (settings.awayFlag) {  // set to present
 				try {       
 					it.present()				            
@@ -648,6 +647,7 @@ private void restore_tstats_mode() {
 	}        
 	if (tstatList) {
 		msg = "thermostats $tstatList mode are now set back to their original mode"
+		send("WindowOrDoorOpen>${theSensor} closed,$msg")
 		runIn(10, "speak_voice_message_restore_tstats",  [data: [message:msg]])       // use of runIn to avoid conflict with closed door message     	
 	}        
 	state.lastThermostatMode = ""
