@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.1" 
+		paragraph "Version 2.5.2" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -102,7 +102,6 @@ def initialize() {
 			return       
 		}        
 	}  
-
 }
 
 def sensorTriggered0(evt) {
@@ -250,7 +249,6 @@ def sensorTriggered28(evt) {
 	sensorTriggered(evt,i)    
 }
 
-
 def sensorTriggered29(evt) {
 	int i=29
 	sensorTriggered(evt,i)    
@@ -266,11 +264,11 @@ def sensorTriggered(evt, indice=0) {
 		restore_tstats_mode()
 		def msg = "your ${theSensor[indice]} is now closed"
 		send("WindowOrDoorOpen>${msg}")
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
+		if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
 			theVoice*.setLevel(30)
 			theVoice*.speak(msg)
 		}
-		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
+		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
 			theSpeaker*.setLevel(30)
 			theSpeaker*.playText(msg)
 		}
@@ -492,13 +490,20 @@ def takeAction(indice=0) {
 			log.debug "master switch ${masterSwitch} is now off"
 			masterSwitch.off() // set the master switch to off as there is an open contact        
 		}        
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-			theVoice*.setLevel(30)
-			theVoice*.speak(msg)
+		if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
+			try {            
+				theVoice*.setLevel(30)
+				theVoice*.speak(msg)
+			} catch (e) {
+				log.error ("takeAction>cannot speak $msg, exception $e" )                
+			}                
 		}
-		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-			theSpeaker*.setLevel(30)
-			theSpeaker*.playText(msg)
+		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
+			try {            
+				theSpeaker*.playText(msg)
+			} catch (e) {
+				log.error ("takeAction>cannot playText $msg, exception $e" )                
+			}                
 		}
 
 		if ((tstats) && (openMinutesCount >= max_open_time_in_min)) {
@@ -534,42 +539,63 @@ def clearStatus(indice=0) {
 
 private void set_tstats_off_or_away(max_open_time_in_min) {
 	def msg
-
+	def tstatList=""
+	save_tstats_mode() 
 	if (!settings.awayFlag) {             
-		save_tstats_mode() 
 		tstats.each { 
-			try {                 
-				it.off()                
+			it.poll()        
+			def currentMode= it.currentThermostatMode            
+			try {
+				if (currentMode != 'off') {                
+					it.off()                
+					tstatList=tstatList + it + ' '
+				}                    
 			} catch (e) { 
 				msg = "cannot turn $it off, exception $e"
 				send("WindowDoorOpen>${msg}")
 			}
 		}
-		msg = "thermostats are now turned off after ${max_open_time_in_min} minutes"	
+		if (tstatList) msg = "thermostats $tstatList are now turned off after ${max_open_time_in_min} minutes"	
 	} else {
 		tstats.each {
-			try {         
-				if (it.hasCommand("eco")) {
+			it.poll()        
+			def currentMode= it.currentThermostatMode            
+			def currentPresence= it.currentValue("presence")            
+			try {   
+				if ((it.hasCommand("eco")) && (currentMode != 'eco')) {
 					it.eco()                
-				} else {
+					tstatList=tstatList + it + ' '
+				}                    
+				if ((!it.hasCommand("eco")) && (currentPresence != 'non present')) {
 					it.away()                
+					tstatList=tstatList + it + ' '                
 				}
 			} catch (e) { 
    				msg = "cannot set $it to eco or away, exception $e"
 				send("WindowDoorOpen>${msg}")
 			}
 		}
-		msg = "thermostats are now set to eco or away after ${max_open_time_in_min} minutes"
+		if (tstatList) msg = "thermostats $tstatList are now set to eco or away after ${max_open_time_in_min} minutes"
 	}
-	send("WindowDoorOpen>${msg}")
-	if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-		theVoice*.setLevel(30)
-		theVoice*.speak(msg)
-	}
-	if ((theSpeaker) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-		theSpeaker*.setLevel(30)
-		theSpeaker*.playText(msg)
-	}
+	if (msg) {    
+		send("WindowDoorOpen>${msg}")
+		if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
+			try {        
+				theVoice*.setLevel(30)
+				theVoice*.speak(msg)
+			} catch (e) {
+				log.error ("set_tstats_off_or_away>cannot speak $msg, exception $e" )                
+			}            
+		}
+		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
+			try {        
+				theSpeaker*.setLevel(30)
+				theSpeaker*.playText(msg)
+			} catch (e) {
+				log.error ("set_tstats_off_or_away>cannot playText $msg, exception $e" )                
+			}            
+		}
+	}        
 }
 
 
@@ -633,23 +659,46 @@ private void restore_tstats_mode() {
 			}
 			msg = "thermostat ${it}'s mode is now set back to ${lastSavedMode}"
 			send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
-			if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-				theVoice*.speak(msg)
+			if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
+				try {            
+					theVoice*.speak(msg)
+				} catch (e) {
+					log.error ("restore_tstats_mode>cannot speak $msg, exception $e" )                
+				}                
+					                    
 			}
-			if ((theSpeaker) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-				theSpeaker*.playText(msg)
+			if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
+				try {            
+					theSpeaker*.playText(msg)
+				} catch (e) {
+					log.error ("restore_tstats_mode>cannot playText $msg, exception $e" )                
+				}                
 			}
 		} 
 		if (settings.awayFlag) {  // set to present
-			it.present()				            
-			msg = "thermostat ${it}'s mode is now set back to present"
-			send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
-			if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-				theVoice.speak(msg)
+			try {       
+				it.present()				            
+				msg = "thermostat ${it}'s mode is now set back to present"
+				send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
+			} catch (e)  {
+				log.error "restore_tstats_mode>thermostat $it cannot be set back to present"       
+			} 
+/*            
+			if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
+				try {            
+					theSpeaker*.playText(msg)
+				} catch (e) {
+					log.error ("restore_tstats_mode>cannot playText $msg, exception $e" )                
+				}                
 			}
-			if ((theSpeaker) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-				theSpeaker*.playText(msg)
+			if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
+				try {            
+					theSpeaker*.playText(msg)
+				} catch (e) {
+					log.error ("restore_tstats_mode>cannot playText $msg, exception $e" )                
+				}                
 			}
+*/            
 		}
             
 		i++
