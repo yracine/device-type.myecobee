@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.2" 
+		paragraph "Version 2.5.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -486,29 +486,17 @@ def takeAction(indice=0) {
 		def openMinutesCount = state.count[indice] * delay
 		msg = "your ${theSensor[indice]} has been open for more than ${openMinutesCount} minute(s)!"
 		send("WindowOrDoorOpen>${msg}")
-		if ((masterSwitch) && (masterSwitch?.currentSwitch=="on")) {
-			log.debug "master switch ${masterSwitch} is now off"
-			masterSwitch.off() // set the master switch to off as there is an open contact        
-		}        
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
-			try {            
-				theVoice*.setLevel(30)
-				theVoice*.speak(msg)
-			} catch (e) {
-				log.error ("takeAction>cannot speak $msg, exception $e" )                
-			}                
-		}
-		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
-			try {            
-				theSpeaker*.playText(msg)
-			} catch (e) {
-				log.error ("takeAction>cannot playText $msg, exception $e" )                
-			}                
-		}
+//		runIn(10, "speak_voice_message",  [data: [message:msg]])            	
+		speak_voice_message(msg)
 
 		if ((tstats) && (openMinutesCount >= max_open_time_in_min)) {
 			set_tstats_off_or_away(max_open_time_in_min)			
-		}
+			if ((masterSwitch) && (masterSwitch?.currentSwitch=="on")) {
+				log.debug "master switch ${masterSwitch} is now off"
+				masterSwitch.off() // set the master switch to off as there's been an open contact for quite a long time now        
+			}        
+		}	
+
 		if (((!tstats) || (settings.awayFlag)) && (state.count[indice] > maxNotif) ) {
 			// stop the repeated notifications if there is no thermostats to be turned off and we've reached maxNotif
 			clearStatus(indice)
@@ -579,22 +567,9 @@ private void set_tstats_off_or_away(max_open_time_in_min) {
 	}
 	if (msg) {    
 		send("WindowDoorOpen>${msg}")
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
-			try {        
-				theVoice*.setLevel(30)
-				theVoice*.speak(msg)
-			} catch (e) {
-				log.error ("set_tstats_off_or_away>cannot speak $msg, exception $e" )                
-			}            
-		}
-		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
-			try {        
-				theSpeaker*.setLevel(30)
-				theSpeaker*.playText(msg)
-			} catch (e) {
-				log.error ("set_tstats_off_or_away>cannot playText $msg, exception $e" )                
-			}            
-		}
+//		runIn(10, "speak_voice_message",  [data: [message:msg]])            	
+		speak_voice_message(msg)
+
 	}        
 }
 
@@ -616,6 +591,7 @@ private void save_tstats_mode() {
 private void restore_tstats_mode() {
 	def msg
 	def MAX_CONTACT=30
+	def tstatList=""
     
 	log.debug "restore_tstats_mode>checking if all contacts are closed..."
 	for (int j = 0;(j < MAX_CONTACT); j++)  {
@@ -634,7 +610,7 @@ private void restore_tstats_mode() {
 	if (!tstats) {
 		return    
 	}    
-	def lastThermostatMode
+	def lastThermostatMode=null
 	if (state.lastThermostatMode) {
 		 lastThermostatMode= state.lastThermostatMode.toString().split(',')
 	}    
@@ -657,56 +633,51 @@ private void restore_tstats_mode() {
 			} else {
 				it.off()
 			}
-			msg = "thermostat ${it}'s mode is now set back to ${lastSavedMode}"
+			tstatList = tstatList + it + ' '            
 			send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
-			if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
-				try {            
-					theVoice*.speak(msg)
-				} catch (e) {
-					log.error ("restore_tstats_mode>cannot speak $msg, exception $e" )                
-				}                
-					                    
+			if (settings.awayFlag) {  // set to present
+				try {       
+					it.present()				            
+				} catch (e)  {
+					log.error "restore_tstats_mode>thermostat $it cannot be set back to present"       
+				} 
 			}
-			if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
-				try {            
-					theSpeaker*.playText(msg)
-				} catch (e) {
-					log.error ("restore_tstats_mode>cannot playText $msg, exception $e" )                
-				}                
-			}
-		} 
-		if (settings.awayFlag) {  // set to present
-			try {       
-				it.present()				            
-				msg = "thermostat ${it}'s mode is now set back to present"
-				send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
-			} catch (e)  {
-				log.error "restore_tstats_mode>thermostat $it cannot be set back to present"       
-			} 
-/*            
-			if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
-				try {            
-					theSpeaker*.playText(msg)
-				} catch (e) {
-					log.error ("restore_tstats_mode>cannot playText $msg, exception $e" )                
-				}                
-			}
-			if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
-				try {            
-					theSpeaker*.playText(msg)
-				} catch (e) {
-					log.error ("restore_tstats_mode>cannot playText $msg, exception $e" )                
-				}                
-			}
-*/            
-		}
             
+		} 
 		i++
+	}        
+	if (tstatList) {
+		msg = "thermostats $tstatList mode are now set back to their original mode"
+		runIn(10, "speak_voice_message_restore_tstats",  [data: [message:msg]])       // use of runIn to avoid conflict with closed door message     	
 	}        
 	state.lastThermostatMode = ""
 }
 
+private void speak_voice_message_restore_tstats(data) {
+	def msg=data.message
+	speak_voice_message(msg)
+}
 
+private void speak_voice_message(msg) {
+
+	log.debug ("speak_voice_message>about to speak $msg")
+	if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
+		try {            
+			theVoice*.speak(msg)
+		} catch (e) {
+			log.error ("speak_voice_message>cannot speak $msg, exception $e" )                
+		}                
+					                    
+	}
+	if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
+		try {            
+			theSpeaker*.playText(msg)
+		} catch (e) {
+			log.error ("speak_voice_message>cannot playText $msg, exception $e" )                
+		}                
+	}
+	log.debug ("speak_voice_message>end")
+}
 
 private send(msg) {
 	if (sendPushMessage != "No") {
