@@ -1,5 +1,5 @@
 /**
- *  WindowOrDoorOpen!
+ *  WindowOrDoorOpen
  *
  *  Copyright 2014 Yves Racine 
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
@@ -15,7 +15,7 @@
  *
  * Software Distribution is restricted and shall be done only with Developer's written approval.
  * 
- * Compatible with MyEcobee device available at my store:
+ * Compatible with MyEcobee & MyNextTstat devices available at my store:
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
  *
  */
@@ -32,9 +32,9 @@ definition(
 preferences {
 	section("About") {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
-			"it will turn off your thermostats (optional) after a delay and restore their mode when the contact is closed." +
+			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.4.3" 
+		paragraph "Version 2.5.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -49,17 +49,19 @@ preferences {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 		input "phone", "phone", title: "Send a Text Message?", required: false
 		input "frequency", "number", title: "Delay between notifications in minutes", description: "", required: false
-		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "Only used if no thermostat is provided as input", required: false
+		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "Apply only if no thermostat is provided as input", required: false
 	}
 	section("Use Speech capability to warn the residents [optional]") {
-		input "theVoice", "capability.speechSynthesis", required: false, multiple: true
+		input "theVoice", "capability.speechSynthesis", title: "Announce with these text-to-speech devices (speechSynthesis)", required: false, multiple: true
+		input "theSpeaker", "capability.musicPlayer", title: "Announce with these text-to-speech devices (musicPlayer)", required: false, multiple: true
 		input "powerSwitch", "capability.switch", title: "On/off switch for Voice notifications? [optional]", required: false
 	}
 	section("And, when contact is left open for more than this delay in minutes [default=5 min.]") {
 		input "maxOpenTime", "number", title: "Minutes?", required:false
 	}
-	section("Turn off the thermostat(s) after the delay;revert this action when closed [optional]") {
-		input "tstats", "capability.thermostat", multiple: true, required: false
+	section("Turn off the thermostat(s) or set them to eco/away after the delay;revert this action when closed [optional]") {
+		input "tstats", "capability.thermostat", title:"Which thermostat(s)?", multiple: true, required: false
+		input "awayFlag", "bool", title: "Set the thermostat(s) to eco/away instead of turning it off  [default= off]?", required: false
 	}
 	section("What do I use as the Master on/off switch to enable/disable other smartapps' processing? [optional,ex.for zoned heating/cooling solutions]") {
 		input (name:"masterSwitch", type:"capability.switch", required: false, description: "Optional")
@@ -100,7 +102,6 @@ def initialize() {
 			return       
 		}        
 	}  
-
 }
 
 def sensorTriggered0(evt) {
@@ -248,7 +249,6 @@ def sensorTriggered28(evt) {
 	sensorTriggered(evt,i)    
 }
 
-
 def sensorTriggered29(evt) {
 	int i=29
 	sensorTriggered(evt,i)    
@@ -264,9 +264,13 @@ def sensorTriggered(evt, indice=0) {
 		restore_tstats_mode()
 		def msg = "your ${theSensor[indice]} is now closed"
 		send("WindowOrDoorOpen>${msg}")
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-			theVoice.setLevel(30)
-			theVoice.speak(msg)
+		if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
+			theVoice*.setLevel(30)
+			theVoice*.speak(msg)
+		}
+		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
+			theSpeaker*.setLevel(30)
+			theSpeaker*.playText(msg)
 		}
 		clearStatus(indice)
 	} else if ((evt.value == "open") && (state?.status[indice] != "scheduled")) {
@@ -482,25 +486,19 @@ def takeAction(indice=0) {
 		def openMinutesCount = state.count[indice] * delay
 		msg = "your ${theSensor[indice]} has been open for more than ${openMinutesCount} minute(s)!"
 		send("WindowOrDoorOpen>${msg}")
-		if ((masterSwitch) && (masterSwitch?.currentSwitch=="on")) {
-			log.debug "master switch ${masterSwitch} is now off"
-			masterSwitch.off() // set the master switch to off as there is an open contact        
-		}        
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-			theVoice.setLevel(30)
-			theVoice.speak(msg)
-		}
+//		runIn(10, "speak_voice_message",  [data: [message:msg]])            	
+		speak_voice_message(msg)
 
-		if ((tstats) && (openMinutesCount > max_open_time_in_min)) {
-						        
-			save_tstats_mode()        
-			tstats.off()
-			            
-			msg = "thermostats are now turned off after ${max_open_time_in_min} minutes"
-			send("WindowDoorOpen>${msg}")
-		}
-		if ((!tstats) && (state.count[indice] > maxNotif)) {
-			// stop the repeated notifications if there is no thermostats provided and we've reached maxNotif
+		if ((tstats) && (openMinutesCount >= max_open_time_in_min)) {
+			set_tstats_off_or_away(max_open_time_in_min)			
+			if ((masterSwitch) && (masterSwitch?.currentSwitch=="on")) {
+				log.debug "master switch ${masterSwitch} is now off"
+				masterSwitch.off() // set the master switch to off as there's been an open contact for quite a long time now        
+			}        
+		}	
+
+		if (((!tstats) || (settings.awayFlag)) && (state.count[indice] > maxNotif) ) {
+			// stop the repeated notifications if there is no thermostats to be turned off and we've reached maxNotif
 			clearStatus(indice)
 			takeActionMethod= "takeAction${indice}"       
 			unschedule("${takeActionMethod}")
@@ -527,6 +525,54 @@ def clearStatus(indice=0) {
 	state?.count[indice] = 0
 }
 
+private void set_tstats_off_or_away(max_open_time_in_min) {
+	def msg
+	def tstatList=""
+	save_tstats_mode() 
+	if (!settings.awayFlag) {             
+		tstats.each { 
+			it.poll()        
+			def currentMode= it.currentThermostatMode            
+			try {
+				if (currentMode != 'off') {                
+					it.off()                
+					tstatList=tstatList + it + ' '
+				}                    
+			} catch (e) { 
+				msg = "cannot turn $it off, exception $e"
+				send("WindowDoorOpen>${msg}")
+			}
+		}
+		if (tstatList) msg = "thermostats $tstatList are now turned off after ${max_open_time_in_min} minutes"	
+	} else {
+		tstats.each {
+			it.poll()        
+			def currentMode= it.currentThermostatMode            
+			def currentPresence= it.currentValue("presence")            
+			try {   
+				if ((it.hasCommand("eco")) && (currentMode != 'eco')) {
+					it.eco()                
+					tstatList=tstatList + it + ' '
+				}                    
+				if ((!it.hasCommand("eco")) && (currentPresence != 'non present')) {
+					it.away()                
+					tstatList=tstatList + it + ' '                
+				}
+			} catch (e) { 
+   				msg = "cannot set $it to eco or away, exception $e"
+				send("WindowDoorOpen>${msg}")
+			}
+		}
+		if (tstatList) msg = "thermostats $tstatList are now set to eco or away after ${max_open_time_in_min} minutes"
+	}
+	if (msg) {    
+		send("WindowDoorOpen>${msg}")
+//		runIn(10, "speak_voice_message",  [data: [message:msg]])            	
+		speak_voice_message(msg)
+
+	}        
+}
+
 
 private void save_tstats_mode() {
 
@@ -545,6 +591,7 @@ private void save_tstats_mode() {
 private void restore_tstats_mode() {
 	def msg
 	def MAX_CONTACT=30
+	def tstatList=""
     
 	log.debug "restore_tstats_mode>checking if all contacts are closed..."
 	for (int j = 0;(j < MAX_CONTACT); j++)  {
@@ -563,40 +610,74 @@ private void restore_tstats_mode() {
 	if (!tstats) {
 		return    
 	}    
-
+	def lastThermostatMode=null
 	if (state.lastThermostatMode) {
-		def lastThermostatMode = state.lastThermostatMode.toString().split(',')
-		int i = 0
-        
-		tstats.each {
-			def lastSavedMode = lastThermostatMode[i].trim()
-			if (lastSavedMode) {
-				log.debug "restore_tstats_mode>about to set ${it}, back to saved thermostatMode=${lastSavedMode}"
-				if (lastSavedMode == 'cool') {
-					it.cool()
-				} else if (lastSavedMode.contains('heat')) {
-					it.heat()
-				} else if (lastSavedMode == 'auto') {
-					it.auto()
-				} else if (lastSavedMode == 'eco') {
-					it.eco()
-				} else {
-					it.off()
-				}
-				msg = "thermostat ${it}'s mode is now set back to ${lastSavedMode}"
-				send("WindowOrDoorOpen>${theSensor} closed, ${msg}")
-				if ((theVoice) && (powerSwitch?.currentSwitch == "on")) { //  Notify by voice only if the powerSwitch is on
-					theVoice.speak(msg)
-				}
-                
+		 lastThermostatMode= state.lastThermostatMode.toString().split(',')
+	}    
+	int i = 0
+	tstats.each {
+		def lastSavedMode= null
+		if (lastThermostatMode) {        
+			lastSavedMode = lastThermostatMode[i].trim()
+		}    
+		if (lastSavedMode) {
+			log.debug "restore_tstats_mode>about to set ${it}, back to saved thermostatMode=${lastSavedMode}"
+			if (lastSavedMode == 'cool') {
+				it.cool()
+			} else if (lastSavedMode.contains('heat')) {
+				it.heat()
+			} else if (lastSavedMode == 'auto') {
+				it.auto()
+			} else if (lastSavedMode == 'eco') {
+				it.eco()
+			} else {
+				it.off()
 			}
-			i++
-		}
+			tstatList = tstatList + it + ' '            
+			if (settings.awayFlag) {  // set to present
+				try {       
+					it.present()				            
+				} catch (e)  {
+					log.error "restore_tstats_mode>thermostat $it cannot be set back to present"       
+				} 
+			}
+            
+		} 
+		i++
+	}        
+	if (tstatList) {
+		msg = "thermostats $tstatList mode are now set back to their original mode"
+		send("WindowOrDoorOpen>${theSensor} closed,$msg")
+		runIn(10, "speak_voice_message_restore_tstats",  [data: [message:msg]])       // use of runIn to avoid conflict with closed door message     	
 	}        
 	state.lastThermostatMode = ""
 }
 
+private void speak_voice_message_restore_tstats(data) {
+	def msg=data.message
+	speak_voice_message(msg)
+}
 
+private void speak_voice_message(msg) {
+
+	log.debug ("speak_voice_message>about to speak $msg")
+	if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
+		try {            
+			theVoice*.speak(msg)
+		} catch (e) {
+			log.error ("speak_voice_message>cannot speak $msg, exception $e" )                
+		}                
+					                    
+	}
+	if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
+		try {            
+			theSpeaker*.playText(msg)
+		} catch (e) {
+			log.error ("speak_voice_message>cannot playText $msg, exception $e" )                
+		}                
+	}
+	log.debug ("speak_voice_message>end")
+}
 
 private send(msg) {
 	if (sendPushMessage != "No") {
