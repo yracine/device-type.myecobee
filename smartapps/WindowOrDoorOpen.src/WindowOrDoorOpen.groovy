@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.4" 
+		paragraph "Version 2.5.5" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -263,15 +263,8 @@ def sensorTriggered(evt, indice=0) {
 	if (evt.value == "closed") {
 		restore_tstats_mode()
 		def msg = "your ${theSensor[indice]} is now closed"
-		send("WindowOrDoorOpen>${msg}")
-		if ((theVoice) && (powerSwitch?.currentSwitch == "on") && (theVoice.hasCommand("speak"))) { //  Notify by voice only if the powerSwitch is on
-			theVoice*.setLevel(30)
-			theVoice*.speak(msg)
-		}
-		if ((theSpeaker) && (powerSwitch?.currentSwitch == "on") && (theSpeaker.hasCommand("playText"))) { //  Notify by voice only if the powerSwitch is on
-			theSpeaker*.setLevel(30)
-			theSpeaker*.playText(msg)
-		}
+//		send("WindowOrDoorOpen>${msg}")
+//		speak_voice_message(msg)        
 		clearStatus(indice)
 	} else if ((evt.value == "open") && (state?.status[indice] != "scheduled")) {
 		def takeActionMethod= "takeAction${indice}"       
