@@ -530,7 +530,7 @@ private void set_tstats_off_or_away(max_open_time_in_min) {
 			def currentMode= it.currentThermostatMode?.toString()  
 			log.debug ("set_tstats_off_or_away>$it's current mode is $currentMode, about to turn it off if needed")           
 			try {
-				if ((it.hasCommand("off")) && (currentMode != ' off')) it.off()                
+				if ((it.hasCommand("off")) && (currentMode != 'off')) it.off()                
 				else if (it.hasCommand("offbtn")) it.offbtn()                
 				tstatList=tstatList + it + ' '
 			} catch (e) { 
