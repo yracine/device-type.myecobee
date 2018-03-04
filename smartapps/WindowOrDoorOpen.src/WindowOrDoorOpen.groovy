@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.5" 
+		paragraph "Version 2.5.6" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -521,16 +521,18 @@ def clearStatus(indice=0) {
 private void set_tstats_off_or_away(max_open_time_in_min) {
 	def msg
 	def tstatList=""
-	save_tstats_mode() 
-	if (!settings.awayFlag) {             
+	save_tstats_mode()
+	    
+	if (settings.awayFlag==false) {             
 		tstats.each { 
-			it.poll()        
-			def currentMode= it.currentThermostatMode            
+			if (it.hasCapability("Polling")) it.poll()        
+			else if (it.hasCapability("Refresh")) it.refresh()        
+			def currentMode= it.currentThermostatMode?.toString()  
+			log.debug ("set_tstats_off_or_away>$it's current mode is $currentMode, about to turn it off if needed")           
 			try {
-				if (currentMode != 'off') {                
-					it.off()                
-					tstatList=tstatList + it + ' '
-				}                    
+				if ((it.hasCommand("off")) && (currentMode != ' off')) it.off()                
+				else if (it.hasCommand("offbtn")) it.offbtn()                
+				tstatList=tstatList + it + ' '
 			} catch (e) { 
 				msg = "cannot turn $it off, exception $e"
 				send("WindowDoorOpen>${msg}")
@@ -539,9 +541,11 @@ private void set_tstats_off_or_away(max_open_time_in_min) {
 		if (tstatList) msg = "thermostats $tstatList are now turned off after ${max_open_time_in_min} minutes"	
 	} else {
 		tstats.each {
-			it.poll()        
-			def currentMode= it.currentThermostatMode            
-			def currentPresence= it.currentValue("presence")            
+			if (it.hasCapability("Polling")) it.poll()        
+			else if (it.hasCapability("Refresh")) it.refresh()        
+			def currentMode= it.currentThermostatMode?.toString()  
+			def currentPresence= it.currentValue("presence")?.toString()            
+			log.debug ("set_tstats_off_or_away>$it's current mode is $currentMode and its presence is $currentPresence, about to set it to eco/away if needed")           
 			try {   
 				if ((it.hasCommand("eco")) && (currentMode != 'eco')) {
 					it.eco()                
@@ -573,7 +577,8 @@ private void save_tstats_mode() {
 		return    
 	} 
 	tstats.each {
-		it.poll() // to get the latest value at thermostat            
+		if (it.hasCapability("Polling")) it.poll()        
+		else if (it.hasCapability("Refresh")) it.refresh()        
 		state.lastThermostatMode = state.lastThermostatMode + "${it.currentThermostatMode}" + ","
 	}    
 	log.debug "save_tstats_mode>state.lastThermostatMode= $state.lastThermostatMode"
