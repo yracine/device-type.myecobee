@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.6" 
+		paragraph "Version 2.5.7" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -530,9 +530,13 @@ private void set_tstats_off_or_away(max_open_time_in_min) {
 			def currentMode= it.currentThermostatMode?.toString()  
 			log.debug ("set_tstats_off_or_away>$it's current mode is $currentMode, about to turn it off if needed")           
 			try {
-				if ((it.hasCommand("off")) && (currentMode != 'off')) it.off()                
-				else if (it.hasCommand("offbtn")) it.offbtn()                
-				tstatList=tstatList + it + ' '
+				if ((it.hasCommand("off")) && (currentMode != 'off')) {
+					it.off()                
+					tstatList=tstatList + it + ' '
+				} else if (it.hasCommand("offbtn")) {
+					it.offbtn()                
+					tstatList=tstatList + it + ' '
+				}                
 			} catch (e) { 
 				msg = "cannot turn $it off, exception $e"
 				send("WindowDoorOpen>${msg}")
