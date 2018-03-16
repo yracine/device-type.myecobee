@@ -22,8 +22,10 @@ Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in t
 
 https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
 
--  (e) <b> Determine your shard, please consult this thread: </bmartthings.com/t-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
-
+-  (e) <b> Determine your shard, please consult this thread: 
+  
+https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
+  
 Or the SmartThings documentation here:
 
 http://docs.smartthings.com/en/latest/publishing/index.html#ensure-proper-location
