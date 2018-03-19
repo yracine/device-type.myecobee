@@ -22,6 +22,7 @@
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
  */
 // Automatically generated. Make future change here.
+
 definition(
 	name: "${get_APP_NAME()}",
 	namespace: "yracine",
@@ -32,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.4.2"}
+def get_APP_VERSION() {return "3.4.3"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -126,6 +127,7 @@ def dashboardPage() {
 					"EcobeeHasHumidifier: $hasHumidifier\n" +
 					"EcobeeHasDeHumidifier: $hasDehumidifier\n" +
 					"DehumidifyWithAC: $dehumidifyWithACString\n" +
+					"DehumidifyWithACOffset: ${settings.dehumidifyWithACOffset}\n" +
 					"EcobeeHasHRV: $hasHrv\n" +
 					"EcobeeHasERV: $hasErv\n" +
 					"MinFanTime: ${min_fan_time} min.\n" +
@@ -230,7 +232,8 @@ def dehumidifySettings() {
 			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
 		section("¨Dehumidify With AC - Use your AC to dehumidify when humidity is high and dehumidifier is not available [optional]") {
-			input "dehumidifyWithACFlag", "bool", title: "Use AC as dehumidifier (By default=false)?", description: 'optional', required: false
+			input "dehumidifyWithACFlag", title: "Use AC as dehumidifier (By default=false)?",  type: "bool", description: 'optional', required: false
+			input "dehumidifyWithACOffset", title: "Offset in Farenheit (+delta) to be applied to cooling setpoint for dehumidifying  [range: 0..50, need to be a multiple of 5F]",  type: "number", description: 'optional', required: false
 		}
 		        
 		section {
@@ -673,10 +676,18 @@ def setHumidityLevel() {
 		}
 		//      If mode is cooling and outdoor humidity is too high then use the A/C to lower humidity in the house if there is no dehumidifier
 
-		ecobee.setThermostatSettings("", ['dehumidifyWithAC': 'true', 'dehumidifierLevel': "${target_humidity}",
-			'dehumidiferMode': 'off', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
-			])
+		if (settings.dehumidifyWithACOffset!=null)   {
+        
+			ecobee.setThermostatSettings("", ['dehumidifyWithAC': 'true', 'dehumidifyWithOffset':dehumidifyWithACOffset , 'dehumidifierLevel': "${target_humidity}",
+				'dehumidiferMode': 'off', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
+				])
+		
+		} else   {       
+			ecobee.setThermostatSettings("", ['dehumidifyWithAC': 'true', 'dehumidifierLevel': "${target_humidity}",
+				'dehumidiferMode': 'off', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
+				])
 
+		}
 
 	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
