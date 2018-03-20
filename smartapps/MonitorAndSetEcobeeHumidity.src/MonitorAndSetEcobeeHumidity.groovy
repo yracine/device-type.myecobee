@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.4.3"}
+def get_APP_VERSION() {return "3.4.4"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -678,7 +678,7 @@ def setHumidityLevel() {
 
 		if (settings.dehumidifyWithACOffset!=null)   {
         
-			ecobee.setThermostatSettings("", ['dehumidifyWithAC': 'true', 'dehumidifyWithOffset':dehumidifyWithACOffset , 'dehumidifierLevel': "${target_humidity}",
+			ecobee.setThermostatSettings("", ['dehumidifyWithAC': 'true', 'dehumidifyOvercoolOffset':dehumidifyWithACOffset , 'dehumidifierLevel': "${target_humidity}",
 				'dehumidiferMode': 'off', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
 				])
 		
