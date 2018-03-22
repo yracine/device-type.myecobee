@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates monthly runtime reports about your ecobee components"
-		paragraph "Version 1.8"
+		paragraph "Version 1.8.1"
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -216,8 +216,17 @@ private def get_nextComponentStats(component='') {
 			[position:5, next: 'compCool1'
 			],
 		'compCool1': 
-			[position:6, next: 'done'
+			[position:6, next: 'compHeat1'
 			], 
+		'compHeat1': 
+			[position:7, next: 'compHeat2'
+			], 
+		'compHeat2': 
+			[position:8, next: 'compHeat3'
+			], 
+		'compHeat3': 
+			[position:9, next: 'done'
+			]
 		]
 	try {
 		nextInLine = components.getAt(component)
@@ -238,7 +247,7 @@ private def get_nextComponentStats(component='') {
 void generateStats() {
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
 	def delay = 2  // 2-minute delay for rerun
-	def MAX_POSITION=6    
+	def MAX_POSITION=9    
 	def MAX_RETRIES=4    
 	float runtimeTotalAvgMonthly    
 	String mode= ecobee.currentThermostatMode    
@@ -349,6 +358,39 @@ void generateStats() {
 		}     
 	}        
         
+	component = 'compHeat1'
+//	if ((mode in ['auto','heat','off']) && (nextComponent?.position <= 1)) { 
+	if (nextComponent?.position <= 6) { 
+		generateRuntimeReport(component,aMonthAgo, endDate,'monthly') // generate stats for the last 30 days
+		runtimeTotalAvgMonthly = (ecobee.currentCompHeat1RuntimeAvgMonthly)? ecobee.currentCompHeat1RuntimeAvgMonthly.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (runtimeTotalAvgMonthly) {
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+		}     
+	}
+    
+   
+	component = 'compHeat2'
+//	if ((mode in ['auto','heat', 'off']) && (heatStages >1) && (nextComponent.position <= 2)) { 
+	if ((heatStages >1) && (nextComponent.position <= 7)) { 
+		generateRuntimeReport(component,aMonthAgo, endDate,'monthly') // generate stats for the last 30 days
+		runtimeTotalAvgMonthly = (ecobee.currentCompHeat2RuntimeAvgMonthly)? ecobee.currentCompHeat2RuntimeAvgMonthly.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (runtimeTotalAvgMonthly) {
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+		}     
+	}     
+
+	component = 'compHeat3'
+//	if ((mode in ['auto','heat', 'off']) && (heatStages >2) && (nextComponent.position <= 3)) { 
+	if ((heatStages >2) && (nextComponent.position <= 8)) { 
+		generateRuntimeReport(component,aMonthAgo, endDate,'monthly') // generate stats for the last 30 days
+		runtimeTotalAvgMonthly = (ecobee.currentCompHeat3RuntimeAvgMonthly)? ecobee.currentCompHeat3RuntimeAvgMonthly.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (runtimeTotalAvgMonthly) {
+			send "${ecobee} ${component}'s average monthly runtime stats=${runtimeTotalAvgMonthly} minutes since ${String.format('%tF', aMonthAgo)}", settings.askAlexaFlag
+		}     
+	}     
         
 	component=atomicState?.componentAlreadyProcessed    
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
