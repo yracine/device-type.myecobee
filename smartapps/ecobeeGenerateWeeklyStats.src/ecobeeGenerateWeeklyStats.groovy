@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.7" 
+		paragraph "Version 1.7.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -216,9 +216,18 @@ private def get_nextComponentStats(component='') {
 			[position:5, next: 'compCool1'
 			],
 		'compCool1': 
-			[position:6, next: 'done'
+			[position:6, next: 'compHeat1'
 			], 
-		]
+		'compHeat1': 
+			[position:7, next: 'compHeat2'
+			], 
+		'compHeat2': 
+			[position:8, next: 'compHeat3'
+			], 
+		'compHeat3': 
+			[position:9, next: 'done'
+			]
+	]
 	try {
 		nextInLine = components.getAt(component)
 	} catch (any) {
@@ -237,7 +246,7 @@ private def get_nextComponentStats(component='') {
 
 void generateStats() {
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
-	def MAX_POSITION=6    
+	def MAX_POSITION=9    
 	def MAX_RETRIES=4    
 	float runtimeTotalAvgWeekly
     
@@ -356,6 +365,46 @@ void generateStats() {
 		}     
 	}        
     
+	// Get the compHeat1's runtime for startDate-endDate period
+	component = 'compHeat1'
+
+	if (nextComponent.position <= 6) { 
+		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
+		runtimeTotalAvgWeekly = (ecobee.currentCompHeat1RuntimeAvgWeekly)? ecobee.currentCompHeat1RuntimeAvgWeekly.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (runtimeTotalAvgWeekly) {
+			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
+		}     
+	}
+    
+    
+	component = 'compHeat2'
+	if (heatStages >1 && nextComponent.position <= 7) { 
+    
+//	Get the compHeat2's runtime for startDate-endDate period
+ 	
+		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
+		runtimeTotalAvgWeekly = (ecobee.currentCompHeat2RuntimeAvgWeekly)? ecobee.currentCompHeat2RuntimeAvgWeekly.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (runtimeTotalAvgWeekly) {
+			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
+		}     
+
+	}     
+
+	component = 'compHeat3'
+	if (heatStages >2 && nextComponent.position <= 8) { 
+    
+//	Get the auxHeat3's runtime for startDate-endDate period
+ 	
+		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
+		runtimeTotalAvgWeekly = (ecobee.currentCompHeat3RuntimeAvgWeekly)? ecobee.currentCompHeat3RuntimeAvgWeekly.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (runtimeTotalAvgWeekly) {
+			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
+		}     
+	}     
+
 	component= atomicState?.componentAlreadyProcessed   
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (nextComponent?.position >=MAX_POSITION) {
