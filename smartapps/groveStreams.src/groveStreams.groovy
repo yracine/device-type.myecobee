@@ -35,7 +35,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.2.2" 
+		paragraph "Version 2.2.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -120,6 +120,9 @@ def initialize() {
 	subscribe(ecobees, "auxHeat1RuntimeDaily", handleDailyStats)
 	subscribe(ecobees, "auxHeat2RuntimeDaily", handleDailyStats)
 	subscribe(ecobees, "auxHeat3RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "compHeat1RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "compHeat2RuntimeDaily", handleDailyStats)
+	subscribe(ecobees, "compHeat3RuntimeDaily", handleDailyStats)
 	subscribe(ecobees, "compCool1RuntimeDaily", handleDailyStats)
 	subscribe(ecobees, "compCool2RuntimeDaily", handleDailyStats)
 	subscribe(ecobees, "fanRuntimeDaily", handleDailyStats)
