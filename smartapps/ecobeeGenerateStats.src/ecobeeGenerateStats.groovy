@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.5.1" 
+		paragraph "Version 2.5.2" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -234,7 +234,16 @@ private def get_nextComponentStats(component='') {
 			[position:9, next: 'fan'
 			],
 		'fan': 
-			[position:10, next: 'done'
+			[position:10, next: 'compHeat1'
+			],
+		'compHeat1': 
+			[position:11, next: 'compHeat2'
+			], 
+		'compHeat2': 
+			[position:12, next: 'compHeat3'
+			], 
+		'compHeat3': 
+			[position:13, next: 'done'
 			]
 		]
 	try {
@@ -255,7 +264,7 @@ private def get_nextComponentStats(component='') {
 
 
 void generateStats() {	
-	def MAX_POSITION=10
+	def MAX_POSITION=13
 	def MAX_RETRIES=4
 	float runtimeTotalYesterday,runtimeTotalDaily    
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
@@ -461,6 +470,59 @@ void generateStats() {
 		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for the day before
 		runtimeTotalYesterday = (ecobee.currentFanRuntimeYesterday)? ecobee.currentFanRuntimeYesterday.toFloat().round(2):0
 		atomicState?.componentAlreadyProcessed=component
+		if (detailedNotif && runtimeTotalYesterday) {
+			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
+		}     
+	}     
+
+	// Get the compHeat1's runtime for startDate-endDate period
+	component = 'compHeat1'
+	if (nextComponent.position <= 10) { 
+		generateRuntimeReport(component,startDate, endDate)
+		runtimeTotalDaily = (ecobee.currentCompHeat1RuntimeDaily) ? ecobee.currentCompHeat1RuntimeDaily.toFloat().round(2):0
+		if (runtimeTotalDaily) {
+			send "On ${String.format('%tF', startDate)}, ${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes", settings.askAlexaFlag
+		}     
+    
+		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
+		runtimeTotalYesterday = (ecobee.currentCompHeat1RuntimeYesterday)? ecobee.currentCompHeat1RuntimeYesterday.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (detailedNotif && runtimeTotalYesterday) {
+			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
+		}     
+	}     
+	
+    
+	component = 'compHeat2'
+	if (heatStages >1 && (nextComponent.position <=11) ) { 
+    
+//	Get the compHeat2's runtime for startDate-endDate period
+ 	
+		generateRuntimeReport(component,startDate, endDate)
+		runtimeTotalDaily = (ecobee.currentCompHeat2RuntimeDaily)? ecobee.currentCompHeat2RuntimeDaily.toFloat().round(2):0
+		if (runtimeTotalDaily) {
+			send "On  ${String.format('%tF', startDate)}, ${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes", settings.askAlexaFlag
+		}     
+		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
+		runtimeTotalYesterday = (ecobee.currentCompHeat2RuntimeYesterday)? ecobee.currentCompHeat2RuntimeYesterday.toFloat().round(2):0
+		atomicState?.componentAlreadyProcessed=component
+		if (detailedNotif && runtimeTotalYesterday) {
+			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
+		}     
+	}     
+
+	component = 'compHeat3'
+	if (heatStages >2 && nextComponent.position <= 12) { 
+    
+//	Get the compHeat3's runtime for startDate-endDate period
+ 	
+		generateRuntimeReport(component,startDate, endDate)
+		runtimeTotalDaily = (ecobee.currentCompHeat3RuntimeDaily)? ecobee.currentCompHeat3RuntimeDaily.toFloat().round(2):0
+		if (runtimeTotalDaily) {
+			send "On ${String.format('%tF', startDate)},${ecobee} ${component}'s runtime stats=${runtimeTotalDaily} minutes", settings.askAlexaFlag
+		}     
+		generateRuntimeReport(component,yesterday, startDate,'yesterday') // generate stats for yesterday
+		runtimeTotalYesterday = (ecobee.currentCompHeat3RuntimeYesterday)? ecobee.currentCompHeat3RuntimeYesterday.toFloat().round(2):0
 		if (detailedNotif && runtimeTotalYesterday) {
 			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
 		}     
