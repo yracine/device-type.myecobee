@@ -29,6 +29,7 @@ PREREQUISITES
 =====================
 
 - Your ecobee thermostat fully operational (and connected to wifi)
+- Your ecobee sensors connected to your thermostat and fully operationnal under the ecobee portal
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
 - <b>Location set for your ST account</b> 
 
