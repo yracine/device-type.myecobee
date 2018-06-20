@@ -59,7 +59,7 @@ for your active zone(s) which is used for controlling your vents and slave therm
 - You can also manually make the zone active or inactive according to
 your requirements during the day.
 
-a) Go to https://graph.api.smartthings.com/ide/devices    (or whatever your shard is )
+a) Go to https://graph.api.smartthings.com/ide/devices   (or whatever your shard is and click on My Device Handlers in the IDE's top menu)
 
 b) Hit the "+New Device Handler" at the top right corner
 
@@ -80,8 +80,7 @@ If the virtual zones are not responsive to any commands (i.e., set target temp d
 # 2) Create a new smartapp (ScheduleTstatZones)
 
 
-a) Go to https://graph.api.smartthings.com/ide/apps    (or whatever your shard is )
-
+a) Go to https://graph.api.smartthings.com/ide/apps  (or whatever your shard is and click on My Smartapps in the IDE's top menu)
 b) Hit the "+New SmartApp" at the top right corner
 
 c) Hit the "From Code" tab on the left corner
