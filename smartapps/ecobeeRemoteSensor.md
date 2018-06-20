@@ -64,7 +64,7 @@ https://graph.api.smartthings.com/ide/apps    (or whatever your shard is and cli
 
 <b>b) Create a new Smartapp, click on new Smartapp on the right</b>
 
-<b>c) From there, use the "From code" tab, and copy & paste it from the source file</b>
+<b>c) From there, use the "From code" tab, and copy & paste it from the source file in the zip</b>
 
 <b>d) Click "Save" & Publish (upper right)"</b>
 # 3) Prior to calling ecobeeRemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
@@ -75,7 +75,7 @@ https://graph.api.smartthings.com/ide/apps    (or whatever your shard is and cli
 
 <b>c) On the new Device Handler page, click on the "From Code" tab</b>
 
-<b>d) Copy and paste the code from My Remote Sensor from the source file</b>
+<b>d) Copy and paste the code from My Remote Sensor from the source txt file in the zip</b>
 
 <b>e) Click save and publish</b>
 # 4) Enable tracing, activate live Logging & Execute ecobeeRemoteSensorInit
