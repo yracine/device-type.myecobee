@@ -60,7 +60,7 @@ https://github.com/yracine/device-type.myecobee
 # 2) Create a new smartapp called ecobeeRemoteSensorInit, grab the code from the related txt file, save & publish
 <b>a) Go to </b> 
 
-https://graph.api.smartthings.com/ide/apps    (or whatever your shard is)
+https://graph.api.smartthings.com/ide/apps    (or whatever your shard is and click on My Smartapps in the IDE's top menu)
 
 <b>b) Create a new Smartapp, click on new Smartapp on the right</b>
 
@@ -69,7 +69,7 @@ https://graph.api.smartthings.com/ide/apps    (or whatever your shard is)
 <b>d) Click "Save" & Publish (upper right)"</b>
 # 3) Prior to calling ecobeeRemoteSensorInit, you need to create My Remote Sensor device handler in your IDE:
 
-<b>a) Go to https://graph.api.smartthings.com/ide/devices</b>    (or whatever your shard is)
+<b>a) Go to https://graph.api.smartthings.com/ide/devices</b>    (or whatever your shard is and click on My Device Handlers in the IDE's top menu)
 
 <b>b) Click on new Device Handler on the right</b>
 
@@ -83,7 +83,7 @@ https://graph.api.smartthings.com/ide/apps    (or whatever your shard is)
 for better support, just active the live logging and get more tracing
 in the IDE by following these steps:
 
-<b>a) Go to https://graph.api.smartthings.com/ide/logs</b>     (or whatever your shard is)
+<b>a) Go to https://graph.api.smartthings.com/ide/logs</b>     (or whatever your shard is and click on Live Logging in the IDE's top menu)
 
 <b>b) Under the ST app, run ecobeeRemoteSensorInit on your smartphone/tablet</b>
 
@@ -130,7 +130,7 @@ otherwise, you may encounter the blank page issue within the ecobeeRemoteInitSen
 
 After execution, you should be able to see the new Sensor objects under  (or whatever your shard is)
 
-https://graph.api.smartthings.com/device/list  
+https://graph.api.smartthings.com/device/list   (or whatever your shard is and click on My Devices in the IDE's top menu)
 
 # 5) Motion and temp Updates 
 
