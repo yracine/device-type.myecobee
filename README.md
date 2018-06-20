@@ -160,7 +160,7 @@ https://graph.api.smartthings.com/device/list  (or whatever your shard is and cl
 
 And
 
-In the ST app, under myHome/Things.
+In the ST mobile app, under myHome/Things.
 
 
 # 6) To populate the UI fields for your newly created device(s)
