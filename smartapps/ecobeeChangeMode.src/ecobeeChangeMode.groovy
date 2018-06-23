@@ -40,7 +40,7 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 1.9.9a" 
+			paragraph "Version 1.9.9b" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -50,9 +50,6 @@ preferences {
 		}
 		section("Change the following ecobee thermostat(s)...") {
 			input "thermostats", "device.myEcobeeDevice", title: "Which thermostat(s)", multiple: true
-		}
-		section("Do the mode change manually only (by pressing the arrow to execute the smartapp)") {
-			input "manualFlag", "bool", title: "Manual only [default=false]", description:"optional",required:false
 		}
         
 	}
@@ -88,6 +85,9 @@ def selectProgram() {
 		}
 		section("Enter a delay in minutes [optional, default=immediately after ST hello mode change] ") {
 			input "delay", "number", title: "Delay in minutes [default=immediate]", description:"no delay by default",required:false
+		}
+		section("Do the mode change manually only (by pressing the arrow next to its name in Automation/Smartapps in the mobile app)") {
+			input "manualFlag", "bool", title: "Manual only [default=false]", description:"optional",required:false
 		}
 
         
