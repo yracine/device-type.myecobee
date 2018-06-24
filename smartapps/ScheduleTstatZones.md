@@ -108,6 +108,7 @@ Refer to the ST community wiki, most of the use cases are documented with the in
 
 
 http://thingsthataresmart.wiki/index.php?title=ScheduleTstatZones#Prerequisites
+
 http://thingsthataresmart.wiki/index.php?title=ScheduleTstatZones#Configuration
 
 TROUBLESHOOTING
