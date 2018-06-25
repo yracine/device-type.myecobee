@@ -603,6 +603,10 @@ def setHumidityLevel() {
 
 		ecobee.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}", 'vent': 'minontime', 'ventilatorMinOnTime': "${min_vent_time}"])
 		if (settings.useFanWhenHumidityIsHigh) {
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 			ecobee.fanOn() // set fan on
 		}
 
@@ -625,6 +629,10 @@ def setHumidityLevel() {
 			])
 
 		if (settings.useFanWhenHumidityIsHigh) {
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 			ecobee.fanOn() // set fan on
 		}
 
@@ -643,6 +651,10 @@ def setHumidityLevel() {
 
 		ecobee.setThermostatSettings("", ['fanMinOnTime': "${min_fan_time}", 'vent': 'minontime', 'ventilatorMinOnTime': "${min_vent_time}"])
 		if (settings.useFanWhenHumidityIsHigh) {
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 			ecobee.fanOn() // set fan on
 		}
 
@@ -664,6 +676,10 @@ def setHumidityLevel() {
 			send ("Too cold (${outdoorTemp}°) to dehumidify to ${target_humidity}", askAlexaFlag)
 		}
 		if (settings.useFanWhenHumidityIsHigh) {
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 			ecobee.fanOn() // set fan on
 		}
 
@@ -704,6 +720,10 @@ def setHumidityLevel() {
 
 		}
 		if (settings.useFanWhenHumidityIsHigh) {
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 			ecobee.fanOn() // set fan on
 		}
 
@@ -739,6 +759,10 @@ def setHumidityLevel() {
 			])
 
 		if (settings.useFanWhenHumidityIsHigh) {
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 			ecobee.fanOn() // set fan on
 		}
 	} else if ((ecobeeMode == 'cool') && (hasDehumidifier == 'true') && (useDehumidifierAsHRVFlag) &&
@@ -758,6 +782,10 @@ def setHumidityLevel() {
 
 		if (settings.useFanWhenHumidityIsHigh) {
 			ecobee.fanOn() // set fan on
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 		}
 
 
@@ -803,9 +831,17 @@ def setHumidityLevel() {
 
 		if (settings.useFanWhenHumidityIsHigh) {
 			ecobee.fanOn() // set fan on
+			if (detailedNotif) {
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			}
 		}
 	} else if ((ecobeeHumidity > (target_humidity + min_humidity_diff)) && (settings.useFanWhenHumidityIsHigh)) {
-			ecobee.fanOn() // set fan on
+		if (detailedNotif) {
+			log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+		}
+		ecobee.fanOn() // set fan on
     
 	} else {
 
