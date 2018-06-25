@@ -822,7 +822,7 @@ def setHumidityLevel() {
 			])
 
 
-	} else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > target_humidity)) {
+	} else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > (target_humidity + min_humidity_diff))) {
 
 		//      If indoor humidity is greater than target, but outdoor humidity is way higher than indoor humidity, 
 		//      just wait for the next cycle & do nothing for now.
