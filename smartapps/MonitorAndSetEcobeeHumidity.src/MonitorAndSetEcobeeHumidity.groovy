@@ -589,7 +589,7 @@ def setHumidityLevel() {
 		log.trace("Evaluate: Ecobee humidity: ${ecobeeHumidity} vs. outdoor humidity ${outdoorHumidity}," +
 			"coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
 		log.trace("hasErv=${hasErv}, hasHrv=${hasHrv},hasHumidifier=${hasHumidifier},hasDehumidifier=${hasDehumidifier}, freeCoolingFlag=${freeCoolingFlag}," +
-			"useDehumidifierAsHRV=${useDehumidifierAsHRVFlag}")
+			"useDehumidifierAsHRV=${useDehumidifierAsHRVFlag}, useFanWhenHumidityIsHigh=${useFanWhenHumidityIsHigh}")
 	}
 
 	if ((ecobeeMode == 'cool' && (hasHrv == 'true' || hasErv == 'true')) &&
