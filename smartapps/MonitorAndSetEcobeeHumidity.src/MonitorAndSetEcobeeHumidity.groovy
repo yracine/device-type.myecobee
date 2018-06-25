@@ -78,6 +78,7 @@ def dashboardPage() {
 				def hasHrv = (ecobee.currentHasHrv) ? ecobee.currentHasHrv : 'false'
 				def hasErv = (ecobee.currentHasErv) ? ecobee.currentHasErv : 'false'
 				String dehumidifyWithACString=(settings.dehumidifyWithACFlag)? 'true': 'false'                
+				String useFanWhenHumidityIsHighString=(settings.useFanWhenHumidityIsHigh)? 'true': 'false'                
 				def heatingSetpoint,coolingSetpoint
 				if (indoorSensor) {
 					indoorHumidity = indoorSensor.currentHumidity
@@ -132,7 +133,8 @@ def dashboardPage() {
 					"EcobeeHasERV: $hasErv\n" +
 					"MinFanTime: ${min_fan_time} min.\n" +
 					"IndoorHumidity: ${indoorHumidity}%\n" +
-					"IndoorTemp: ${indoorTemp}$scale\n" 
+					"IndoorTemp: ${indoorTemp}$scale\n" +
+					"UseFanWhenHumidityIsHigh: $useFanWhenHumidityIsHighString\n" 
 				if (outdoorSensor) {
 					dParagraph=  dParagraph +                   
 					"OudoorHumidity: $outdoorHumidity%\n" +
@@ -853,7 +855,7 @@ def setHumidityLevel() {
 			send ("all off, humidity level (${ecobeeHumidity}%) within range", askAlexaFlag)
 		}
 		if (settings.useFanWhenHumidityIsHigh) {
-			ecobee.fanOff() // set fan off
+			ecobee.fanAuto() // set fan off
 		}
         
 	}
