@@ -57,7 +57,7 @@ def dashboardPage() {
 			input "givenInterval", "number", title: "Interval",  required: false
 		}
 		section("Humidity differential for adjustments") {
-			input "givenHumidityDiff", "number", title: "Humidity Differential [default=5%]", required: false
+			input "givenHumidityDiff", "number", title: "Humidity Offset Allowed [default=5%]", required: false
 		}
 		section("Press Next in the upper section for Initial setup") {
 			if (ecobee) {            
@@ -120,6 +120,7 @@ def dashboardPage() {
 				if (heatingSetpoint)  { 
 					dParagraph = dParagraph + "HeatingSetpoint: ${heatingSetpoint}$scale\n" 
 				}
+				def min_humidity_diff = givenHumidityDiff ?: 5 //  5% humidity differential by default
 				dParagraph = dParagraph +
 					"DetailedNotification: ${detailedNotif}\n" +
 					"EcobeeCurrentProgram: $currentProgName\n" +
@@ -134,7 +135,8 @@ def dashboardPage() {
 					"MinFanTime: ${min_fan_time} min.\n" +
 					"IndoorHumidity: ${indoorHumidity}%\n" +
 					"IndoorTemp: ${indoorTemp}$scale\n" +
-					"UseFanWhenHumidityIsHigh: $useFanWhenHumidityIsHighString\n" 
+					"UseFanWhenHumidityIsHigh: $useFanWhenHumidityIsHighString\n" +
+					"HumidityOffsetAllowed: +/- $min_humidity_diff%\n"                    
 				if (outdoorSensor) {
 					dParagraph=  dParagraph +                   
 					"OudoorHumidity: $outdoorHumidity%\n" +
@@ -586,7 +588,7 @@ def setHumidityLevel() {
 		log.debug "outdoorSensorHumidity = $outdoorSensorHumidity%, normalized outdoorHumidity based on ambient temperature = $outdoorHumidity%"
 		send ("normalized outdoor humidity is ${outdoorHumidity}%,sensor outdoor humidity ${outdoorSensorHumidity}%,vs. indoor Humidity ${ecobeeHumidity}%", 
 			askAlexaFlag)
-		log.trace("Evaluate: Ecobee humidity: ${ecobeeHumidity} vs. outdoor humidity ${outdoorHumidity}," +
+		log.trace("Evaluate: Ecobee humidity: ${ecobeeHumidity} vs. outdoor humidity ${outdoorHumidity}, humidity differential allowed= ${min_humidity_diff}, " +
 			"coolingSetpoint: ${coolTemp} , heatingSetpoint: ${heatTemp}, target humidity=${target_humidity}, fanMinOnTime=${min_fan_time}")
 		log.trace("hasErv=${hasErv}, hasHrv=${hasHrv},hasHumidifier=${hasHumidifier},hasDehumidifier=${hasDehumidifier}, freeCoolingFlag=${freeCoolingFlag}," +
 			"useDehumidifierAsHRV=${useDehumidifierAsHRVFlag}, useFanWhenHumidityIsHigh=${useFanWhenHumidityIsHigh}")
