@@ -119,7 +119,7 @@ f) Make sure that enable OAuth in Smartapp is active
 
 g) Go back to the code window, and hit the "publish/for me" button at the top right corner 
 
-Refer to the troubleshooting section if the instructions above are not clear enough, some pictures have been added to the section:
+If the instructions above are not clear enough, you can refer to the troubleshooting section below with some pictures:
 
 http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.27t_know_how_to_create_a_custom_smartapp
 
