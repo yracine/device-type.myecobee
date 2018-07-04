@@ -75,7 +75,6 @@ INSTALLATION STEPS
 =====================
 
 
-
 # 1) Create a new device Handler (My Ecobee Device)
 
 
@@ -120,6 +119,9 @@ f) Make sure that enable OAuth in Smartapp is active
 
 g) Go back to the code window, and hit the "publish/for me" button at the top right corner 
 
+Refer to the troubleshooting section if the instructions above are not clear enough, some pictures have been added to the section:
+
+http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.27t_know_how_to_create_a_custom_smartapp
 
 
 # 3) Under the ST mobile app, execute MyEcobeeInit (under MarketSpace>Smartapps>MyApps)
