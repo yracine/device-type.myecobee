@@ -35,7 +35,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeAwayFromHome, the smartapp that sets your ecobee thermostat to 'Away' or to some specific settings when all presences leave your home"
-		paragraph "Version 1.9.5" 
+		paragraph "Version 1.9.6" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 		paragraph "Copyright©2014 Yves Racine"
@@ -221,7 +221,7 @@ def takeActions() {
 		}
 		if ((givenClimateName != null) && (givenClimateName != "")) {
 			ecobee.each {
-				it.setClimate('', givenClimateName) // Set to the climateName
+				it?.setThisTstatClimate(givenClimateName)  // Set to the climateName
 			}                
 		} else {
 
