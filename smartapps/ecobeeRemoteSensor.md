@@ -29,7 +29,12 @@ PREREQUISITES
 =====================
 
 - Your ecobee thermostat fully operational (and connected to wifi)
-- Your ecobee sensors connected to your thermostat and fully operationnal under the ecobee portal
+- Your ecobee's proprietary sensors connected to your thermostat and fully operationnal under the ecobee portal
+  
+  Note: This smartapp is used to expose the proprietary remote sensors. For any other ST connnected sensors, refer to    
+        MonitorAndSetEcobeeTemp at my github or even better ecobeeSetZoneWithSchedule which allows you to control which ST
+        connectedsensors are used at a given period of the day according to the ecobee's schedules (Home, Away, Sleep, Awake, custom).
+        
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
 - <b>Location set for your ST account</b> 
 
