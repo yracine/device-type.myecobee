@@ -31,9 +31,10 @@ PREREQUISITES
 - Your ecobee thermostat fully operational (and connected to wifi)
 - Your ecobee's proprietary sensors connected to your thermostat and fully operationnal under the ecobee portal
   
-  Note: This smartapp is used to expose the ecobee's proprietary remote sensors. For any other ST connnected sensors, refer to    
-        MonitorAndSetEcobeeTemp at my github or even better ecobeeSetZoneWithSchedule which allows you to control which ST
-        connected sensors are used at a given period of the day according to the ecobee's schedules (Home, Away, Sleep, Awake, custom).
+  Note: This smartapp is used to expose the ecobee's proprietary remote sensors. 
+        For any other ST connnected sensors, refer to MonitorAndSetEcobeeTemp at my github or even better             
+        ecobeeSetZoneWithSchedule which allows you to control which ST connected sensors are used at a given period of the day   
+        according to the ecobee's schedules (Home, Away, Sleep, Awake, custom).
         
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
 - <b>Location set for your ST account</b> 
@@ -106,14 +107,10 @@ The smartapp will ask you to select the remote temp sensors and motion sensors t
 If you have a blank page in ecobeeRemoteSensorInit or "a unexpected error occurred" while
 executing the smartapp:
 
-<b>d) Make sure that you have the latest ecobee firmware (at least v3.6) at the tstat as motion sensors
-are not detected prior to that firmware version. </b> 
-
-And, of course, make sure that all your remote sensors are actually reporting to the physical thermostat...
+<b>d) Make sure that all your remote sensors are actually reporting to the physical thermostat...
 In some cases, remote sensors may have some connection issues with your physical thermostat, and my code is not able 
 to detect them.
-
-
+ 
 <b>e) If you have the following error msg in the logs:</b>
 
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'My RemoteSensor' in namespace 'yracine' not found
