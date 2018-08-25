@@ -75,9 +75,28 @@ INSTALLATION STEPS
 =====================
 
 
-# 1) Create a new device Handler (My Ecobee Device)
+# 1a) Create a new device Handler (My Ecobee Device)
 
 
+a) Go to https://graph.api.smartthings.com/ide/devices   (or whatever your shard is and click on My Device Handlers in the IDE's top menu)
+
+b) Hit the "+New Device Handler" at the top right corner
+
+c) Hit the "From Code" tab on the left corner
+
+d) Copy and paste the code from the corresponding txt file in the zip 
+
+<b>The code has been sent to you via your paypal verified email address.</b>
+
+e) Hit the create button at the bottom
+
+f) Hit the "publish/for me" button at the top right corner (in the code window)
+
+# 1b) (Optional) Create a new device Handler (My Ecobee Switch)
+
+
+ N.B. The code for the new EcobeeSwitch+ is included in My Ecobee bundle only (available at my store).
+ 
 a) Go to https://graph.api.smartthings.com/ide/devices   (or whatever your shard is and click on My Device Handlers in the IDE's top menu)
 
 b) Hit the "+New Device Handler" at the top right corner
@@ -150,7 +169,7 @@ and then 'Done' when finished.
 
 If you get a blank screen after pressing 'Next or you get the following error: " Error - bad state. Unable to complete page configuration", you'd need to enable oAuth as specified in step 2f) above.
 
-
+If you have My Ecobee bundle, you can also select your ecobee switch(es) to be exposed to ST.
 
 # 5) Your device(s) should now be ready to process your commands
 
