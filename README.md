@@ -92,8 +92,7 @@ e) Hit the create button at the bottom
 
 f) Hit the "publish/for me" button at the top right corner (in the code window)
 
-# 1b) (Optional) Create a new device Handler (My Ecobee Switch)
-
+# 1b) (Optional) Create a new device Handler (My Ecobee Switch, If you have such switches at home)
 
  N.B. The code for the new EcobeeSwitch+ is included in My Ecobee bundle only (available at my store).
  
@@ -174,7 +173,7 @@ If you have My Ecobee bundle, you can also select your ecobee switch(es) to be e
 # 5) Your device(s) should now be ready to process your commands
 
 
-You should see your device under
+Afer about 1 minute, You should see your device under:
 
 https://graph.api.smartthings.com/device/list  (or whatever your shard is and click on My Devices in the IDE's top menu)
 
