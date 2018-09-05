@@ -30,7 +30,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.2"}
+def get_APP_VERSION() {return "1.3"}
 
 preferences {
 
@@ -82,6 +82,9 @@ def HASettingsPage() {
 
 
 def otherSettings() {
+
+	def enumModes=location.modes.collect{ it.name }
+
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
@@ -97,6 +100,9 @@ def otherSettings() {
 			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
 				description:"optional")            
 			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (default=2 days)?", required: false
+		}
+		section("Set for specific ST location mode(s) [default=all]")  {
+				input (name:"selectedModes", type:"enum", title: "Choose ST Mode(s) to run the smartapp", options: enumModes, required: false, multiple:true) 
 		}
 		section([mobileOnly: true]) {
 			label title: "Assign a name for this SmartApp", required: false
@@ -153,6 +159,12 @@ private boolean check_event(eventType) {
 	if (detailedNotif) {
 		log.debug "check_event>eventType=${eventType}, givenEvents list=${givenEvents}"
 	}        
+	boolean foundMode=selectedModes.find{it == (location.currentMode as String)} 
+	if ((selectedModes != null) && (!foundMode)) {
+		log.debug "not the right mode to run the smartapp, location.mode= $location.mode, selectedModes=${selectedModes},foundMode=${foundMode}, exiting"
+		return            
+	}
+    
 	if ((givenEvents.contains(eventType))) {
 		foundEvent=true    
 		msg = "${thermostat} has triggered ${eventType}, about to ${switchMode} ${switches}"
