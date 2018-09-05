@@ -32,7 +32,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.0.2"}
+def get_APP_VERSION() {return "1.0.3"}
 
 
 
@@ -76,6 +76,8 @@ preferences {
 
 	}
 	page(name: "selectAudio", title: "Ecobee4 Audio Settings", content: "selectAudio")
+	def enumModes=location.modes.collect{ it.name }
+
 	page(name: "Notifications", title: "Notification Options", install: true, uninstall: true) {
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
@@ -89,12 +91,14 @@ preferences {
 				description:"optional")            
 			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=5 days)?", required: false
 		}
+		section("Set for specific ST location mode(s) [default=all]")  {
+			input (name:"selectedModes", type:"enum", title: "Choose ST Mode(s) to run the smartapp", options: enumModes, required: false, multiple:true) 
+		}
 		section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
 		}
 	}
 }
-
 
 def selectAudio() {
 
@@ -151,9 +155,6 @@ def initialize() {
 	subscribe(app, appTouch)    
 
 }
-def climateListHandler(evt) {
-	log.debug "thermostat's Climates List: $evt.value, $settings"
-}
 
 
 def setAudio() {
@@ -163,6 +164,11 @@ def setAudio() {
 
 	if (doChange == true) {
 
+		boolean foundMode=selectedModes.find{it == (location.currentMode as String)} 
+		if ((selectedModes != null) && (!foundMode)) {
+			log.debug "not the right mode to run the smartapp, location.mode= $location.mode, selectedModes=${selectedModes},foundMode=${foundMode}, exiting"
+			return            
+		}
 		ecobee.each {
 			it.updateAudio("", playbackVolume, micEnabled, soundAlertVolume, soundTickVolume )
 			send("set ${it} to playbackVolume ${playbackVolume}, microphoneEnabled: $micEnabled, soundAlertVolume: $soundAlertVolume, soundTickVolume: $soundTickVolume as requested, settings.askAlexaFlag")
