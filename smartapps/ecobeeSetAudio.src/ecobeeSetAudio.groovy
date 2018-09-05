@@ -38,7 +38,7 @@ def get_APP_VERSION() {return "1.0"}
 
 preferences {
 
-	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
+	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectAudio") {
 		section("About") {
 			paragraph image:"${getCustomImagePath()}ecohouse.jpg","${get_APP_NAME()}, the smartapp that sets the ecobee4's audio settings (playbackVolume, microphoneEnabled, soundAlertVolume, soundTickVolume)"
 			paragraph "Version ${get_APP_VERSION()}\n" 
@@ -82,16 +82,15 @@ preferences {
 				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
 		}
-        	section([mobileOnly:true]) {
-			label title: "Assign a name for this SmartApp", required: false
-			mode title: "Set for specific mode(s)", required: false
-		}
 		section("Enable Amazon Echo/Ask Alexa Notifications (optional)") {
 			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
 				description:"optional",required:false)
 			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
 				description:"optional")            
 			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=5 days)?", required: false
+		}
+        section([mobileOnly:true]) {
+			label title: "Assign a name for this SmartApp", required: false
 		}
 	}
 }
@@ -103,10 +102,10 @@ def selectAudio() {
 	return dynamicPage(name: "selectAudio", title: "Select Ecobee4 Audio Settings", install: false, uninstall: true, nextPage:
 		"Notifications") {
 		section("Select Audio Settings") {
-			input "playbackVolume", "number", title: "playback volume [0-100]?", range: "0..100", required: true
-			input "micEnabled", "bool", title: "Enable Microphone (true) or disable it (false)?",  required: false
-			input "soundAlertVolume", "number", title: "Sound Alert Volume [0-10]?", range: "0..10", required: false
-			input "soundTickVolume", "number", title: "Sound Tick Volume [0-10]?", range: "0..10", required: false
+			input (name: "playbackVolume", type: "number", title: "playback volume [0-100]?", range: "0..100", required: true)
+			input (name :"micEnabled", title: "Enable Microphone?", type:"bool",required:false, defaultValue: true)
+			input (name: "soundAlertVolume",  type: "number", title: "Sound Alert Volume [0-10]?", range: "0..10", required: false)
+			input (name: "soundTickVolume",  type: "number", title: "Sound Tick Volume [0-10]?", range: "0..10", required: false)
 		}
 	}
 }
