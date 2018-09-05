@@ -38,7 +38,7 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false, uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeSetClimate, the smartapp that sets your ecobee thermostat to a given climate at a given day & time"
-			paragraph "Version 1.2" 
+			paragraph "Version 1.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -73,15 +73,19 @@ preferences {
 
 	}
 	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
+	def enumModes=location.modes.collect{ it.name }
 	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: true) {
 		section("Notifications") {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
 				false
 			input "phone", "phone", title: "Send a Text Message?", required: false
 		}
-        	section([mobileOnly:true]) {
+        section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
-			mode title: "Set for specific mode(s)", required: false
+			                
+		}
+		section("Set for specific ST location mode(s) [default=all]")  {
+				input (name:"selectedModes", type:"enum", title: "Choose ST Mode(s) to run the smartapp", options: enumModes, required: false, multiple:true) 
 		}
 	}
 }
@@ -141,7 +145,11 @@ def setClimate() {
 	// If we have hit the condition to schedule this then lets do it
 
 	if (doChange == true) {
-		log.debug "setClimate, location.mode = $location.mode, newMode = $newMode, location.modes = $location.modes"
+		boolean foundMode=selectedModes.find{it == (location.currentMode as String)} 
+		if ((selectedModes != null) && (!foundMode)) {
+			log.debug "not the right mode to run the smartapp, location.mode= $location.mode, selectedModes=${selectedModes},foundMode=${foundMode}, exiting"
+			return            
+		}
 
 		ecobee.each {
 			it.setThisTstatClimate(climateName)
