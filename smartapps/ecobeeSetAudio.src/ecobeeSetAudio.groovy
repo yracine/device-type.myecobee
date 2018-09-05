@@ -89,7 +89,7 @@ preferences {
 				description:"optional")            
 			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=5 days)?", required: false
 		}
-        section([mobileOnly:true]) {
+		section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
 		}
 	}
