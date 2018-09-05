@@ -32,7 +32,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.0"}
+def get_APP_VERSION() {return "1.0.1"}
 
 
 
@@ -134,7 +134,7 @@ def askAlexaMQHandler(evt) {
 	switch (evt.value) {
 		case "refresh":
 		state?.askAlexaMQ = evt.jsonData && evt.jsonData?.queues ? evt.jsonData.queues : []
-		traceEvent(settings.logFilter,"askAlexaMQHandler>new refresh value=$evt.jsonData?.queues", detailedNotif, get_LOG_INFO())
+		log.debug "askAlexaMQHandler>new refresh value=$evt.jsonData?.queues"
   		break
 	}
 }
@@ -212,7 +212,7 @@ private send(msg, askAlexa=false) {
 
 
 	if (sendPushMessage == "Yes") {
-		traceEvent(settings.logFilter,"about to send notifications", false, get_LOG_INFO())
+		log.debug "about to send notifications"
 		sendPush(message)
 	}
 	if (askAlexa) {
