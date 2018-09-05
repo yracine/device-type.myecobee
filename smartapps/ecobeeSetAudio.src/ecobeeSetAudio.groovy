@@ -208,7 +208,6 @@ def IsRightDayForChange() {
 
 
 private send(msg, askAlexa=false) {
-	int MAX_EXCEPTION_MSG_SEND=5
 
 	def message = "${get_APP_NAME()}>${msg}"
 
