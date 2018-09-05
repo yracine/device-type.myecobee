@@ -32,7 +32,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.0.1"}
+def get_APP_VERSION() {return "1.0.2"}
 
 
 
@@ -147,6 +147,8 @@ def initialize() {
 	subscribe(location, "askAlexaMQ", askAlexaMQHandler)
 
 	schedule(begintime,setAudio)
+    
+	subscribe(app, appTouch)    
 
 }
 def climateListHandler(evt) {
