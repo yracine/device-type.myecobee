@@ -16,7 +16,7 @@
  * Software Distribution is restricted and shall be done only with Developer's written approval.
  * 
  * You may want to create multiple instances of this smartapp (and rename them in SmartSetup) for each time
- * you want to set a different Climate at a given day and time during the week.*
+ * you want to set different audio settings at a given day and time during the week.*
  *
  *  N.B. Requires MyEcobee device available at 
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
