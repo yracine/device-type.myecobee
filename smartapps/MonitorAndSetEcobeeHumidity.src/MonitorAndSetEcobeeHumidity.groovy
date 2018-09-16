@@ -1079,7 +1079,7 @@ private void turn_off_dehumidifier() {
 
 
 	if (detailedNotif) {
-		send("about to turn off dehumidifier used as HRV....", askAlexaFlag)
+		send("about to turn off dehumidifier used as HRV and $dehumidifySwitches switch(es)....", askAlexaFlag)
 	}
 	log.trace("About to turn off the dehumidifier used as HRV and the fan after timeout")
 
@@ -1087,7 +1087,7 @@ private void turn_off_dehumidifier() {
 	ecobee.setThermostatSettings("", ['dehumidifierMode': 'off'])
 	if (dehumidifySwitches) {
 		if (detailedNotif) {    
-			log.trace("use dehumidifier as HRV, turning on all dehumidify/fan switches")
+			log.trace("use dehumidifier as HRV, turning off all dehumidify/fan switches")
 		}
 		dehumidifySwitches.off()        
 	}            
