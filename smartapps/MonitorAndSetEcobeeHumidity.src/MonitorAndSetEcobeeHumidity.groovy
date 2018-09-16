@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.1"}
+def get_APP_VERSION() {return "3.5.2"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -144,6 +144,7 @@ def dashboardPage() {
 					"NormalizedOutHumidity: $corrOutdoorHum%\n" +
 					"IdealIndoorHumidity: $idealIndoorHum%\n" 
 				}
+                
 				paragraph dParagraph 
 				if (hasDehumidifier=='true') {
 					def min_temp = (givenMinTemp) ? givenMinTemp : ((scale=='C') ? -15 : 10)
@@ -161,11 +162,20 @@ def dashboardPage() {
 					paragraph dParagraph 
 				}
 				if ((hasHrv=='true') || (hasErv=='true')) {
-					dParagraph=  "MinVentTime $min_vent_time min."
+					dParagraph=  "MinVentTime: $min_vent_time min."
 					def freeCoolingFlag= (freeCooling) ? 'true' : 'false'
 					dParagraph = dParagraph + "\nFreeCooling: $freeCoolingFlag"                     
 					paragraph dParagraph 
 				}
+				if (humidifySwitches) {
+					dParagraph=  "HumidifySwitch(es): $humidifySwitches"
+					paragraph dParagraph 
+				}
+				if (dehumidifySwitches) {
+					dParagraph=  "DehumidifySwitch(es): $dehumidifySwitches"
+					paragraph dParagraph 
+				}
+
 				if (ted) {                
 					int max_power = givenPowerLevel ?: 3000 // Do not run above 3000w consumption level by default
 					dParagraph = "PowerMeter: $ted" + 
