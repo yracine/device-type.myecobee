@@ -27,13 +27,13 @@ definition(
 	name: "${get_APP_NAME()}",
 	namespace: "yracine",
 	author: "Yves Racine",
-	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV",
+	description: "Monitor And set Ecobee's humidity via your connected humidifier/dehumidifier/HRV/ERV and your connected Humidifier/Dehumidifier/Fan switch(es)",
 	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.4.5"}
+def get_APP_VERSION() {return "3.5"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -217,6 +217,9 @@ def humidifySettings() {
 		section("Frost control for humidifier [optional]") {
 			input "frostControl", "bool", title: "Frost control [default=false]?",  description: 'optional', required: false
 		}
+		section("Switch(es) to be turned on when needed for humidifying/ventilating the house[optional]") {
+			input "humidifySwitches", "capability.switch", multiple:true, required: false
+		}
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
@@ -236,8 +239,11 @@ def dehumidifySettings() {
 			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
 		}
 		section("¨Dehumidify With AC - Use your AC to dehumidify when humidity is high and dehumidifier is not available [optional]") {
-			input "dehumidifyWithACFlag", title: "Use AC as dehumidifier (By default=false)?",  type: "bool", description: 'optional', required: false
-			input "dehumidifyWithACOffset", title: "Offset in Farenheit (+delta) to be applied to cooling setpoint for dehumidifying  [range: 0..50, need to be a multiple of 5F]",  type: "number", description: 'optional', required: false
+			input "dehumidifyWithACFlag",  "bool", title: "Use AC as dehumidifier (By default=false)?", description: 'optional', required: false
+			input "dehumidifyWithACOffset",  "number", title: "Offset in Farenheit (+delta) to be applied to cooling setpoint for dehumidifying  [range: 0..50, need to be a multiple of 5F]", description: 'optional', required: false
+		}
+		section("Switch(es) to be turned on when needed for dehumidifying/ventilating the house[optional]") {
+			input "dehumidifySwitches", "capability.switch", multiple:true, required: false
 		}
 		        
 		section {
@@ -256,6 +262,9 @@ def ventilatorSettings() {
 		}
 		section("Minimum outdoor threshold for stopping ventilation (in Farenheits/Celsius) [optional]") {
 			input "givenMinTemp", "decimal", title: "Min Outdoor Temp [default=10°F/-15°C]", description: 'optional', required: false
+		}
+		section("Switch(es) to be turned on when needed for dehumidifying/ventilating the house[optional]") {
+			input "dehumidifySwitches", "capability.switch", multiple:true, required: false
 		}
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
@@ -435,6 +444,18 @@ def setHumidityLevel() {
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'off', 'humidifierMode': 'off', 'dehumidifyWithAC': 'false',
 			'vent': 'off', 'ventilatorFreeCooling': 'false'
 			])
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("setHumidityLevel does not apply,location.mode= $location.mode, turning off all dehumidify/fan switches")
+			}
+			dehumidifySwitches.off()        
+		}        
+		if (humidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("setHumidityLevel does not apply,location.mode= $location.mode, turning off all humidify/fan switches")
+			}
+			humidifySwitches.off()        
+		}        
 		return			
 	}    
     
@@ -532,6 +553,18 @@ def setHumidityLevel() {
 				}
 
 				ecobee.setThermostatSettings("", ['vent': 'off', 'dehumidifierMode': 'off', 'humidifierMode': 'off'])
+				if (dehumidifySwitches) {
+					if (detailedNotif) {    
+						log.trace("all off,power usage is too high, turning off all dehumidify/fan switches")
+					}
+					dehumidifySwitches.off()        
+				}        
+				if (humidifySwitches) {
+					if (detailedNotif) {    
+						log.trace("all off,power usage is too high, turning off all humidify/fan switches")
+					}
+					humidifySwitches.off()        
+				}        
 				return
 
 			}
@@ -614,7 +647,12 @@ def setHumidityLevel() {
 			ecobee.fanOn() // set fan on
 		}
 
-
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 	} else if (((ecobeeMode in ['heat','off', 'auto']) && (hasHrv == 'false' && hasErv == 'false' && hasDehumidifier == 'true')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
 		(ecobeeHumidity >= outdoorHumidity) &&
@@ -639,6 +677,12 @@ def setHumidityLevel() {
 			}
 			ecobee.fanOn() // set fan on
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 	} else if (((ecobeeMode in ['heat','off', 'auto']) && ((hasHrv == 'true' || hasErv == 'true') && hasDehumidifier == 'false')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
@@ -661,6 +705,12 @@ def setHumidityLevel() {
 			}
 			ecobee.fanOn() // set fan on
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 	} else if (((ecobeeMode in ['heat','off', 'auto']) && (hasHrv == 'true' || hasErv == 'true' || hasDehumidifier == 'true')) &&
 		(ecobeeHumidity >= (target_humidity + min_humidity_diff)) &&
@@ -686,6 +736,12 @@ def setHumidityLevel() {
 			}
 			ecobee.fanOn() // set fan on
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 	} else if ((((ecobeeMode in ['heat','off', 'auto']) && hasHumidifier == 'true')) &&
 		(ecobeeHumidity < (target_humidity - min_humidity_diff))) {
@@ -698,6 +754,12 @@ def setHumidityLevel() {
 
 		def humidifierMode = (frostControlFlag) ? 'auto' : 'manual'
 		ecobee.setThermostatSettings("", ['humidifierMode': "${humidifierMode}", 'humidity': "${target_humidity}", 'dehumidifierMode': 'off'])
+		if (humidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and is way lower than target humidity, turning on all humidify/fan switches")
+			}
+			humidifySwitches.on()        
+		}            
 
 	} else if (((ecobeeMode == 'cool' && dehumidifyWithACFlag==true) && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
@@ -730,6 +792,12 @@ def setHumidityLevel() {
 			}
 			ecobee.fanOn() // set fan on
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
@@ -747,6 +815,12 @@ def setHumidityLevel() {
 			'dehumidiferMode': 'off', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
 			])
 
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 	} else if ((ecobeeMode == 'cool') && (hasDehumidifier == 'true') && (!useDehumidifierAsHRVFlag) &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff))) {
@@ -769,6 +843,13 @@ def setHumidityLevel() {
 			}
 			ecobee.fanOn() // set fan on
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
+        
 	} else if ((ecobeeMode == 'cool') && (hasDehumidifier == 'true') && (useDehumidifierAsHRVFlag) &&
 		(outdoorHumidity < target_humidity + min_humidity_diff) &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff))) {
@@ -791,6 +872,12 @@ def setHumidityLevel() {
 				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
 			}
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 
 	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'true' && hasErv == 'false' && hasHrv == 'false')) &&
@@ -806,6 +893,12 @@ def setHumidityLevel() {
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': "${target_humidity}", 'humidifierMode': 'off',
 			'dehumidifyWithAC': 'false', 'fanMinOnTime': "${min_fan_time}"
 			])
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 
 	} else if ((ecobeeMode == 'cool' && (hasHrv == 'true')) && (outdoorTemp < indoorTemp) && (freeCoolingFlag)) {
@@ -821,6 +914,12 @@ def setHumidityLevel() {
 			'vent': 'minontime', 'ventilatorMinOnTime': "${min_vent_time}", 'ventilatorFreeCooling': 'true'
 			])
 
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("free cooling is on, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
 
 	} else if ((outdoorHumidity > ecobeeHumidity) && (ecobeeHumidity > (target_humidity + min_humidity_diff))) {
 
@@ -840,12 +939,25 @@ def setHumidityLevel() {
 				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
 			}
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
+        
 	} else if ((ecobeeHumidity > (target_humidity + min_humidity_diff)) && (settings.useFanWhenHumidityIsHigh)) {
 		if (detailedNotif) {
 			log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
 			send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
 		}
 		ecobee.fanOn() // set fan on
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
     
 	} else {
 
@@ -859,6 +971,18 @@ def setHumidityLevel() {
 		if (settings.useFanWhenHumidityIsHigh) {
 			ecobee.fanAuto() // set fan off
 		}
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("humidity level (${ecobeeHumidity}%) within range, turning off all dehumidify/fan switches")
+			}
+			dehumidifySwitches.off()        
+		}            
+		if (humidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("humidity level (${ecobeeHumidity}%) within range, turning off all humidify/fan switches")
+			}
+			humidifySwitches.off()        
+		}            
         
 	}
 
@@ -909,7 +1033,13 @@ private void use_dehumidifer_as_HRV() {
 				'fanMinOnTime': "${min_fan_time}"
 			])
 		// calculate the delay to turn off the dehumidifier according to the scheduled monitoring cycle
-
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("use dehumidifier as HRV, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
+  
 		float delay = ((min_vent_time.toFloat() / 60) * scheduleInterval.toFloat()).round()
 		int delayInt = delay.toInteger()
 		delayInt = (delayInt > 1) ? delayInt : 1 // Min. delay should be at least 1 minute, otherwise, the dehumidifier won't stop.
@@ -938,7 +1068,13 @@ private void turn_off_dehumidifier() {
 
 
 	ecobee.setThermostatSettings("", ['dehumidifierMode': 'off'])
-
+	if (dehumidifySwitches) {
+		if (detailedNotif) {    
+			log.trace("use dehumidifier as HRV, turning on all dehumidify/fan switches")
+		}
+		dehumidifySwitches.off()        
+	}            
+ 
 }
 
 
