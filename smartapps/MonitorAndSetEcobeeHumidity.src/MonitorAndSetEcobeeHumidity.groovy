@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5"}
+def get_APP_VERSION() {return "3.5.1"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -754,6 +754,22 @@ def setHumidityLevel() {
 
 		def humidifierMode = (frostControlFlag) ? 'auto' : 'manual'
 		ecobee.setThermostatSettings("", ['humidifierMode': "${humidifierMode}", 'humidity': "${target_humidity}", 'dehumidifierMode': 'off'])
+		if (humidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and is way lower than target humidity, turning on all humidify/fan switches")
+			}
+			humidifySwitches.on()        
+		}            
+
+	} else if ((((ecobeeMode in ['heat','off', 'auto']) && hasHumidifier == 'false')) &&
+		(ecobeeHumidity < (target_humidity - min_humidity_diff))) {
+
+		if (detailedNotif) {
+			log.trace("In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house, but no humidifier is connected to ecobee")
+			send ("humidify to ${target_humidity} in ${ecobeeMode} mode", askAlexaFlag)
+		}
+		//      Need a minimum differential to humidify the house to the target if any humidifier available
+
 		if (humidifySwitches) {
 			if (detailedNotif) {    
 				log.trace("Indoor humidity is ${ecobeeHumidity}% and is way lower than target humidity, turning on all humidify/fan switches")
