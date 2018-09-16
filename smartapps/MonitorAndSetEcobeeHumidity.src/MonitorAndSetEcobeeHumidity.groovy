@@ -633,7 +633,7 @@ def setHumidityLevel() {
 		if (detailedNotif) {
 			log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, " +
 			"need to dehumidify the house and normalized outdoor humidity is lower (${outdoorHumidity})"
-			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode, using ERV/HRV", askAlexaFlag)
+			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode, using ERV/HRV and $dehumidifySwitches switch(es) ", askAlexaFlag)
 		}
 	
 		// Turn on the dehumidifer and HRV/ERV, the outdoor humidity is lower or equivalent than inside
@@ -660,8 +660,8 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
-				"normalized outdoor humidity is within range (${outdoorHumidity}) & outdoor temp is ${outdoorTemp},not too cold"
-			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode", askAlexaFlag)
+				"normalized outdoor humidity is within range (${outdoorHumidity}) & outdoor temp is ${outdoorTemp},not too cold, using connected dehumidifier and $dehumidifySwitches switch(es)"
+			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode using connected dehumidifier and $dehumidifySwitches switch(es)", askAlexaFlag)
 		}
 
 		//      Turn on the dehumidifer, the outdoor temp is not too cold 
@@ -691,7 +691,7 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
-				"normalized outdoor humidity is within range (${outdoorHumidity}) & outdoor temp is ${outdoorTemp},not too cold"
+				"normalized outdoor humidity is within range (${outdoorHumidity}) & outdoor temp is ${outdoorTemp},not too cold using connected dehumidifier and $dehumidifySwitches switch(es)"
 			send ("use HRV/ERV to dehumidify ${target_humidity}% in ${ecobeeMode} mode", askAlexaFlag)
 		}
 
@@ -726,8 +726,8 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
-				"normalized outdoor humidity is lower (${outdoorHumidity}), but outdoor temp is ${outdoorTemp}: too cold to dehumidify"
-			send ("Too cold (${outdoorTemp}°) to dehumidify to ${target_humidity}", askAlexaFlag)
+				"normalized outdoor humidity is lower (${outdoorHumidity}), but outdoor temp is ${outdoorTemp}: too cold to dehumidify, using $dehumidifySwitches switch(es) only"
+			send ("Too cold (${outdoorTemp}°) to dehumidify to ${target_humidity}, using  $dehumidifySwitches switch(es) only", askAlexaFlag)
 		}
 		if (settings.useFanWhenHumidityIsHigh) {
 			if (detailedNotif) {
@@ -747,8 +747,8 @@ def setHumidityLevel() {
 		(ecobeeHumidity < (target_humidity - min_humidity_diff))) {
 
 		if (detailedNotif) {
-			log.trace("In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house")
-			send ("humidify to ${target_humidity} in ${ecobeeMode} mode", askAlexaFlag)
+			log.trace("In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house with connected humidifier and $humidifySwitches switch(es)")
+			send ("humidify to ${target_humidity} in ${ecobeeMode} mode using connected humidifier and $humidifySwitches switch(es)", askAlexaFlag)
 		}
 		//      Need a minimum differential to humidify the house to the target if any humidifier available
 
@@ -765,14 +765,15 @@ def setHumidityLevel() {
 		(ecobeeHumidity < (target_humidity - min_humidity_diff))) {
 
 		if (detailedNotif) {
-			log.trace("In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house, but no humidifier is connected to ecobee")
-			send ("humidify to ${target_humidity} in ${ecobeeMode} mode", askAlexaFlag)
+			log.trace("In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house, but no humidifier is connected to ecobee, using $humidifySwitches switch(es) only")
 		}
 		//      Need a minimum differential to humidify the house to the target if any humidifier available
 
 		if (humidifySwitches) {
 			if (detailedNotif) {    
 				log.trace("Indoor humidity is ${ecobeeHumidity}% and is way lower than target humidity, turning on all humidify/fan switches")
+				send ("In ${ecobeeMode} mode, Ecobee's humidity provided is way lower than target humidity level=${target_humidity}, need to humidify the house, using $humidifySwitches switch(es)",
+					askAlexaFlag)            
 			}
 			humidifySwitches.on()        
 		}            
@@ -784,7 +785,7 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace("Ecobee humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, because normalized outdoor humidity is too high=${outdoorHumidity}")
-			send ("dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and normalized outdoor humidity (${outdoorHumidity}%) is too high to dehumidify",
+			send ("dehumidifyWithAC in cooling mode, indoor humidity is ${ecobeeHumidity}% and normalized outdoor humidity (${outdoorHumidity}%) is too high to dehumidify, using $dehumidifySwitches switch(es) only",
 					askAlexaFlag)            
 		}
 		//      If mode is cooling and outdoor humidity is too high then use the A/C to lower humidity in the house if there is no dehumidifier
@@ -822,7 +823,7 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace("Ecobee humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, no dehumidifier is available, flag is set to false in the smartapp...")
-			send("Ecobee humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, no dehumidifier is available, flag is set to false in the smartapp...",
+			send("Ecobee humidity provided is way higher than target humidity level=${target_humidity}, need to dehumidify with AC, no dehumidifier is available, flag is set to false in the smartapp, using $dehumidifySwitches switch(es) only",
 				askAlexaFlag)            
 		}
 		//      If mode is cooling and outdoor humidity is too high then use the A/C to lower humidity in the house if there is no dehumidifier
@@ -845,7 +846,7 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace "Dehumidify to ${target_humidity} in ${ecobeeMode} mode using the dehumidifier"
-			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode using the dehumidifier only",askAlexaFlag)
+			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode using the connected dehumidifier and $dehumidifySwitches switch(es)",askAlexaFlag)
 		}
 
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': "${target_humidity}", 'humidifierMode': 'off',
@@ -854,8 +855,8 @@ def setHumidityLevel() {
 
 		if (settings.useFanWhenHumidityIsHigh) {
 			if (detailedNotif) {
-				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
-				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+				log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan and $dehumidifySwitches switch(es) as requested")
+				send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan and $dehumidifySwitches switch(es)  as requested")
 			}
 			ecobee.fanOn() // set fan on
 		}
@@ -874,7 +875,7 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace "Dehumidify to ${target_humidity} in ${ecobeeMode} mode using the dehumidifier"
-			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode using the dehumidifier only", askAlexaFlag)
+			send ("dehumidify to ${target_humidity}% in ${ecobeeMode} mode using the connected dehumidifier and $dehumidifySwitches switch(es)", askAlexaFlag)
 		}
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': "${target_humidity}", 'humidifierMode': 'off',
 			'dehumidifyWithAC': 'false', 'fanMinOnTime': "${min_fan_time}", 'vent': 'off'
@@ -903,7 +904,7 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace "In cooling mode, outdoor temp is lower than inside, using dehumidifier for free cooling"
-			send ("Outdoor temp is lower than inside, using dehumidifier for more efficient cooling", askAlexaFlag)
+			send ("Outdoor temp is lower than inside, using connected dehumidifier and $dehumidifySwitches switch(es) for more efficient cooling ", askAlexaFlag)
 		}
 
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': "${target_humidity}", 'humidifierMode': 'off',
@@ -921,7 +922,7 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace("In cooling mode, outdoor temp is lower than inside, using the HRV to get fresh air")
-			send ("Outdoor temp is lower than inside, using the HRV for more efficient cooling", askAlexaFlag)
+			send ("Outdoor temp is lower than inside, using the connected HRV and $dehumidifySwitches switch(es) for more efficient cooling", askAlexaFlag)
 
 		}
 		//      If mode is cooling and outdoor's temp is lower than inside, then use HRV to get fresh air into the house
@@ -945,7 +946,7 @@ def setHumidityLevel() {
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'off', 'humidifierMode': 'off', 'vent': 'off'])
 		if (detailedNotif) {
 			log.trace("Indoor humidity is ${ecobeeHumidity}%, but outdoor humidity (${outdoorHumidity}%) is too high to dehumidify")
-			send ("indoor humidity is ${ecobeeHumidity}%, but outdoor humidity ${outdoorHumidity}% is too high to dehumidify", askAlexaFlag)
+			send ("indoor humidity is ${ecobeeHumidity}%, but outdoor humidity ${outdoorHumidity}% is too high to dehumidify, using $dehumidifySwitches switch(es) only", askAlexaFlag)
 		}
 
 		if (settings.useFanWhenHumidityIsHigh) {
@@ -964,8 +965,8 @@ def setHumidityLevel() {
         
 	} else if ((ecobeeHumidity > (target_humidity + min_humidity_diff)) && (settings.useFanWhenHumidityIsHigh)) {
 		if (detailedNotif) {
-			log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
-			send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan as requested")
+			log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan and $dehumidifySwitches switch(es) as requested")
+			send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, triggering the HVAC fan and $dehumidifySwitches switch(es) as requested")
 		}
 		ecobee.fanOn() // set fan on
 		if (dehumidifySwitches) {
