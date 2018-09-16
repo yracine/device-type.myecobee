@@ -691,8 +691,8 @@ def setHumidityLevel() {
 
 		if (detailedNotif) {
 			log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
-				"normalized outdoor humidity is within range (${outdoorHumidity}) & outdoor temp is ${outdoorTemp},not too cold using connected dehumidifier and $dehumidifySwitches switch(es)"
-			send ("use HRV/ERV to dehumidify ${target_humidity}% in ${ecobeeMode} mode", askAlexaFlag)
+				"normalized outdoor humidity is within range (${outdoorHumidity}) & outdoor temp is ${outdoorTemp},not too cold using connected HRV/ERV and $dehumidifySwitches switch(es)"
+			send ("using HRV/ERV and $dehumidifySwitches switch(es) to dehumidify ${target_humidity}% in ${ecobeeMode} mode", askAlexaFlag)
 		}
 
 		//      Turn on the HRV/ERV, the outdoor temp is not too cold 
@@ -727,7 +727,7 @@ def setHumidityLevel() {
 		if (detailedNotif) {
 			log.trace "Ecobee is in ${ecobeeMode} mode and its humidity > target humidity level=${target_humidity}, need to dehumidify the house " +
 				"normalized outdoor humidity is lower (${outdoorHumidity}), but outdoor temp is ${outdoorTemp}: too cold to dehumidify, using $dehumidifySwitches switch(es) only"
-			send ("Too cold (${outdoorTemp}°) to dehumidify to ${target_humidity}, using  $dehumidifySwitches switch(es) only", askAlexaFlag)
+			send ("Too cold (${outdoorTemp}°) to dehumidify to ${target_humidity}, using $dehumidifySwitches switch(es) only", askAlexaFlag)
 		}
 		if (settings.useFanWhenHumidityIsHigh) {
 			if (detailedNotif) {
@@ -816,7 +816,7 @@ def setHumidityLevel() {
 			dehumidifySwitches.on()        
 		}            
 
-	} else if (((ecobeeMode == 'cool') && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
+	} else if (((ecobeeMode == 'cool' && !dehumidifyWithACFlag) && (hasDehumidifier == 'false') && (hasHrv == 'false' && hasErv == 'false')) &&
 		(ecobeeHumidity > (target_humidity + min_humidity_diff)) &&
 		(outdoorHumidity > target_humidity)) {
 
