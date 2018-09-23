@@ -43,7 +43,7 @@ PREREQUISITES
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
 - (d) <b>Location set for your ST account  </b>
 
-Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
+Under the ST classic mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
 
 https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
 
@@ -199,7 +199,7 @@ b) Click on the My ecobee device that you just created
 
 c) Click on Preferences (edit)
 
-N.B. You can also edit the preferences under Things/Your Ecobee device/Edit Device using the ST mobile app.
+N.B. You can also edit the preferences under Things/Your Ecobee device/Edit Device using the ST classic mobile app.
 
 You only need to edit the following parameters
 
