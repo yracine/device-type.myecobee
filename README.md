@@ -142,7 +142,7 @@ If the instructions above are not clear enough, you can refer to the troubleshoo
 http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.27t_know_how_to_create_a_custom_smartapp
 
 
-# 3) Under the ST mobile app, execute MyEcobeeInit (under MarketSpace>Smartapps>MyApps)
+# 3) Under the ST classic mobile app, execute MyEcobeeInit (under MarketSpace>Smartapps>MyApps)
 
 
 
@@ -179,7 +179,7 @@ https://graph.api.smartthings.com/device/list  (or whatever your shard is and cl
 
 And
 
-In the ST mobile app, under myHome/Things.
+In the ST classic mobile app, under myHome/Things.
 
 
 # 6) To populate the UI fields for your newly created device(s)
