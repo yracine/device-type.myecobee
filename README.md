@@ -41,7 +41,7 @@ PREREQUISITES
 - (a) Your ecobee thermostat fully operational (and connected to wifi)
 - (b) Your ecobee credentials (username/password)
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
-- (d) <b>Location set for your ST account under the ST classic app </b>
+- (d) <b>Location set for your ST account under the ST classic mobile app </b>
 
 Under the ST classic mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
 
