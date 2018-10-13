@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.2"}
+def get_APP_VERSION() {return "3.5.3"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -349,7 +349,7 @@ def initialize() {
 		subscribe(powerSwitch, "switch.off", offHandler)
 		subscribe(powerSwitch, "switch.on", onHandler)
 	}
-	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	int delay = givenInterval ?: 59 // By default, do it every hour
 	if ((delay < 10) || (delay > 59)) {
 		log.error "Scheduling delay not in range (${delay} min.), exiting"
 		runIn(30, "sendNotifDelayNotInRange")
@@ -391,7 +391,7 @@ def appTouch(evt) {
 
 def rescheduleIfNeeded(evt) {
 	if (evt) log.debug("rescheduleIfNeeded>$evt.name=$evt.value")
-	Integer delay = givenInterval ?: 59 // By default, do it every hour
+	int delay = givenInterval ?: 59 // By default, do it every hour
 	BigDecimal currentTime = now()    
 	BigDecimal lastPollTime = (currentTime - (state?.poll["last"]?:0))  
  
@@ -425,7 +425,7 @@ def onHandler(evt) {
 
 
 def setHumidityLevel() {
-	Integer scheduleInterval = givenInterval ?: 59 // By default, do it every hour
+	int scheduleInterval = givenInterval ?: 59 // By default, do it every hour
 
 	def todayDay = new Date().format("dd",location.timeZone)
 	if ((!state?.today) || (todayDay != state?.today)) {
@@ -483,8 +483,8 @@ def setHumidityLevel() {
 		return
 	}
 	def min_humidity_diff = givenHumidityDiff ?: 5 //  5% humidity differential by default
-	Integer min_fan_time = (givenFanMinTime!=null) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
-	Integer min_vent_time = (givenVentMinTime!=null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+	int min_fan_time = (givenFanMinTime!=null) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
+	int min_vent_time = (givenVentMinTime!=null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
 	def freeCoolingFlag = (freeCooling != null) ? freeCooling : false // Free cooling using the Hrv/Erv/dehumidifier
 	def frostControlFlag = (frostControl != null) ? frostControl : false // Frost Control for humdifier, by default=false
 	def min_temp // Min temp in Farenheits for using HRV/ERV,otherwise too cold
@@ -496,7 +496,7 @@ def setHumidityLevel() {
 
 		min_temp = (givenMinTemp) ? givenMinTemp : 10 // Min temp in Farenheits for using HRV/ERV,otherwise too cold
 	}
-	Integer max_power = givenPowerLevel ?: 3000 // Do not run above 3000w consumption level by default
+	int max_power = givenPowerLevel ?: 3000 // Do not run above 3000w consumption level by default
 
 
 	//  Polling of all devices
@@ -551,7 +551,7 @@ def setHumidityLevel() {
 
 		try {
 			ted.poll()
-			Integer powerConsumed = ted.currentPower.toInteger()
+			int powerConsumed = ted.currentPower.toInteger()
 			if (powerConsumed > max_power) {
 
 				// peak of energy consumption, turn off all devices
@@ -1021,6 +1021,7 @@ def setHumidityLevel() {
 }
 
 private void use_dehumidifer_as_HRV() {
+	int scheduleInterval = givenInterval ?: 59 // By default, do it every hour
 	Date now = new Date()
 	String nowInLocalTime = new Date().format("yyyy-MM-dd HH:mm", location.timeZone)
 	Calendar oneHourAgoCal = new GregorianCalendar()
@@ -1037,7 +1038,11 @@ private void use_dehumidifer_as_HRV() {
 	ecobee.generateReportRuntimeEvents("dehumidifier", oneHourAgo, now, 0, null, 'lastHour')
 	def dehumidifierRunInMinString=ecobee.currentDehumidifierRuntimeInPeriod    
 	float dehumidifierRunInMin = (dehumidifierRunInMinString)? dehumidifierRunInMinString.toFloat().round():0
-	float diffVentTimeInMin = min_vent_time - dehumidifierRunInMin as Float
+	int min_vent_time = (givenVentMinTime!=null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+	if (detailedNotif) {
+		log.debug "use_dehumidifer_as_HRV>dehumidifierRunInMin=$dehumidifierRunInMin, min_vent_time=$min_vent_time"    
+	}        
+	float diffVentTimeInMin = min_vent_time - (dehumidifierRunInMin as Float)
 	def equipStatus = ecobee.currentEquipmentStatus
 	if (detailedNotif) {
 		send ("dehumidifier runtime in the last hour is ${dehumidifierRunInMin.toString()} min. vs. desired ventilatorMinOnTime =${min_vent_time.toString()} minutes",
