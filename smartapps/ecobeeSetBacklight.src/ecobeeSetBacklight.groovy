@@ -172,7 +172,7 @@ def setBacklight() {
 			if (backlightOffTime != null  && backlightOffTime>0) {
 				log.debug "About to change backlightOffTime, new value=$backlightOffTime"
 				it.setBacklightOffTime(backlightOffTime)                
-				send("set ${it} with backlightOffTime in seconds=$backlightOffTime as requested", settings.askAlexaFlag)
+				send("set ${it} with backlightOffTime=$backlightOffTime seconds as requested", settings.askAlexaFlag)
 			}           
 			if (backlightSleepIntensity != null) {
 				log.debug "About to change backlightSleepIntensity, new value=$backlightSleepIntensity"
