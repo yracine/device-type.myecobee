@@ -32,7 +32,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.0.3"}
+def get_APP_VERSION() {return "1.0.4"}
 
 
 
@@ -171,7 +171,7 @@ def setAudio() {
 		}
 		ecobee.each {
 			it.updateAudio("", playbackVolume, micEnabled, soundAlertVolume, soundTickVolume )
-			send("set ${it} to playbackVolume ${playbackVolume}, microphoneEnabled: $micEnabled, soundAlertVolume: $soundAlertVolume, soundTickVolume: $soundTickVolume as requested, settings.askAlexaFlag")
+			send("set ${it} to playbackVolume ${playbackVolume}, microphoneEnabled: $micEnabled, soundAlertVolume: $soundAlertVolume, soundTickVolume: $soundTickVolume as requested", settings.askAlexaFlag)
 		}            
 	} else {
 		log.debug("ecobeeSetAudio>not the rigth time to set ${ecobee} to playbackVolume ${playbackVolume}, microphoneEnabled: micEnabled, soundAlertVolume: $soundAlertVolume, soundTickVolume: $soundTickVolume")
