@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.3"}
+def get_APP_VERSION() {return "3.5.4"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -1039,6 +1039,7 @@ private void use_dehumidifer_as_HRV() {
 	def dehumidifierRunInMinString=ecobee.currentDehumidifierRuntimeInPeriod    
 	float dehumidifierRunInMin = (dehumidifierRunInMinString)? dehumidifierRunInMinString.toFloat().round():0
 	int min_vent_time = (givenVentMinTime!=null) ? givenVentMinTime : 20 //  20 min. ventilator time per hour by default
+	int min_fan_time = (givenFanMinTime!=null) ? givenFanMinTime : 20 //  20 min. fan time per hour by default
 	if (detailedNotif) {
 		log.debug "use_dehumidifer_as_HRV>dehumidifierRunInMin=$dehumidifierRunInMin, min_vent_time=$min_vent_time"    
 	}        
