@@ -28,7 +28,7 @@ P.S. Technical support packages are also available.
 PREREQUISITES
 =====================
 
-- Your ecobee thermostat fully operational (and connected to wifi)
+- Your ecobee thermostat fully operational (and connected to wifi), exposed to SmartThings via My Ecobee device (doesn't work with any other ecobee implementation)
 - Your ecobee's proprietary sensors connected to your thermostat and fully operationnal under the ecobee portal
   
   Note: This smartapp is used to expose the ecobee's proprietary remote sensors. 
