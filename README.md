@@ -162,6 +162,8 @@ If needed, watch "how to setup ecobee" video (but use My ecobee Init instead of 
 
 http://blog.smartthings.com/news/smartthings-updates/new-additions-to-smartthings-labs
 
+After signing-in, you need to accept the permission needed to connect your ecobee devices to SmartThings by pressing the accept button at the bottom of the page.
+
 After being connected, click 'Next' and select your ecobee thermostat(s) (ecobee lite, ecobee3, SMART, SMART-SI, EMS) 
 that you want to control from Smartthings and, then press 'Next' for the 'Other Settings &Notification' page, 
 and then 'Done' when finished.
