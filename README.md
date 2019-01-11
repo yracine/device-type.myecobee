@@ -286,7 +286,7 @@ The ecobeeGenerateXXXstats smartapps allow to collect runtime stats for better t
 
 /****************************************************
 
-<b>f AwayFromHome and ecobeeResumeProg</b>
+<b>f) AwayFromHome and ecobeeResumeProg</b>
 
 /****************************************************
 
@@ -294,7 +294,7 @@ Use presence/motion sensors or ST hello modes to set a target climate or heating
 
 /****************************************************
 
-<b>g ecobeeSetClimate</b>
+<b>g) ecobeeSetClimate</b>
 
 /****************************************************
 
@@ -303,7 +303,7 @@ This smartapp allows a ST user to set the ecobee thermostat(s) to a given climat
 
 /****************************************************
 
-<b>h ecobeeStateTriggerHA</b>
+<b>h) ecobeeStateTriggerHA</b>
 
 /****************************************************
 
