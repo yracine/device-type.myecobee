@@ -219,9 +219,9 @@ You only need to edit the following parameters
  
  http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Item_3b.29_Set_up_the_holdType_input_parameter
 
-# 8) Use some of the Complimentary Smartapps available (optional)
+# 8) Use some of the  Smartapps available (optional)
 
-Refer to:
+Some complimentary smartapps at my github, refer to:
 
 https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
