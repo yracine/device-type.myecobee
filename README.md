@@ -219,8 +219,11 @@ You only need to edit the following parameters
  
  http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Item_3b.29_Set_up_the_holdType_input_parameter
 
-# 8) Use some of the Smartapps available (optional)
+# 8) Use some of the Complimentary Smartapps available (optional)
 
+Refer to:
+
+https://github.com/yracine/device-type.myecobee/tree/master/smartapps
 
 Amongst others:
 
@@ -280,7 +283,7 @@ Change your ecobee climate (Away,Home) according to your hello home mode.
 
 /****************************************************
 
-This smartapps allow the user to get comfort & energy tips based on his/her indoor/outdoor conditions at home.
+The smartapps allow the user to get comfort & energy tips based on his/her indoor/outdoor conditions at home.
 The ecobeeGenerateXXXstats smartapps allow to collect runtime stats for better tips generation.
 
 
