@@ -273,9 +273,20 @@ P.S. Your humidifier/dehumidifier/HRV/ERV needs to be physically connected to ec
 
 Change your ecobee climate (Away,Home) according to your hello home mode.
 
+
 /****************************************************
 
-<b>e) AwayFromHome and ecobeeResumeProg</b>
+<b>e) ecobeeGetTips and EcobeeGenerateXXXstats/b>
+
+/****************************************************
+
+This smartapps allow the user to get comfort & energy tips based on his/her indoor/outdoor conditions at home.
+The ecobeeGenerateXXXstats smartapps allow to collect runtime stats for better tips generation.
+
+
+/****************************************************
+
+<b>f AwayFromHome and ecobeeResumeProg</b>
 
 /****************************************************
 
@@ -283,7 +294,7 @@ Use presence/motion sensors or ST hello modes to set a target climate or heating
 
 /****************************************************
 
-<b>f) ecobeeSetClimate</b>
+<b>g ecobeeSetClimate</b>
 
 /****************************************************
 
@@ -292,7 +303,7 @@ This smartapp allows a ST user to set the ecobee thermostat(s) to a given climat
 
 /****************************************************
 
-<b>g) ecobeeStateTriggerHA</b>
+<b>h ecobeeStateTriggerHA</b>
 
 /****************************************************
 
@@ -300,7 +311,7 @@ The above smartapp allows a ST user to trigger some switch(es) (turn on/off or f
 
 /****************************************************
 
-<b>h) ecobeeSetZoneWithSchedule</b>
+<b>i ecobeeSetZoneWithSchedule</b>
 
 /****************************************************
 
