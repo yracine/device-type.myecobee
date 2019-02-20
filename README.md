@@ -172,6 +172,8 @@ If you get a blank screen after pressing 'Next or you get the following error: "
 
 If you have My Ecobee bundle, you can also select your ecobee switch(es) to be exposed to ST.
 
+At the end of the authorization flow, you may have to press "Save" several times if you have have the following error message: "Error processing your request - please try again".  This is due to some ST platform timeouts due to rate limiting.
+
 # 5) Your device(s) should now be ready to process your commands
 
 
