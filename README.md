@@ -166,13 +166,13 @@ After signing-in, you need to accept the permission needed to connect your ecobe
 
 After being connected, click 'Next' and select your ecobee thermostat(s) (ecobee lite, ecobee3, SMART, SMART-SI, EMS) 
 that you want to control from Smartthings and, then press 'Next' for the 'Other Settings &Notification' page, 
-and then 'Done' when finished.
+and then 'Done' or 'Save' when finished.
 
 If you get a blank screen after pressing 'Next or you get the following error: " Error - bad state' or 'Java.lang.NullPointerException: Cannot get property 'accessToken' on null object" in the IDE', you'd need to enable oAuth as specified in step 2f) above.
 
 If you have My Ecobee bundle, you can also select your ecobee switch(es) to be exposed to ST.
 
-At the end of the authorization flow, you may have to press "Save" several times if you have the following error message: "Error processing your request - please try again" or "Unexepected error".  This is due to some ST platform timeouts due to rate limiting.
+At the end of the authorization flow, you may have to press "Save" several times if you have the following error message: "Error processing your request - please try again" or "Unexpected error".  This is due to some ST platform timeouts due to rate limiting.
 
 # 5) Your device(s) should now be ready to process your commands
 
