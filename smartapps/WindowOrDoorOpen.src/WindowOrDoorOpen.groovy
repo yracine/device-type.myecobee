@@ -13,7 +13,7 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *
- * Software Distribution is restricted and shall be done only with Developer's written approval.
+ * Software Distribution is restricted and shall be done fonly with Developer's written approval.
  * 
  * Compatible with MyEcobee & MyNextTstat devices available at my store:
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.8" 
+		paragraph "Version 2.5.9" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -270,7 +270,7 @@ def sensorTriggered(evt, indice=0) {
 		def takeActionMethod= "takeAction${indice}"       
 		runIn(freq, "${takeActionMethod}",[overwrite: false])
 		state?.status[indice] = "scheduled"
-		log.debug "${theSensor[indice]} is now open and will be checked every ${delay} minute(s) by ${takeActionMethod}"
+		log.debug "${theSensor[indice]} is now open and will be checked every ${delay} minutes by ${takeActionMethod}"
 	}
 }
 
@@ -477,7 +477,7 @@ def takeAction(indice=0) {
 		state.count[indice] = state.count[indice] + 1
 		log.debug "${theSensor[indice]} was open too long, sending message (count=${state.count[indice]})"
 		def openMinutesCount = state.count[indice] * delay
-		msg = "your ${theSensor[indice]} has been open for more than ${openMinutesCount} minute(s)!"
+		msg = "your ${theSensor[indice]} has been open for more than ${openMinutesCount} minutes!"
 		send("WindowOrDoorOpen>${msg}")
 //		runIn(10, "speak_voice_message",  [data: [message:msg]])            	
 		speak_voice_message(msg)
