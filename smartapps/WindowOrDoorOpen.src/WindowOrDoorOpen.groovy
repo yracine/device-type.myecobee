@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.6" 
+		paragraph "Version 2.6a" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -67,7 +67,7 @@ preferences {
 		input (name:"masterSwitch", type:"capability.switch", required: false, description: "Optional")
 	}
 	section("What do I use as the on/off switch to enable/disable this smartapp's processing? [optional,ex.for physical or virtual buttons]") {
-		input (name:"powerSwitch", type:"capability.switch", required: false, description: "Optional")
+		input (name:"holdSwitch", type:"capability.switch", required: false, description: "Optional")
 	}
 
 }
@@ -93,9 +93,9 @@ def initialize() {
 	state?.status=[]    
 	state?.count=[]    
 	state.lastThermostatMode = ""
-	if (powerSwitch) {
-		subscribe(powerSwitch, "switch.off", offHandler)
-		subscribe(powerSwitch, "switch.on", onHandler)
+	if (holdSwitch) {
+		subscribe(holdSwitch, "switch.off", offHandler)
+		subscribe(holdSwitch, "switch.on", onHandler)
 	}
     
 	int i=0    
@@ -490,10 +490,10 @@ def takeAction(indice=0) {
 	def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
 	def msg
 
-	if (powerSwitch != null && powerSwitch?.currentSwitch == "off") {
-		log.debug("Virtual master switch ${powerSwitch.name} is off, processing on hold...")
+	if (holdSwitch != null && holdSwitch?.currentSwitch == "off") {
+		log.debug("Virtual master switch ${holdSwitch.name} is off, processing on hold...")
 		if (detailedNotif) {
-			send("Virtual master switch ${powerSwitch.name} is off, processing on hold...")
+			send("Virtual master switch ${holdSwitch.name} is off, processing on hold...")
 		}
 		return
 	}
