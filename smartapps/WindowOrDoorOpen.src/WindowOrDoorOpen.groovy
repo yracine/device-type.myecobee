@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.5.9" 
+		paragraph "Version 2.6" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -66,6 +66,9 @@ preferences {
 	section("What do I use as the Master on/off switch to enable/disable other smartapps' processing? [optional,ex.for zoned heating/cooling solutions]") {
 		input (name:"masterSwitch", type:"capability.switch", required: false, description: "Optional")
 	}
+	section("What do I use as the on/off switch to enable/disable this smartapp's processing? [optional,ex.for physical or virtual buttons]") {
+		input (name:"powerSwitch", type:"capability.switch", required: false, description: "Optional")
+	}
 
 }
 
@@ -90,6 +93,10 @@ def initialize() {
 	state?.status=[]    
 	state?.count=[]    
 	state.lastThermostatMode = ""
+	if (powerSwitch) {
+		subscribe(powerSwitch, "switch.off", offHandler)
+		subscribe(powerSwitch, "switch.on", onHandler)
+	}
     
 	int i=0    
 	theSensor.each {
@@ -102,6 +109,17 @@ def initialize() {
 			return       
 		}        
 	}  
+}
+
+def offHandler(evt) {
+	log.debug "$evt.name: $evt.value"
+	unschedule()    
+    
+}
+
+def onHandler(evt) {
+	log.debug "$evt.name: $evt.value"
+	takeAction()
 }
 
 def sensorTriggered0(evt) {
@@ -470,7 +488,15 @@ def takeAction(indice=0) {
 	def maxNotif = (givenMaxNotif) ?: 5
 	def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
 	def msg
-    
+
+	if (powerSwitch != null && powerSwitch?.currentSwitch == "off") {
+		log.debug("Virtual master switch ${powerSwitch.name} is off, processing on hold...")
+		if (detailedNotif) {
+			send("Virtual master switch ${powerSwitch.name} is off, processing on hold...")
+		}
+		return
+	}
+
 	def contactState = theSensor[indice].currentState("contact")
 	log.trace "takeAction>${theSensor[indice]}'s contact status = ${contactState.value}, state.status=${state.status[indice]}, indice=$indice"
 	if ((state?.status[indice] == "scheduled") && (contactState.value == "open")) {
