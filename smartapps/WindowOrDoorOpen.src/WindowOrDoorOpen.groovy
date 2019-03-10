@@ -113,6 +113,7 @@ def initialize() {
 
 def offHandler(evt) {
 	log.debug "$evt.name: $evt.value"
+	restore_tstats_mode()
 	unschedule()    
     
 }
