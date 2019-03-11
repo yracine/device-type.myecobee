@@ -43,7 +43,7 @@ PREREQUISITES
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
 - (d) <b>Location set for your ST account under the ST classic mobile app </b>
 
-Under the ST classic mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
+<b>Under the ST classic mobile app </b>, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
 
 https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
 
