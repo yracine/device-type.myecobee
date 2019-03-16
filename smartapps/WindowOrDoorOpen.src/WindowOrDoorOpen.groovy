@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.6a" 
+		paragraph "Version 2.7" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -62,6 +62,7 @@ preferences {
 	section("Turn off the thermostat(s) or set them to eco/away after the delay;revert this action when closed [optional]") {
 		input "tstats", "capability.thermostat", title:"Which thermostat(s)?", multiple: true, required: false
 		input "awayFlag", "bool", title: "Set the thermostat(s) to eco/away instead of turning it off  [default= off]?", required: false
+		input "delayToRestore", "number", title: "Delay in Minutes before restoring the thermostat mode? [optional]", required:false
 	}
 	section("What do I use as the Master on/off switch to enable/disable other smartapps' processing? [optional,ex.for zoned heating/cooling solutions]") {
 		input (name:"masterSwitch", type:"capability.switch", required: false, description: "Optional")
@@ -280,7 +281,13 @@ def sensorTriggered(evt, indice=0) {
 	def max_open_time_in_min = maxOpenTime ?: 5 // By default, 5 min. is the max open time
 
 	if (evt.value == "closed") {
-		restore_tstats_mode()
+		if (delayToRestore) {
+			log.debug "about to call restore_tstats_mode() in $delayToRestore minutes"
+			runIn((delayToRestore*60), "restore_tstats_mode")
+		} else {
+			log.debug "about to call restore_tstats_mode() immediately (no delay specified)"
+			restore_tstats_mode()
+		}        
 		def msg = "your ${theSensor[indice]} is now closed"
 //		send("WindowOrDoorOpen>${msg}")
 //		speak_voice_message(msg)        
@@ -531,7 +538,13 @@ def takeAction(indice=0) {
 		log.debug msg            
 		runIn(freq, "${takeActionMethod}", [overwrite: false])
 	} else if (contactState.value == "closed") {
-		restore_tstats_mode()
+		if (delayToRestore) {
+			log.debug "about to call restore_tstats_mode() in $delayToRestore minutes"
+			runIn((delayToRestore*60), "restore_tstats_mode")
+		} else {
+			log.debug "about to call restore_tstats_mode() immediately (no delay specified)"
+			restore_tstats_mode()
+		}        
 		clearStatus(indice)
 		takeActionMethod= "takeAction${indice}"       
 		unschedule("${takeActionMethod}")
