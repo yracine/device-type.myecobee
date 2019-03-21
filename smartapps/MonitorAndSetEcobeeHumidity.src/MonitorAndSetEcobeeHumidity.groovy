@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.4"}
+def get_APP_VERSION() {return "3.5.5"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -415,6 +415,21 @@ def rescheduleIfNeeded(evt) {
 
 def offHandler(evt) {
 	log.debug "$evt.name: $evt.value"
+    
+	if (dehumidifySwitches) {
+		if (detailedNotif) {    
+			log.trace("turning off all dehumidify/fan switches")
+		}
+		dehumidifySwitches.on()        
+	}            
+    
+	if (humidifySwitches) {
+		if (detailedNotif) {    
+			log.trace("turning off all humidify/fan switches")
+		}
+		humidifySwitches.on()        
+	}            
+    
 }
 
 def onHandler(evt) {
