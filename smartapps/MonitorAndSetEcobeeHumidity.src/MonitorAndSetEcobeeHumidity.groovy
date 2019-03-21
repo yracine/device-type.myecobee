@@ -420,14 +420,14 @@ def offHandler(evt) {
 		if (detailedNotif) {    
 			log.trace("turning off all dehumidify/fan switches")
 		}
-		dehumidifySwitches.on()        
+		dehumidifySwitches.off()        
 	}            
     
 	if (humidifySwitches) {
 		if (detailedNotif) {    
 			log.trace("turning off all humidify/fan switches")
 		}
-		humidifySwitches.on()        
+		humidifySwitches.off()        
 	}            
     
 }
