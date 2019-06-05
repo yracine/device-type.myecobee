@@ -325,7 +325,7 @@ The above smartapp allows a ST user to trigger some switch(es) (turn on/off or f
 
 /****************************************************
 
-<b>i ecobeeSetZoneWithSchedule</b>
+<b>i) ecobeeSetZoneWithSchedule</b>
 
 /****************************************************
 
