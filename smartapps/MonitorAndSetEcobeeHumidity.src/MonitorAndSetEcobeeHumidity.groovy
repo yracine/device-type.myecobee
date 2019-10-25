@@ -1043,8 +1043,8 @@ def setHumidityLevel() {
 			humidifySwitches.off()        
 			if (settings.useFanWithHumidifierSwitches) {
 				if (detailedNotif) {
-					log.trace("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, setting the HVAC's fan to auto")
-					send("Indoor humidity is ${ecobeeHumidity}% and above the target humidity, setting the HVAC's fan to auto")
+					log.trace("Indoor humidity is ${ecobeeHumidity}% and close to target humidity, setting the HVAC's fan to auto")
+					send("Indoor humidity is ${ecobeeHumidity}% and close to target humidity, setting the HVAC's fan to auto")
 				}
 				ecobee.fanAuto() // set fan to auto
 			}
