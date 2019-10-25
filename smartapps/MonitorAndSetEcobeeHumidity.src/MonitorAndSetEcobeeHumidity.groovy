@@ -257,6 +257,7 @@ def dehumidifySettings() {
 		}
 		section("Switch(es) to be turned on when needed for dehumidifying/ventilating the house[optional]") {
 			input "dehumidifySwitches", "capability.switch", multiple:true, required: false
+			input "useFanWhenHumidityIsHigh", "bool", title: "Trigger HVAC's fan when humidity is high?", required: false
 		}
 		        
 		section {
