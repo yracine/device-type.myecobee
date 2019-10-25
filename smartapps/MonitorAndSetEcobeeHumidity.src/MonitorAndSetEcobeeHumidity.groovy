@@ -79,7 +79,7 @@ def dashboardPage() {
 				def hasErv = (ecobee.currentHasErv) ? ecobee.currentHasErv : 'false'
 				String dehumidifyWithACString=(settings.dehumidifyWithACFlag)? 'true': 'false'                
 				String useFanWhenHumidityIsHighString=(settings.useFanWhenHumidityIsHigh)? 'true': 'false'                
-				String useFanWithHumidifierSwitchesString=(settings.useFanWithHumiditySwitches)? 'true': 'false'                
+				String useFanWithHumidifierSwitchesString=(settings.useFanWithHumidifierSwitches)? 'true': 'false'                
 				def heatingSetpoint,coolingSetpoint
 				if (indoorSensor) {
 					indoorHumidity = indoorSensor.currentHumidity
