@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.6"}
+def get_APP_VERSION() {return "3.5.7"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -535,7 +535,7 @@ def setHumidityLevel() {
 			state?.exceptionCount=0       
 		}                
 	} catch (e) {
-		log.error "setHumidityLevel>exception $e while trying to poll the device $d, exceptionCount= ${state?.exceptionCount}" 
+		log.error "setHumidityLevel>exception $e while trying to poll the device, exceptionCount= ${state?.exceptionCount}" 
 	}
 	if ((state?.exceptionCount>=MAX_EXCEPTION_COUNT) || ((exceptionCheck) && (exceptionCheck.contains("Unauthorized")))) {
 		// need to authenticate again    
