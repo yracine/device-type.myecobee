@@ -22,6 +22,7 @@
  *  N.B. Requires MyEcobee device available at 
  *          http://www.ecomatiqhomes.com/#!store/tc3yr 
  */
+ 
 definition(
 	name: "MonitorAndSetEcobeeTemp",
 	namespace: "yracine",
@@ -41,7 +42,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.9e"}
+def get_APP_VERSION() { return "3.4.9f"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -108,8 +109,8 @@ def dashboardPage() {
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
 			paragraph "Copyright©2014 Yves Racine"
-				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
- 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+				href url:"https://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+ 					description: "https://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		} /* end section About */
 	} /* end dashboardPage */ 
 } 
@@ -1118,7 +1119,7 @@ def fToC(temp) {
 }
 
 def getImagePath() {
-	return "http://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
+	return "https://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
 }    
 
 def get_APP_NAME() {
