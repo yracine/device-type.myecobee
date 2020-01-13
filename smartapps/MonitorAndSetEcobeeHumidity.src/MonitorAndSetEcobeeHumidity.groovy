@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.7"}
+def get_APP_VERSION() {return "3.5.8"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -201,8 +201,8 @@ def dashboardPage() {
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
 			paragraph "Copyright©2014 Yves Racine"
-				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
- 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+				href url:"https://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+ 					description: "https://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
        
 	} /* end dashboardPage */ 
@@ -1241,7 +1241,7 @@ def fToC(temp) {
 }
 
 def getImagePath() {
-	return "http://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
+	return "https://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
 } 
 
 def get_APP_NAME() {
