@@ -32,7 +32,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.0.4"}
+def get_APP_VERSION() {return "1.0.5"}
 
 
 
@@ -46,8 +46,8 @@ preferences {
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
 			paragraph "Copyright©2018 Yves Racine"
-				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
-					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+				href url:"https://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+					description: "https://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Set the ecobee thermostat(s)") {
 			input "ecobee", "device.myEcobeeDevice", title: "Which ecobee thermostat(s)?", multiple: true
@@ -252,7 +252,7 @@ def event(evt) {
 }
 
 def getCustomImagePath() {
-	return "http://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
+	return "https://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
 }    
 
 private def get_APP_NAME() {
