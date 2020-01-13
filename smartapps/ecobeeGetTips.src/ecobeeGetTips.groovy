@@ -37,8 +37,8 @@ preferences {
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
 			paragraph "Copyright©2016 Yves Racine"
-				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
-					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
+				href url:"https://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
+					description: "https://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Get tips for this ecobee thermostat") {
 			input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
@@ -123,5 +123,5 @@ def initialize() {
 
 
 def getCustomImagePath() {
-	return "http://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
+	return "https://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
 }    
