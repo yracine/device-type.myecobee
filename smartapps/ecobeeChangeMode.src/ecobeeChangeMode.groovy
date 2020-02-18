@@ -40,7 +40,7 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 1.9.9b" 
+			paragraph "Version 2.0" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -83,10 +83,13 @@ def selectProgram() {
 		section("When SmartThings' hello home mode changes to (ex. 'Away', 'Home')[optional]") {
 			input "newMode", "enum", options: enumModes, multiple:true, required: false
 		}
+		section("Or the following virtual/physical switch is turned on)[optional]") {
+			input "aSwitch", type:"capability.switch", required: false, description: "Optional"
+		}
 		section("Enter a delay in minutes [optional, default=immediately after ST hello mode change] ") {
 			input "delay", "number", title: "Delay in minutes [default=immediate]", description:"no delay by default",required:false
 		}
-		section("Do the mode change manually only (by pressing the arrow next to its name in Automation/Smartapps in the mobile app)") {
+		section("Or Do the mode change manually only (by pressing the arrow next to its name in Automation/Smartapps in the mobile app)") {
 			input "manualFlag", "bool", title: "Manual only [default=false]", description:"optional",required:false
 		}
 
@@ -108,6 +111,9 @@ private def initialize() {
 
 	if (!manualFlag) {
 		subscribe(location, "mode", changeMode)
+		if (aSwitch) {
+			subscribe(aSwitch, "switch.on", onHandler, [filterEvents: false])
+		}
 	} else {
 		takeAction()  
 	}    
@@ -118,6 +124,26 @@ def appTouch(evt) {
 	log.debug ("changeMode>location.mode= $location.mode, givenClimate=${givenClimate}, about to takeAction")
 
 	takeAction() 
+}
+
+def onHandler(evt) {
+	log.debug "$evt.name: $evt.value"
+	if (delay) {
+		try {
+			unschedule(takeAction)
+		} catch (e) {
+			log.debug ("ecobeeChangeMode>exception when trying to unschedule: $e")    
+		}    
+	}    
+       
+	if ((!delay) || (delay==null)) {
+		log.debug ("onHandler>about to call takeAction() immediately")
+		takeAction()    
+	} else {
+    
+		log.debug ("onHandler>about to schedule takeAction() in $delay minutes ")
+		runIn((delay*60), "takeAction")   
+ 	}    
 }
 
 
@@ -149,9 +175,10 @@ def changeMode(evt) {
 	}
 
 	if ((!delay) || (delay==null)) {
-		log.debug ("changeMode>about to call takeAction()")
+		log.debug ("changeMode>about to call takeAction() immediately")
 		takeAction()    
 	} else {
+		log.debug ("changeMode>about to schedule takeAction() in $delay minutes ")
 		runIn((delay*60), "takeAction")   
  	}    
 }
