@@ -1,4 +1,5 @@
 /***
+ *
  *  Copyright 2014 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
@@ -34,7 +35,7 @@ preferences {
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
 			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
-			paragraph "Version 2.1.7" 
+			paragraph "Version 2.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -52,6 +53,9 @@ preferences {
 		}
 		section("Or there is motion at home on these sensors [optional]") {
 			input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
+		}
+		section("Or the following virtual/physical switch is turned on)[optional]") {
+			input "aSwitch", type:"capability.switch", required: false, description: "Optional"
 		}
 		section("False alarm threshold [defaults = 3 minutes]") {
 			input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
@@ -111,8 +115,20 @@ def initialize() {
 	subscribe(app, appTouch)
 	subscribe(people, "presence", presence)
 	subscribe(motions, "motion", motionEvtHandler)
+	if (aSwitch) {
+		subscribe(aSwitch, "switch.on", onHandler, [filterEvents: false])
+	}
 
 }
+
+def onHandler(evt) {
+	log.debug "$evt.name: $evt.value"
+	def message = "EcobeeResumeProg>switch $aSwitch turned on, about to resume program"
+	send(message)
+	takeActions()    
+}
+
+
 
 def motionEvtHandler(evt) {
 	if ((evt.value == "active") && residentsHaveJustBeenActive()) {
