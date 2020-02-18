@@ -55,7 +55,7 @@ preferences {
 			input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
 		}
 		section("Or the following virtual/physical switch is turned on)[optional]") {
-			input "aSwitch", type:"capability.switch", required: false, description: "Optional"
+			input "aSwitch", "capability.switch", required: false, description: "Optional"
 		}
 		section("False alarm threshold [defaults = 3 minutes]") {
 			input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
