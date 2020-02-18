@@ -84,7 +84,7 @@ def selectProgram() {
 			input "newMode", "enum", options: enumModes, multiple:true, required: false
 		}
 		section("Or the following virtual/physical switch is turned on)[optional]") {
-			input "aSwitch", type:"capability.switch", required: false, description: "Optional"
+			input "aSwitch", "capability.switch", required: false, description: "Optional"
 		}
 		section("Enter a delay in minutes [optional, default=immediately after ST hello mode change] ") {
 			input "delay", "number", title: "Delay in minutes [default=immediate]", description:"no delay by default",required:false
