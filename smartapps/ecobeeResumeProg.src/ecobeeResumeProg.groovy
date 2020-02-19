@@ -35,7 +35,7 @@ preferences {
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
 			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
-			paragraph "Version 2.2" 
+			paragraph "Version 2.2.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -54,7 +54,7 @@ preferences {
 		section("Or there is motion at home on these sensors [optional]") {
 			input "motions", "capability.motionSensor", title: "Where?", multiple: true, required: false
 		}
-		section("Or the following virtual/physical switch is turned on)[optional]") {
+		section("Or the following virtual/physical switch is turned off...)[optional]") {
 			input "aSwitch", "capability.switch", required: false, description: "Optional"
 		}
 		section("False alarm threshold [defaults = 3 minutes]") {
@@ -116,14 +116,14 @@ def initialize() {
 	subscribe(people, "presence", presence)
 	subscribe(motions, "motion", motionEvtHandler)
 	if (aSwitch) {
-		subscribe(aSwitch, "switch.on", onHandler, [filterEvents: false])
+		subscribe(aSwitch, "switch.off", offHandler, [filterEvents: false])
 	}
 
 }
 
-def onHandler(evt) {
+def offHandler(evt) {
 	log.debug "$evt.name: $evt.value"
-	def message = "EcobeeResumeProg>switch $aSwitch turned on, about to resume program"
+	def message = "EcobeeResumeProg>switch $aSwitch turned off, about to resume program"
 	send(message)
 	takeActions()    
 }
