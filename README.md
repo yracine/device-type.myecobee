@@ -41,13 +41,19 @@ PREREQUISITES
 - (a) Your ecobee thermostat fully operational (and connected to wifi)
 - (b) Your ecobee credentials (username/password)
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
-- (d) <b>Location set for your ST account under the ST classic mobile app </b>
+- (d) ) The installation must proceed with the SmartThings classic mobile app, so you have to download it first from your appStore. This is required as any custom DTHs can only be instantiated or created via the ST classic mobile app
 
-<b>Under the ST classic mobile app </b>, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
+However, after creating the devices under SmartThings, you can return to the new Samsung Connect app if you prefer as both apps (ST classic, STSC) can run in parallel without any issues.
+
+- (e) <b>Location set for your ST account under the ST classic mobile app </b>
+
+<b>Under the ST classic mobile app </b>, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.  
+
+However, after creating the devices under SmartThings, you can return to the new Samsung Connect app if you prefer as both apps (ST classic, STSC) can run in parallel without any issues.
 
 https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
 
--  (e) <b>Determine your shard, please consult this thread: </b>
+-  (f) <b>Determine your shard, please consult this thread: </b>
 
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
 
@@ -64,7 +70,7 @@ replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-usea
 Or use  https://consigliere-regional.api.smartthings.com/ to point to the right shard.
 
 
--  (f) <b>To avoid confusion, remove EcobeeConnect or any other ecobee implementation</b>
+-  (g) <b>To avoid confusion, remove EcobeeConnect or any other ecobee implementation</b>
 
 If you have installed EcobeeConnect before (stock ST device), remove the smartapp and related device(s) to
 avoid any confusion with My Ecobee Device. Both devices can run in parallel as they are totally distinct in their
