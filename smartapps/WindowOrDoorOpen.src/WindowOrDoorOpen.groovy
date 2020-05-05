@@ -56,8 +56,8 @@ preferences {
 		input "theSpeaker", "capability.musicPlayer", title: "Announce with these text-to-speech devices (musicPlayer)", required: false, multiple: true
 		input "powerSwitch", "capability.switch", title: "On/off switch for Voice notifications? [optional]", required: false
 	}
-	section("And, when contact is left open for more than this delay in minutes [min: 1 min, default=5 min.]") {
-		input "maxOpenTime", "number", title: "Minutes?", required:false, range: "[1..59]"
+	section("And, when contact is left open for more than this delay in minutes [min: 1 min, default=5 min. if null or zero values provided]") {
+		input (name:"maxOpenTime", title: "Minutes?", type: "number", range: "1..59", required:false)
 	}
 	section("Turn off the thermostat(s) or set them to eco/away after the delay;revert this action when closed [optional]") {
 		input "tstats", "capability.thermostat", title:"Which thermostat(s)?", multiple: true, required: false
