@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.8"}
+def get_APP_VERSION() {return "3.5.9"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -123,7 +123,7 @@ def dashboardPage() {
 				}
 				def min_humidity_diff = givenHumidityDiff ?: 5 //  5% humidity differential by default
 				dParagraph = dParagraph +
-					"DetailedNotification: ${detailedNotif}\n" +
+					"DetailedNotification: ${detailedNotifFlag}\n" +
 					"EcobeeCurrentProgram: $currentProgName\n" +
 					"EcobeeClimateSet: $currentSetClimateName\n" +
 					"EcobeeProgramType: $currentProgType\n" +
@@ -356,7 +356,7 @@ def initialize() {
 	int delay = givenInterval ?: 59 // By default, do it every hour
 	if ((delay < 10) || (delay > 59)) {
 		log.error "Scheduling delay not in range (${delay} min.), exiting"
-		runIn(30, "sendNotifDelayNotInRange")
+		send("error, inputted delay $delay in minutes not in range  [10..59]")
 		return
 	}
 	if (detailedNotif) {   
