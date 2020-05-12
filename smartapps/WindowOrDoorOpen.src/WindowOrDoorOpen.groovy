@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.7.2" 
+		paragraph "Version 2.7.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -665,7 +665,7 @@ private void restore_tstats_mode() {
 		if (lastSavedMode) {
 			log.debug "restore_tstats_mode>about to set ${it}, back to saved thermostatMode=${lastSavedMode}"
 			String currentMode= it.currentThermostatMode
-			if ((currentMode== 'eco') && (it.hasCommand("home"))) it.home()        
+//			if ((currentMode== 'eco') && (it.hasCommand("home"))) it.home()        
 			if (lastSavedMode == 'cool') {
 				it.cool()
 			} else if (lastSavedMode.contains('heat')) {
