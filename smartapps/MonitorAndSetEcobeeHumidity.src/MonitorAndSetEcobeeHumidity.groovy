@@ -1,5 +1,5 @@
 /***
- *  Copyright 2014 Yves Racine
+ *  Copyright 2014-2020 Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.9"}
+def get_APP_VERSION() {return "3.5.9a"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -141,8 +141,8 @@ def dashboardPage() {
 					"HumidityOffsetAllowed: +/- $min_humidity_diff%\n"                    
 				if (outdoorSensor) {
 					dParagraph=  dParagraph +                   
-					"OudoorHumidity: $outdoorHumidity%\n" +
-					"OudoorTemp: ${outdoorTemp}$scale\n" +
+					"OutdoorHumidity: $outdoorHumidity%\n" +
+					"OutdoorTemp: ${outdoorTemp}$scale\n" +
 					"NormalizedOutHumidity: $corrOutdoorHum%\n" +
 					"IdealIndoorHumidity: $idealIndoorHum%\n" 
 				}
