@@ -34,7 +34,7 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.7.3" 
+		paragraph "Version 2.7.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
@@ -49,15 +49,17 @@ preferences {
 		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
 		input "phone", "phone", title: "Send a Text Message?", required: false
 		input "frequency", "number", title: "Delay between notifications in minutes", description: "", required: false
-		input "givenMaxNotif", "number", title: "Max Number of Notifications", description: "This option applies only if NO thermostat is provided as input", required: false
+		input "givenMaxNotif", "number", title: "Max Number of Notifications. This option applies only if NO thermostat is provided as input below", description: "Only when No Tstats", required: false
 	}
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", title: "Announce with these text-to-speech devices (speechSynthesis)", required: false, multiple: true
 		input "theSpeaker", "capability.musicPlayer", title: "Announce with these text-to-speech devices (musicPlayer)", required: false, multiple: true
 		input "powerSwitch", "capability.switch", title: "On/off switch for Voice notifications? [optional]", required: false
 	}
-	section("And, when contact is left open for more than this delay in minutes [min: 1 min, default=5 min. if null or zero values provided]") {
-		input (name:"maxOpenTime", title: "Minutes?", type: "number", range: "1..59", required:false)
+	section("And, when contact is left open for more than this delay in minutes (see input below). The delay input should be a multiple of the delay between notifications " +
+ 		"as most people want some notifications before shutting down the tstat or setting it to eco/away, ex. 2 minutes delay for contact left open vs. 1 minute delay between notification" +
+ 		"[min: 1 min, , default=5 min. if null or zero values provided]") {
+		input (name:"maxOpenTime", title: "Max Open time in Minutes for the Tstat(s)?", type: "number", range: "1..59", required:false)
 	}
 	section("Turn off the thermostat(s) or set them to eco/away after the delay;revert this action when closed [optional]") {
 		input "tstats", "capability.thermostat", title:"Which thermostat(s)?", multiple: true, required: false
