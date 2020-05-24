@@ -56,12 +56,12 @@ preferences {
 		input "theSpeaker", "capability.musicPlayer", title: "Announce with these text-to-speech devices (musicPlayer)", required: false, multiple: true
 		input "powerSwitch", "capability.switch", title: "On/off switch for Voice notifications? [optional]", required: false
 	}
-	section("And, when contact is left open for more than this delay in minutes (see input below). The delay input should be a multiple of the delay between notifications " +
+	section("And, when contact is left open for more than this delay in minutes (see input below), turn off the tsat(s) or set them to eco/away. The delay input should be a multiple of the delay between notifications " +
  		"as most people want some notifications before shutting down the tstat or setting it to eco/away, ex. 2 minutes delay for contact left open vs. 1 minute delay between notification" +
- 		"[min: 1 min, , default=5 min. if null or zero values provided]") {
+ 		"[min: 1 min, default=5 min. if null or zero values provided]") {
 		input (name:"maxOpenTime", title: "Max Open time in Minutes for the Tstat(s)?", type: "number", range: "1..59", required:false)
 	}
-	section("Turn off the thermostat(s) or set them to eco/away after the delay;revert this action when closed [optional]") {
+	section("Turn off these thermostat(s) or set them to eco/away after the delay;revert this action when closed [optional]") {
 		input "tstats", "capability.thermostat", title:"Which thermostat(s)?", multiple: true, required: false
 		input "awayFlag", "bool", title: "Set the thermostat(s) to eco/away instead of turning it off  [default= off]?", required: false
 		input "delayToRestore", "number", title: "Delay in Minutes before restoring the thermostat mode? [optional, default=no delay]", required:false
