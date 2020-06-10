@@ -25,7 +25,7 @@ ________________________________________________________________________________
 You can now download the code at 
 
 <b>
-http://www.maisonsecomatiq.com/#!store/tc3yr 
+http://www.maisonsecomatiq.com/store
 </b>
 
 P.S. Technical support packages are also available.
