@@ -43,17 +43,8 @@ PREREQUISITES
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
 - (d) The installation may now proceed with the new Samsung connect app.
 
-However, after creating the devices under SmartThings, you can return to the new Samsung Connect app if you prefer as both apps (ST classic, STSC) can run in parallel without any issues.
 
-- (e) <b>Location set for your ST account under the ST classic mobile app </b>
-
-<b>Under the ST classic mobile app </b>, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.  
-
-However, after creating the devices under SmartThings, you can return to the new Samsung Connect app if you prefer as both apps (ST classic, STSC) can run in parallel without any issues.
-
-https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
-
--  (f) <b>Determine your shard, please consult this thread: </b>
+- (e) <b>Determine your shard, please consult this thread: </b>
 
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
 
@@ -70,7 +61,7 @@ replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-usea
 Or use  https://account.smartthings.com to point to the right shard (automatically).
 
 
--  (g) <b>To avoid confusion, remove EcobeeConnect or any other ecobee implementation</b>
+-  (f) <b>To avoid confusion, remove EcobeeConnect or any other ecobee implementation</b>
 
 If you have installed EcobeeConnect before (stock ST device), remove the smartapp and related device(s) to
 avoid any confusion with My Ecobee Device. Both devices can run in parallel as they are totally distinct in their
@@ -148,11 +139,11 @@ If the instructions above are not clear enough, you can refer to the troubleshoo
 http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.27t_know_how_to_create_a_custom_smartapp
 
 
-# 3) Under the ST classic mobile app, execute MyEcobeeInit (under MarketSpace>Smartapps>MyApps)
+# 3) Under the new Samsung connect app, execute MyEcobeeInit (under + in the upper right corner/Smartapps)
 
 
 
-<b>Click on the Smartapps link in the upper section of the following Marketspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
+<b>Click on the Smartapp name (MyEcobeeInit) in the list of smartapps under the Custom section</b>
 
 
 
@@ -198,7 +189,7 @@ https://graph.api.smartthings.com/device/list  (or whatever your shard is and cl
 
 And
 
-In the ST classic mobile app, under myHome/Things.
+In the new Samsung connect app, under the devices in the 'No room assigned' section (bottom of the page)
 
 
 # 6) To populate the UI fields for your newly created device(s)
@@ -218,7 +209,6 @@ b) Click on the My ecobee device that you just created
 
 c) Click on Preferences (edit)
 
-N.B. You can also edit the preferences under Things/Your Ecobee device/Edit Device using the ST classic mobile app.
 
 You only need to edit the following parameters
 
