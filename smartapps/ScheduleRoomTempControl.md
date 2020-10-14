@@ -14,15 +14,9 @@ PREREQUISITES
 =====================
 - (a) Your ecobee thermostat and slave thermostats (if any) fully operational (and connected to ST)
 - (b) My Ecobee device installed & fully operational
-- (c) You have donwloaded the ST classic mobile app and connected it to your Samsung account
-- (d) Developer access to SmartThings (http://graph.api.smartthings.com/)
-- (e) Location set for your ST account  t  
+- (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
 
-Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper left corner, and then the "gear'" icon to review your location and save it.
-
-https://support.smartthings.com/hc/en-us/articles/205956850-How-to-edit-Location-settings
-
--  (f) <b> Determine your shard, please consult this thread: 
+- (d) <b> Determine your shard, please consult this thread: 
   
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
   
@@ -92,7 +86,7 @@ e) Hit the create button at the bottom
 f) Go back to the code window, and hit the "publish/for me" button at the top right corner 
 
 
-# 3) Under the ST app, execute ScheduleRoomTempControl
+# 3) Under the new Samsung connect app, execute ScheduleRoomTempControl (under + in the upper right corner/Smartapps)
 
 If you don't see the smartapp, you probably installed it under the wrong shard or it's not been "published" in the IDE. Please refer to the prerequisites above.
 
