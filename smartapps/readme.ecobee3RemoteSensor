@@ -32,9 +32,6 @@ PREREQUISITES
         according to the ecobee's schedules (Home, Away, Sleep, Awake, custom).
         
 - Developer access to SmartThings (http://graph.api.smartthings.com/)
-- <b>Location set for your ST account</b> 
-
-Under the ST mobile app, click on the 3-horizontal lines- "hamburger"- menu in the upper right corner, and then the "gear'" icon to review your location.
 
 -  <b> Determine your shard, please consult this thread: </b>
 
@@ -89,11 +86,11 @@ in the IDE by following these steps:
 
 <b>a) Go to https://graph.api.smartthings.com/ide/logs</b>     (or whatever your shard is and click on Live Logging in the IDE's top menu)
 
-<b>b) Under the ST app, run ecobeeRemoteSensorInit on your smartphone/tablet</b>
+<b>b) Under the new Samsung connect app, run ecobeeRemoteSensorInit on your smartphone/tablet</b>
 
-<b>Click on the Smartapps link in the upper section of the following Marketspace screen (last icon at the bottom), and then MyApps (last item in the list).</b>
+<b> Under the new Samsung connect app, execute ecobeeRemoteSensorInit (under + in the upper right corner/Smartapp).</b>
 
-Scroll down to ecobeeRemoteSensorInit and click on it to execute it.
+Scroll down to ecobeeRemoteSensorInit under the Custom section and click on it to execute it.
 
 The smartapp will ask you to select the remote temp sensors and motion sensors to expose to SmartThings.
 
@@ -114,18 +111,6 @@ to detect them.
 physicalgraph.app.exception.UnknownDeviceTypeException: Device type 'My RemoteSensor' in namespace 'yracine' not found
 
 Then, it means that somehow, step 3 was not completed entirely.
-
-<b>f) If you have the following error msg in the logs:</b>
-
-'generateRemoteSensorEvents' is not supported. Supported commands: [poll, refresh, setHeatingSetpoint, ....'
-
-This could mean that you're using the wrong Device Type Handler (stock ecobee device or old version)..
-
-- Kill your smartThings app, clean the cache under your OS (android or iOS) and reload 
-the app (as the old device is cached)
-
-- For iOS devices, in order to clear the cache, you'd need to uninstall & reinstall the smartThings app,
-otherwise, you may encounter the blank page issue within the ecobeeRemoteInitSensor smartapp.
 
 
 After execution, you should be able to see the new Sensor objects under  (or whatever your shard is)
