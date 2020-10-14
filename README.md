@@ -1,5 +1,8 @@
 # device-type.myecobee           Ecobee-SmartThings integration
 
+*** The devices can be created using the Samsung connect app ****
+
+
 My Ecobee Device:  Custom ecobee device to enable more smart thermostat's capabilities within SmartThings 
 
 Author:             Yves Racine
