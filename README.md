@@ -41,7 +41,7 @@ PREREQUISITES
 - (a) Your ecobee thermostat fully operational (and connected to wifi)
 - (b) Your ecobee credentials (username/password)
 - (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
-- (d) ) The installation must proceed with the SmartThings classic mobile app, so you have to download it first from your appStore. This is required as any custom DTHs can only be instantiated or created via the ST classic mobile app
+- (d) The installation may now proceed with the new Samsung connect app.
 
 However, after creating the devices under SmartThings, you can return to the new Samsung Connect app if you prefer as both apps (ST classic, STSC) can run in parallel without any issues.
 
