@@ -150,7 +150,6 @@ http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.
 
 
 
-
 # 4) Connect Smartthings to the Ecobee portal
 
 
