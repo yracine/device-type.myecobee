@@ -1,6 +1,6 @@
 /*
  *  ecobeeGetTips
- *  Copyright 2015 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: http://www.linkedin.com/in/yracine
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -32,16 +32,16 @@ preferences {
 	page (name: "generalSetupPage", title: "General Setup", uninstall:true, nextPage: "displayTipsPage") {
 		section("About") {
 			paragraph "ecobeeGetTips, the smartapp that Get Comfort & Energy Saving Tips from My Ecobee device"
-			paragraph "Version 1.1" 
+			paragraph "Version 1.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
-			paragraph "Copyright©2016 Yves Racine"
+			paragraph "Copyright©2016-2020 Yves Racine"
 				href url:"https://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 					description: "https://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Get tips for this ecobee thermostat") {
-			input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+			input "ecobee","capability.thermostat", title: "MyEcobee Thermostat"
 		}  
 		section("Level Of Tip") {
 			input (name:"level", title: "Which level ([1..4], 4 is the highest, but not always applicable, ex. for multi-stage heating/cooling systems)?", type:"number", 
@@ -54,9 +54,9 @@ preferences {
 	page (name: "displayTipsPage", content: "displayTipsPage", install: false, uninstall:true)
 	page(name: "OtherOptions", title: "Other Options", install: true, uninstall: true) {
         section([mobileOnly:true]) {
-			label title: "Assign a name for this SmartApp", required: false
-		}
-	}
+            label title: "Assign a name for this SmartApp", required: false
+        }
+    }        
 }
 
 def displayTipsPage() {
@@ -117,6 +117,19 @@ def updated() {
 	initialize()
 }
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
+
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 def initialize() {
 	// TODO: subscribe to attributes, devices, locations, etc.
 }
@@ -125,3 +138,4 @@ def initialize() {
 def getCustomImagePath() {
 	return "https://raw.githubusercontent.com/yracine/device-type.myecobee/master/icons/"
 }    
+
