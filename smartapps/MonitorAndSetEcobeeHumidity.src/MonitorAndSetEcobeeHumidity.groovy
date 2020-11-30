@@ -326,9 +326,9 @@ def otherSettings() {
 			input (name:"selectedMode", type:"enum", title: "Choose Mode", options: enumModes, 
 				required: false, multiple:true, description: "Optional")
 		}
-    	section([mobileOnly: true]) {
-	    	label title: "Assign a name for this SmartApp", required: false
-        }
+    		section([mobileOnly: true]) {
+	    		label title: "Assign a name for this SmartApp", required: false
+        	}
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
