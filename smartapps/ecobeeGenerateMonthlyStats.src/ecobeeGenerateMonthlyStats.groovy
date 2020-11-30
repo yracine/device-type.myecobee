@@ -1,7 +1,7 @@
 /**
  *  ecobeeGenerateMonthlyStats
  *
- *  Copyright 2015 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -32,17 +32,17 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates monthly runtime reports about your ecobee components"
-		paragraph "Version 1.8.1"
+		paragraph "Version 1.9"
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
-		paragraph "Copyright©2016 Yves Racine"
+		paragraph "Copyright©2016-2020 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 
 	section("Generate monthly stats for this ecobee thermostat") {
-		input "ecobee", "device.myEcobeeDevice", title: "Ecobee?"
+		input "ecobee", "capability.thermostat", title: "MyEcobee?"
 
 	}
 	section("Date for the initial run = YYYY-MM-DD") {
@@ -50,22 +50,41 @@ preferences {
 	}        
 	section("Time for the initial run (24HR)" ) {
 		input "givenEndTime", "text", title: "End time [default=00:00]", required: false
-	}        
-	section( "Notifications" ) {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes", "No"]], required: false, default:"No"
-		input "phoneNumber", "phone", title: "Send a text message?", required: false
+	} 
+    	if (isST()) {    
+    		section( "Notifications" ) {
+	    		input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: false, default:"No"
+    			input "phoneNumber", "phone", title: "Send a text message?", required: false
+		    }
+    		section("Enable Amazon Echo/Ask Alexa Notifications for ecobee stats reporting (optional)") {
+	    		input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
+		    		description:"optional",required:false)
+    			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
+	    			description:"optional")            
+    			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
+	    	}
+    	}        
+	section("Logging") {
+		input "detailedNotif", "bool", title: "Detailed logging?", required:false
 	}
-	section("Detailed Notifications") {
-		input "detailedNotif", "bool", title: "Detailed Notifications?", required:false
-	}
-	section("Enable Amazon Echo/Ask Alexa Notifications for ecobee stats reporting (optional)") {
-		input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
-			description:"optional",required:false)
-		input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
-			description:"optional")            
-		input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
-	}
-    
+    	section([mobileOnly:true]) {
+        	label title: "Assign a name for this SmartApp", required: false
+    	}
+        
+}
+
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
+
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+//  log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
 }
 
 def installed() {
@@ -84,7 +103,7 @@ def updated() {
 
 def initialize() {
 	atomicState?.timestamp=''
-	atomicState?.componentAlreadyProcessed=''
+	atomicState?.componentAlreadyProcessed=' '
 	atomicState?.retries=0  
 
 
@@ -122,7 +141,7 @@ def rescheduleIfNeeded(evt) {
 		Double lastPollTimeInMinutes = (lastPollTime/60000).toDouble().round(1)      
 		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
 	}
-	if (((atomicState?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+	if (((atomicState?.poll["last"]?:0) + (delay * 60000) < currentTime)) {
 		log.info "rescheduleIfNeeded>scheduling dailyRun in ${delay} minutes.."
 		schedule("0 30 0 * * ?", dailyRun)    
 	}
@@ -135,7 +154,7 @@ def rescheduleIfNeeded(evt) {
 
 def appTouch(evt) {
 	atomicState?.timestamp=''
-	atomicState?.componentAlreadyProcessed=''
+	atomicState?.componentAlreadyProcessed=' '
 	generateStats()
 }
 
@@ -166,7 +185,7 @@ void dailyRun() {
 	if (detailedNotif) {    
 		log.debug("dailyRun>For $ecobee, about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
-	atomicState?.componentAlreadyProcessed=''
+	atomicState?.componentAlreadyProcessed=' '
 	atomicState?.retries=0  
 	generateStats()
     
@@ -192,7 +211,7 @@ private def formatDate(dateString) {
 	return aDate
 }
 
-private def get_nextComponentStats(component='') {
+private def get_nextComponentStats(component=' ') {
 	if (detailedNotif) {
 		log.debug "get_nextComponentStats>About to get ${component}'s next component from components table"
 	}
@@ -200,7 +219,7 @@ private def get_nextComponentStats(component='') {
 	def nextInLine=[:]
 
 	def components = [
-		'': 
+		' ': 
 			[position:1, next: 'auxHeat1'
 			], 
 		'auxHeat1': 
@@ -247,8 +266,8 @@ private def get_nextComponentStats(component='') {
 void generateStats() {
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
 	def delay = 2  // 2-minute delay for rerun
-	def MAX_POSITION=9    
-	def MAX_RETRIES=4    
+    int MAX_POSITION=9    
+    int MAX_RETRIES=4    
 	float runtimeTotalAvgMonthly    
 	String mode= ecobee.currentThermostatMode    
 	atomicState?.retries=	((atomicState?.retries==null) ?:0) +1
@@ -262,7 +281,7 @@ void generateStats() {
 		}    	
 	}    
     
-	if (atomicState?.retries >= MAX_RETRIES) { 
+	if (atomicState?.retries.toInteger() >= MAX_RETRIES) { 
 		if (detailedNotif) {    
 			log.debug("${get_APP_NAME()}>Max retries reached, exiting")
 			send("max retries reached ${atomicState?.retries}), exiting")
@@ -273,7 +292,7 @@ void generateStats() {
 	if (detailedNotif) {    
 		log.debug("${get_APP_NAME()}>for $ecobee, about to process nextComponent=${nextComponent}, state.componentAlreadyProcessed=${atomicState?.componentAlreadyProcessed}")
 	}    	
-	if (atomicState?.timestamp == dateInLocalTime && nextComponent.position >=MAX_POSITION) {
+	if (atomicState?.timestamp == dateInLocalTime && nextComponent.position.toInteger() >=MAX_POSITION) {
 		return // the monthly stats are already generated 
 	} else {    	
 		// schedule a rerun till the stats are generated properly
@@ -395,7 +414,7 @@ void generateStats() {
 	component=atomicState?.componentAlreadyProcessed    
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 //	int endPosition= (mode=='heat') ? ((heatStages>2) ? 4 : (heatStages>1)? 3:2) :MAX_POSITION     
-	if (nextComponent.position >=MAX_POSITION) {
+	if (nextComponent.position.toInteger() >=MAX_POSITION) {
 		send "generated all ${ecobee}'s monthly stats since ${String.format('%tF', aMonthAgo)}"
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
 		atomicatomicState?.timestamp = dateInLocalTime // save the date to avoid re-execution.
@@ -410,7 +429,7 @@ void generateRuntimeReport(component, startDate, endDate, frequence='daily') {
 		log.debug("generateRuntimeReport>For component ${component}, about to call getReportData with endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		send ("For component ${component}, about to call getReportData with aMonthAgo in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 	}        
-	ecobee.getReportData("", startDate, endDate, null, null, component,false)
+	ecobee.getReportData(null, startDate, endDate, null, null, component,false)
 	if (detailedNotif) {
 		log.debug("generateRuntimeReport>For component ${component}, about to call generateReportRuntimeEvents with endDate in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
 		send ("For component ${component}, about to call generateReportRuntimeEvents with aMonthAgo in UTC =${endDate.format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone("UTC"))}")
