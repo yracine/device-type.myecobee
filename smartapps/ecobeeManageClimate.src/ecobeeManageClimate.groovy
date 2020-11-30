@@ -1,7 +1,7 @@
 /**
  *  ecobeeManageClimate
  *
- *  Copyright 2014 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -31,23 +31,23 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeManageClimate, the smartapp that manages your ecobee climates ['creation', 'update', 'delete']" 
-		paragraph "Version 1.9.5"
+		paragraph "Version 1.9.6"
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
-		paragraph "Copyright©2014 Yves Racine"
+		paragraph "Copyright©2014-2020 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 
 	section("For this ecobee thermostat") {
-		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+		input "ecobee", "capability.thermostat", title: "MyEcobee Thermostat"
 	}
 	section("Create (if not present) or update this climate") {
 		input "climateName", "text", title: "Climate Name"
 	}
 	section("Or delete the Climate [default=false]") {
-		input "deleteClimate", "Boolean", title: "delete?", metadata: [values: ["true", "false"]], required: false
+		input "deleteClimate", "Boolean", title: "delete?", options: ["true", "false"], required: false
 	}
 	section("Substitute Climate name in schedule (used for delete)") {
 		input "subClimateName", "text", title: "Climate Name", required: false
@@ -59,25 +59,43 @@ preferences {
 		input "givenHeatTemp", "decimal", title: "Heat Temp", required: false
 	}
 	section("isOptimized [default=false]") {
-		input "isOptimizedFlag", "Boolean", title: "isOptimized?", metadata: [values: ["true", "false"]], required: false
+		input "isOptimizedFlag", "Boolean", title: "isOptimized?", options: ["true", "false"], required: false
 	}
 	section("isOccupied [default=false]") {
-		input "isOccupiedFlag", "Boolean", title: "isOccupied?", metadata: [values: ["true", "false"]], required: false
+		input "isOccupiedFlag", "Boolean", title: "isOccupied?", options: ["true", "false"], required: false
 	}
 	section("Cool Fan Mode [default=auto]") {
-		input "givenCoolFanMode", "enum", title: "Cool Fan Mode ?", metadata: [values: ["auto", "on"]], required: false
+		input "givenCoolFanMode", "enum", title: "Cool Fan Mode ?", options: ["auto", "on"], required: false
 	}
 	section("Heat Fan Mode [default=auto]") {
-		input "givenHeatFanMode", "enum", title: "Heat Fan Mode ?", metadata: [values: ["auto", "on"]], required: false
+		input "givenHeatFanMode", "enum", title: "Heat Fan Mode ?", options: ["auto", "on"], required: false
 	}
-	section("Notifications") {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
-		input "phoneNumber", "phone", title: "Send a text message?", required: false
-	}
-    
-
+	if (isST()) {    
+    		section("Notifications") {
+	    		input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: false
+		    	input "phoneNumber", "phone", title: "Send a text message?", required: false
+	    	}
+    	}    
+    	section([mobileOnly:true]) {
+        	label title: "Assign a name for this SmartApp", required: false
+    	}
+        
 }
 
+
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
+
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 
 
 def installed() {
@@ -127,12 +145,12 @@ def takeAction() {
 
 	if (deleteClimateFlag == 'true') {
 		send("ecobeeManageClimate>about to delete climateName = ${climateName}")
-		ecobee.deleteClimate("", climateName, subClimateName)
+		ecobee.deleteClimate(null, climateName, subClimateName)
 
 	} else {
 
 		send("ecobeeManageClimate>about to create or update climateName = ${climateName}")
-		ecobee.updateClimate("", climateName, deleteClimateFlag, subClimateName,
+		ecobee.updateClimate(null, climateName, deleteClimateFlag, subClimateName,
 			coolTemp, heatTemp, isOptimized, isOccupied, coolFanMode, heatFanMode)
 	}
 
