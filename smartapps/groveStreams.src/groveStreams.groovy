@@ -1,7 +1,7 @@
 /**
  *  groveStreams
  *
- *  Copyright 2014 Yves Racine
+ *  Copyright Yves Racine
  *
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
@@ -35,18 +35,18 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.2.3" 
+		paragraph "Version 2.3" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
-		paragraph "Copyright©2014 Yves Racine"
+		paragraph "Copyright©2014-2020 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine"
 	}
 	section("Log devices...") {
 		input "temperatures", "capability.temperatureMeasurement", title: "Temperatures", required: false, multiple: true
 		input "thermostats", "capability.thermostat", title: "Thermostats", required: false, multiple: true
-		input "ecobees", "device.myEcobeeDevice", title: "Ecobees", required: false, multiple: true
+		input "ecobees", "capability.thermostat", title: "MyEcobee thermostats", required: false, multiple: true
 		input "automatic", "capability.presenceSensor", title: "Automatic Connected Device(s)", required: false, multiple: true
 		input "detectors", "capability.smokeDetector", title: "Smoke/CarbonMonoxide Detectors", required: false, multiple: true
 		input "humidities", "capability.relativeHumidityMeasurement", title: "Humidity sensors", required: false, multiple: true
