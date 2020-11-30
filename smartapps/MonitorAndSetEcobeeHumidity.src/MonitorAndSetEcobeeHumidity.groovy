@@ -1,5 +1,5 @@
 /***
- *  Copyright 2014-2020 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.5.9a"}
+def get_APP_VERSION() {return "3.6"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -48,7 +48,7 @@ preferences {
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeHumidity-Dashboard", uninstall: true, nextPage:sensorSettings, submitOnChange: true) {
 		section("Monitor & set the ecobee thermostat's dehumidifer/humidifier/HRV/ERV settings") {
-			input "ecobee", "capability.thermostat", title: "Which Ecobee?"
+			input "ecobee", "capability.thermostat", title: "MyEcobee?"
 		}
 		section("To this humidity level") {
 			input "givenHumidityLevel", "number", title: "Humidity level (default=calculated based on outside temp)", required: false
@@ -200,7 +200,7 @@ def dashboardPage() {
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
-			paragraph "Copyright©2014 Yves Racine"
+			paragraph "Copyright©2014-2020 Yves Racine"
 				href url:"https://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
  					description: "https://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
@@ -303,35 +303,51 @@ def otherSettings() {
 		section("What do I use for the Master on/off switch to enable/disable processing? (optional)") {
 			input "powerSwitch", "capability.switch", required: false
 		}
-		section("Notifications") {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
-				false
-			input "phoneNumber", "phone", title: "Send a text message?", required: false
-		}
-		section("Detailed Logging/Notifications") {
-			input "detailedNotif", "bool", title: "Detailed Logging/Notifications?", required:
-				false
-		}
-		section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
-			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
-				description:"optional",required:false)
-			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
-				description:"optional")            
-			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
-		}        
+		if (isST()) {        
+    			section("Notifications") {
+	    			input "sendPushMessage", "enum", title: "Send a push notification?", options:["Yes", "No"], required:
+		    			false
+    				input "phoneNumber", "phone", title: "Send a text message?", required: false
+	    		}
+    			section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
+	    			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
+			    		description:"optional",required:false)
+    				input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
+				    	description:"optional")            
+	    			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
+	    		}
+        	}        
+                    
+    		section("Logging") {
+		    	input "detailedNotif", "bool", title: "Detailed Logging?", required:
+		   		false
+        	}
 		section("Set Humidity Level only for specific mode(s) [default=all]")  {
 			input (name:"selectedMode", type:"enum", title: "Choose Mode", options: enumModes, 
 				required: false, multiple:true, description: "Optional")
 		}
-		section([mobileOnly: true]) {
-			label title: "Assign a name for this SmartApp", required: false
-		}
+    	section([mobileOnly: true]) {
+	    	label title: "Assign a name for this SmartApp", required: false
+        }
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
 	}
 }
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
+
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 
 
 def installed() {
