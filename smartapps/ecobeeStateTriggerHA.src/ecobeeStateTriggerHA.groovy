@@ -1,7 +1,7 @@
 /**
  * ecobeeStateTriggerHA
  *
- *  Copyright 2017 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -30,7 +30,7 @@ definition(
 )
 
 
-def get_APP_VERSION() {return "1.3"}
+def get_APP_VERSION() {return "1.4"}
 
 preferences {
 
@@ -48,7 +48,7 @@ def HASettingsPage() {
 				href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
 			paragraph "Version ${get_APP_VERSION()}"
-			paragraph "Copyright©2017 Yves Racine"
+			paragraph "Copyright©2017-2020 Yves Racine"
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
@@ -60,19 +60,17 @@ def HASettingsPage() {
 				title: "Which Events(s)?",
 				multiple: true,
 				required: true,
-				metadata: [
-					values: [
+			    options: [
 						'cooling',
 						'heating',
 						'fan only',
 						'idle'
-					]    
 				]    
 
 		}
 		section("Turn on/off or Flash the following switch(es) [optional]") {
 			input "switches", "capability.switch", required:false, multiple: true, title: "Which switch(es)?"
-			input "switchMode", "enum", metadata: [values: ["Flash", "Turn On","Turn Off"]], required: false, defaultValue: "Turn On", title: "Action?"
+			input "switchMode", "enum", options: ["Flash", "Turn On","Turn Off"], required: false, defaultValue: "Turn On", title: "Action?"
 		}
 		section("Select Routine for Execution [optional]") {
 			input "phrase", "enum", title: "Routine?", required: false, options: phrases
@@ -86,33 +84,48 @@ def otherSettings() {
 	def enumModes=location.modes.collect{ it.name }
 
 	dynamicPage(name: "otherSettings", title: "Other Settings", install: true, uninstall: false) {
-		section("Notifications") {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
+		section("Notifications & other options") {
+			input "sendPushMessage", "enum", title: "Send a push notification?", options:["Yes", "No"], required:
 				false
 			input "phoneNumber", "phone", title: "Send a text message?", required: false
 		}
-		section("Detailed Notifications") {
-			input "detailedNotif", "bool", title: "Detailed Notifications?", required:false
+		section("Detailed Logging") {
+			input "detailedNotif", "bool", title: "Detailed Logging?", required:false
 		}
-		section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
-			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
-				description:"optional",required:false)
-			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
-				description:"optional")            
-			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (default=2 days)?", required: false
-		}
+		if (isST()) {
+            
+    			section("Enable Amazon Echo/Ask Alexa Notifications [optional, default=false]") {
+	    			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications?", type:"bool",
+		    		description:"optional",required:false)
+			    	input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
+    					description:"optional")            
+	    			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (default=2 days)?", required: false
+			}
+        	}
 		section("Set for specific ST location mode(s) [default=all]")  {
-				input (name:"selectedModes", type:"enum", title: "Choose ST Mode(s) to run the smartapp", options: enumModes, required: false, multiple:true) 
+			input (name:"selectedModes", type:"enum", title: "Choose ST Mode(s) to run the smartapp", options: enumModes, required: false, multiple:true) 
 		}
-		section([mobileOnly: true]) {
-			label title: "Assign a name for this SmartApp", required: false
-		}
+        	section([mobileOnly: true]) {
+            	label title: "Assign a name for this SmartApp", required: false
+        	}
 	}
 }
 
 
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
 
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 def installed() {
 	initialize()
 }
