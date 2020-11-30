@@ -1,5 +1,5 @@
 /***
- *  Copyright 2014 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -31,24 +31,24 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeManageVacation, the smartapp that manages your ecobee vacation settings ['creation', 'update', 'delete']"
-		paragraph "Version 1.9.3" 
+		paragraph "Version 1.9.4" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
-		paragraph "Copyright©2014 Yves Racine"
+		paragraph "Copyright©2014-2020 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 
 	section("For the Ecobee thermostat(s)") {
-		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat", multiple:true
+		input "ecobee", "capability.thermostat", title: "Ecobee Thermostat", multiple:true
 	}
 	section("Create this Vacation Name") {
 		input "vacationName", "text", title: "Vacation Name"
 	}
     
 	section("Or delete the vacation [default=false]") {
-		input "deleteVacation", "Boolean", title: "delete?", metadata: [values: ["true", "false"]], required: false
+		input "deleteVacation", "Boolean", title: "delete?", options:["true", "false"], required: false
 	}
 	section("Cool Temp for vacation, [default = 80°F/27°C]") {
 		input "givenCoolTemp", "decimal", title: "Cool Temp", required: false
@@ -68,12 +68,30 @@ preferences {
 	section("End time for the vacation [HH:MM 24HR]") {
 		input "givenEndTime", "text", title: "End time"
 	}
+	if (isST()) {    
+    		section( "Notifications" ) {
+	    		input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: false, default:"No"
+	    		input "phoneNumber", "phone", title: "Send a text message?", required: false	
+	    	}
+    	}        
 
 
 }
 
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
 
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 def installed() {
 
 	subscribe(app, appTouch)
@@ -121,13 +139,13 @@ def takeAction() {
 
 		log.debug("About to call iterateCreateVacation for ${vacationName}")
 		ecobee.each {        
-			it.createVacation("", vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime,
+			it.createVacation(null, vacationName, minCoolTemp, minHeatTemp, vacationStartDateTime,
 			vacationEndDateTime)
 		}            
 		send("ecobeeManageVacation> vacationName ${vacationName} created at ${ecobee}")
 	} else {
 		ecobee.each {
-			it.deleteVacation("", vacationName)
+			it.deleteVacation(null, vacationName)
 		}                
 		send("ecobeeManageVacation> vacationName ${vacationName} deleted at ${ecobee}")
 
