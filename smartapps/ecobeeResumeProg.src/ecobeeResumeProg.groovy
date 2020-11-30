@@ -1,6 +1,6 @@
 /***
  *
- *  Copyright 2014 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -35,18 +35,18 @@ preferences {
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
 			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
-			paragraph "Version 2.2.1" 
+			paragraph "Version 2.3" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
-			paragraph "Copyright©2014 Yves Racine"
+			paragraph "Copyright©2014-2020 Yves Racine"
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 	}        
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: false, nextPage: "selectModes") {
 		section("Resume Program at the ecobee thermostat(s)") {
-			input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat(s)", multiple: true
+			input "ecobee", "capability.thermostat", title: "MyEcobee Thermostat(s)", multiple: true
 		}
 		section("When one of these people arrive at home") {
 			input "people", "capability.presenceSensor", multiple: true, required:false
@@ -62,15 +62,18 @@ preferences {
 		}
 	}        
 	page(name: "selectModes", title: "Select Hello ST modes", content: "selectModes")
-	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: false) {
-		section("Notifications") {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
-				false
-			input "phone", "phone", title: "Send a Text Message?", required: false
-		}
-        section([mobileOnly:true]) {
-			label title: "Assign a name for this SmartApp", required: false
-		}
+	if (isST()) {
+        
+    		page(name: "Notifications", title: "Notifications & other Options", install: true, uninstall: false) {
+	    		section("Notifications") {
+		    		input "sendPushMessage", "enum", title: "Send a push notification?", options:["Yes", "No"], required:
+			    		false
+    				input "phone", "phone", title: "Send a Text Message?", required: false
+	    		}
+        	}            
+	}
+    	section([mobileOnly:true]) {
+        	label title: "Assign a name for this SmartApp", required: false
 	}
 
 }
@@ -97,7 +100,19 @@ def appTouch(evt) {
 	takeActions() 
 }
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
 
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 	initialize()
