@@ -1,7 +1,7 @@
 /**
  *  EcobeeManageGroup
  *
- *  Copyright 2014 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/ 
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -30,52 +30,64 @@ definition(
 preferences {
 	section("About") {
 		paragraph "ecobeeManageGroup, the smartapp that manages your ecobee groups ['creation', 'update', 'delete']"
-		paragraph "Version 1.9.4" 
+		paragraph "Version 1.9.5" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
-		paragraph "Copyright©2014 Yves Racine"
+		paragraph "Copyright©2014-2020 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
  	}
 	section("For this ecobee thermostat") {
-		input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+		input "ecobee", "device.myEcobeeDevice", title: "MyEcobee Thermostat"
 	}
 	section("Create this group or update all groups [empty for all group]") {
 		input "groupName", "text", title: "Group Name", required: false
 	}
 	section("Or delete the group [default=false]") {
-		input "deleteGroup", "Boolean", title: "delete?", metadata: [values: ["true", "false"]], required: false
+		input "deleteGroup", "Boolean", title: "delete?", options: ["true", "false"], required: false
 	}
 	section("Synchronize Vacation") {
-		input "synchronizeVacation", "Boolean", title: "synchronize Vacation [default=false]?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeVacation", "Boolean", title: "synchronize Vacation [default=false]?", options: ["true", "false"], required: false
 	}
 	section("Synchronize Schedule") {
-		input "synchronizeSchedule", "Boolean", title: "synchronize Schedule [default=false]?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeSchedule", "Boolean", title: "synchronize Schedule [default=false]?", options: ["true", "false"], required: false
 	}
 	section("Synchronize SystemMode") {
-		input "synchronizeSystemMode", "Boolean", title: "synchronize SystemMode [default=false]?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeSystemMode", "Boolean", title: "synchronize SystemMode [default=false]?", options:["true", "false"], required: false
 	}
 	section("Synchronize Alerts") {
-		input "synchronizeAlerts", "Boolean", title: "synchronize Alerts [default=false]?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeAlerts", "Boolean", title: "synchronize Alerts [default=false]?", options:["true", "false"], required: false
 	}
 	section("Synchronize QuickSave") {
-		input "synchronizeQuickSave", "Boolean", title: "synchronize QuickSave [default=false]?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeQuickSave", "Boolean", title: "synchronize QuickSave [default=false]?",options:["true", "false"], required: false
 	}
 	section("Synchronize User Preferences") {
-		input "synchronizeUserPreferences", "Boolean", title: "synchronize User Preferences [default=false]?", metadata: [values: ["true", "false"]], required: false
+		input "synchronizeUserPreferences", "Boolean", title: "synchronize User Preferences [default=false]?", options:["true", "false"], required: false
 	}
 
-	section("Notifications") {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
-		input "phoneNumber", "phone", title: "Send a text message?", required: false
-	}
-
-
-
+	if (isST()) {
+    		section("Notifications") {
+	    		input "sendPushMessage", "enum", title: "Send a push notification?", options:["Yes", "No"], required: false
+			input "phoneNumber", "phone", title: "Send a text message?", required: false
+	    	}
+    	}        
 
 }
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
+
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 
 
 def installed() {
