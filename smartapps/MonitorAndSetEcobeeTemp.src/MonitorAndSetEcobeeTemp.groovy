@@ -1,7 +1,7 @@
 /**
  *  MonitorAndSetEcobeeTemp
  *
- *  Copyright 2014 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -42,7 +42,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.4.9f"}
+def get_APP_VERSION() { return "3.5"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -108,7 +108,7 @@ def dashboardPage() {
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
-			paragraph "Copyright©2014 Yves Racine"
+			paragraph "Copyright©2014-2020 Yves Racine"
 				href url:"https://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
  					description: "https://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		} /* end section About */
@@ -179,22 +179,24 @@ def otherSettings() {
 		section("What do I use for the Master on/off switch to enable/disable processing? [optional]") {
 			input "powerSwitch", "capability.switch", required: false
 		}
-		section("Notifications") {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
+        	if (isST()) {        
+    			section("Notifications") {
+	    			input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required:
+		    			false
+    				input "phoneNumber", "phone", title: "Send a text message?", required: false
+	    		}
+	    		section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
+    				input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
+					description:"optional",required:false)
+			    	input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
+					    description:"optional")            
+			    	input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
+		    	}        
+        	}            
+		section("Logging") {
+			input "detailedNotif", "bool", title: "Detailed Logging?", required:
 				false
-			input "phoneNumber", "phone", title: "Send a text message?", required: false
 		}
-		section("Detailed Logging/Notifications") {
-			input "detailedNotif", "bool", title: "Detailed Logging/Notifications?", required:
-				false
-		}
-		section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
-			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
-				description:"optional",required:false)
-			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
-				description:"optional")            
-			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
-		}        
 		section([mobileOnly:true]) {
 			label title: "Assign a name for this SmartApp", required: false
 		}
@@ -204,6 +206,20 @@ def otherSettings() {
 	}
 }
 
+
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
+
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 
 
 def installed() {
