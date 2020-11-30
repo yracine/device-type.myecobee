@@ -1,7 +1,7 @@
 /**
  *  WindowOrDoorOpen
  *
- *  Copyright 2014-2020 Yves Racine 
+ *  Copyright Yves Racine 
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -34,22 +34,24 @@ preferences {
 		paragraph "WindowOrDoorOpen!, the smartapp that warns you if you leave a door or window open (with voice as an option);" +
 			"(optional) Your thermostats can be turned off or set to eco/away after a delay and restore their mode when the contact is closed." +
     		"The smartapp can track up to 30 contacts and can keep track of 6 open contacts at the same time due to ST scheduling limitations"
-		paragraph "Version 2.7.4" 
+		paragraph "Version 2.8" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."            
-		paragraph "Copyright©2014 Yves Racine"
+		paragraph "Copyright©2014-2020 Yves Racine"
 			href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
  				description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 	}
 	section("Notify me when the following door(s) or window contact(s) are left open (maximum 30 contacts)...") {
 		input "theSensor", "capability.contactSensor", multiple:true, required: true
 	}
-	section("Notifications") {
-		input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required: false
-		input "phone", "phone", title: "Send a Text Message?", required: false
-		input "frequency", "number", title: "Delay between notifications in minutes", description: "", required: false
-		input "givenMaxNotif", "number", title: "Max Number of Notifications. This option applies only if NO thermostat is provided as input below", description: "Only when No Tstats", required: false
+    	section("Notifications") {
+	    	if (isST()) {    
+		    	input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required: false
+    			input "phone", "phone", title: "Send a Text Message?", required: false		
+		}
+	    	input "frequency", "number", title: "Delay between notifications in minutes", description: "", required: false
+    		input "givenMaxNotif", "number", title: "Max Number of Notifications. This option applies only if NO thermostat is provided as input below", description: "Only when No Tstats", required: false
 	}
 	section("Use Speech capability to warn the residents [optional]") {
 		input "theVoice", "capability.speechSynthesis", title: "Announce with these text-to-speech devices (speechSynthesis)", required: false, multiple: true
@@ -84,7 +86,19 @@ def installed() {
 	state.lastThermostatMode = ""
 	initialize()
 }
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
 
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 def updated() {
 	log.debug "Updated with settings: ${settings}"
 
