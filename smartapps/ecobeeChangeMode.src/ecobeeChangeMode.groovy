@@ -1,7 +1,7 @@
 /**
  *  ecobeeChangeMode
  *
- *  Copyright 2014 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -40,30 +40,32 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 2.0.1" 
+			paragraph "Version 2.1" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
-			paragraph "Copyright©2014 Yves Racine"
+			paragraph "Copyright©2014-2020 Yves Racine"
 				href url:"http://github.com/yracine/device-type.myecobee", style:"embedded", required:false, title:"More information..."  
 					description: "http://github.com/yracine/device-type.myecobee/blob/master/README.md"
 		}
 		section("Change the following ecobee thermostat(s)...") {
-			input "thermostats", "device.myEcobeeDevice", title: "Which thermostat(s)", multiple: true
+			input "thermostats", "capability.thermostat", title: "MyEcobee thermostat(s)", multiple: true
 		}
         
 	}
 	page(name: "selectProgram", title: "Ecobee Programs", content: "selectProgram")
-	page(name: "Notifications", title: "Notifications Options", install: true, uninstall: true) {
-		section("Notifications") {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
-				false
-			input "phone", "phone", title: "Send a Text Message?", required: false
-		}
-        section([mobileOnly:true]) {
-			label title: "Assign a name for this SmartApp", required: false
-		}
-	}
+	page(name: "Notifications", title: "Notifications & other Options", install: true, uninstall: true) {
+        	if (isST()) {    
+	    		section("Notifications") {
+		    		input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required:false
+		    		input "phone", "phone", title: "Send a Text Message?", required: false
+    			}	
+                    
+	    	}
+    	}
+    	section([mobileOnly:true]) {
+        	label title: "Assign a name for this SmartApp", required: false
+    	}
 }
 
 
@@ -195,8 +197,19 @@ private void takeAction() {
 	}        
 }
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
 
-
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 
 private send(msg) {
 	if (sendPushMessage != "No") {
