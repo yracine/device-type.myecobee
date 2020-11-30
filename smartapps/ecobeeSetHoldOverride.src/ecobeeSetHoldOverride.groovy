@@ -1,6 +1,6 @@
 /***
  *
- *  Copyright 2014-2018 Yves Racine
+ *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
  *  Developer retains all right, title, copyright, and interest, including all copyright, patent rights, trade secret 
@@ -31,7 +31,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "1.0"}
+def get_APP_VERSION() {return "1.1"}
 
 
 preferences {
@@ -43,14 +43,14 @@ preferences {
 				"If you like this smartapp, please support the developer via PayPal and click on the Paypal link below\n" 
 					href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation" 
-			paragraph "Copyright©2018 Yves Racine\n"
+			paragraph "Copyright©2018-2020 Yves Racine\n"
 				href url:"http://www.maisonsecomatiq.com/#!home/mainPage", style:"embedded", required:false, title:"More information..."  
  					description: "http://www.maisonsecomatiq.com/#!home/mainPage"
 		} /* end section about */
 	}        
 	page(name: "selectThermostats", title: "Select Thermostat for Hold Override, Choose one condition below", install: false , uninstall: false, nextPage: "Notifications") {
 		section("Override any holds at this ecobee thermostat with a new ecobee's hold override") {
-			input "ecobee", "device.myEcobeeDevice", title: "Ecobee Thermostat"
+			input "ecobee", "capability.thermostat", title: "MyEcobee Thermostat"
 		}
 		section("Hold until the next transition at the ecobee schedule [default=false]") {
 			input "nextTransitionFlag", "bool", title: "Until the next Transition?", required:false
@@ -78,21 +78,28 @@ preferences {
 		}
      
 	}        
-	page(name: "Notifications", title: "Notifications & Logging Options", install: true, uninstall: false) {
-		section("") {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata: [values: ["Yes", "No"]], required:
-				false
-			input "phoneNumber", "phone", title: "Send a text message?", required: false
-			input "detailedNotif", "bool", title: "Detailed Logging & Notifications?", required:false
-			input "logFilter", "enum", title: "log filtering [Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]?",required:false, metadata: [values: [1,2,3,4,5]]
+    	page(name: "Notifications", title: "Notifications & Logging Options", install: true, uninstall: false) {
+		if (isST()) {    
+			section("") {
+		    		input "sendPushMessage", "enum", title: "Send a push notification?", options: ["Yes", "No"], required:
+					false
+				input "phoneNumber", "phone", title: "Send a text message?", required: false
+    				input "detailedNotif", "bool", title: "Detailed Logging & Notifications?", required:false
+	    			input "logFilter", "enum", title: "log filtering [Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]?",required:false, options:[1,2,3,4,5]
 				          
-		}
-		section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
-			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
-				description:"optional",required:false)
-			input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
-				description:"optional")            
-			input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
+			}
+    			section("Enable Amazon Echo/Ask Alexa Notifications for events logging (optional)") {
+	    			input (name:"askAlexaFlag", title: "Ask Alexa verbal Notifications [default=false]?", type:"bool",
+		    			description:"optional",required:false)
+			    	input (name:"listOfMQs",  type:"enum", title: "List of the Ask Alexa Message Queues (default=Primary)", options: state?.askAlexaMQ, multiple: true, required: false,
+					description:"optional")            
+    				input "AskAlexaExpiresInDays", "number", title: "Ask Alexa's messages expiration in days (optional,default=2 days)?", required: false
+	    		}
+        	}            
+		section("Logging") {
+    			input "detailedNotif", "bool", title: "Detailed Logging?", required:false
+	    		input "logFilter", "enum", title: "log filtering [Level 1=ERROR only,2=<Level 1+WARNING>,3=<2+INFO>,4=<3+DEBUG>,5=<4+TRACE>]?",required:false, options:[1,2,3,4,5]
+				          
 		}
 		section([mobileOnly: true]) {
 			label title: "Assign a name for this SmartApp", required: false
@@ -109,6 +116,19 @@ def appTouch(evt) {
 	takeAction() 
 }
 
+boolean isST() { 
+    return (getHub() == "SmartThings") 
+}
+
+private getHub() {
+    def result = "SmartThings"
+    if(state?.hub == null) {
+        try { [value: "value"]?.encodeAsJson(); } catch (e) { result = "Hubitat" }
+        state?.hub = result
+    }
+    log.debug "hubPlatform: (${state?.hub})"
+    return state?.hub
+}
 
 def installed() {
 	traceEvent(settings.logFilter, "Installed with settings: ${settings}", detailedNotif)
