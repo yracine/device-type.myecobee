@@ -33,7 +33,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates daily runtime reports about your ecobee components"
-		paragraph "Version 2.6" 
+		paragraph "Version 3.0" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -84,6 +84,7 @@ preferences {
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 
+	atomicState?.retries=0    
 	initialize()
 }
 
@@ -112,7 +113,6 @@ def initialize() {
 
 	atomicState?.timestamp=''
 	atomicState?.componentAlreadyProcessed=' '
-	atomicState?.retries=0    
 
 	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
 	subscribe(app, appTouch)
@@ -283,14 +283,17 @@ private def get_nextComponentStats(component=' ') {
 
 
 void generateStats() {	
-	int MAX_POSITION=13
-	int MAX_RETRIES=4
+	Integer MAX_POSITION=13
+	Integer MAX_RETRIES=4
 	float runtimeTotalYesterday,runtimeTotalDaily    
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
 	def delay = 2
     
-	atomicState?.retries=	((atomicState?.retries==null) ?:0) +1
+	atomicState?.retries=	((atomicState?.retries==null) ?:0).toInteger() +1
 
+	if (detailedNotif) {    
+        log.debug("${get_APP_NAME()}>atomicState.retries=${atomicState?.retries}")
+	}    	
 	try {
 		unschedule(reRunIfNeeded)
 	} catch (e) {
@@ -348,7 +351,7 @@ void generateStats() {
     
 	// Get the auxHeat1's runtime for startDate-endDate period
 	component = 'auxHeat1'
-	if (nextComponent?.position <= 1) { 
+	if (nextComponent?.position.toInteger() <= 1) { 
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentAuxHeat1RuntimeDaily) ? ecobee.currentAuxHeat1RuntimeDaily.toFloat().round(2):0
 		if (runtimeTotalDaily) {
@@ -366,7 +369,7 @@ void generateStats() {
 	int heatStages = ecobee.currentHeatStages.toInteger()
     
 	component = 'auxHeat2'
-	if (heatStages >1 && (nextComponent.position <= 2) ) { 
+	if (heatStages >1 && (nextComponent.position.toInteger() <= 2) ) { 
     
 //	Get the auxHeat2's runtime for startDate-endDate period
  	
@@ -381,10 +384,12 @@ void generateStats() {
 		if (detailedNotif && runtimeTotalYesterday) {
 			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
 		}     
-	}     
+    } else {     
+    	atomicState?.componentAlreadyProcessed=component
+    }
 
 	component = 'auxHeat3'
-	if (heatStages >2 && nextComponent.position <= 3) { 
+	if (heatStages >2 && nextComponent.position.toInteger() <= 3) { 
     
 //	Get the auxHeat3's runtime for startDate-endDate period
  	
@@ -398,14 +403,16 @@ void generateStats() {
 		if (detailedNotif && runtimeTotalYesterday) {
 			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
 		}     
-	}     
+    } else {     
+    	atomicState?.componentAlreadyProcessed=component
+    }
 
 // Get the compCool1's runtime for startDate-endDate period
 
 	int coolStages = ecobee.currentCoolStages.toInteger()
 	component = 'compCool1'
 
-	if (nextComponent.position <= 4) {
+	if (nextComponent.position.toInteger() <= 4) {
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentCompCool1RuntimeDaily)? ecobee.currentCompCool1RuntimeDaily.toFloat().round(2):0
 		if (runtimeTotalDaily) {
@@ -422,7 +429,7 @@ void generateStats() {
 //	Get the compCool2's runtime for startDate-endDate period
 
 	component = 'compCool2'
-	if (coolStages >1 && nextComponent.position <= 5) {
+	if (coolStages >1 && nextComponent.position.toInteger() <= 5) {
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentCompCool2RuntimeDaily)? ecobee.currentCompCool2RuntimeDaily.toFloat().round(2):0
 		if (runtimeTotalDaily) {
@@ -434,7 +441,9 @@ void generateStats() {
 		if (detailedNotif && runtimeTotalYesterday ) {
 			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
 		}     
-	} 
+    } else {     
+    	atomicState?.componentAlreadyProcessed=component
+    }
 
 	
 	def hasDehumidifier = (ecobee.currentHasDehumidifier) ? ecobee.currentHasDehumidifier : 'false' 
@@ -443,7 +452,7 @@ void generateStats() {
 	def hasErv = (ecobee.currentHasErv)? ecobee.currentHasErv : 'false' 
 
 	component = "humidifier"
-	if (hasHumidifier=='true' && (nextComponent.position <= 6)) {
+	if (hasHumidifier=='true' && (nextComponent.position.toInteger() <= 6)) {
 	 	// Get the humidifier's runtime for startDate-endDate period
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentHumidifierRuntimeDaily)? ecobee.currentHumidifierRuntimeDaily.toFloat().round(2):0
@@ -455,7 +464,7 @@ void generateStats() {
 	}
 
 	component = 'dehumidifier'
-	if (hasDehumidifier=='true' && (nextComponent.position <= 7)) {
+	if (hasDehumidifier=='true' && (nextComponent.position.toInteger() <= 7)) {
 	// Get the dehumidifier's for startDate-endDate period
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentDehumidifierRuntimeDaily)? ecobee.currentDehumidifierRuntimeDaily.toFloat().round(2):0
@@ -466,7 +475,7 @@ void generateStats() {
 
 	}
 	component = 'ventilator'
-	if (hasHrv=='true' || hasErv=='true' && (nextComponent.position <= 8)) {
+	if (hasHrv=='true' || hasErv=='true' && (nextComponent.position.toInteger() <= 8)) {
  	// Get the ventilator's runtime for  startDate-endDate period
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentVentilatorRuntimeDaily)? ecobee.currentVentilatorRuntimeDaily.toFloat().round(2):0
@@ -479,7 +488,7 @@ void generateStats() {
 
  	component = 'fan'
 // 	Get the fan's runtime for startDate-endDate period
-	if (nextComponent.position <= 9) {
+	if (nextComponent.position.toInteger() <= 9) {
 
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentFanRuntimeDaily)? ecobee.currentFanRuntimeDaily.toFloat().round(2):0
@@ -496,7 +505,7 @@ void generateStats() {
 
 	// Get the compHeat1's runtime for startDate-endDate period
 	component = 'compHeat1'
-	if (nextComponent.position <= 10) { 
+	if (nextComponent.position.toInteger() <= 10) { 
 		generateRuntimeReport(component,startDate, endDate)
 		runtimeTotalDaily = (ecobee.currentCompHeat1RuntimeDaily) ? ecobee.currentCompHeat1RuntimeDaily.toFloat().round(2):0
 		if (runtimeTotalDaily) {
@@ -513,7 +522,7 @@ void generateStats() {
 	
     
 	component = 'compHeat2'
-	if (heatStages >1 && (nextComponent.position <=11) ) { 
+	if (heatStages >1 && (nextComponent.position.toInteger() <=11) ) { 
     
 //	Get the compHeat2's runtime for startDate-endDate period
  	
@@ -528,10 +537,11 @@ void generateStats() {
 		if (detailedNotif && runtimeTotalYesterday) {
 			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
 		}     
-	}     
-
+    } else {     
+    	atomicState?.componentAlreadyProcessed=component
+    }
 	component = 'compHeat3'
-	if (heatStages >2 && nextComponent.position <= 12) { 
+	if (heatStages >2 && nextComponent.position.toInteger() <= 12) { 
     
 //	Get the compHeat3's runtime for startDate-endDate period
  	
@@ -545,15 +555,16 @@ void generateStats() {
 		if (detailedNotif && runtimeTotalYesterday) {
 			send "And, on ${String.format('%tF', yesterday)}, ${ecobee} ${component}'s runtime stats for the day before=${runtimeTotalYesterday} minutes"
 		}     
-	}     
+    } else {     
+    	atomicState?.componentAlreadyProcessed=component
+    }
 
-	component=atomicState?.componentAlreadyProcessed        
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (nextComponent.position.toInteger() >= MAX_POSITION) {
 		send "generated ${ecobee}'s daily stats done for ${String.format('%tF', startDate)} - ${String.format('%tF', endDate)} period"
 		atomicState?.timestamp = dateInLocalTime // save the local date to avoid re-execution    
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
-		atomicState?.retries=0		        
+//		atomicState?.retries=0		        
 	}
 	
 }
