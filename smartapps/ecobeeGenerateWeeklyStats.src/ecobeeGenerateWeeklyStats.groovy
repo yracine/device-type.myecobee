@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 2.0" 
+		paragraph "Version 2.0.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -184,7 +184,7 @@ void dailyRun() {
 	if (detailedNotif) {    
 		log.debug("dailyRun>for $ecobee,about to call generateStats() with settings.givenEndDate=${settings.givenEndDate}")
 	}    
-	atomicState?.componentAlreadyProcessed=''
+	atomicState?.componentAlreadyProcessed=' '
 	atomicState?.retries=0
 	generateStats()
     
@@ -345,7 +345,9 @@ void generateStats() {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 
-	}     
+    } else {     
+        atomicState?.componentAlreadyProcessed=component
+    }
 
 	component = 'auxHeat3'
 	if (heatStages >2 && nextComponent.position.toInteger() <= 3) { 
@@ -358,7 +360,9 @@ void generateStats() {
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
-	}     
+    } else {     
+        atomicState?.componentAlreadyProcessed=component
+    }
 
 // Get the compCool1's runtime for startDate-endDate period
 
@@ -375,7 +379,9 @@ void generateStats() {
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
-	} 
+    } else {     
+        atomicState?.componentAlreadyProcessed=component
+    }
     
 	component = 'compCool1'
 	if (nextComponent.position.toInteger() <= 5) {
@@ -413,7 +419,7 @@ void generateStats() {
 		}     
 
     } else {     
-    	atomicState?.componentAlreadyProcessed=component
+        atomicState?.componentAlreadyProcessed=component
     }
 
 	component = 'compHeat3'
@@ -428,7 +434,7 @@ void generateStats() {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
     } else {     
-    	atomicState?.componentAlreadyProcessed=component
+        atomicState?.componentAlreadyProcessed=component
     }
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (nextComponent?.position.toInteger() >=MAX_POSITION) {
