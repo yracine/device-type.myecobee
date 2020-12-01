@@ -32,7 +32,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "${get_APP_NAME()}, the smartapp that generates weekly runtime reports about your ecobee components"
-		paragraph "Version 1.8" 
+		paragraph "Version 2.0" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -76,6 +76,7 @@ preferences {
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 
+	atomicState?.retries=0
 	initialize()
 }
 
@@ -105,7 +106,6 @@ def initialize() {
 
 	atomicState?.timestamp=''
 	atomicState?.componentAlreadyProcessed=' '
-	atomicState?.retries=0
 
 	runIn((1*60),	"generateStats") // run 1 minute later as it requires notification.     
 	subscribe(app, appTouch)
@@ -264,12 +264,16 @@ private def get_nextComponentStats(component=' ') {
 
 void generateStats() {
 	String dateInLocalTime = new Date().format("yyyy-MM-dd", location.timeZone) 
-    int MAX_POSITION=9    
-	int MAX_RETRIES=4    
+    Integer MAX_POSITION=9    
+    Integer MAX_RETRIES=4    
 	float runtimeTotalAvgWeekly
     
 	def delay = 2 // 2-minute delay for rerun
-	atomicState?.retries=	((atomicState?.retries==null) ?:0) +1
+	atomicState?.retries=	((atomicState?.retries==null) ?:0).toInteger() +1
+
+	if (detailedNotif) {    
+        log.debug("${get_APP_NAME()}>atomicState.retries=${atomicState?.retries}")
+	}    	
 
 	try {
 		unschedule(reRunIfNeeded)
@@ -318,7 +322,7 @@ void generateStats() {
 	// Get the auxHeat1's runtime for startDate-endDate period
 	component = 'auxHeat1'
 
-	if (nextComponent?.position <= 1) { 
+	if (nextComponent?.position.toInteger() <= 1) { 
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentAuxHeat1RuntimeAvgWeekly)? ecobee.currentAuxHeat1RuntimeAvgWeekly.toFloat().round(2):0
 		atomicState?.componentAlreadyProcessed=component
@@ -330,7 +334,7 @@ void generateStats() {
     
     
 	component = 'auxHeat2'
-	if (heatStages >1 && nextComponent.position <= 2) { 
+	if (heatStages >1 && nextComponent.position.toInteger() <= 2) { 
     
 //	Get the auxHeat2's runtime for startDate-endDate period
  	
@@ -344,7 +348,7 @@ void generateStats() {
 	}     
 
 	component = 'auxHeat3'
-	if (heatStages >2 && nextComponent.position <= 3) { 
+	if (heatStages >2 && nextComponent.position.toInteger() <= 3) { 
     
 //	Get the auxHeat3's runtime for startDate-endDate period
  	
@@ -364,7 +368,7 @@ void generateStats() {
 //	Get the compCool2's runtime for startDate-endDate period
 	component = 'compCool2'
 
-	if (coolStages >1 && nextComponent.position <= 4) {
+	if (coolStages >1 && nextComponent.position.toInteger() <= 4) {
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool2RuntimeAvgWeekly)? ecobee.currentCompCool2RuntimeAvgWeekly.toFloat().round(2):0
 		atomicState?.componentAlreadyProcessed=component
@@ -374,7 +378,7 @@ void generateStats() {
 	} 
     
 	component = 'compCool1'
-	if (nextComponent.position <= 5) {
+	if (nextComponent.position.toInteger() <= 5) {
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompCool1RuntimeAvgWeekly)? ecobee.currentCompCool1RuntimeAvgWeekly.toFloat().round(2):0
 		atomicState?.componentAlreadyProcessed=component
@@ -386,7 +390,7 @@ void generateStats() {
 	// Get the compHeat1's runtime for startDate-endDate period
 	component = 'compHeat1'
 
-	if (nextComponent.position <= 6) { 
+	if (nextComponent.position.toInteger() <= 6) { 
 		generateRuntimeReport(component,aWeekAgo, endDate,'weekly') // generate stats for the last 7 days
 		runtimeTotalAvgWeekly = (ecobee.currentCompHeat1RuntimeAvgWeekly)? ecobee.currentCompHeat1RuntimeAvgWeekly.toFloat().round(2):0
 		atomicState?.componentAlreadyProcessed=component
@@ -397,7 +401,7 @@ void generateStats() {
     
     
 	component = 'compHeat2'
-	if (heatStages >1 && nextComponent.position <= 7) { 
+	if (heatStages >1 && nextComponent.position.toInteger() <= 7) { 
     
 //	Get the compHeat2's runtime for startDate-endDate period
  	
@@ -408,10 +412,12 @@ void generateStats() {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
 
-	}     
+    } else {     
+    	atomicState?.componentAlreadyProcessed=component
+    }
 
 	component = 'compHeat3'
-	if (heatStages >2 && nextComponent.position <= 8) { 
+	if (heatStages >2 && nextComponent.position.toInteger() <= 8) { 
     
 //	Get the auxHeat3's runtime for startDate-endDate period
  	
@@ -421,15 +427,15 @@ void generateStats() {
 		if (runtimeTotalAvgWeekly) {
 			send ("${ecobee} ${component}'s average weekly runtime stats=${runtimeTotalAvgWeekly} minutes since ${String.format('%tF', aWeekAgo)}", settings.askAlexaFlag)
 		}     
-	}     
-
-	component= atomicState?.componentAlreadyProcessed   
+    } else {     
+    	atomicState?.componentAlreadyProcessed=component
+    }
 	nextComponent  = get_nextComponentStats(component) // get nextComponentToBeProcessed	
 	if (nextComponent?.position.toInteger() >=MAX_POSITION) {
 		send " generated all ${ecobee}'s weekly stats since ${String.format('%tF', aWeekAgo)}"
 		unschedule(reRunIfNeeded) // No need to reschedule again as the stats are completed.
 		atomicState?.timestamp = dateInLocalTime // save the date to avoid re-execution.
-		atomicState?.retries=0
+//		atomicState?.retries=0
         
 	}
 
