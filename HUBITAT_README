@@ -228,7 +228,7 @@ The ecobeeGenerateXXXstats smartapps allow to collect runtime stats for better t
 
 /****************************************************
 
-Use presence/motion sensors or ST hello modes to set a target climate or heating/cooling setpoints based on your presence/absence.
+Use presence/motion sensors or location modes to set a target climate or heating/cooling setpoints based on your presence/absence.
 
 /****************************************************
 
@@ -236,7 +236,7 @@ Use presence/motion sensors or ST hello modes to set a target climate or heating
 
 /****************************************************
 
-This smartapp allows a ST user to set the ecobee thermostat(s) to a given climate (Away,Home,Awake,Sleep, other custom programs) at a given day&time.
+This smartapp allows a Hubitat user to set the ecobee thermostat(s) to a given climate (Away,Home,Awake,Sleep, other custom programs) at a given day&time.
 
 
 /****************************************************
@@ -245,7 +245,7 @@ This smartapp allows a ST user to set the ecobee thermostat(s) to a given climat
 
 /****************************************************
 
-The above smartapp allows a ST user to trigger some switch(es) (turn on/off or flash) and/or trigger a hello phrase routine when the thermostat is cooling/heating/running the fan/or idle.
+The above smartapp allows a Hubitat user to trigger some switch(es) (turn on/off or flash) and/or trigger a hello phrase routine when the thermostat is cooling/heating/running the fan/or idle.
 
 /****************************************************
 
