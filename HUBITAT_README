@@ -148,7 +148,7 @@ You only need to edit the following parameters
     used for the PIN authentication method (not with the Service Manager).  If you do it, you may
     experience authentication issues when used with MyEcobeeInit smartapp.
  
- For more details on the holdType input parameter, refer to the ST community wiki:
+ For more details on the holdType input parameter, refer to the community wiki:
  
  http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Device#Item_3b.29_Set_up_the_holdType_input_parameter
 
@@ -168,7 +168,7 @@ Amongst others:
 
 /****************************************************
 
-This smartapp will expose your ecobee3's remote sensors as Motion and Temperature Sensors in SmartThings, so
+This smartapp will expose your ecobee3's remote sensors as Motion and Temperature Sensors in Hubitat, so
 that you can use them in your automation scenarios.
 
 See the following readme file for instructions 
