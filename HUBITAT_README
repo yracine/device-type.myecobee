@@ -39,9 +39,7 @@ PREREQUISITES
 
 - (a) Your ecobee thermostat fully operational (and connected to wifi)
 - (b) Your ecobee credentials (username/password)
-- (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
-- (d) The installation may now proceed with the new Samsung connect app.
-
+- (c) Hubitat hub operational
 
 INSTALLATION STEPS
 =====================
@@ -49,7 +47,7 @@ INSTALLATION STEPS
 
 # 1a) Create a new device Handler (My Ecobee Device)
 
-go to http://192.168.xx.xx/driver/list (insert your right IP address)
+go to http://192.168.xx.xx/driver/list (insert your own hub's IP address)
 
 b) Hit the "+New Driver" at the top right corner
 
@@ -61,7 +59,7 @@ d) Hit the save button on the right inside of the screen
 
  N.B. The code for the new EcobeeSwitch+ is included in My Ecobee bundle only (available at my store).
  
-go to http://192.168.xx.xx/driver/list (insert your right IP address)
+go to http://192.168.xx.xx/driver/list (insert your own hub's IP address)
 
 a) Hit the "+New Driver" at the top right corner
 
@@ -70,11 +68,9 @@ b) Copy and paste the code from the corresponding txt file in the zip
 c) Hit the save button on the right inside of the screen
 
 
-
-
 # 2) Create a new smartapp (My ecobee Init)
 
-go to http://192.168.xx.xx/app/list (insert your right IP address)
+go to http://192.168.xx.xx/app/list (insert your own hub's IP address)
 
 a) Hit the "+New App" at the top right corner
 
@@ -92,9 +88,9 @@ http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.
 
 # 3) Go to the apps section of hubitats, execute MyEcobeeInit (under + in the upper right corner/Smartapp)
 
-http://192.168.xx.xx/installedapp/list (insert your right IP address)
+http://192.168.xx.xx/installedapp/list (insert your own hub's IP address)
 
-Click on Add "User app" in the right corner of the window
+Click on "Add User app" in the right corner of the window and choose MyEcobeeInit
 
 # 4) Connect Smartthings to the Ecobee portal
 
@@ -127,7 +123,7 @@ If you get a blank screen after pressing 'Next or you get the following error: "
 
 Afer about 1 minute, You should see your device populated under:
 
-http://192.168.xx.xx/device/list (insert your right IP address)
+http://192.168.xx.xx/device/list (insert your own hub's IP address)
 
 
 
