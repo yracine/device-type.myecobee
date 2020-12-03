@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.6"}
+def get_APP_VERSION() {return "3.6.1"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -419,7 +419,7 @@ def rescheduleIfNeeded(evt) {
 		Double lastPollTimeInMinutes = (lastPollTime/60000).toDouble().round(1)      
 		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
 	}
-	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime)) {
 		log.info "rescheduleIfNeeded>scheduling setHumidityLevel in ${delay} minutes.."
 		schedule("0 0/${delay} * * * ?", setHumidityLevel)
 		setHumidityLevel()
