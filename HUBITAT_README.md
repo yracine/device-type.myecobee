@@ -132,7 +132,7 @@ http://192.168.xx.xx/device/list (insert your own hub's IP address)
 a) Click on the My ecobee device that you just created
 
 
-http://192.168.xx.xx/device/edit/<device number>  (Device number can vary from one location to the next)
+http://192.168.xx.xx/device/edit/"device number"  (Device number can vary from one location to the next)
 
 
 b) Edit the preferences in the middle section of the screen) 
