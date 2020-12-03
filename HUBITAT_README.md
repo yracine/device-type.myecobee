@@ -24,7 +24,7 @@ ________________________________________________________________________________
 You can now download the code at 
 
 <b>
-http://www.maisonsecomatiq.com/store
+http://www.maisonsecomatiq.com/hubitatstore
 </b>
 
 P.S. Technical support packages are also available.
