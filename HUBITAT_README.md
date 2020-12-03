@@ -106,7 +106,7 @@ that you want to control from Smartthings and, then press 'Next' for the 'Other 
 and then 'Done' or 'Save' when finished.
 
 
-If you have My Ecobee bundle, you can also select your ecobee switch(es) to be exposed to ST.
+If you have My Ecobee bundle, you can also select your ecobee switch(es) to be exposed to Hubitat.
 
 *************************************************************************************************************************************
 N.B. If you have any errors:
@@ -183,7 +183,7 @@ https://github.com/yracine/device-type.myecobee/blob/master/smartapps/ecobeeRemo
 /****************************************************
 
 
-In brief, the smartapp allows automatic adjustments of your programmed cooling/heating setpoints according to indoor/outdoor conditions. This is particularly useful in Winter/Summer where outdoor temperature and humidity can vary throughout the day. It can also set your thermostat to 'Away' or 'Home' based on your indoor motion sensors.  It will ajust your thermostat's programmed or scheduled setpoints based on occupied rooms (similar to ecobee3, but with ST connected sensors).
+In brief, the smartapp allows automatic adjustments of your programmed cooling/heating setpoints according to indoor/outdoor conditions. This is particularly useful in Winter/Summer where outdoor temperature and humidity can vary throughout the day. It can also set your thermostat to 'Away' or 'Home' based on your indoor motion sensors.  It will ajust your thermostat's programmed or scheduled setpoints based on occupied rooms (similar to ecobee3, but with any connected sensors).
 
 You can enable/disable the smartapp with a button on/off tile (ex.virtual switch).
 
