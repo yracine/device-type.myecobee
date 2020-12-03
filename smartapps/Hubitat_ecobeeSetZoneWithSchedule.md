@@ -47,6 +47,30 @@ If the instructions above are not clear enough, you can refer to the troubleshoo
 http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.27t_know_how_to_create_a_custom_smartapp
 
 
+CONFIGURATION STEPS
+=====================
+
+Refer to the ST community wiki, most of the use cases are documented with the input parameters needed.
+
+http://thingsthataresmart.wiki/index.php?title=EcobeeSetZoneWithSchedule#Prerequisites
+http://thingsthataresmart.wiki/index.php?title=EcobeeSetZoneWithSchedule#Configuration
+
+TROUBLESHOOTING
+=====================
+
+http://thingsthataresmart.wiki/index.php?title=EcobeeSetZoneWithSchedule#Troubleshooting
+
+SUPPORT
+========
+
+If needed, there are several support packages at my store.
+
+www.ecomatiqhomes.com/store
+
+Regards.
+
+
+
 # 3) Go to the apps section of hubitats, execute ecobeeSetZoneWithSchedule
 
 http://192.168.xx.xx/installedapp/list (insert your own hub's IP address)
