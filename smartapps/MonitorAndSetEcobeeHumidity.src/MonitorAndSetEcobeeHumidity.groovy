@@ -1,4 +1,4 @@
-    /***
+ /***
  *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
@@ -95,7 +95,7 @@ def dashboardPage() {
                 def idealIndoorHum                
                 if (outdoorTemp) {                
                     idealIndoorHum= (scale == 'C')? find_ideal_indoor_humidity(outdoorTemp):
-					    find_ideal_indoor_humidity(fToC(outdoorTemp))
+                        find_ideal_indoor_humidity(fToC(outdoorTemp))
                 }                                     
 				switch (mode) { 
 					case 'cool':
