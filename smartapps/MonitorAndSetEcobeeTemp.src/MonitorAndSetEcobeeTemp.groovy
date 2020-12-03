@@ -42,7 +42,7 @@ preferences {
 	page(name: "otherSettings", title: "OtherSettings")
 }
 
-def get_APP_VERSION() { return "3.5"}
+def get_APP_VERSION() { return "3.5.1"}
 
 def dashboardPage() {
 	dynamicPage(name: "dashboardPage", title: "MonitorAndSetEcobeeTemp-Dashboard", uninstall: true, nextPage: tempSensorSettings,submitOnChange: true) {
@@ -308,7 +308,7 @@ def rescheduleIfNeeded(evt) {
 		Double lastPollTimeInMinutes = (lastPollTime/60000).toDouble().round(1)      
 		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
 	}
-	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+	if (((state?.poll["last"]?:0) + (delay * 60000) < currentTime)) {
 		log.info "rescheduleIfNeeded>scheduling monitorAdjustTemp in ${delay} minutes.."
 		schedule("0 0/${delay} * * * ?", monitorAdjustTemp)
 	}
@@ -1141,3 +1141,4 @@ def getImagePath() {
 def get_APP_NAME() {
 	return "MonitorAndSetEcobeeTemp"
 } 
+
