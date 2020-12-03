@@ -7,31 +7,13 @@ Email: services@maisonsecomatiq.com
 
 linkedIn profile: https://www.linkedin.com/in/yracine/
 
-\Installation Setup time: about 5-10 minutes depending on your ST skills.
+\Installation Setup time: about 5-10 minutes depending on your Hubitat skills.
 
 
 PREREQUISITES
 =====================
 - (a) Your ecobee thermostat and slave thermostats (if any) fully operational (and connected to ST)
-- (b) My Ecobee device installed & fully operational
-- (c) Developer access to SmartThings (http://graph.api.smartthings.com/) or Hubitat
-
-- (d) <b> For ST users, Determine your shard, please consult this thread: 
-  
-https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
-  
-Or the SmartThings documentation here:
-
-http://docs.smartthings.com/en/latest/publishing/index.html#ensure-proper-location
-
-If you are on a different shard, you need to change the links below for your right shard. 
-As an example, in North America, 
-
-replace https://graph.api.smartthings.com/ide/devices by https://graph-na02-useast1.api.smartthings.com
-
-
-Or use   https://account.smartthings.com to point to the right shard (automatically)
-
+- (b) Any other z-wave and zigbee tstats connected and operational
 
 
 INSTALLATION STEPS
