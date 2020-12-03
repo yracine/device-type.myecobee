@@ -14,9 +14,9 @@ PREREQUISITES
 =====================
 - (a) Your ecobee thermostat and slave thermostats (if any) fully operational (and connected to ST)
 - (b) My Ecobee device installed & fully operational
-- (c) Developer access to SmartThings (http://graph.api.smartthings.com/)
+- (c) Developer access to SmartThings (http://graph.api.smartthings.com/) or Hubitat
 
-- (d) <b> Determine your shard, please consult this thread: 
+- (d) <b> For ST users, Determine your shard, please consult this thread: 
   
 https://community.smartthings.com/t/faq-how-to-find-out-what-shard-cloud-slice-ide-url-your-account-location-is-on/53923
   
