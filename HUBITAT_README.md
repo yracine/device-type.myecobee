@@ -113,7 +113,7 @@ N.B. If you have any errors:
 
 If you get a blank screen after pressing 'Next or you get the following error: "Error - bad state' or 'Java.lang.NullPointerException: Cannot get property 'accessToken' on null object" in the IDE', you'd need to enable oAuth as specified in step 2f) above.
 
-<b> At the end of the authorization flow,  if you have the following error message: "Unexpected error" even if you press several times, this probably means that you have not "saved & published" one of the Device Handler Types (MyEcobeeDevice,MyEcobeeSwitch) under the right shard.  Refer to the prerequisites & step 1 for more details.
+<b> At the end of the authorization flow,  if you have the following error message: "Unexpected error" even if you press several times, this probably means that you have not "saved" one of the Device Handler Types (MyEcobeeDevice,MyEcobeeSwitch).
  
 *************************************************************************************************************************************
 
