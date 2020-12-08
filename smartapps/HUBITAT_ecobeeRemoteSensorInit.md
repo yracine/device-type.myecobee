@@ -70,7 +70,7 @@ If the instructions above are not clear enough, you can refer to the troubleshoo
 http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.27t_know_how_to_create_a_custom_smartapp
 
 
-# 3) Go to the apps section of hubitat, execute ScheduleRoomTempControl 
+# 3) Go to the apps section of hubitat, execute ecobeeRemoteSensorInit 
 
 http://192.168.xx.xx/installedapp/list (insert your own hub's IP address)
 
