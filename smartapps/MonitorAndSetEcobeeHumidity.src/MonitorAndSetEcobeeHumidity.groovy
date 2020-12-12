@@ -1,4 +1,4 @@
- /***
+/***
  *  Copyright Yves Racine
  *  LinkedIn profile: ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
  *
@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.6.1"}
+def get_APP_VERSION() {return "3.6.2"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -484,7 +484,7 @@ def setHumidityLevel() {
 		state?.poll["rescheduled"] = now()
 	}
 
-	boolean foundMode=selectedMode.find{it == (location.currentMode as String)} 
+	boolean foundMode=selectedMode.find{it == (location.mode as String)} 
 	if ((selectedMode != null) && (!foundMode)) {
 		if (detailedNotif) {    
 			log.trace("setHumidityLevel does not apply,location.mode= $location.mode, selectedMode=${selectedMode},foundMode=${foundMode}, turning off all equipments")
@@ -564,7 +564,7 @@ def setHumidityLevel() {
 		return        
 	}    
 
-	if (outdoorSensor.hasCapability("Polling")) {
+	if (outdoorSensor && outdoorSensor.hasCapability("Polling")) {
 		try {    
 			outdoorSensor.poll()
 		} catch (e) {
@@ -574,7 +574,7 @@ def setHumidityLevel() {
         		send (msg,askAlexaFlag)
 			}
 		}
-	} else if (outdoorSensor.hasCapability("Refresh")) {
+	} else if (outdoorSensor && outdoorSensor.hasCapability("Refresh")) {
 		try {    
 			outdoorSensor.refresh()
 		} catch (e) {
