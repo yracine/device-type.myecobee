@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.6.2"}
+def get_APP_VERSION() {return "3.6.3"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -640,8 +640,8 @@ def setHumidityLevel() {
 		indoorTemp = indoorSensor.currentTemperature
 	}
     
-	def outdoorSensorHumidity = outdoorSensor.currentHumidity
-	def outdoorTemp = outdoorSensor.currentTemperature
+	def outdoorSensorHumidity = ( outdoorSensor) ? outdoorSensor.currentHumidity : 50 // if no outdoor sensor, default is 50
+	def outdoorTemp =  ( outdoorSensor) ? outdoorSensor.currentTemperature : (scale=='C') ? 20 : 70
 	// by default, the humidity level is calculated based on a sliding scale target based on outdoorTemp
 
 	def target_humidity = givenHumidityLevel ?: (scale == 'C')? find_ideal_indoor_humidity(outdoorTemp):
