@@ -92,7 +92,7 @@ http://192.168.xx.xx/installedapp/list (insert your own hub's IP address)
 
 Click on "Add User app" in the right corner of the window and choose MyEcobeeInit
 
-# 4) Connect Smartthings to the Ecobee portal
+# 4) Connect Hubitat to the Ecobee portal
 
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
