@@ -35,7 +35,7 @@ definition(
 preferences {
 	section("About") {
 		paragraph "groveStreams, the smartapp that sends your device states to groveStreams for data correlation"
-		paragraph "Version 2.3" 
+		paragraph "Version 2.3.1" 
 		paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 			href url: "https://www.paypal.me/ecomatiqhomes",
 				title:"Paypal donation..."
@@ -182,7 +182,7 @@ def rescheduleIfNeeded(evt) {
 		Double lastPollTimeInMinutes = (lastPollTime/60000).toDouble().round(1)      
 		log.info "rescheduleIfNeeded>last poll was  ${lastPollTimeInMinutes.toString()} minutes ago"
 	}
-	if (((atomicState?.poll["last"]?:0) + (delay * 60000) < currentTime) && canSchedule()) {
+	if (((atomicState?.poll["last"]?:0) + (delay * 60000) < currentTime)) {
 		log.info "rescheduleIfNeeded>scheduling processQueue in ${delay} minutes.."
 		unschedule        
 		schedule("0 0/${delay} * * * ?", processQueue)
@@ -448,3 +448,4 @@ def processQueue() {
 	}
 
 }
+
