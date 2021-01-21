@@ -11,9 +11,7 @@ ________________________________________________________________________________
 
 For more details on the extensive features & capabilities of MyEcobee device, please refer to this ST community thread:
 
-https://community.smartthings.com/t/release-my-ecobee-device-v5-the-smartest-thermostat-under-st-with-new-comfort-tips-features-and-unique-integration-with-echo-ask-alexa/56534
-
-<i>It's the most comprehensive ecobee integration under any automation platform.</i>
+https://community.hubitat.com/t/release-resilient-comprehensive-my-ecobee-devices-tstat-switch-and-ecosystem-v6-now-available-with-hubitat-optimized-code/58236
 
 please take note of the following statement:
 
@@ -99,7 +97,8 @@ You should already have an ecobee username and password, if not go to https://ww
 
 Go through the authentication process using MyEcobeeInit. To do so, please press on the "ecobee Connect> Required" button in the middle of the screen.
 
-After signing-in, you need to accept the permission needed to connect your ecobee devices to SmartThings by pressing the accept button at the bottom of the page.
+After signing-in, you need to accept the permission needed to connect your ecobee devices to 
+by pressing the accept button at the bottom of the page.
 
 After being connected, click 'Next' and select your ecobee thermostat(s) (SmartThermostat, ecobee lite, ecobee3, SMART, SMART-SI) 
 that you want to control from Smartthings and, then press 'Next' for the 'Other Settings &Notification' page, 
