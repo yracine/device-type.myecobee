@@ -78,7 +78,7 @@ b) Copy and paste the code from the corresponding txt file in the zip
 
 c) Hit the save button on the right inside of the screen
 
-d) Make sure that enable OAuth in Smartapp is active (click oAuth in the upper right corner)
+d) Make sure to enable OAuth in Smartapp is active (click oAuth in the upper right corner)
 * Hit "Update" at the bottom
 
 If the instructions above are not clear enough, you can refer to the troubleshooting section below with some pictures:
