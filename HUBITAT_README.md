@@ -9,7 +9,7 @@ linkedIn profile:   ca.linkedin.com/pub/yves-racine-m-sc-a/0/406/4b/
 
 _______________________________________________________________________________________
 
-For more details on the extensive features & capabilities of MyEcobee device, please refer to this ST community thread:
+For more details on the extensive features & capabilities of MyEcobee device, please refer to this Hubitat community thread:
 
 https://community.hubitat.com/t/release-resilient-comprehensive-my-ecobee-devices-tstat-switch-and-ecosystem-v6-now-available-with-hubitat-optimized-code/58236
 
