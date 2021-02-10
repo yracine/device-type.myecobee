@@ -25,11 +25,19 @@ please take note of the following statement:
 
 _______________________________________________________________________________________
 
-You can now download the code at 
+For SmartTHings users, you can now download the code at 
 
 <b>
-http://www.maisonsecomatiq.com/store
+http://www.ecomatiqhomes.com/store 
 </b>
+
+For Hubitat users, you can now download the code at 
+
+<b>
+http://www.ecomatiqhomes.com/hubitatstore 
+</b>
+
+
 
 P.S. Technical support packages are also available.
 **************************************************************************************************
