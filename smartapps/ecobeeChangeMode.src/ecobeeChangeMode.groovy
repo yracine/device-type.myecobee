@@ -40,7 +40,7 @@ preferences {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
                 		" based on ST hello mode."
-			paragraph "Version 2.1" 
+			paragraph "Version 2.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -62,9 +62,9 @@ preferences {
     			}	
                     
 	    	}
-    	}
-    	section([mobileOnly:true]) {
-        	label title: "Assign a name for this SmartApp", required: false
+        	section([mobileOnly:true]) {
+            	label title: "Assign a name for this SmartApp", required: false
+    	    }
     	}
 }
 
