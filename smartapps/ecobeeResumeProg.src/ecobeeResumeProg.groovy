@@ -35,7 +35,7 @@ preferences {
 	page(name: "About", title: "About", install: false , uninstall: true, nextPage: "selectThermostats") {
 		section("About") {
 			paragraph "ecobeeResumeProg, the smartapp that resumes your ecobee's scheduled program when a presence is back home,or when motion is detected or when a ST hello mode is changed"
-			paragraph "Version 2.3" 
+			paragraph "Version 2.4" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
 					title:"Paypal donation..."
@@ -62,18 +62,17 @@ preferences {
 		}
 	}        
 	page(name: "selectModes", title: "Select Hello ST modes", content: "selectModes")
-	if (isST()) {
-        
-    		page(name: "Notifications", title: "Notifications & other Options", install: true, uninstall: false) {
+    page(name: "Notifications", title: "Notifications & other Options", install: true, uninstall: false) {
+		if (isST()) {
 	    		section("Notifications") {
 		    		input "sendPushMessage", "enum", title: "Send a push notification?", options:["Yes", "No"], required:
 			    		false
     				input "phone", "phone", title: "Send a Text Message?", required: false
 	    		}
         	}            
-	}
     	section([mobileOnly:true]) {
         	label title: "Assign a name for this SmartApp", required: false
+		}
 	}
 
 }
