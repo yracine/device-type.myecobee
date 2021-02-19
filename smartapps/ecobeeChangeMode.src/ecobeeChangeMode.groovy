@@ -27,7 +27,7 @@ definition(
 	namespace: "yracine",
 	author: "Yves Racine",
 	description:
-	"Change the ecobee program manually (by pressing the app's play button) and automatically at the ecobee thermostat(s) based on the ST hello mode(s)",
+	"Change the ecobee program manually (by pressing the app's play button) and automatically at the ecobee thermostat(s) based on the location mode(s)",
 	category: "My Apps",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
@@ -39,7 +39,7 @@ preferences {
 	page(name: "selectThermostats", title: "Thermostats", install: false , uninstall: true, nextPage: "selectProgram") {
 		section("About") {
 			paragraph "ecobeeChangeMode, the smartapp that sets your ecobee thermostat to a given program/climate ['Away', 'Home', 'Night']" + 
-                		" based on ST hello mode."
+                		" based on the hub's location mode."
 			paragraph "Version 2.2" 
 			paragraph "If you like this smartapp, please support the developer via PayPal and click on the Paypal link below " 
 				href url: "https://www.paypal.me/ecomatiqhomes",
