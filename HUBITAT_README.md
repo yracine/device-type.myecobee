@@ -95,6 +95,8 @@ Click on "Add User app" in the right corner of the window and choose MyEcobeeIni
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
 
+To start the Authentication with Ecobee, press Next on the first page.
+
 Go through the authentication process using MyEcobeeInit. To do so, please press on the "ecobee Connect> Required" button in the middle of the screen.
 
 After signing-in, you need to accept the permission needed to connect your ecobee devices to 
