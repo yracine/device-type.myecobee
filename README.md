@@ -163,6 +163,8 @@ http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.
 
 You should already have an ecobee username and password, if not go to https://www.ecobee.com/home/ecobeeLogin.jsp
 
+To start the Authentication with Ecobee, press Next on the first page.
+
 Go through the authentication process using MyEcobeeInit. To do so, please press on the "ecobee Connect> Required" button in the middle of the screen.
 
 If needed, watch "how to setup ecobee" video (but use My ecobee Init instead of the Smarttings labs script) as the authentication process is similar.
