@@ -154,7 +154,7 @@ http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.
 
 
 
-<b>Click on the Smartapp name (MyEcobeeInit) in the list of smartapps under the Custom section</b>
+<b>Click on the Smartapp name (MyEcobeeInit) in the list of smartapps under Discover</b>
 
 
 
