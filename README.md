@@ -150,7 +150,7 @@ If the instructions above are not clear enough, you can refer to the troubleshoo
 http://thingsthataresmart.wiki/index.php?title=My_Ecobee_Init#Issue_.231:_I_don.27t_know_how_to_create_a_custom_smartapp
 
 
-# 3) Under the new Samsung connect app, execute MyEcobeeInit (in the Automation tab, under + in the upper right corner/Add Routine/Discover/Add Smartapp)
+# 3) Under the new Samsung connect app, execute MyEcobeeInit (in the Automation tab, under + in the upper right corner/Add Routine/Discover (bottom))
 
 
 
