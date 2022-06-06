@@ -85,7 +85,7 @@ f) Go back to the code window, and hit the "publish/for me" button at the top ri
 
 
 
-# 3) Under the new Samsung connect app, execute ecobeeSetZoneWithSchedule (under + in the upper right corner/Smartapps)
+# 3) Under the new Samsung connect app, execute ecobeeSetZoneWithSchedule (under the Automation bottom menu, under '+' in the upper right corner/Add Routine/Discover at the bottom) 
 
 If you don't see the smartapp, you probably installed it under the wrong shard or it's not been "published" in the IDE. Please refer to the prerequisites above.
 
