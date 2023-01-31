@@ -33,7 +33,7 @@ definition(
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Partner/ecobee@2x.png"
 )
 
-def get_APP_VERSION() {return "3.6.3"}
+def get_APP_VERSION() {return "3.6.4"}
 
 preferences {
 	page(name: "dashboardPage", title: "DashboardPage")
@@ -81,7 +81,9 @@ def dashboardPage() {
 				String useFanWhenHumidityIsHighString=(settings.useFanWhenHumidityIsHigh)? 'true': 'false'                
 				String useFanWithHumidifierSwitchesString=(settings.useFanWithHumidifierSwitches)? 'true': 'false'                
 				def heatingSetpoint,coolingSetpoint
-				if (indoorSensor) {
+                def threshVOC, threshCarbonDioxide, threshRadon, indoorVOC, indoorRadon,indoorCarbonDioxide                
+
+                if (indoorSensor) {
 					indoorHumidity = indoorSensor.currentHumidity
 					indoorTemp = indoorSensor.currentTemperature
 				}
@@ -96,6 +98,16 @@ def dashboardPage() {
                 if (outdoorTemp) {                
                     idealIndoorHum= (scale == 'C')? find_ideal_indoor_humidity(outdoorTemp):
                         find_ideal_indoor_humidity(fToC(outdoorTemp))
+                }                                     
+                if (indoorVOCSensor) {                
+                    threshVOC = (settings.thresholdVOC) ?: 700
+                    threshCarbonDioxide = (settings.thresholdCarbonDioxide) ?:500
+                    indoorVOC=indoorVOCSensor.currentValue("voc")
+                    indoorCarbonDioxide=indoorVOCSensor.currentValue("co2")
+                }                                     
+                if (indoorRadonSensor) {                
+                    threshRadon = (settings.thresholdRadon) ?:100
+                    indoorRadon=indoorRadonSensor.currentValue("radonShortTermAvg")
                 }                                     
 				switch (mode) { 
 					case 'cool':
@@ -149,7 +161,20 @@ def dashboardPage() {
 					"NormalizedOutHumidity: $corrOutdoorHum%\n" +
 					"IdealIndoorHumidity: $idealIndoorHum%\n" 
 				}
+				if (indoorVOCSensor) {
+					dParagraph=  dParagraph +                   
+					"\nAir Quality\nVOC: ${indoorVOC} ppb\n" +
+					"CarbonDioxide: ${indoorCarbonDioxide}\n" +
+					"ThresholdVOC: ${threshVOC} ppb\n" +
+					"ThresholdCarbonDioxide: ${threshCarbonDioxide}\n" 
+					"ThresholdRadon: ${threshRadon}\n" 
+				}
                 
+				if (indoorRadonSensor) {
+					dParagraph=  dParagraph +                   
+					"IndoorRadonLevel: ${indoorRadon}\n" 
+					"ThresholdRadon: ${threshRadon}\n" 
+				}
 				paragraph dParagraph 
 				if (hasDehumidifier=='true') {
 					def min_temp = (givenMinTemp) ? givenMinTemp : ((scale=='C') ? -15 : 10)
@@ -220,6 +245,23 @@ def sensorSettings() {
 		section("Choose Outdoor humidity sensor to be used (weatherStation or sensor)") {
 			input "outdoorSensor", "capability.relativeHumidityMeasurement", title: "Outdoor Humidity Sensor"
 		}
+		section("Choose Indoor VOC/CarbonDioxide sensor to be used for better air quality (optional)") {
+			input "indoorVOCSensor", "capability.carbonDioxideMeasurement", title: "Indoor Air Quality (CarbonDioxide/VOC) Sensor", required: false
+		}
+		section("Choose Indoor Radon sensor to be used for better air quality (optional)") {
+			input "indoorRadonSensor", "capability.carbonDioxideMeasurement", title: "Indoor Air Quality radon Sensor", required: false
+		}
+        if (indoorVOCSensor) {
+    		section {
+                input "thresholdVOC", "number", title: "Threshold VOC for air circulation [default=700 ppb]", description: 'optional',required: false
+                input "thresholdCarbonDioxide", "number", title: "Threshold Carbon Dioxide level for air circulation [default=500]", description: 'optional',required: false
+		    }
+        }
+        if (indoorRadonSensor) {
+    		section {
+                input "thresholdRadon", "number", title: "Threshold Radon level for air circulation [default=100]", description: 'optional',required: false
+		    }
+        }
 		section {
 			href(name: "toDashboardPage", title: "Back to Dashboard Page", page: "dashboardPage")
 		}
@@ -526,6 +568,9 @@ def setHumidityLevel() {
 	def freeCoolingFlag = (freeCooling != null) ? freeCooling : false // Free cooling using the Hrv/Erv/dehumidifier
 	def frostControlFlag = (frostControl != null) ? frostControl : false // Frost Control for humdifier, by default=false
 	def min_temp // Min temp in Farenheits for using HRV/ERV,otherwise too cold
+    float threshVOC = (settings.thresholdVOC) ?: 700
+    float threshCarbonDioxide = (settings.thresholdCarbonDioxide) ?:500    
+    float threshRadon = (settings.thresholdCarbonDioxide) ?:100    
 
 	def scale = getTemperatureScale()
 	if (scale == 'C') {
@@ -584,11 +629,73 @@ def setHumidityLevel() {
           		send (msg,askAlexaFlag)
 			}
 		}
-	}        
+	} 
+    def indoorCarbonDioxide, indoorVOC, indoorRadon
+    
+
+	if (indoorVOCSensor)
+        if (indoorVOCSensor.hasCapability("Refresh")) {
+		    try {    
+			    indoorVOCSensor.refresh()
+		    } catch (e) {
+			    msg="not able to refresh ${indoorVOCSensor}'s carbonDioxide and voc values"
+			    log.warn msg
+			    if (detailedNotif) {
+        		    send (msg,askAlexaFlag)
+			    }
+            }
+		}
+		try {    
+            indoorVOC=indoorVOCSensor.currentValue("voc")
+			if (detailedNotif) {
+			    msg="indoorVOC value is ${indoorVOC}"
+			    log.info msg
+            }
+                            
+            indoorCarbonDioxide=indoorVOCSensor.currentValue("co2")
+			if (detailedNotif) {
+			    msg="indoorCarbonDioxide value is ${indoorCarbonDioxide}"
+			    log.info msg
+            }            
+        } catch (e) {
+			    msg="not able to extract ${indoorVOCSensor}'s carbonDioxide or VOC value"
+			    log.warn msg
+			    if (detailedNotif) {
+        		    send (msg,askAlexaFlag)
+        }
+ 	}     
+    if (indoorRadonSensor) {                
+        if (indoorRadonSensor.hasCapability("Refresh")) {
+		    try {    
+			    indoorRadonSensor.refresh()
+		    } catch (e) {
+			    msg="not able to refresh ${indoorRadonSensor}'s Radon values"
+			    log.warn msg
+			    if (detailedNotif) {
+        		    send (msg,askAlexaFlag)
+			    }
+            }
+		}
+		try {    
+            indoorRadon=indoorRadonSensor.currentValue("radonShortTermAvg")
+			if (detailedNotif) {
+			    msg="indoorRadon value is ${indoorRadon}"
+			    log.info msg
+            }
+            
+        } catch (e) {
+			    msg="not able to extract ${indoorRadonSensor}'s  Radon value"
+			    log.warn msg
+			    if (detailedNotif) {
+        		    send (msg,askAlexaFlag)
+                    
+            }
+        }
+ 	}     
 	if (ted) {
 
 		try {
-			ted.poll()
+			if (ted.hasCapability("Polling")) ted.poll()
 			int powerConsumed = ted.currentPower.toInteger()
 			if (powerConsumed > max_power) {
 
@@ -633,7 +740,6 @@ def setHumidityLevel() {
 	def hasErv = (ecobee.currentHasErv) ? ecobee.currentHasErv : 'false'
 	def useDehumidifierAsHRVFlag = (useDehumidifierAsHRV) ? useDehumidifierAsHRV : false
 	def outdoorHumidity
-
 	// use the readings from another sensor if better precision neeeded
 	if (indoorSensor) {
 		indoorHumidity = indoorSensor.currentHumidity
@@ -1037,7 +1143,7 @@ def setHumidityLevel() {
 			}
 			dehumidifySwitches.on()        
 		}            
-    
+
 	} else {
 
 		ecobee.setThermostatSettings("", ['dehumidifierMode': 'off', 'humidifierMode': 'off', 'dehumidifyWithAC': 'false',
@@ -1071,7 +1177,25 @@ def setHumidityLevel() {
 		}            
         
 	}
-
+	if ((indoorVOCSensor) && ((indoorVOC) && (indoorVOC.toFloat() > (threshVOC.toFloat()))) || (((indoorCarbonDioxide) && (indoorCarbonDioxide.toFloat() > threshCarbonDioxide.toFloat()))) || ((indoorRadon) && (indoorRadon.toFloat() > (threshRadon.toFloat()))))   {
+		if (detailedNotif) {
+			if (indoorVOC) log.trace("indoor VOC ${indoorVOC} is above the target VOC of ${threshVOC}, triggering the HVAC fan and $dehumidifySwitches switch(es) as requested")
+			if (indoorCarbonDioxide) log.trace("or indoor CarbonDioxide ${indoorCarbonDioxide} is above the target CarbonDioxide level of ${threshCarbonDioxide}, triggering the dehumidifier, HVAC fan and $dehumidifySwitches switch(es) as requested")
+			if (indoorRadon) log.trace("or indoor Radon ${indoorRadon} is above the target Radon level of ${threshRadon}, triggering the dehumidifier, HVAC fan and $dehumidifySwitches switch(es) as requested")
+			send("Indoor quality air is poor, triggering the dehumidifier, HVAC fan and $dehumidifySwitches switch(es) as requested")
+		}
+		ecobee.fanOn() // set fan on
+		ecobee.setThermostatSettings("", ['dehumidifierMode': 'on', 'dehumidifierLevel': "${target_humidity}", 'humidifierMode': 'off',
+			'dehumidifyWithAC': 'false'
+			])
+		if (dehumidifySwitches) {
+			if (detailedNotif) {    
+				log.trace("Indoor Air quality is poor, turning on all dehumidify/fan switches")
+			}
+			dehumidifySwitches.on()        
+		}            
+	}            
+    
 	if (useDehumidifierAsHRVFlag) {
 		use_dehumidifer_as_HRV()    
 	} // end if useDehumidifierAsHRVFlag '
